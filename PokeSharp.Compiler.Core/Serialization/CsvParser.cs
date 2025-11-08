@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using System.Numerics;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
@@ -51,36 +53,36 @@ public static partial class CsvParser
         return values.Where(v => v is not null)!;
     }
     
-    public static object? CastCsvValue(string value, char schema, Type? enumeration = null)
+    public static object? CastCsvValue(string value, SchemaTypeData schema)
     {
-        return char.ToLower(schema) switch
+        return schema.Type switch
         {
-            SchemaValues.Integer => ParseInt(value),
-            SchemaValues.UnsignedInteger => ParseUnsigned(value),
-            SchemaValues.PositiveInteger => ParsePositive(value),
-            SchemaValues.Hexadecimal => ParseHex(value),
-            SchemaValues.Float => ParseFloat(value),
-            SchemaValues.Boolean => ParseBoolean(value),
-            SchemaValues.Name => ParseName(value),
-            SchemaValues.String or SchemaValues.Unformatted => value,
-            SchemaValues.Symbol => ParseSymbol(value),
-            SchemaValues.Enum => ParseEnumField(value, enumeration),
-            SchemaValues.EnumOrInteger => ParseEnumOrInt(value, enumeration),
+            PbsFieldType.Integer => ParseInt(value),
+            PbsFieldType.UnsignedInteger => ParseUnsigned(value),
+            PbsFieldType.PositiveInteger => ParsePositive(value),
+            PbsFieldType.Hexadecimal => ParseHex(value),
+            PbsFieldType.Float => ParseFloat(value),
+            PbsFieldType.Boolean => ParseBoolean(value),
+            PbsFieldType.Name => ParseName(value),
+            PbsFieldType.String or PbsFieldType.UnformattedText => value,
+            PbsFieldType.Symbol => ParseSymbol(value),
+            PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType),
+            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType),
             _ => throw new PbsParseException($"Unknown schema '{schema}'.")
         };
     }
     
 
-    private static int ParseInt(string value)
+    private static long ParseInt(string value)
     {
-        return int.TryParse(value, out var result)
+        return long.TryParse(value, out var result)
             ? result
             : throw new PbsParseException($"Field '{value}' is not an integer.");
     }
 
-    private static int ParseUnsigned(string value)
+    private static ulong ParseUnsigned(string value)
     {
-        if (!int.TryParse(value, out var result) || result < 0)
+        if (!ulong.TryParse(value, out var result))
         {
             throw new PbsParseException(
                 $"Field '{value}' is not a positive integer or 0.");
@@ -89,9 +91,9 @@ public static partial class CsvParser
         return result;
     }
 
-    private static int ParsePositive(string value)
+    private static ulong ParsePositive(string value)
     {
-        if (!int.TryParse(value, out var result) || result <= 0)
+        if (!ulong.TryParse(value, out var result) || result == 0)
         {
             throw new PbsParseException(
                 $"Field '{value}' is not a positive integer.");
@@ -100,9 +102,9 @@ public static partial class CsvParser
         return result;
     }
 
-    private static int ParseHex(string value)
+    private static ulong ParseHex(string value)
     {
-        if (!int.TryParse(value, NumberStyles.HexNumber, null, out var result) || result < 0)
+        if (!ulong.TryParse(value, NumberStyles.HexNumber, null, out var result))
         {
             throw new PbsParseException(
                 $"Field '{value}' is not a hexadecimal number.");
@@ -111,9 +113,9 @@ public static partial class CsvParser
         return result;
     }
 
-    private static float ParseFloat(string value)
+    private static decimal ParseFloat(string value)
     {
-        return float.TryParse(value, out var result) ? result : throw new PbsParseException($"Field '{value}' is not a number.");
+        return decimal.TryParse(value, out var result) ? result : throw new PbsParseException($"Field '{value}' is not a number.");
     }
 
     private static bool ParseBoolean(string value)
@@ -122,10 +124,10 @@ public static partial class CsvParser
         return FalseFormats.IsMatch(value) ? false : throw new PbsParseException($"Field '{value}' is not a Boolean value (true, false, 1, 0).");
     }
 
-    [GeneratedRegex(@"^(?:1|TRUE|YES|Y)$")]
+    [GeneratedRegex("^(?:1|TRUE|YES|Y)$", RegexOptions.IgnoreCase)]
     private static partial Regex TrueFormats { get; }
 
-    [GeneratedRegex(@"^(?:0|FALSE|NO|N)$")]
+    [GeneratedRegex("^(?:0|FALSE|NO|N)$", RegexOptions.IgnoreCase)]
     private static partial Regex FalseFormats { get; }
 
     private static string ParseName(string value)
@@ -169,44 +171,44 @@ public static partial class CsvParser
     {
         var result = new List<object?>();
         var repeat = false;
-        var start = 0;
-        var schemaLength = schema.TypeString.Length;
-        switch (schema.TypeString[0])
+        var schemaLength = schema.TypeEntries.Length;
+        switch (schema.FieldStructure)
         {
-            case '*':
+            case PbsFieldStructure.Array:
                 repeat = true;
-                start = 1;
                 break;
-            case '^':
-                start = 1;
+            case PbsFieldStructure.Repeating:
                 schemaLength--;
                 break;
+            case PbsFieldStructure.Single:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(schema), schema.FieldStructure, null);
         }
 
-        var subarrays = repeat && schema.TypeString.Length - start > 1;
+        var subarrays = repeat && schema.TypeEntries.Length > 1;
         var values = SplitCsvLine(record).ToImmutableArray();
         var index = -1;
         while (true)
         {
             var parsedValues = new List<object?>();
-            for (var i = start; i < schema.TypeString.Length; i++)
+            foreach (var typeData in schema.TypeEntries)
             {
                 index++;
-                var schemaChar = schema.TypeString[i];
-                if (char.IsUpper(schemaChar) && string.IsNullOrEmpty(values[index]))
+                if (typeData.IsOptional && string.IsNullOrEmpty(values[index]))
                 {
                     parsedValues.Add(null);
                     continue;
                 }
 
-                if (char.ToLower(schemaChar) == SchemaValues.Unformatted)
+                if (typeData.Type == PbsFieldType.UnformattedText)
                 {
                     parsedValues.Add(record);
                     index = values.Length;
                     break;
                 }
 
-                parsedValues.Add(CastCsvValue(values[index], schemaChar, schema.EnumTypes[i - start]));
+                parsedValues.Add(CastCsvValue(values[index], typeData));
             }
 
             if (parsedValues.Count > 0)
@@ -221,9 +223,9 @@ public static partial class CsvParser
                 }
             }
             
-            if (!repeat || index > values.Length - 1) break;
+            if (!repeat || index >= values.Length - 1) break;
         }
 
-        return !repeat || schemaLength == 1 ? result[0] : result;
+        return !repeat && schemaLength == 1 ? result[0] : result;
     }
 }

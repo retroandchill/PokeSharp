@@ -10,15 +10,15 @@ public static class CsvWriter
     public static async Task<object?> WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
     {
         var recordSet = record is IEnumerable asEnumerable ? asEnumerable.Flatten().ToImmutableArray() : [record];
-        var start = schema.TypeString[0] is '*' or '^' ? 1 : 0;
         var index = -1;
+        var noMoreValues = false;
         while (true)
         {
-            for (var i = start; i < schema.TypeString.Length; i++)
+            foreach (var typeData in schema.TypeEntries)
             {
                 index++;
                 var value = recordSet[index];
-                if (char.IsUpper(schema.TypeString[i]))
+                if (typeData.IsOptional)
                 {
                     var laterValueFound = false;
                     for (var j = index; j < recordSet.Length; j++)
@@ -31,7 +31,7 @@ public static class CsvWriter
 
                     if (!laterValueFound)
                     {
-                        start = -1;
+                        noMoreValues = true;
                         break;
                     }
                 }
@@ -39,22 +39,21 @@ public static class CsvWriter
                 if (index > 0) await writer.WriteAsync(',');
                 if (value is null) continue;
 
-                switch (char.ToLower(schema.TypeString[i]))
+                switch (typeData.Type)
                 {
-                    case SchemaValues.Enum:
-                        await WriteEnumRecord(value, writer, schema.EnumTypes[i - start]);
+                    case PbsFieldType.Enumerable:
+                        await WriteEnumRecord(value, writer, typeData.EnumType);
                         break;
-                    case SchemaValues.EnumOrInteger:
-                        await WriteEnumOrIntegerRecord(value, writer, schema.EnumTypes[i - start]);
+                    case PbsFieldType.EnumerableOrInteger:
+                        await WriteEnumOrIntegerRecord(value, writer, typeData.EnumType);
                         break;
                     default:
-                        await WriteOtherRecordType(value, writer, schema.TypeString[i]);
+                        await WriteOtherRecordType(value, writer, typeData.Type);
                         break;
                 }
             }
 
-            if (start > 0 && index >= recordSet.Length - 1) break;
-            if (start <= 0) break;
+            if (noMoreValues) break;
         }
 
         return record;
@@ -72,12 +71,12 @@ public static class CsvWriter
         await writer.WriteAsync(record?.ToString() ?? "");
     }
 
-    private static async Task WriteOtherRecordType(object? record, StreamWriter writer, char schema)
+    private static async Task WriteOtherRecordType(object? record, StreamWriter writer, PbsFieldType schema)
     {
         switch (record)
         {
             case string str:
-                await writer.WriteAsync((schema == SchemaValues.Unformatted) ? str : TextFormatter.CsvQuote(str));
+                await writer.WriteAsync((schema == PbsFieldType.UnformattedText) ? str : TextFormatter.CsvQuote(str));
                 break;
             case Name name:
                 await writer.WriteAsync(name.ToString());

@@ -1,7 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Compiler.Core.Serialization.Converters;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
@@ -14,9 +15,15 @@ public readonly record struct LineWithNumber(string Line, int LineNumber);
 public partial class PbsSerializer
 {
     private readonly FileLineData _fileLineData = new();
+    private readonly SchemaBuilder _schemaBuilder = new();
+    public List<IPbsConverter> Converters { get; } = [
+        new LocalizingTextConverter(),
+        new NumericTypeConverter(),
+        new CollectionConverter()
+    ];
     
     public async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(StreamReader fileReader, 
-                                                                      Dictionary<string, SchemaEntry>? schema = null, 
+                                                                      IReadOnlyDictionary<string, SchemaEntry>? schema = null, 
                                                                       [EnumeratorCancellation] 
                                                                       CancellationToken cancellationToken = default)
     {
@@ -58,7 +65,7 @@ public partial class PbsSerializer
                     var value = match.Groups[2].Value;
 
                     if (schema is not null && schema.TryGetValue(key, out var entry) &&
-                        entry.TypeString.StartsWith('^'))
+                        entry.FieldStructure == PbsFieldStructure.Repeating)
                     {
                         if (!lastSection.TryGetValue(key, out var existingValue) || existingValue is not IList<string> list)
                         {
@@ -83,7 +90,7 @@ public partial class PbsSerializer
     }
 
     public async IAsyncEnumerable<Section<string>> ParseFileSections(
-        StreamReader fileReader, Dictionary<string, SchemaEntry>? schema = null,
+        StreamReader fileReader, IReadOnlyDictionary<string, SchemaEntry>? schema = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await foreach (var (section, name) in ParseFileSectionsEx(fileReader, schema, cancellationToken))
@@ -149,5 +156,76 @@ public partial class PbsSerializer
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
     private static partial Regex KeyValuePair { get; }
 
-    
+    public async IAsyncEnumerable<object?> ReadFromFile(Type type, string[] paths, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var attribute = type.GetCustomAttribute<PbsDataAttribute>()!;
+
+        if (attribute.IsOptional && !paths.Any(File.Exists)) yield break;
+
+        var schema = _schemaBuilder.BuildSchema(type);
+        foreach (var path in paths)
+        {
+            using var fileStream = new StreamReader(path);
+            
+            _fileLineData.File = path;
+
+            await foreach (var (contents, sectionName) in ParseFileSections(fileStream, schema, cancellationToken))
+            {
+                var result = Activator.CreateInstance(type);
+                foreach (var (key, schemaEntry) in schema)
+                {
+                    var property = type.GetProperty(schemaEntry.PropertyName);
+                    if (property is null) throw new InvalidOperationException($"Property '{schemaEntry.PropertyName}' not found on type '{type.Name}'.");
+                    
+                    if (key == "SectionName")
+                    {
+                        SetValueToProperty(sectionName, result, property, CsvParser.GetCsvRecord(sectionName, schemaEntry));
+                        continue;
+                    }
+
+                    if (!contents.TryGetValue(key, out var value)) continue;
+
+                    switch (value)
+                    {
+                        case IList<string> list:
+                            var propertyOutput = list.Select(item => CsvParser.GetCsvRecord(item, schemaEntry)).ToList();
+                            SetValueToProperty(sectionName, result, property, propertyOutput);
+                            break;
+                        case string stringValue:
+                            SetValueToProperty(sectionName, result, property, CsvParser.GetCsvRecord(stringValue, schemaEntry));
+                            break;
+                        case null:
+                            throw new InvalidOperationException($"Property '{property.Name}' is null.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected value type '{value.GetType().Name}' for property '{property.Name}'.");   
+                    }
+                }
+                
+                yield return result;
+            }
+        }
+    }
+
+    public IAsyncEnumerable<T> ReadFromFile<T>(string[] paths, CancellationToken cancellationToken = default)
+    {
+        return ReadFromFile(typeof(T), paths, cancellationToken).OfType<T>();
+    }
+
+    private void SetValueToProperty(string sectionName, object? target, PropertyInfo property, object? value)
+    {
+        if (value is null) return;
+
+        if (property.PropertyType.IsInstanceOfType(value))
+        {
+            property.SetValue(target, value);
+            return;       
+        }
+        
+        var converter = Converters.FirstOrDefault(c => c.CanConvert(sectionName, property, value));
+        if (converter is null)
+            throw new PbsParseException($"Could not find a converter for the property {property.Name}.");
+        
+        var convertedValue = converter.Convert(sectionName, property, value);
+        property.SetValue(target, convertedValue);
+    }
 }

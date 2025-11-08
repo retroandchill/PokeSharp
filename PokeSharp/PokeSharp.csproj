@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj" />
+      <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
+      <ProjectReference Include="..\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj"
+                        OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+      <PackageReference Include="ZLinq" Version="1.5.3" />
+    </ItemGroup>
+
+</Project>

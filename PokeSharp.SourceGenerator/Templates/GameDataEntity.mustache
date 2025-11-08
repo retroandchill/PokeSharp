@@ -1,0 +1,67 @@
+#nullable enable
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.Abstractions;
+using PokeSharp.Core;
+using PokeSharp.Core.Data;
+
+namespace {{Namespace}};
+
+public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}> {
+    
+    private static Name _currentContextId;
+
+    [field: AllowNull]
+    private static {{EntityType}}GameDataSet<{{ClassName}}, {{Key}}> Data
+    {
+        get
+        {
+            var currentContext = GameContextManager.Current;
+            if (field is null || currentContext.ContextId != _currentContextId)
+            {
+                field = currentContext.GetService<{{EntityType}}GameDataSet<{{ClassName}}, {{Key}}>>();
+                _currentContextId = currentContext.ContextId;
+            }
+            
+            return field;
+        }
+    }
+
+    public static IEnumerable<{{Key}}> Keys => Data.Keys;
+    
+    public static IEnumerable<{{ClassName}}> Entities => Data.Entities;
+    
+    public static int Count => Data.Count;
+    
+    public static bool Exists({{Key}} key) => Data.Exists(key);
+    
+    public static {{ClassName}} Get({{Key}} key) => Data.Get(key);
+    
+    public static bool TryGet({{Key}} key, {{#IsReferenceType}}[NotNullWhen(true)] {{/IsReferenceType}}out {{ClassName}}{{#IsReferenceType}}?{{/IsReferenceType}} entity) => Data.TryGet(key, out entity);
+    
+    {{#IsLoaded}}
+    public static void Load() => Data.Load();
+
+    public static void Save() => Data.Save();
+    {{/IsLoaded}}
+    {{^IsLoaded}}
+    public static void Register({{ClassName}} entity) => Data.Register(entity);
+    {{/IsLoaded}}
+
+    {{#Identifiers}}
+    public static readonly {{../Key}} {{Identifier}} = "{{Identifier}}";   
+    {{/Identifiers}}
+}
+
+public static partial class {{ClassName}}Extensions
+{
+    public static IServiceCollection Add{{ClassName}}Data(this IServiceCollection serviceCollection)
+    {
+        {{#IsLoaded}}
+        return serviceCollection.AddSingleton(() => new {{EntityType}}GameDataSet<{{ClassName}}, {{key}}>("{{DataPath}}"));
+        {{/IsLoaded}}
+        {{^IsLoaded}}
+        return serviceCollection.AddSingleton<{{EntityType}}GameDataSet<{{ClassName}}, {{key}}>>();
+        {{/IsLoaded}}
+    }
+}

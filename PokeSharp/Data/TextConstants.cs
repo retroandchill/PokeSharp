@@ -1,0 +1,9 @@
+﻿using PokeSharp.Abstractions;
+
+namespace PokeSharp.Data;
+
+public static class TextConstants
+{
+    public static readonly Text ThreeQuestions = "???";
+    public static readonly Text Unnamed = Text.Localized("TextConstants", "Unnamed", "Unnamed");
+}

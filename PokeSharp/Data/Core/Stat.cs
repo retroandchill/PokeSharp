@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 
-namespace PokeSharp.Data.HardCoded;
+namespace PokeSharp.Data.Core;
 
 public enum StatType : byte
 {
@@ -35,11 +35,11 @@ public partial record Stat
     
     public int PbsOrder { get; init; }
 
-    public static IEnumerable<Stat> AllMain => Entities.Where(x => x.StatType is StatType.Main or StatType.MainBattle);
+    public static IEnumerable<Stat> AllMain => Stat.Entities.Where(x => x.StatType is StatType.Main or StatType.MainBattle);
     
-    public static IEnumerable<Stat> AllMainBattle => Entities.Where(x => x.StatType == StatType.MainBattle);
+    public static IEnumerable<Stat> AllMainBattle => Stat.Entities.Where(x => x.StatType == StatType.MainBattle);
     
-    public static IEnumerable<Stat> AllBattle => Entities.Where(x => x.StatType is StatType.Battle or StatType.MainBattle);
+    public static IEnumerable<Stat> AllBattle => Stat.Entities.Where(x => x.StatType is StatType.Battle or StatType.MainBattle);
 
     #region Defaults
 

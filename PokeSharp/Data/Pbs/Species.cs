@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using PokeSharp.Abstractions;
-using PokeSharp.Data.HardCoded;
+using PokeSharp.Data.Core;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;
@@ -69,9 +69,9 @@ public partial record Species
 
     public int BaseExp { get; init; } = 100;
 
-    public Name GrowthRate { get; init; } = HardCoded.GrowthRate.Medium;
+    public Name GrowthRate { get; init; } = Core.GrowthRate.Medium;
 
-    public Name GenderRatio { get; init; } = HardCoded.GenderRatio.Female50Percent;
+    public Name GenderRatio { get; init; } = Core.GenderRatio.Female50Percent;
 
     public int CatchRate { get; init; } = 255;
 
@@ -144,7 +144,7 @@ public partial record Species
     
     public int BaseForm => DefaultForm ?? Form;
     
-    public bool IsSingleGendered => HardCoded.GenderRatio.Get(GenderRatio).IsSingleGender;
+    public bool IsSingleGendered => Core.GenderRatio.Get(GenderRatio).IsSingleGender;
     
     public int BaseStatTotal => BaseStats.Values.Sum();
     

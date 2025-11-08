@@ -3,7 +3,7 @@ using PokeSharp.Abstractions;
 using PokeSharp.Core.Settings;
 using PokeSharp.SourceGenerator.Attributes;
 
-namespace PokeSharp.Data.HardCoded;
+namespace PokeSharp.Data.Core;
 
 [GameDataEntity]
 public partial record GrowthRate

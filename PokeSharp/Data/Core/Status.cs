@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 
-namespace PokeSharp.Data.HardCoded;
+namespace PokeSharp.Data.Core;
 
 [GameDataEntity]
 public readonly partial record struct Status

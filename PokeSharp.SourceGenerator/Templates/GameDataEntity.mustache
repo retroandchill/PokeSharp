@@ -45,7 +45,7 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     public static void Save() => Data.Save();
     {{/IsLoaded}}
     {{^IsLoaded}}
-    public static void Register({{ClassName}} entity) => Data.Register(entity);
+    public static void Register({{ClassName}} entity) => Register(entity);
     {{/IsLoaded}}
 
     {{#Identifiers}}

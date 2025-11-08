@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp", "PokeSharp\Poke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.SourceGenerator", "PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj", "{222957C2-02BB-48B3-81F2-484B22C00E76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler", "PokeSharp.Compiler\PokeSharp.Compiler.csproj", "{1D26B276-BFD7-4404-AD7A-60C4E726A8B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler.Core", "PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj", "{1D26B276-BFD7-4404-AD7A-60C4E726A8B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler.Sample", "PokeSharp.Compiler.Sample\PokeSharp.Compiler.Sample.csproj", "{53B59A64-AC3C-416A-BABF-C549A827157E}"
 EndProject

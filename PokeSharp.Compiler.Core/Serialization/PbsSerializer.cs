@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using PokeSharp.Abstractions;
-using PokeSharp.Compiler.Schema;
+using PokeSharp.Compiler.Core.Schema;
 
-namespace PokeSharp.Compiler.Serialization;
+namespace PokeSharp.Compiler.Core.Serialization;
 
 public readonly record struct PbsParseResult(Dictionary<string, object?> LastSection, string SectionName);
 

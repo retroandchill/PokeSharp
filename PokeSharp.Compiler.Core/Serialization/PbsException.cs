@@ -1,4 +1,4 @@
-﻿namespace PokeSharp.Compiler.Serialization;
+﻿namespace PokeSharp.Compiler.Core.Serialization;
 
 public abstract class PbsException(string? message = null, Exception? inner = null) : Exception(message, inner);
 

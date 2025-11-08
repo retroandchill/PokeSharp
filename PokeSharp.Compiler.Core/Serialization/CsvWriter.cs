@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
 using PokeSharp.Abstractions;
-using PokeSharp.Compiler.Schema;
+using PokeSharp.Compiler.Core.Schema;
 
-namespace PokeSharp.Compiler.Serialization;
+namespace PokeSharp.Compiler.Core.Serialization;
 
 public static class CsvWriter
 {

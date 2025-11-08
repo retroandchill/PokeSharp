@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace PokeSharp.Compiler.Schema;
+namespace PokeSharp.Compiler.Core.Schema;
 
 public record SchemaEntry(string PropertyName, string TypeString, ImmutableArray<Type?> EnumTypes)
 {

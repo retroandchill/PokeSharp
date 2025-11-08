@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using PokeSharp.Compiler.Schema;
-using PokeSharp.Compiler.Serialization;
+using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Compiler.Core.Serialization;
 
 var sampleSchema = new Dictionary<string, SchemaEntry>
 {

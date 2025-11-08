@@ -40,12 +40,14 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     public static bool TryGet({{Key}} key, {{#IsReferenceType}}[NotNullWhen(true)] {{/IsReferenceType}}out {{ClassName}}{{#IsReferenceType}}?{{/IsReferenceType}} entity) => Data.TryGet(key, out entity);
     
     {{#IsLoaded}}
+    public static void Import(IEnumerable<{{ClassName}}> entities) => Data.Import(entities);
+
     public static void Load() => Data.Load();
 
     public static void Save() => Data.Save();
     {{/IsLoaded}}
     {{^IsLoaded}}
-    public static void Register({{ClassName}} entity) => Register(entity);
+    public static void Register({{ClassName}} entity) => Data.Register(entity);
     {{/IsLoaded}}
 
     {{#Identifiers}}
@@ -58,7 +60,7 @@ public static partial class {{ClassName}}Extensions
     public static IServiceCollection Add{{ClassName}}Data(this IServiceCollection serviceCollection)
     {
         {{#IsLoaded}}
-        return serviceCollection.AddSingleton(() => new {{EntityType}}GameDataSet<{{ClassName}}, {{key}}>("{{DataPath}}"));
+        return serviceCollection.AddSingleton(_ => new {{EntityType}}GameDataSet<{{ClassName}}, {{key}}>("{{DataPath}}"));
         {{/IsLoaded}}
         {{^IsLoaded}}
         return serviceCollection.AddSingleton<{{EntityType}}GameDataSet<{{ClassName}}, {{key}}>>();

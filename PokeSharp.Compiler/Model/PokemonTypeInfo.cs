@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Data;
 
 namespace PokeSharp.Compiler.Model;
 
@@ -9,9 +10,9 @@ public record PokemonTypeInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
-    
-    public Text Name { get; init; }
-    
+
+    public Text Name { get; init; } = TextConstants.Unnamed;
+
     public int IconPosition { get; init; }
     
     public bool IsSpecialType { get; init; }

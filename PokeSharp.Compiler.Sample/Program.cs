@@ -1,12 +1,70 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using PokeSharp.Compiler.Core.Serialization;
-using PokeSharp.Compiler.Model;
+using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.Compiler.Compilers;
+using PokeSharp.Compiler.Core;
+using PokeSharp.Core;
+using PokeSharp.Data.Core;
+using PokeSharp.Data.Pbs;
+using Environment = PokeSharp.Data.Core.Environment;
 
-var pbsSerializer = new PbsSerializer();
+var builder = new GameContextBuilder("test");
 
-await foreach (var type in pbsSerializer.ReadFromFile<PokemonTypeInfo>(
-                   ["D:/dev/PokeSharp/PokeSharp.Compiler.Sample/PBS/types.txt"]))
+builder.Services.AddSingleton<PbsCompilerService>()
+    .AddSingleton<IPbsCompiler, TypeCompiler>()
+    .AddGrowthRateData()
+    .AddGenderRatioData()
+    .AddEggGroupData()
+    .AddBodyShapeData()
+    .AddBodyColorData()
+    .AddHabitatData()
+    .AddEvolutionData()
+    .AddStatData()
+    .AddNatureData()
+    .AddWeatherData()
+    .AddEncounterTypeData()
+    .AddEnvironmentData()
+    .AddBattleWeatherData()
+    .AddBattleTerrainData()
+    .AddTargetData()
+    .AddPokemonTypeData()
+    .AddAbilityData()
+    .AddMoveData()
+    .AddItemData()
+    .AddBerryPlantData()
+    .AddSpeciesData()
+    .AddShadowPokemonData()
+    .AddRibbonData()
+    .AddTrainerTypeData()
+    .AddTrainerData();
+
+var context = builder.Build();
+
+try
 {
-    Console.WriteLine(type);
+    GameContextManager.Initialize(context);
+    
+    GrowthRate.AddDefaultValues();
+    GenderRatio.AddDefaultValues();
+    EggGroup.AddDefaultValues();
+    BodyShape.AddDefaultValues();
+    BodyColor.AddDefaultValues();
+    Habitat.AddDefaultValues();
+    Evolution.AddDefaultValues();
+    Stat.AddDefaultValues();
+    Nature.AddDefaultValues();
+    Weather.AddDefaultValues();
+    EncounterType.AddDefaultValues();
+    Environment.AddDefaultValues();
+    BattleWeather.AddDefaultValues();
+    BattleTerrain.AddDefaultValues();
+    Target.AddDefaultValues();
+
+    var compilerService = context.GetService<PbsCompilerService>();
+
+    await compilerService.CompilePbsFiles();
+}
+finally
+{
+    GameContextManager.Reset();
 }

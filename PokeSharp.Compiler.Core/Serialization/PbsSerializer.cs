@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using PokeSharp.Compiler.Core.Schema;
@@ -89,26 +90,13 @@ public partial class PbsSerializer
             yield return new PbsParseResult(lastSection, sectionName);
     }
 
-    public async IAsyncEnumerable<Section<string>> ParseFileSections(
+    private async IAsyncEnumerable<Section<string>> ParseFileSections(
         StreamReader fileReader, IReadOnlyDictionary<string, SchemaEntry>? schema = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await foreach (var (section, name) in ParseFileSectionsEx(fileReader, schema, cancellationToken))
         {
             yield return new Section<string>(section, name);
-        }
-    }
-
-    public async IAsyncEnumerable<Section<int>> ParseFileSectionsNumbered(
-        StreamReader fileReader, Dictionary<string, SchemaEntry>? schema = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        await foreach (var (section, name) in ParseFileSectionsEx(fileReader, schema, cancellationToken))
-        {
-            if (int.TryParse(name, out var number))
-            {
-                yield return new Section<int>(section, number);    
-            }
         }
     }
 
@@ -156,13 +144,13 @@ public partial class PbsSerializer
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
     private static partial Regex KeyValuePair { get; }
 
-    public async IAsyncEnumerable<object?> ReadFromFile(Type type, string[] paths, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<T> ReadFromFile<T>(ImmutableArray<string> paths, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var attribute = type.GetCustomAttribute<PbsDataAttribute>()!;
+        var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
 
         if (attribute.IsOptional && !paths.Any(File.Exists)) yield break;
 
-        var schema = _schemaBuilder.BuildSchema(type);
+        var schema = _schemaBuilder.BuildSchema(typeof(T));
         foreach (var path in paths)
         {
             using var fileStream = new StreamReader(path);
@@ -171,11 +159,11 @@ public partial class PbsSerializer
 
             await foreach (var (contents, sectionName) in ParseFileSections(fileStream, schema, cancellationToken))
             {
-                var result = Activator.CreateInstance(type);
+                var result = Activator.CreateInstance<T>();
                 foreach (var (key, schemaEntry) in schema)
                 {
-                    var property = type.GetProperty(schemaEntry.PropertyName);
-                    if (property is null) throw new InvalidOperationException($"Property '{schemaEntry.PropertyName}' not found on type '{type.Name}'.");
+                    var property = typeof(T).GetProperty(schemaEntry.PropertyName);
+                    if (property is null) throw new InvalidOperationException($"Property '{schemaEntry.PropertyName}' not found on type '{typeof(T).Name}'.");
                     
                     if (key == "SectionName")
                     {
@@ -204,11 +192,6 @@ public partial class PbsSerializer
                 yield return result;
             }
         }
-    }
-
-    public IAsyncEnumerable<T> ReadFromFile<T>(string[] paths, CancellationToken cancellationToken = default)
-    {
-        return ReadFromFile(typeof(T), paths, cancellationToken).OfType<T>();
     }
 
     private void SetValueToProperty(string sectionName, object? target, PropertyInfo property, object? value)

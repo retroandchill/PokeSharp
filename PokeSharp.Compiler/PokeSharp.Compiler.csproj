@@ -9,6 +9,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj" />
+      <ProjectReference Include="..\PokeSharp\PokeSharp.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Riok.Mapperly" Version="4.3.0" />
     </ItemGroup>
 
 </Project>

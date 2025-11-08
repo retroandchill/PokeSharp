@@ -38,6 +38,15 @@ public sealed class LoadedGameDataSet<TEntity, TKey>(string outputPath) : GameDa
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
+    public void Import(IEnumerable<TEntity> entities)
+    {
+        Data.Clear();
+        foreach (var entity in entities)
+        {
+            Data.Add(entity.Id, entity);
+        }
+    }
+    
     public void Load()
     {
         Data.Clear();

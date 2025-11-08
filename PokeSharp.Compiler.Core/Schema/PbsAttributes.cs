@@ -1,8 +1,10 @@
 ﻿using System.Collections.Immutable;
+using JetBrains.Annotations;
 
 namespace PokeSharp.Compiler.Core.Schema;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+[MeansImplicitUse]
 public sealed class PbsDataAttribute(params string[] baseFilenames) : Attribute
 {
     public ImmutableArray<string> BaseFilenames { get; } = [..baseFilenames];

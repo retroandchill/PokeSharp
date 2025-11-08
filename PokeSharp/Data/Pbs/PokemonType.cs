@@ -10,21 +10,23 @@ public partial record PokemonType
 {
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public required Text Name { get; init; }
+    
+    public required int IconPosition { get; init; }
     
     public bool IsPhysicalType => !IsSpecialType;
     
-    public bool IsSpecialType { get; init; }
+    public required bool IsSpecialType { get; init; }
     
-    public bool IsPseudoType { get; init; }
+    public required bool IsPseudoType { get; init; }
 
-    public ImmutableArray<Name> Weaknesses { get; init; } = [];
+    public required ImmutableArray<Name> Weaknesses { get; init; }
     
-    public ImmutableArray<Name> Resistances { get; init; } = [];
+    public required ImmutableArray<Name> Resistances { get; init; }
     
-    public ImmutableArray<Name> Immunities { get; init; } = [];
+    public required ImmutableArray<Name> Immunities { get; init; }
     
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required IReadOnlySet<Name> Flags { get; init; }
     
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 

@@ -1,4 +1,4 @@
-﻿namespace PokeSharp.Compiler;
+﻿namespace PokeSharp.Compiler.Serialization;
 
 public class FileLineData
 {

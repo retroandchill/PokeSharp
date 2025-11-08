@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Schema;
 
-namespace PokeSharp.Compiler;
+namespace PokeSharp.Compiler.Serialization;
 
 public static class CsvWriter
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace PokeSharp.Compiler;
+namespace PokeSharp.Compiler.Serialization;
 
 public static partial class TextFormatter
 {

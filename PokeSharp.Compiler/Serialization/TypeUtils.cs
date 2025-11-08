@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace PokeSharp.Compiler;
+namespace PokeSharp.Compiler.Serialization;
 
 public static class TypeUtils
 {

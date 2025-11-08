@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Schema;
 
-namespace PokeSharp.Compiler;
+namespace PokeSharp.Compiler.Serialization;
 
 public static partial class CsvParser
 {

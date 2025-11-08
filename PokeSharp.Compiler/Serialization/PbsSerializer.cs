@@ -1,8 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Schema;
 
-namespace PokeSharp.Compiler;
+namespace PokeSharp.Compiler.Serialization;
 
 public readonly record struct PbsParseResult(Dictionary<string, object?> LastSection, string SectionName);
 
@@ -10,7 +11,7 @@ public readonly record struct Section<T>(Dictionary<string, object?> Data, T Id)
 
 public readonly record struct LineWithNumber(string Line, int LineNumber);
 
-public class PbsSerializer
+public partial class PbsSerializer
 {
     private readonly FileLineData _fileLineData = new();
     
@@ -28,7 +29,7 @@ public class PbsSerializer
             {
                 line = TextFormatter.PrepLine(line);
 
-                var match = Regex.Match(line, @"^\s*\[\s*(.*)\s*\]\s*$");
+                var match = SectionHeader.Match(line);
                 if (match.Success)
                 {
                     if (sectionName is not null) 
@@ -45,7 +46,8 @@ public class PbsSerializer
                         throw new PbsFormatException($"Expected a section at the beginning of the file.\\nThis error may also occur if the file was not saved in UTF-8.\n{_fileLineData.LineReport}");
                     }
 
-                    if (!Regex.IsMatch(line, @"^\s*(\w+)\s*=\s*(.*)$"))
+                    match = KeyValuePair.Match(line);
+                    if (!match.Success)
                     {
                         _fileLineData.SetSection(sectionName, null, line);
                         throw new PbsFormatException(
@@ -140,4 +142,12 @@ public class PbsSerializer
             lineNumber++;
         }
     }
+    
+    [GeneratedRegex(@"^\s*\[\s*(.*)\s*\]\s*$")]
+    private static partial Regex SectionHeader { get; }
+
+    [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
+    private static partial Regex KeyValuePair { get; }
+
+    
 }

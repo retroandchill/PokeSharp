@@ -1,4 +1,5 @@
 ﻿using PokeSharp.Abstractions;
+using PokeSharp.Data.Pbs;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -10,7 +11,7 @@ public partial record Evolution
 
     public required Text Name { get; init; }
 
-    public object? Parameter { get; init; }
+    public Type? Parameter { get; init; }
 
     public bool AnyLevelUp { get; init; }
 
@@ -371,7 +372,7 @@ public partial record Evolution
             {
                 Id = "HappinessMove",
                 Name = Text.Localized(LocalizationNamespace, "HappinessMove", "HappinessMove"),
-                Parameter = "Move",
+                Parameter = typeof(Move),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215de8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:321>",
@@ -387,7 +388,7 @@ public partial record Evolution
                     "HappinessMoveType",
                     "HappinessMoveType"
                 ),
-                Parameter = "Type",
+                Parameter = typeof(PokemonType),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215d20 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:332>",
@@ -403,7 +404,7 @@ public partial record Evolution
                     "HappinessHoldItem",
                     "HappinessHoldItem"
                 ),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215c58 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:343>",
@@ -440,7 +441,7 @@ public partial record Evolution
             {
                 Id = "HoldItem",
                 Name = Text.Localized(LocalizationNamespace, "HoldItem", "HoldItem"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x00000253072159b0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:374>",
@@ -454,7 +455,7 @@ public partial record Evolution
             {
                 Id = "HoldItemMale",
                 Name = Text.Localized(LocalizationNamespace, "HoldItemMale", "HoldItemMale"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x00000253072158c0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:388>",
@@ -468,7 +469,7 @@ public partial record Evolution
             {
                 Id = "HoldItemFemale",
                 Name = Text.Localized(LocalizationNamespace, "HoldItemFemale", "HoldItemFemale"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x00000253072157d0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:402>",
@@ -482,7 +483,7 @@ public partial record Evolution
             {
                 Id = "DayHoldItem",
                 Name = Text.Localized(LocalizationNamespace, "DayHoldItem", "DayHoldItem"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x00000253072156e0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:416>",
@@ -496,7 +497,7 @@ public partial record Evolution
             {
                 Id = "NightHoldItem",
                 Name = Text.Localized(LocalizationNamespace, "NightHoldItem", "NightHoldItem"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x00000253072155f0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:430>",
@@ -514,7 +515,7 @@ public partial record Evolution
                     "HoldItemHappiness",
                     "HoldItemHappiness"
                 ),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215500 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:444>",
@@ -528,7 +529,7 @@ public partial record Evolution
             {
                 Id = "HasMove",
                 Name = Text.Localized(LocalizationNamespace, "HasMove", "HasMove"),
-                Parameter = "Move",
+                Parameter = typeof(Move),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215410 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:458>",
@@ -540,7 +541,7 @@ public partial record Evolution
             {
                 Id = "HasMoveType",
                 Name = Text.Localized(LocalizationNamespace, "HasMoveType", "HasMoveType"),
-                Parameter = "Type",
+                Parameter = typeof(PokemonType),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215348 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:467>",
@@ -552,7 +553,7 @@ public partial record Evolution
             {
                 Id = "HasInParty",
                 Name = Text.Localized(LocalizationNamespace, "HasInParty", "HasInParty"),
-                Parameter = "Species",
+                Parameter = typeof(Species),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x0000025307215280 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:476>",
@@ -576,7 +577,7 @@ public partial record Evolution
             {
                 Id = "LocationFlag",
                 Name = Text.Localized(LocalizationNamespace, "LocationFlag", "LocationFlag"),
-                Parameter = "String",
+                Parameter = typeof(string),
                 AnyLevelUp = true,
                 LevelUpProc =
                     "#<Proc:0x00000253072150a0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:494>",
@@ -600,7 +601,7 @@ public partial record Evolution
             {
                 Id = "Item",
                 Name = Text.Localized(LocalizationNamespace, "Item", "Item"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 UseItemProc =
                     "#<Proc:0x0000025307214ee8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:515>",
             }
@@ -611,7 +612,7 @@ public partial record Evolution
             {
                 Id = "ItemMale",
                 Name = Text.Localized(LocalizationNamespace, "ItemMale", "ItemMale"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 UseItemProc =
                     "#<Proc:0x0000025307214e20 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:523>",
             }
@@ -622,7 +623,7 @@ public partial record Evolution
             {
                 Id = "ItemFemale",
                 Name = Text.Localized(LocalizationNamespace, "ItemFemale", "ItemFemale"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 UseItemProc =
                     "#<Proc:0x0000025307214d58 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:531>",
             }
@@ -633,7 +634,7 @@ public partial record Evolution
             {
                 Id = "ItemDay",
                 Name = Text.Localized(LocalizationNamespace, "ItemDay", "ItemDay"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 UseItemProc =
                     "#<Proc:0x0000025307214c90 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:539>",
             }
@@ -644,7 +645,7 @@ public partial record Evolution
             {
                 Id = "ItemNight",
                 Name = Text.Localized(LocalizationNamespace, "ItemNight", "ItemNight"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 UseItemProc =
                     "#<Proc:0x0000025307214bc8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:547>",
             }
@@ -655,7 +656,7 @@ public partial record Evolution
             {
                 Id = "ItemHappiness",
                 Name = Text.Localized(LocalizationNamespace, "ItemHappiness", "ItemHappiness"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 UseItemProc =
                     "#<Proc:0x0000025307214b00 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:555>",
             }
@@ -716,7 +717,7 @@ public partial record Evolution
             {
                 Id = "TradeItem",
                 Name = Text.Localized(LocalizationNamespace, "TradeItem", "TradeItem"),
-                Parameter = "Item",
+                Parameter = typeof(Item),
                 OnTradeProc =
                     "#<Proc:0x0000025307214650 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:601>",
                 AfterEvolutionProc =
@@ -729,7 +730,7 @@ public partial record Evolution
             {
                 Id = "TradeSpecies",
                 Name = Text.Localized(LocalizationNamespace, "TradeSpecies", "TradeSpecies"),
-                Parameter = "Species",
+                Parameter = typeof(Species),
                 OnTradeProc =
                     "#<Proc:0x0000025307214560 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:614>",
             }

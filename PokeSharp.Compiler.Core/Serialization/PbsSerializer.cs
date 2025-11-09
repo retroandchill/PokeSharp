@@ -302,13 +302,21 @@ public partial class PbsSerializer
 
                 if (key == "SectionName")
                 {
-                    SetValueToProperty(
-                        "SectionName",
-                        lineData,
-                        result,
-                        property,
-                        CsvParser.GetCsvRecord(sectionName, schemaEntry, lineData)
-                    );
+                    try
+                    {
+                        SetValueToProperty(
+                            "SectionName",
+                            lineData,
+                            result,
+                            property,
+                            CsvParser.GetCsvRecord(sectionName, schemaEntry)
+                        );
+                    }
+                    catch (Exception e)
+                    {
+                        throw PbsParseException.Create(e, lineData);
+                    }
+
                     mappedProperties.Add(schemaEntry.PropertyName);
                     continue;
                 }
@@ -316,32 +324,41 @@ public partial class PbsSerializer
                 if (!contents.TryGetValue(key, out var value))
                     continue;
 
-                value.Match(
-                    stringValue =>
-                        SetValueToProperty(
-                            sectionName,
-                            value.LineData,
-                            result,
-                            property,
-                            CsvParser.GetCsvRecord(stringValue, schemaEntry, value.LineData)
-                        ),
-                    list =>
-                    {
-                        var propertyOutput = list.Select(item =>
-                                CsvParser.GetCsvRecord(item, schemaEntry, value.LineData)
+                try
+                {
+                    value.Match(
+                        stringValue =>
+                            SetValueToProperty(
+                                sectionName,
+                                value.LineData,
+                                result,
+                                property,
+                                CsvParser.GetCsvRecord(stringValue, schemaEntry)
+                            ),
+                        list =>
+                        {
+                            var propertyOutput = list.Select(item =>
+                                    CsvParser.GetCsvRecord(item, schemaEntry)
+                                )
+                                .ToList();
+                            SetValueToProperty(
+                                sectionName,
+                                value.LineData,
+                                result,
+                                property,
+                                propertyOutput
+                            );
+                        },
+                        () =>
+                            throw new InvalidOperationException(
+                                $"Property '{property.Name}' is null."
                             )
-                            .ToList();
-                        SetValueToProperty(
-                            sectionName,
-                            value.LineData,
-                            result,
-                            property,
-                            propertyOutput
-                        );
-                    },
-                    () =>
-                        throw new InvalidOperationException($"Property '{property.Name}' is null.")
-                );
+                    );
+                }
+                catch (Exception e)
+                {
+                    throw PbsParseException.Create(e, value.LineData);
+                }
 
                 mappedProperties.Add(schemaEntry.PropertyName);
             }

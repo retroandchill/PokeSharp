@@ -4,6 +4,7 @@ using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Pbs;
+using ZLinq;
 
 namespace PokeSharp.Compiler.Compilers;
 
@@ -29,9 +30,9 @@ public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
         };
     }
 
-    protected override void ValidateAllCompiledEntities(IReadOnlyList<PokemonType> entities)
+    protected override void ValidateAllCompiledEntities(Span<PokemonType> entities)
     {
-        var typeIds = entities.Select(x => x.Id).ToHashSet();
+        var typeIds = entities.AsValueEnumerable().Select(x => x.Id).ToHashSet();
         var exceptions = new List<ValidationException>();
 
         foreach (var type in entities)

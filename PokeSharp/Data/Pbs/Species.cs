@@ -51,13 +51,13 @@ public partial record Species
     public Name SpeciesId => Id.Species;
     public int Form => Id.Form;
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public required Text Name { get; init; }
 
-    public Text? FormName { get; init; }
+    public required Text? FormName { get; init; }
 
-    public Text Category { get; init; } = TextConstants.ThreeQuestions;
+    public required Text Category { get; init; }
 
-    public Text PokedexEntry { get; init; } = TextConstants.ThreeQuestions;
+    public required Text PokedexEntry { get; init; }
 
     private readonly int? _pokedexForm;
 
@@ -67,62 +67,61 @@ public partial record Species
         init => _pokedexForm = value;
     }
 
-    public ImmutableArray<Name> Types { get; init; } = ["NORMAL"];
+    public required ImmutableArray<Name> Types { get; init; }
 
-    public IReadOnlyDictionary<Name, int> BaseStats { get; init; } =
-        ImmutableDictionary<Name, int>.Empty;
+    public required IReadOnlyDictionary<Name, int> BaseStats { get; init; }
 
-    public IReadOnlyDictionary<Name, int> EVs { get; init; } = ImmutableDictionary<Name, int>.Empty;
+    public required IReadOnlyDictionary<Name, int> EVs { get; init; }
 
-    public int BaseExp { get; init; } = 100;
+    public required int BaseExp { get; init; }
 
-    public Name GrowthRate { get; init; } = Core.GrowthRate.Medium;
+    public required Name GrowthRate { get; init; }
 
-    public Name GenderRatio { get; init; } = Core.GenderRatio.Female50Percent;
+    public required Name GenderRatio { get; init; }
 
-    public int CatchRate { get; init; } = 255;
+    public required int CatchRate { get; init; }
 
-    public int Happiness { get; init; } = 70;
+    public required int Happiness { get; init; }
 
-    public ImmutableArray<LevelUpMove> LevelUpMoves { get; init; } = [];
+    public required ImmutableArray<LevelUpMove> LevelUpMoves { get; init; }
 
-    public ImmutableArray<Name> TutorMoves { get; init; } = [];
+    public required ImmutableArray<Name> TutorMoves { get; init; }
 
-    public ImmutableArray<Name> EggMoves { get; init; } = [];
+    public required ImmutableArray<Name> EggMoves { get; init; }
 
-    public ImmutableArray<Name> Abilities { get; init; } = [];
+    public required ImmutableArray<Name> Abilities { get; init; }
 
-    public ImmutableArray<Name> HiddenAbilities { get; init; } = [];
+    public required ImmutableArray<Name> HiddenAbilities { get; init; }
 
-    public ImmutableArray<Name> WildItemCommon { get; init; } = [];
+    public required ImmutableArray<Name> WildItemCommon { get; init; }
 
-    public ImmutableArray<Name> WildItemUncommon { get; init; } = [];
+    public required ImmutableArray<Name> WildItemUncommon { get; init; }
 
-    public ImmutableArray<Name> WildItemRare { get; init; } = [];
+    public required ImmutableArray<Name> WildItemRare { get; init; }
 
-    public ImmutableArray<Name> EggGroups { get; init; } = [EggGroup.Undiscovered];
+    public required ImmutableArray<Name> EggGroups { get; init; }
 
-    public int HatchSteps { get; init; } = 1;
+    public required int HatchSteps { get; init; }
 
-    public Name Incense { get; init; }
+    public required Name Incense { get; init; }
 
-    public ImmutableArray<Name> Offspring { get; init; } = [];
+    public required ImmutableArray<Name> Offspring { get; init; }
 
-    public ImmutableArray<EvolutionInfo> Evolutions { get; init; } = [];
+    public required ImmutableArray<EvolutionInfo> Evolutions { get; init; }
 
-    public float Height { get; init; } = 1;
+    public required int Height { get; init; }
 
-    public float Weight { get; init; } = 1;
+    public required int Weight { get; init; }
 
-    public Name Color { get; init; } = BodyColor.Red;
+    public required Name Color { get; init; }
 
-    public Name Shape { get; init; } = BodyShape.Head;
+    public required Name Shape { get; init; }
 
-    public Name Habitat { get; init; }
+    public required Name Habitat { get; init; }
 
-    public int Generation { get; init; } = 0;
+    public required int Generation { get; init; }
 
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required IReadOnlySet<Name> Flags { get; init; }
 
     public Name MegaStone { get; init; }
 

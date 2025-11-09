@@ -135,18 +135,58 @@ public class SchemaBuilder
 
     private static ImmutableArray<SchemaTypeData> GetComplexFieldType(Type propType)
     {
-        return
-        [
-            .. propType
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Select(subProperty =>
-                {
-                    var subPropType =
-                        Nullable.GetUnderlyingType(subProperty.PropertyType)
-                        ?? subProperty.PropertyType;
-                    return GetFieldType(subProperty, subPropType);
-                }),
-        ];
+        var properties = propType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+        var constructors = propType.GetConstructors();
+
+        if (constructors.Length > 1)
+        {
+            throw new PbsSchemaException(
+                $"Type '{propType.Name}' has multiple constructors. Only one is allowed."
+            );
+        }
+
+        if (constructors.Length == 0)
+        {
+            throw new PbsSchemaException(
+                $"Type '{propType.Name}' has no constructors. At least one is required."
+            );
+        }
+
+        var constructor = constructors[0];
+
+        var parameters = constructor.GetParameters();
+        if (parameters.Length != properties.Length)
+        {
+            throw new PbsSchemaException(
+                $"Constructor for type '{propType.Name}' has {parameters.Length} parameters, but {properties.Length} properties were found."
+            );
+        }
+
+        var builder = ImmutableArray.CreateBuilder<SchemaTypeData>(parameters.Length);
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var property = properties[i];
+            var parameter = parameters[i];
+
+            var propertyType = property.PropertyType;
+            var parameterType = parameter.ParameterType;
+
+            if (!parameterType.IsAssignableFrom(propertyType))
+            {
+                throw new PbsSchemaException(
+                    $"Constructor for type '{propType.Name}' has a parameter of type '{parameterType.Name}', but the property '{property.Name}' has type '{propertyType.Name}'."
+                );
+            }
+
+            var fieldType = GetFieldType(property, propertyType) with
+            {
+                IsOptional = parameter.HasDefaultValue,
+            };
+            builder.Add(fieldType);
+        }
+
+        return builder.ToImmutable();
     }
 
     private static bool IsValidFieldType(Type propType, PbsFieldType declaredType, Type? enumType)

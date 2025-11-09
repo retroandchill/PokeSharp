@@ -37,6 +37,8 @@ public sealed class PbsTypeAttribute(PbsFieldType fieldType) : Attribute
     public Type? EnumType { get; init; }
 
     public bool AllowNone { get; init; }
+
+    public int FixedSize { get; init; } = -1;
 }
 
 [AttributeUsage(AttributeTargets.Property)]

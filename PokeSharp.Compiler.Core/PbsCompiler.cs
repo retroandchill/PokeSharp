@@ -20,7 +20,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
     where TEntity : ILoadedGameDataEntity<TEntity>
 {
     public abstract int Order { get; }
-    private readonly string _fileName;
+    protected string FileName { get; }
     private readonly Dictionary<string, PropertyInfo> _propertyMap = new();
 
     protected PbsCompiler()
@@ -30,31 +30,31 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
             throw new InvalidOperationException(
                 $"Type {typeof(TModel).FullName} does not have a {nameof(PbsDataAttribute)}"
             );
-        _fileName = Path.Join("PBS", $"{attribute.BaseFilename}.txt");
+        FileName = Path.Join("PBS", $"{attribute.BaseFilename}.txt");
     }
 
-    public async Task Compile(
+    public virtual async Task Compile(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
     {
         var entities = await serializer
-            .ReadFromFile<TModel>(_fileName, cancellationToken)
+            .ReadFromFile<TModel>(FileName, cancellationToken)
             .Select(x => ValidateCompiledModel(x.Model, x.LineData))
             .Select(ConvertToEntity)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToArrayAsync(cancellationToken: cancellationToken);
 
         ValidateAllCompiledEntities(entities);
         TEntity.Import(entities);
     }
 
-    public async Task WriteToFile(
+    public virtual async Task WriteToFile(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
     {
         await serializer.WritePbsFile(
-            _fileName,
+            FileName,
             TEntity.Entities.Select(ConvertToModel),
             GetPropertyForPbs
         );
@@ -69,7 +69,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
         return model;
     }
 
-    protected virtual void ValidateAllCompiledEntities(IReadOnlyList<TEntity> entities)
+    protected virtual void ValidateAllCompiledEntities(Span<TEntity> entities)
     {
         // No validation by default
     }

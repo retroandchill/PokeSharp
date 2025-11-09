@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Reflection;
 using PokeSharp.Abstractions;
+using PokeSharp.Compiler.Core.Serialization;
 
 namespace PokeSharp.Compiler.Core.Utils;
 

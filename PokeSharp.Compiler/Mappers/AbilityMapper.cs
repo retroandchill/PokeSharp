@@ -5,9 +5,9 @@ using Riok.Mapperly.Abstractions;
 namespace PokeSharp.Compiler.Mappers;
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class TypeMapper
+public static partial class AbilityMapper
 {
-    public static partial PokemonType ToGameData(this PokemonTypeInfo dto);
+    public static partial Ability ToGameData(this AbilityInfo dto);
     
-    public static partial PokemonTypeInfo ToDto(this PokemonType entity);
+    public static partial AbilityInfo ToDto(this Ability entity);
 }

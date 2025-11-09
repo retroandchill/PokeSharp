@@ -71,12 +71,11 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
         var elementValue = property.GetValue(model);
         switch (elementValue)
         {
-            case IEnumerable enumerable when enumerable.Cast<object?>().TryGetNonEnumeratedCount(out var count) && count == 0:
+            case IEnumerable enumerable when TypeUtils.IsEmptyEnumerable(enumerable):
             case false:
                 return null;
             default:
                 return elementValue;
         }
     }
-    
 }

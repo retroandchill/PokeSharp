@@ -51,7 +51,11 @@ public class CollectionConverter : IPbsConverter
                    genericTypeDef == typeof(HashSet<>) ||
                    genericTypeDef == typeof(ImmutableArray<>) ||
                    genericTypeDef == typeof(IList<>) ||
+                   genericTypeDef == typeof(IReadOnlyList<>) ||
                    genericTypeDef == typeof(ICollection<>) ||
+                   genericTypeDef == typeof(IReadOnlyCollection<>) ||
+                   genericTypeDef == typeof(ISet<>) ||
+                   genericTypeDef == typeof(IReadOnlySet<>) ||
                    genericTypeDef == typeof(IEnumerable<>);
         }
         
@@ -131,13 +135,17 @@ public class CollectionConverter : IPbsConverter
             
             if (genericTypeDef == typeof(List<>) ||
                 genericTypeDef == typeof(IList<>) ||
+                genericTypeDef == typeof(IReadOnlyList<>) ||
                 genericTypeDef == typeof(ICollection<>) ||
+                genericTypeDef == typeof(IReadOnlyCollection<>) ||
                 genericTypeDef == typeof(IEnumerable<>))
             {
                 return items; // items is already a List<T>
             }
             
-            if (genericTypeDef == typeof(HashSet<>))
+            if (genericTypeDef == typeof(HashSet<>) || 
+                genericTypeDef == typeof(ISet<>) || 
+                genericTypeDef == typeof(IReadOnlySet<>))
             {
                 var hashSetType = typeof(HashSet<>).MakeGenericType(elementType);
                 var hashSet = Activator.CreateInstance(hashSetType)!;

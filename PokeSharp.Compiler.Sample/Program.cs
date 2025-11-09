@@ -12,6 +12,7 @@ var builder = new GameContextBuilder("test");
 
 builder.Services.AddSingleton<PbsCompilerService>()
     .AddSingleton<IPbsCompiler, TypeCompiler>()
+    .AddSingleton<IPbsCompiler, AbilityCompiler>()
     .AddGrowthRateData()
     .AddGenderRatioData()
     .AddEggGroupData()

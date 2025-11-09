@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Pbs;
@@ -13,7 +14,7 @@ public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
     protected override PokemonType ConvertToEntity(PokemonTypeInfo model) => model.ToGameData();
     protected override PokemonTypeInfo ConvertToModel(PokemonType entity) => entity.ToDto();
 
-    protected override PokemonTypeInfo ValidateCompiledModel(PokemonTypeInfo model)
+    protected override PokemonTypeInfo ValidateCompiledModel(PokemonTypeInfo model, FileLineData fileLineData)
     {
         // Remove duplicate weaknesses/resistances/immunities
         return model with

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Immutable;
 using System.Reflection;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
@@ -32,7 +31,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
     public async Task Compile(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         var entities = await serializer.ReadFromFile<TModel>(_fileName, cancellationToken)
-            .Select(ValidateCompiledModel)
+            .Select(model => ValidateCompiledModel(model, serializer.LineData))
             .Select(ConvertToEntity)
             .ToListAsync(cancellationToken: cancellationToken);
 
@@ -49,7 +48,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
     
     protected abstract TModel ConvertToModel(TEntity entity);
 
-    protected virtual TModel ValidateCompiledModel(TModel model)
+    protected virtual TModel ValidateCompiledModel(TModel model, FileLineData fileLineData)
     {
         return model;
     }

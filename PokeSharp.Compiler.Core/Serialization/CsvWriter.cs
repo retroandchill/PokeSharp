@@ -9,7 +9,7 @@ public static class CsvWriter
 {
     public static async Task WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
     {
-        var recordSet = record is IEnumerable asEnumerable ? asEnumerable.Flatten().ToImmutableArray() : [record];
+        var recordSet = record is IEnumerable asEnumerable and not string ? asEnumerable.Flatten().ToImmutableArray() : [record];
         
         if (recordSet.IsEmpty) return;
         

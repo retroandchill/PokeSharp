@@ -10,7 +10,7 @@ public static class TypeUtils
     {
         foreach (var item in enumerable)
         {
-            if (item is IEnumerable enumerableItem)
+            if (item is IEnumerable enumerableItem and not string)
             {
                 foreach (var subItem in enumerableItem.Flatten())
                 {

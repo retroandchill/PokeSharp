@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization.Converters;
@@ -254,7 +255,7 @@ public partial class PbsSerializer
                 $"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field.\n{_fileLineData.LineReport}");
         }
         
-        await using var fileWriter = new StreamWriter(path);
+        await using var fileWriter = new StreamWriter(path, false, Encoding.UTF8);
         await AddPbsHeaderToFile(fileWriter);
 
         foreach (var entity in entities)

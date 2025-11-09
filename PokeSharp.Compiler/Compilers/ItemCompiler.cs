@@ -9,6 +9,7 @@ namespace PokeSharp.Compiler.Compilers;
 public class ItemCompiler : PbsCompiler<Item, ItemInfo>
 {
     public override int Order => 6;
+
     protected override Item ConvertToEntity(ItemInfo model) => model.ToGameData();
 
     protected override ItemInfo ConvertToModel(Item entity) => entity.ToDto();
@@ -21,7 +22,7 @@ public class ItemCompiler : PbsCompiler<Item, ItemInfo>
             case nameof(ItemInfo.BPPrice) when originalValue is 1:
             case nameof(ItemInfo.FieldUse) when originalValue is FieldUse.NoFieldUse:
             case nameof(ItemInfo.BattleUse) when originalValue is BattleUse.NoBattleUse:
-            case nameof(ItemInfo.Move) when originalValue is Name { IsNone: true }:    
+            case nameof(ItemInfo.Move) when originalValue is Name { IsNone: true }:
                 return null;
             case nameof(ItemInfo.Consumable):
                 return model.Consumable;

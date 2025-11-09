@@ -21,22 +21,33 @@ public class NumericTypeConverter : IPbsConverter
         typeof(decimal),
     ];
 
-    public bool CanConvert(string sectionName, PropertyInfo property, object? value)
+    public bool CanConvert(
+        string sectionName,
+        PropertyInfo property,
+        object? value,
+        Type targetType
+    )
     {
         if (value is null)
             return false;
 
         return NumericTypes.Any(t => t.IsInstanceOfType(value))
-            && NumericTypes.Any(t => t.IsAssignableTo(property.PropertyType));
+            && NumericTypes.Any(t => t.IsAssignableTo(targetType));
     }
 
-    public object? Convert(string sectionName, PropertyInfo property, object? value)
+    public object? Convert(
+        string sectionName,
+        PropertyInfo property,
+        object? value,
+        Type targetType,
+        Func<object?, Type, object?> convertInner
+    )
     {
         if (value is null)
             return null;
 
         var sourceType = value.GetType();
-        var targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+        targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
         // If types are the same, no conversion needed
         if (sourceType == targetType)

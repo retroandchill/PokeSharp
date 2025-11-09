@@ -1,11 +1,14 @@
 ﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization.Converters;
+using PokeSharp.Compiler.Core.Utils;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
@@ -97,9 +100,14 @@ public partial class PbsSerializer
     private readonly SchemaBuilder _schemaBuilder = new();
 
     public List<IPbsConverter> Converters { get; } =
-    [new LocalizingTextConverter(), new NumericTypeConverter(), new CollectionConverter()];
+    [
+        new LocalizingTextConverter(),
+        new NumericTypeConverter(),
+        new CollectionConverter(),
+        new ComplexTypeConverter(),
+    ];
 
-    public async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(
+    public static async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(
         StreamReader fileReader,
         FileLineData lineData,
         IReadOnlyDictionary<string, SchemaEntry>? schema = null,
@@ -369,23 +377,47 @@ public partial class PbsSerializer
         object? value
     )
     {
-        if (value is null)
-            return;
+        var converted = ConvertTypeIfNecessary(
+            sectionName,
+            value,
+            property.PropertyType,
+            property,
+            lineData
+        );
+        property.SetValue(target, converted);
+    }
 
-        if (property.PropertyType.IsInstanceOfType(value))
+    private object? ConvertTypeIfNecessary(
+        string sectionName,
+        object? value,
+        Type targetType,
+        PropertyInfo property,
+        FileLineData lineData
+    )
+    {
+        if (value is null)
+            return null;
+
+        if (targetType.IsInstanceOfType(value))
         {
-            property.SetValue(target, value);
-            return;
+            return value;
         }
 
-        var converter = Converters.FirstOrDefault(c => c.CanConvert(sectionName, property, value));
+        var converter = Converters.FirstOrDefault(c =>
+            c.CanConvert(sectionName, property, value, targetType)
+        );
         if (converter is null)
             throw new PbsParseException(
                 $"Could not find a converter for the property {property.Name}.\n{lineData.LineReport}"
             );
 
-        var convertedValue = converter.Convert(sectionName, property, value);
-        property.SetValue(target, convertedValue);
+        return converter.Convert(
+            sectionName,
+            property,
+            value,
+            targetType,
+            (o, t) => ConvertTypeIfNecessary(sectionName, o, t, property, lineData)
+        );
     }
 
     public static async Task AddPbsHeaderToFile(StreamWriter fileWriter)

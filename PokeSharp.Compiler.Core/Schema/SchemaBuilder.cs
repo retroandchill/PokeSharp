@@ -1,5 +1,8 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 using PokeSharp.Abstractions;
+using PokeSharp.Compiler.Core.Serialization;
+using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core.Data;
 
 namespace PokeSharp.Compiler.Core.Schema;
@@ -83,17 +86,20 @@ public class SchemaBuilder
 
     private static SchemaEntry GetSchemaEntry(PropertyInfo property)
     {
-        var fieldType = GetFieldType(property);
+        var propType = GetUnderlyingType(property.PropertyType);
 
-        return new SchemaEntry(property.Name, [fieldType])
+        var fieldTypes = !TypeUtils.IsSimpleType(propType)
+            ? GetComplexFieldType(propType)
+            : [GetFieldType(property, propType)];
+
+        return new SchemaEntry(property.Name, fieldTypes)
         {
             FieldStructure = GetFieldStructure(property),
         };
     }
 
-    private static SchemaTypeData GetFieldType(PropertyInfo property)
+    private static SchemaTypeData GetFieldType(PropertyInfo property, Type propType)
     {
-        var propType = GetUnderlyingType(property.PropertyType);
         var typeAttribute = property.GetCustomAttribute<PbsTypeAttribute>();
 
         if (typeAttribute is null)
@@ -125,6 +131,22 @@ public class SchemaBuilder
             typeAttribute.EnumType ?? propType,
             typeAttribute.AllowNone
         );
+    }
+
+    private static ImmutableArray<SchemaTypeData> GetComplexFieldType(Type propType)
+    {
+        return
+        [
+            .. propType
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Select(subProperty =>
+                {
+                    var subPropType =
+                        Nullable.GetUnderlyingType(subProperty.PropertyType)
+                        ?? subProperty.PropertyType;
+                    return GetFieldType(subProperty, subPropType);
+                }),
+        ];
     }
 
     private static bool IsValidFieldType(Type propType, PbsFieldType declaredType, Type? enumType)

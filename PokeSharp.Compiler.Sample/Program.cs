@@ -17,6 +17,7 @@ builder
     .AddSingleton<IPbsCompiler, AbilityCompiler>()
     .AddSingleton<IPbsCompiler, MoveCompiler>()
     .AddSingleton<IPbsCompiler, ItemCompiler>()
+    .AddSingleton<IPbsCompiler, BerryPlantCompiler>()
     .AddGrowthRateData()
     .AddGenderRatioData()
     .AddEggGroupData()

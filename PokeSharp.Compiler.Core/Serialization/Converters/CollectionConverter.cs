@@ -6,12 +6,16 @@ namespace PokeSharp.Compiler.Core.Serialization.Converters;
 
 public class CollectionConverter : IPbsConverter
 {
-    public bool CanConvert(string sectionName, PropertyInfo property, object? value)
+    public bool CanConvert(
+        string sectionName,
+        PropertyInfo property,
+        object? value,
+        Type targetType
+    )
     {
         if (value is null)
             return false;
 
-        var propertyType = property.PropertyType;
         var valueType = value.GetType();
 
         // Check if the value implements IEnumerable (but not string)
@@ -19,15 +23,20 @@ public class CollectionConverter : IPbsConverter
             return false;
 
         // Check if the property type is one of our supported collection types
-        return IsSupportedCollectionType(propertyType);
+        return IsSupportedCollectionType(targetType);
     }
 
-    public object? Convert(string sectionName, PropertyInfo property, object? value)
+    public object? Convert(
+        string sectionName,
+        PropertyInfo property,
+        object? value,
+        Type targetType,
+        Func<object?, Type, object?> convertInner
+    )
     {
         if (value is null)
             return null;
 
-        var targetType = property.PropertyType;
         var enumerable = (IEnumerable)value;
 
         // Get the element type of the target collection
@@ -36,7 +45,7 @@ public class CollectionConverter : IPbsConverter
             throw new InvalidOperationException($"Cannot determine element type for {targetType}");
 
         // Convert the enumerable to a list of the target element type
-        var convertedItems = ConvertElements(enumerable, elementType);
+        var convertedItems = ConvertElements(enumerable, elementType, convertInner);
 
         // Create the appropriate collection type
         return CreateCollection(targetType, elementType, convertedItems);
@@ -89,42 +98,18 @@ public class CollectionConverter : IPbsConverter
         return enumerableInterface?.GetGenericArguments().FirstOrDefault();
     }
 
-    private static IList ConvertElements(IEnumerable source, Type targetElementType)
+    private static IList ConvertElements(
+        IEnumerable source,
+        Type targetElementType,
+        Func<object?, Type, object?> convertItem
+    )
     {
         var listType = typeof(List<>).MakeGenericType(targetElementType);
         var list = (IList)Activator.CreateInstance(listType)!;
 
         foreach (var item in source)
         {
-            if (item is null)
-            {
-                if (
-                    !targetElementType.IsValueType
-                    || (
-                        targetElementType.IsGenericType
-                        && targetElementType.GetGenericTypeDefinition() == typeof(Nullable<>)
-                    )
-                )
-                {
-                    list.Add(null);
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Cannot assign null to non-nullable type {targetElementType}"
-                    );
-                }
-            }
-            else if (targetElementType.IsInstanceOfType(item))
-            {
-                list.Add(item);
-            }
-            else
-            {
-                // Try to convert the item if possible
-                var convertedItem = System.Convert.ChangeType(item, targetElementType);
-                list.Add(convertedItem);
-            }
+            list.Add(convertItem(item, targetElementType));
         }
 
         return list;

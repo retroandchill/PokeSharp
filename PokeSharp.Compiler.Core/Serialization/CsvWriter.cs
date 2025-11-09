@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Compiler.Core.Utils;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
@@ -11,7 +12,7 @@ public static class CsvWriter
     {
         var recordSet = record is IEnumerable asEnumerable and not string
             ? asEnumerable.Flatten().ToImmutableArray()
-            : [record];
+            : DeconstructIfNecessary(record);
 
         if (recordSet.IsEmpty)
             return;
@@ -66,6 +67,18 @@ public static class CsvWriter
             if ((!noMoreValues && index >= recordSet.Length - 1) || noMoreValues)
                 break;
         }
+    }
+
+    private static ImmutableArray<object?> DeconstructIfNecessary(object? record)
+    {
+        if (record is null)
+            return [null];
+
+        var recordType = record.GetType();
+        if (TypeUtils.IsSimpleType(recordType))
+            return [record];
+
+        return [.. recordType.GetProperties().Select(p => p.GetValue(record))];
     }
 
     private static async Task WriteEnumRecord(object? record, StreamWriter writer, Type? enumType)

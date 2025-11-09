@@ -1,0 +1,15 @@
+﻿using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Mappers;
+using PokeSharp.Compiler.Model;
+using PokeSharp.Data.Pbs;
+
+namespace PokeSharp.Compiler.Compilers;
+
+public class BerryPlantCompiler : PbsCompiler<BerryPlant, BerryPlantInfo>
+{
+    public override int Order => 7;
+
+    protected override BerryPlant ConvertToEntity(BerryPlantInfo model) => model.ToGameData();
+
+    protected override BerryPlantInfo ConvertToModel(BerryPlant entity) => entity.ToDto();
+}

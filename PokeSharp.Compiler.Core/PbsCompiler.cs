@@ -2,6 +2,7 @@
 using System.Reflection;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
+using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core.Data;
 
 namespace PokeSharp.Compiler.Core;
@@ -81,11 +82,11 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
             ArgumentNullException.ThrowIfNull(property);
             _propertyMap.Add(key, property);
         }
-        
+
         var elementValue = property.GetValue(model);
         switch (elementValue)
         {
-            case IEnumerable enumerable when TypeUtils.IsEmptyEnumerable(enumerable):
+            case IEnumerable enumerable when CollectionUtils.IsEmptyEnumerable(enumerable):
             case false:
                 return null;
             default:

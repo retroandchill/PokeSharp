@@ -79,27 +79,15 @@ public partial class Item
 
     public required Text NamePlural { get; init; }
 
-    public required Text PortionName
-    {
-        get;
-        init;
-    }
+    public required Text PortionName { get; init; }
 
-    public required Text PortionNamePlural
-    {
-        get;
-        init;
-    }
+    public required Text PortionNamePlural { get; init; }
 
     public required int Pocket { get; init; }
 
     public required int Price { get; init; }
 
-    public required int SellPrice
-    {
-        get;
-        init;
-    }
+    public required int SellPrice { get; init; }
 
     public required int BPPrice { get; init; }
 
@@ -109,9 +97,10 @@ public partial class Item
 
     public required IReadOnlySet<Name> Flags { get; init; }
 
-    public required bool Consumable { 
+    public required bool Consumable
+    {
         get => !IsImportant && field;
-        init; 
+        init;
     }
 
     public required bool ShowQuantity

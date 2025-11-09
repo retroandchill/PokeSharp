@@ -2,9 +2,9 @@
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace PokeSharp.Compiler.Core.Serialization;
+namespace PokeSharp.Compiler.Core.Utils;
 
-public static class TypeUtils
+public static class CollectionUtils
 {
     public static IEnumerable<object?> Flatten(this IEnumerable enumerable)
     {

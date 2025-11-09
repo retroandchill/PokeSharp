@@ -10,7 +10,8 @@ using Environment = PokeSharp.Data.Core.Environment;
 
 var builder = new GameContextBuilder("test");
 
-builder.Services.AddLogging()
+builder
+    .Services.AddLogging()
     .AddSingleton<PbsCompilerService>()
     .AddSingleton<IPbsCompiler, TypeCompiler>()
     .AddSingleton<IPbsCompiler, AbilityCompiler>()
@@ -46,7 +47,7 @@ var context = builder.Build();
 try
 {
     GameContextManager.Initialize(context);
-    
+
     GrowthRate.AddDefaultValues();
     GenderRatio.AddDefaultValues();
     EggGroup.AddDefaultValues();

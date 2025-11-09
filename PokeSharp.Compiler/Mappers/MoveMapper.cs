@@ -8,6 +8,6 @@ namespace PokeSharp.Compiler.Mappers;
 public static partial class MoveMapper
 {
     public static partial Move ToGameData(this MoveInfo dto);
-    
+
     public static partial MoveInfo ToDto(this Move entity);
 }

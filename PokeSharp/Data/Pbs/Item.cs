@@ -74,9 +74,9 @@ public enum BattleUse : byte
 public partial class Item
 {
     public required Name Id { get; init; }
-    
+
     public Text Name { get; init; } = TextConstants.Unnamed;
-    
+
     public Text NamePlural { get; init; } = TextConstants.Unnamed;
 
     private readonly Text? _portionName;
@@ -85,7 +85,7 @@ public partial class Item
         get => _portionName ?? Name;
         init => _portionName = value;
     }
-    
+
     private readonly Text? _portionNamePlural;
     public Text PortionNamePlural
     {
@@ -94,7 +94,7 @@ public partial class Item
     }
 
     public int Pocket { get; init; } = 1;
-    
+
     public int Price { get; init; } = 0;
 
     private readonly int? _sellPrice;
@@ -105,64 +105,63 @@ public partial class Item
     }
 
     public int BPPrice { get; init; } = 1;
-    
+
     public FieldUse FieldUse { get; init; } = FieldUse.NoFieldUse;
-    
+
     public BattleUse BattleUse { get; init; } = BattleUse.NoBattleUse;
-    
+
     public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
-    
+
     public bool IsConsumable { get; init; }
 
     public bool ShowQuantity
     {
         get => field || !IsImportant;
         init;
-        
     } = true;
-    
+
     public Name Move { get; init; }
 
     public Text Description { get; init; } = TextConstants.ThreeQuestions;
-    
+
     public bool HasFlag(Name flag) => Flags.Contains(flag);
-    
+
     public bool IsTM => FieldUse == FieldUse.TM;
-    
+
     public bool IsHM => FieldUse == FieldUse.HM;
-    
+
     public bool IsTR => FieldUse == FieldUse.TR;
-    
+
     public bool IsMachine => IsTM || IsHM || IsTR;
 
     public bool IsMail => HasFlag(ItemTags.Mail) || HasFlag(ItemTags.IconMail);
-    
+
     public bool IsIconMail => HasFlag(ItemTags.IconMail);
-    
+
     public bool IsPokeBall => HasFlag(ItemTags.PokeBall) || HasFlag(ItemTags.SnagBall);
-    
+
     public bool IsBerry => HasFlag(ItemTags.Berry);
-    
+
     public bool IsKeyItem => HasFlag(ItemTags.KeyItem);
-    
+
     public bool IsEvolutionStone => HasFlag(ItemTags.EvolutionStone);
-    
+
     public bool IsFossil => HasFlag(ItemTags.Fossil);
-    
+
     public bool IsApricorn => HasFlag(ItemTags.Apricorn);
-    
+
     public bool IsGem => HasFlag(ItemTags.TypeGem);
-    
+
     public bool IsMulch => HasFlag(ItemTags.Mulch);
-    
+
     public bool IsMegaStone => HasFlag(ItemTags.MegaStone);
-    
+
     public bool IsScent => HasFlag(ItemTags.Scent);
-    
+
     public bool IsImportant => IsKeyItem || IsHM || IsTM;
 
     public bool CanHold => !IsImportant;
-    
+
     public bool ConsumedAfterUse => !IsImportant && IsConsumable;
 }
 

@@ -10,7 +10,7 @@ public static class CollectionTypeHelper
         typeof(ICollection<>),
         typeof(IEnumerable<>),
         typeof(IReadOnlyList<>),
-        typeof(IReadOnlyCollection<>)
+        typeof(IReadOnlyCollection<>),
     ];
 
     // Common concrete collection types
@@ -21,7 +21,7 @@ public static class CollectionTypeHelper
         typeof(LinkedList<>),
         typeof(ImmutableArray<>),
         typeof(ImmutableList<>),
-        typeof(ImmutableHashSet<>)
+        typeof(ImmutableHashSet<>),
     ];
 
     extension(Type type)
@@ -30,24 +30,28 @@ public static class CollectionTypeHelper
         {
             get
             {
-                if (type.IsArray) return true;
+                if (type.IsArray)
+                    return true;
 
-                if (type == typeof(string)) return false;
+                if (type == typeof(string))
+                    return false;
 
-                if (!type.IsGenericType) return false;
-        
+                if (!type.IsGenericType)
+                    return false;
+
                 var genericTypeDef = type.GetGenericTypeDefinition();
-        
-                if (CollectionInterfaceTypes.Contains(genericTypeDef)) return true;
 
-                if (ConcreteCollectionTypes.Contains(genericTypeDef)) return true;
+                if (CollectionInterfaceTypes.Contains(genericTypeDef))
+                    return true;
+
+                if (ConcreteCollectionTypes.Contains(genericTypeDef))
+                    return true;
 
                 return type.GetInterfaces()
-                    .Any(i => i.IsGenericType && 
-                              i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                    .Any(i =>
+                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                    );
             }
         }
     }
-
-    
 }

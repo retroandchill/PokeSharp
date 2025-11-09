@@ -16,7 +16,6 @@ public readonly partial record struct BodyShape
 
     public static void AddDefaultValues()
     {
-
         Register(
             new BodyShape
             {
@@ -128,7 +127,6 @@ public readonly partial record struct BodyShape
                 Name = Text.Localized(LocalizationNamespace, "Insectoid", "Insectoid"),
             }
         );
-
     }
     #endregion
 }

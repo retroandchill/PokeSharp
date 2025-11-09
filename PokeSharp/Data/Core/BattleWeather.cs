@@ -6,7 +6,6 @@ namespace PokeSharp.Data.Core;
 [GameDataEntity]
 public readonly partial record struct BattleWeather
 {
-
     public required Name Id { get; init; }
 
     public required Text Name { get; init; }
@@ -88,7 +87,6 @@ public readonly partial record struct BattleWeather
                 Name = Text.Localized(LocalizationNamespace, "ShadowSky", "Shadow Sky"),
             }
         );
-
     }
     #endregion
 }

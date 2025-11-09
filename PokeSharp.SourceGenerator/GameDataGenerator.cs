@@ -20,36 +20,38 @@ public class GameDataGenerator : IIncrementalGenerator
         DiagnosticSeverity.Error,
         true
     );
-    
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var dataTypes = context.SyntaxProvider
-            .ForAttributeWithMetadataName(typeof(GameDataEntityAttribute).FullName!,
+        var dataTypes = context
+            .SyntaxProvider.ForAttributeWithMetadataName(
+                typeof(GameDataEntityAttribute).FullName!,
                 (n, _) => n is TypeDeclarationSyntax,
                 (ctx, _) =>
                 {
                     var type = (TypeDeclarationSyntax)ctx.TargetNode;
                     return ctx.SemanticModel.GetDeclaredSymbol(type) as INamedTypeSymbol;
-                })
-                .Where(t => t is not null);
-        
+                }
+            )
+            .Where(t => t is not null);
+
         context.RegisterSourceOutput(dataTypes, Execute!);
     }
 
     private static void Execute(SourceProductionContext context, INamedTypeSymbol type)
     {
         var info = type.GetAttributes().Select(a => a.GetGameDataEntityInfo()).Single();
-        
-        var idProperty = type
-            .GetPublicProperties()
-            .SingleOrDefault(p => p.Name == "Id");
+
+        var idProperty = type.GetPublicProperties().SingleOrDefault(p => p.Name == "Id");
 
         if (idProperty is null)
         {
-            context.ReportDiagnostic(Diagnostic.Create(NoIdPropertyDiagnostic, type.Locations[0], type.Name));
+            context.ReportDiagnostic(
+                Diagnostic.Create(NoIdPropertyDiagnostic, type.Locations[0], type.Name)
+            );
             return;
         }
-        
+
         var templateParameters = new
         {
             Namespace = type.ContainingNamespace.ToDisplayString(),
@@ -62,21 +64,22 @@ public class GameDataGenerator : IIncrementalGenerator
             info.DataPath,
             Identifiers = type.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where(m => m.Name == "AddDefaultValues" && m is { IsStatic: true, Parameters.Length: 0, ReturnsVoid: true })
+                .Where(m =>
+                    m.Name == "AddDefaultValues"
+                    && m is { IsStatic: true, Parameters.Length: 0, ReturnsVoid: true }
+                )
                 .SelectMany(GetIdentifiers)
-                .Select(x => new
-                {
-                    Identifier = x
-                })
-                .ToImmutableArray()
+                .Select(x => new { Identifier = x })
+                .ToImmutableArray(),
         };
-        
+
         var handlebars = Handlebars.Create();
         handlebars.Configuration.TextEncoder = null;
 
         context.AddSource(
             $"{type.Name}.g.cs",
-            handlebars.Compile(SourceTemplates.GameDataEntityTemplate)(templateParameters));
+            handlebars.Compile(SourceTemplates.GameDataEntityTemplate)(templateParameters)
+        );
     }
 
     private static string GetClassType(INamedTypeSymbol typeSymbol)
@@ -85,33 +88,44 @@ public class GameDataGenerator : IIncrementalGenerator
         {
             return typeSymbol.IsValueType ? "record struct" : "record";
         }
-        
+
         return typeSymbol.IsValueType ? "struct" : "class";
     }
 
     private static IEnumerable<string> GetIdentifiers(IMethodSymbol methodSymbol)
     {
-        return methodSymbol.DeclaringSyntaxReferences
-            .Select(r => r.GetSyntax())
+        return methodSymbol
+            .DeclaringSyntaxReferences.Select(r => r.GetSyntax())
             .OfType<MethodDeclarationSyntax>()
             .SelectMany(m => m.Body?.Statements ?? [])
             .OfType<ExpressionStatementSyntax>()
-            .Where(es => es.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "Register" } })
+            .Where(es =>
+                es.Expression
+                    is InvocationExpressionSyntax
+                    {
+                        Expression: IdentifierNameSyntax { Identifier.ValueText: "Register" }
+                    }
+            )
             .Select(es => (InvocationExpressionSyntax)es.Expression)
-            .Where(invocation => invocation.ArgumentList.Arguments.Count > 0 &&
-                                 invocation.ArgumentList.Arguments[0].Expression is ObjectCreationExpressionSyntax
-                                 {
-                                     Initializer: not null
-                                 })
-            .SelectMany(invocation => 
+            .Where(invocation =>
+                invocation.ArgumentList.Arguments.Count > 0
+                && invocation.ArgumentList.Arguments[0].Expression
+                    is ObjectCreationExpressionSyntax { Initializer: not null }
+            )
+            .SelectMany(invocation =>
             {
-                var objectCreation = (ObjectCreationExpressionSyntax)invocation.ArgumentList.Arguments[0].Expression;
-                return objectCreation.Initializer!.Expressions
-                    .OfType<AssignmentExpressionSyntax>()
-                    .Where(assignment => assignment.Left is IdentifierNameSyntax { Identifier.ValueText: "Id" } &&
-                                         assignment.Right is LiteralExpressionSyntax literal &&
-                                         literal.Token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken))
-                    .Select(x => ((LiteralExpressionSyntax) x.Right).Token.ValueText);
+                var objectCreation = (ObjectCreationExpressionSyntax)
+                    invocation.ArgumentList.Arguments[0].Expression;
+                return objectCreation
+                    .Initializer!.Expressions.OfType<AssignmentExpressionSyntax>()
+                    .Where(assignment =>
+                        assignment.Left is IdentifierNameSyntax { Identifier.ValueText: "Id" }
+                        && assignment.Right is LiteralExpressionSyntax literal
+                        && literal.Token.IsKind(
+                            Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken
+                        )
+                    )
+                    .Select(x => ((LiteralExpressionSyntax)x.Right).Token.ValueText);
             });
     }
 }

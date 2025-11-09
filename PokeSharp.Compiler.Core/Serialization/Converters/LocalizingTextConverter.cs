@@ -7,6 +7,10 @@ public class LocalizingTextConverter : PbsConverter<Text, string>
 {
     protected override Text Convert(string sectionName, PropertyInfo property, string value)
     {
-        return Text.Localized(property.DeclaringType?.FullName ?? "Unknown", $"{sectionName}.{property.Name}", value);
+        return Text.Localized(
+            property.DeclaringType?.FullName ?? "Unknown",
+            $"{sectionName}.{property.Name}",
+            value
+        );
     }
 }

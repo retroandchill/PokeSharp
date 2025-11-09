@@ -2,7 +2,6 @@
 using RhoMicro.CodeAnalysis;
 #endif
 
-
 namespace PokeSharp.SourceGenerator.Attributes;
 
 /// <summary>

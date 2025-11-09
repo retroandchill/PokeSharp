@@ -146,13 +146,13 @@ public readonly struct GenderRatioData
 public readonly partial record struct GenderRatio
 {
     public required Name Id { get; init; }
-    
+
     public required Text Name { get; init; }
-    
+
     public required GenderRatioData Ratio { get; init; }
-    
+
     public bool IsSingleGender => Ratio.IsSingleGender;
-    
+
     #region Defaults
     private const string LocalizationNamespace = "GameData.GenderRatio";
 
@@ -189,7 +189,11 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "FemaleOneEighth",
-                Name = Text.Localized(LocalizationNamespace, "FemaleOneEighth", "Female One Eighth"),
+                Name = Text.Localized(
+                    LocalizationNamespace,
+                    "FemaleOneEighth",
+                    "Female One Eighth"
+                ),
                 Ratio = GenderRatioData.FemaleChance(32),
             }
         );
@@ -198,7 +202,11 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "Female25Percent",
-                Name = Text.Localized(LocalizationNamespace, "Female25Percent", "Female 25 Percent"),
+                Name = Text.Localized(
+                    LocalizationNamespace,
+                    "Female25Percent",
+                    "Female 25 Percent"
+                ),
                 Ratio = GenderRatioData.FemaleChance(64),
             }
         );
@@ -207,7 +215,11 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "Female50Percent",
-                Name = Text.Localized(LocalizationNamespace, "Female50Percent", "Female 50 Percent"),
+                Name = Text.Localized(
+                    LocalizationNamespace,
+                    "Female50Percent",
+                    "Female 50 Percent"
+                ),
                 Ratio = GenderRatioData.FemaleChance(128),
             }
         );
@@ -216,7 +228,11 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "Female75Percent",
-                Name = Text.Localized(LocalizationNamespace, "Female75Percent", "Female 75 Percent"),
+                Name = Text.Localized(
+                    LocalizationNamespace,
+                    "Female75Percent",
+                    "Female 75 Percent"
+                ),
                 Ratio = GenderRatioData.FemaleChance(192),
             }
         );
@@ -225,7 +241,11 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "FemaleSevenEighths",
-                Name = Text.Localized(LocalizationNamespace, "FemaleSevenEighths", "Female Seven Eighths"),
+                Name = Text.Localized(
+                    LocalizationNamespace,
+                    "FemaleSevenEighths",
+                    "Female Seven Eighths"
+                ),
                 Ratio = GenderRatioData.FemaleChance(224),
             }
         );

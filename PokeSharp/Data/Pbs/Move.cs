@@ -15,7 +15,7 @@ public enum DamageCategory : byte
 public partial record Move
 {
     public required Name Id { get; init; }
-    
+
     public required Text Name { get; init; }
 
     public required Name Type { get; init; }
@@ -27,27 +27,27 @@ public partial record Move
     public required int Accuracy { get; init; }
 
     public required int TotalPP { get; init; }
-    
+
     public required Name Target { get; init; }
-    
+
     public required int Priority { get; init; }
-    
+
     public required Name FunctionCode { get; init; }
-    
+
     public required IReadOnlySet<Name> Flags { get; init; }
-    
+
     public required int EffectChance { get; init; }
-    
+
     public required Text Description { get; init; }
-    
+
     public bool HasFlag(Name flag) => Flags.Contains(flag);
-    
+
     public bool IsPhysical => Category == DamageCategory.Physical;
-    
+
     public bool IsSpecial => Category == DamageCategory.Special;
-    
+
     public bool IsDamaging => Category != DamageCategory.Status;
-    
+
     public bool IsStatus => Category == DamageCategory.Status;
 
     public bool IsHiddenMove => Item.Entities.Any(i => i.IsHM && i.Move == Id);

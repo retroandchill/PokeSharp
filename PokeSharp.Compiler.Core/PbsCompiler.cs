@@ -9,13 +9,14 @@ namespace PokeSharp.Compiler.Core;
 public interface IPbsCompiler
 {
     int Order { get; }
-    
+
     Task Compile(PbsSerializer serializer, CancellationToken cancellationToken = default);
-    
+
     Task WriteToFile(PbsSerializer serializer, CancellationToken cancellationToken = default);
 }
 
-public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity : ILoadedGameDataEntity<TEntity>
+public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
+    where TEntity : ILoadedGameDataEntity<TEntity>
 {
     public abstract int Order { get; }
     private readonly string _fileName;
@@ -24,13 +25,20 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
     protected PbsCompiler()
     {
         var attribute = typeof(TModel).GetCustomAttribute<PbsDataAttribute>();
-        if (attribute is null) throw new InvalidOperationException($"Type {typeof(TModel).FullName} does not have a {nameof(PbsDataAttribute)}");
+        if (attribute is null)
+            throw new InvalidOperationException(
+                $"Type {typeof(TModel).FullName} does not have a {nameof(PbsDataAttribute)}"
+            );
         _fileName = Path.Join("PBS", $"{attribute.BaseFilename}.txt");
     }
 
-    public async Task Compile(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public async Task Compile(
+        PbsSerializer serializer,
+        CancellationToken cancellationToken = default
+    )
     {
-        var entities = await serializer.ReadFromFile<TModel>(_fileName, cancellationToken)
+        var entities = await serializer
+            .ReadFromFile<TModel>(_fileName, cancellationToken)
             .Select(x => ValidateCompiledModel(x.Model, x.LineData))
             .Select(ConvertToEntity)
             .ToListAsync(cancellationToken: cancellationToken);
@@ -39,13 +47,20 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
         TEntity.Import(entities);
     }
 
-    public async Task WriteToFile(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public async Task WriteToFile(
+        PbsSerializer serializer,
+        CancellationToken cancellationToken = default
+    )
     {
-        await serializer.WritePbsFile(_fileName, TEntity.Entities.Select(ConvertToModel), GetPropertyForPbs);
+        await serializer.WritePbsFile(
+            _fileName,
+            TEntity.Entities.Select(ConvertToModel),
+            GetPropertyForPbs
+        );
     }
 
     protected abstract TEntity ConvertToEntity(TModel model);
-    
+
     protected abstract TModel ConvertToModel(TEntity entity);
 
     protected virtual TModel ValidateCompiledModel(TModel model, FileLineData fileLineData)
@@ -66,7 +81,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
             ArgumentNullException.ThrowIfNull(property);
             _propertyMap.Add(key, property);
         }
-        
+
         var elementValue = property.GetValue(model);
         switch (elementValue)
         {

@@ -10,7 +10,7 @@ public sealed class PbsCompilerService
 
     public PbsCompilerService(IEnumerable<IPbsCompiler> compilers)
     {
-        _compilers = [..compilers.OrderBy(x => x.Order)];
+        _compilers = [.. compilers.OrderBy(x => x.Order)];
     }
 
     public async Task CompilePbsFiles(CancellationToken cancellationToken = default)
@@ -20,7 +20,7 @@ public sealed class PbsCompilerService
             await compiler.Compile(_serializer, cancellationToken);
         }
     }
-    
+
     public async Task WritePbsFiles(CancellationToken cancellationToken = default)
     {
         foreach (var compiler in _compilers)

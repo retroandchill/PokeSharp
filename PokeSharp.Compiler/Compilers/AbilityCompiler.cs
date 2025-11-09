@@ -8,6 +8,7 @@ namespace PokeSharp.Compiler.Compilers;
 public class AbilityCompiler : PbsCompiler<Ability, AbilityInfo>
 {
     public override int Order => 4;
+
     protected override Ability ConvertToEntity(AbilityInfo model) => model.ToGameData();
 
     protected override AbilityInfo ConvertToModel(Ability entity) => entity.ToDto();

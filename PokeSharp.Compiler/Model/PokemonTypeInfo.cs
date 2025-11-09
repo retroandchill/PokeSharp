@@ -15,16 +15,16 @@ public record PokemonTypeInfo
 
     [PbsType(PbsFieldType.UnsignedInteger)]
     public int IconPosition { get; init; }
-    
+
     public bool IsSpecialType { get; init; }
-    
+
     public bool IsPseudoType { get; init; }
-    
+
     public ImmutableArray<Name> Weaknesses { get; init; } = [];
-    
+
     public ImmutableArray<Name> Resistances { get; init; } = [];
-    
+
     public ImmutableArray<Name> Immunities { get; init; } = [];
-    
+
     public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
 }

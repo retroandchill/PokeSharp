@@ -18,7 +18,10 @@ public record FileLineData(string File)
         {
             Section = section,
             Key = key,
-            Value = value is not null && value.Length > 200 ? $"{value[..200]}..." : value ?? string.Empty
+            Value =
+                value is not null && value.Length > 200
+                    ? $"{value[..200]}..."
+                    : value ?? string.Empty,
         };
     }
 
@@ -39,7 +42,9 @@ public record FileLineData(string File)
             if (Section is null)
                 return $"File {File}, line {LineNumber}\n{LineData}\n \n";
 
-            return Key is null ? $"File {File}, section {Section}\n{Value}\n \n" : $"File {File}, section {Section}, key {Key}\n{Value}\n \n";
+            return Key is null
+                ? $"File {File}, section {Section}\n{Value}\n \n"
+                : $"File {File}, section {Section}, key {Key}\n{Value}\n \n";
         }
     }
 }

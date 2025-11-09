@@ -10,14 +10,16 @@ public sealed class GameContextScope : IDisposable
         _scopedContext = context;
         GameContextManager.PushContext(_scopedContext);
     }
-    
+
     public void Dispose()
     {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         var popped = GameContextManager.PopContext();
-        if (popped != _scopedContext) throw new InvalidOperationException("Popped context does not match pushed context.");
-        
+        if (popped != _scopedContext)
+            throw new InvalidOperationException("Popped context does not match pushed context.");
+
         _scopedContext.Dispose();
         _disposed = true;
     }

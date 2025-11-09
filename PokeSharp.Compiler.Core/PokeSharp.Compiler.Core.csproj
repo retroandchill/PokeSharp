@@ -1,20 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <LangVersion>preview</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj" />
-      <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
-      <PackageReference Include="System.Linq.Async" Version="6.0.3" />
-    </ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj" />
+    <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.3" />
+  </ItemGroup>
 </Project>

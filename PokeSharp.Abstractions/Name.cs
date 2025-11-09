@@ -1,13 +1,17 @@
-﻿#if UNREAL_ENGINE
+﻿using System.Runtime.CompilerServices;
+#if UNREAL_ENGINE
 using UnrealSharp.Core;
 #else
 using System.Collections.Concurrent;
 #endif
-using System.Runtime.CompilerServices;
 
 namespace PokeSharp.Abstractions;
 
-public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<ReadOnlySpan<char>>, IComparable<Name>
+public readonly struct Name
+    : IEquatable<Name>,
+        IEquatable<string>,
+        IEquatable<ReadOnlySpan<char>>,
+        IComparable<Name>
 {
 #if UNREAL_ENGINE
     private readonly FName _value;
@@ -15,29 +19,26 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     private readonly uint _comparisonIndex;
     private readonly uint _displayStringIndex;
 #endif
-    
 #if UNREAL_ENGINE
     public Name(FName name)
     {
         _value = name;
     }
 #endif
-    
+
     public Name(ReadOnlySpan<char> name)
     {
-        #if UNREAL_ENGINE
+#if UNREAL_ENGINE
         _value = new FName(name);
-        #else
+#else
         _comparisonIndex = NameTable.GetOrAddEntry(name);
         _displayStringIndex = NameTable.GetOrAddEntry(name, true);
 #endif
     }
 
-    public Name(string name) : this(name.AsSpan())
-    {
-        
-    }
-    
+    public Name(string name)
+        : this(name.AsSpan()) { }
+
     public static Name None
     {
         get
@@ -81,14 +82,13 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
 #else
         return lhs._comparisonIndex == rhs._comparisonIndex;
 #endif
-
     }
-    
+
     public static bool operator !=(Name lhs, Name rhs)
     {
         return !(lhs == rhs);
     }
-    
+
     public static bool operator ==(Name lhs, string? rhs)
     {
 #if UNREAL_ENGINE
@@ -98,12 +98,11 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
         return NameTable.Equals(lhs._comparisonIndex, rhs);
 #endif
     }
-    
+
     public static bool operator !=(Name lhs, string? rhs)
     {
         return !(lhs == rhs);
     }
-
 
     public static bool operator ==(Name lhs, ReadOnlySpan<char> rhs)
     {
@@ -114,19 +113,19 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
         return NameTable.Equals(lhs._comparisonIndex, rhs);
 #endif
     }
-    
+
     public static bool operator !=(Name lhs, ReadOnlySpan<char> rhs)
     {
         return !(lhs == rhs);
     }
 
     public static implicit operator Name(string name) => new(name);
-    
+
     public static implicit operator string(Name name) => name.ToString();
-    
+
 #if UNREAL_ENGINE
     public static implicit operator Name(FName name) => new(name);
-    
+
     public static implicit operator FName(Name name) => name._value;
 #endif
 
@@ -134,7 +133,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     {
         return obj is Name other && Equals(other);
     }
-    
+
     public bool Equals(Name other)
     {
 #if UNREAL_ENGINE
@@ -143,6 +142,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
         return _comparisonIndex == other._comparisonIndex;
 #endif
     }
+
     public int CompareTo(Name other)
     {
 #if UNREAL_ENGINE
@@ -161,7 +161,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     {
         return this == other;
     }
-    
+
     public override string ToString()
     {
 #if UNREAL_ENGINE
@@ -188,10 +188,11 @@ internal static class NameTable
 {
     private const int BucketCount = 1024;
     private const int BucketMask = BucketCount - 1;
-    
-    private static readonly ConcurrentBag<NameHashEntry>[] HashBuckets = new ConcurrentBag<NameHashEntry>[BucketCount];
+
+    private static readonly ConcurrentBag<NameHashEntry>[] HashBuckets =
+        new ConcurrentBag<NameHashEntry>[BucketCount];
     private static readonly ConcurrentDictionary<uint, string> IDToString = new();
-    
+
     private static uint _nextId = 1;
 
     static NameTable()
@@ -206,7 +207,7 @@ internal static class NameTable
     private static int ComputeHash(ReadOnlySpan<char> span, bool caseSensitive = false)
     {
         var hash = 0;
-        
+
         foreach (var t in span)
         {
             var c = caseSensitive ? t : char.ToLowerInvariant(t);
@@ -214,37 +215,43 @@ internal static class NameTable
         }
         return hash;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool SpanEqualsString(ReadOnlySpan<char> span, string str, bool caseSensitive = false)
+    private static bool SpanEqualsString(
+        ReadOnlySpan<char> span,
+        string str,
+        bool caseSensitive = false
+    )
     {
-        if (span.Length != str.Length) return false;
-        
+        if (span.Length != str.Length)
+            return false;
+
         for (var i = 0; i < span.Length; i++)
         {
             if (caseSensitive)
             {
                 if (span[i] != str[i])
                     return false;
-                
+
                 continue;
             }
-            
+
             if (char.ToLowerInvariant(span[i]) != char.ToLowerInvariant(str[i]))
                 return false;
         }
         return true;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static uint GetOrAddEntry(ReadOnlySpan<char> value, bool caseSensitive = false)
     {
-        if (IsNoneSpan(value)) return 0;
-        
+        if (IsNoneSpan(value))
+            return 0;
+
         var hash = ComputeHash(value, caseSensitive);
         var bucketIndex = hash & BucketMask; // Fast modulo for power of 2
         var bucket = HashBuckets[bucketIndex];
-        
+
         // Search existing entries in this bucket
         foreach (var entry in bucket)
         {
@@ -253,26 +260,26 @@ internal static class NameTable
                 return entry.Id;
             }
         }
-        
+
         // Not found, need to add new entry
         // Only now do we allocate a string
         var stringValue = value.ToString();
         var newId = Interlocked.Increment(ref _nextId);
         var newEntry = new NameHashEntry(newId, hash, stringValue);
-        
+
         // Add to both bucket and reverse lookup
         bucket.Add(newEntry);
         IDToString.TryAdd(newId, stringValue);
-        
+
         return newId;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string GetString(uint id)
     {
         return IDToString.GetValueOrDefault(id, "None");
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Equals(uint id, ReadOnlySpan<char> span)
     {
@@ -280,18 +287,21 @@ internal static class NameTable
         {
             return IsNoneSpan(span);
         }
-        
+
         return IDToString.TryGetValue(id, out var value) && SpanEqualsString(span, value);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsNoneSpan(ReadOnlySpan<char> span)
     {
-        return span.IsEmpty || (span.Length == 4 && 
-               (span[0] == 'N' || span[0] == 'n') &&
-               (span[1] == 'o' || span[1] == 'O') &&
-               (span[2] == 'n' || span[2] == 'N') &&
-               (span[3] == 'e' || span[3] == 'E'));
+        return span.IsEmpty
+            || (
+                span.Length == 4
+                && (span[0] == 'N' || span[0] == 'n')
+                && (span[1] == 'o' || span[1] == 'O')
+                && (span[2] == 'n' || span[2] == 'N')
+                && (span[3] == 'e' || span[3] == 'E')
+            );
     }
 }
 #endif

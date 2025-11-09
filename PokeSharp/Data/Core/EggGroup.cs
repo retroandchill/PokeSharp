@@ -61,11 +61,7 @@ public readonly partial record struct EggGroup
         );
 
         Register(
-            new EggGroup
-            {
-                Id = "Bug",
-                Name = Text.Localized(LocalizationNamespace, "Bug", "Bug"),
-            }
+            new EggGroup { Id = "Bug", Name = Text.Localized(LocalizationNamespace, "Bug", "Bug") }
         );
 
         Register(
@@ -154,7 +150,7 @@ public readonly partial record struct EggGroup
             {
                 Id = "Dragon",
                 Name = Text.Localized(LocalizationNamespace, "Dragon", "Dragon"),
-                BreedingType = EggGroupType.WithNoEggGroups
+                BreedingType = EggGroupType.WithNoEggGroups,
             }
         );
     }

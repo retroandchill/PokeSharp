@@ -9,10 +9,13 @@ public static class CsvWriter
 {
     public static async Task WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
     {
-        var recordSet = record is IEnumerable asEnumerable and not string ? asEnumerable.Flatten().ToImmutableArray() : [record];
-        
-        if (recordSet.IsEmpty) return;
-        
+        var recordSet = record is IEnumerable asEnumerable and not string
+            ? asEnumerable.Flatten().ToImmutableArray()
+            : [record];
+
+        if (recordSet.IsEmpty)
+            return;
+
         var index = -1;
         var noMoreValues = false;
         while (true)
@@ -26,8 +29,9 @@ public static class CsvWriter
                     var laterValueFound = false;
                     for (var j = index; j < recordSet.Length; j++)
                     {
-                        if (recordSet[j] is null) continue;
-                        
+                        if (recordSet[j] is null)
+                            continue;
+
                         laterValueFound = true;
                         break;
                     }
@@ -39,8 +43,10 @@ public static class CsvWriter
                     }
                 }
 
-                if (index > 0) await writer.WriteAsync(',');
-                if (value is null) continue;
+                if (index > 0)
+                    await writer.WriteAsync(',');
+                if (value is null)
+                    continue;
 
                 // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (typeData.Type)
@@ -56,8 +62,9 @@ public static class CsvWriter
                         break;
                 }
             }
-            
-            if ((!noMoreValues && index >= recordSet.Length - 1) || noMoreValues) break;
+
+            if ((!noMoreValues && index >= recordSet.Length - 1) || noMoreValues)
+                break;
         }
     }
 
@@ -66,19 +73,29 @@ public static class CsvWriter
         // TODO: This needs some more logic, but for now we're just going to write the value.
         await writer.WriteAsync(record?.ToString() ?? "");
     }
-    
-    private static async Task WriteEnumOrIntegerRecord(object? record, StreamWriter writer, Type? enumType)
+
+    private static async Task WriteEnumOrIntegerRecord(
+        object? record,
+        StreamWriter writer,
+        Type? enumType
+    )
     {
         // TODO: This needs some more logic, but for now we're just going to write the value.
         await writer.WriteAsync(record?.ToString() ?? "");
     }
 
-    private static async Task WriteOtherRecordType(object? record, StreamWriter writer, PbsFieldType schema)
+    private static async Task WriteOtherRecordType(
+        object? record,
+        StreamWriter writer,
+        PbsFieldType schema
+    )
     {
         switch (record)
         {
             case string str:
-                await writer.WriteAsync((schema == PbsFieldType.UnformattedText) ? str : TextFormatter.CsvQuote(str));
+                await writer.WriteAsync(
+                    (schema == PbsFieldType.UnformattedText) ? str : TextFormatter.CsvQuote(str)
+                );
                 break;
             case Name name:
                 await writer.WriteAsync(name.ToString());

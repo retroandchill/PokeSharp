@@ -24,22 +24,24 @@ public enum StatType : byte
 [GameDataEntity]
 public partial record Stat
 {
-
     public required Name Id { get; init; }
 
     public required Text Name { get; init; }
-    
+
     public required Text NameBrief { get; init; }
-    
+
     public StatType StatType { get; init; }
-    
+
     public int PbsOrder { get; init; }
 
-    public static IEnumerable<Stat> AllMain => Stat.Entities.Where(x => x.StatType is StatType.Main or StatType.MainBattle);
-    
-    public static IEnumerable<Stat> AllMainBattle => Stat.Entities.Where(x => x.StatType == StatType.MainBattle);
-    
-    public static IEnumerable<Stat> AllBattle => Stat.Entities.Where(x => x.StatType is StatType.Battle or StatType.MainBattle);
+    public static IEnumerable<Stat> AllMain =>
+        Stat.Entities.Where(x => x.StatType is StatType.Main or StatType.MainBattle);
+
+    public static IEnumerable<Stat> AllMainBattle =>
+        Stat.Entities.Where(x => x.StatType == StatType.MainBattle);
+
+    public static IEnumerable<Stat> AllBattle =>
+        Stat.Entities.Where(x => x.StatType is StatType.Battle or StatType.MainBattle);
 
     #region Defaults
 
@@ -47,7 +49,6 @@ public partial record Stat
 
     public static void AddDefaultValues()
     {
-
         Register(
             new Stat
             {
@@ -83,7 +84,7 @@ public partial record Stat
 
         Register(
             new Stat
-            {                
+            {
                 Id = "SPECIAL_ATTACK",
                 Name = Text.Localized(LocalizationNamespace, "SpecialAttack", "SpecialAttack"),
                 NameBrief = Text.Localized(LocalizationNamespace, "SpAtk", "SpAtk"),
@@ -94,7 +95,7 @@ public partial record Stat
 
         Register(
             new Stat
-            {                
+            {
                 Id = "SPECIAL_DEFENSE",
                 Name = Text.Localized(LocalizationNamespace, "SpecialDefense", "SpecialDefense"),
                 NameBrief = Text.Localized(LocalizationNamespace, "SpDef", "SpDef"),
@@ -105,7 +106,7 @@ public partial record Stat
 
         Register(
             new Stat
-            {                
+            {
                 Id = "SPEED",
                 Name = Text.Localized(LocalizationNamespace, "Speed", "Speed"),
                 NameBrief = Text.Localized(LocalizationNamespace, "Spd", "Spd"),
@@ -116,7 +117,7 @@ public partial record Stat
 
         Register(
             new Stat
-            {               
+            {
                 Id = "ACCURACY",
                 Name = Text.Localized(LocalizationNamespace, "accuracy", "accuracy"),
                 NameBrief = Text.Localized(LocalizationNamespace, "Acc", "Acc"),
@@ -126,14 +127,13 @@ public partial record Stat
 
         Register(
             new Stat
-            {                
+            {
                 Id = "EVASION",
                 Name = Text.Localized(LocalizationNamespace, "evasiveness", "evasiveness"),
                 NameBrief = Text.Localized(LocalizationNamespace, "Eva", "Eva"),
                 StatType = StatType.Battle,
             }
         );
-
     }
     #endregion
 }

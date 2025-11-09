@@ -6,7 +6,8 @@ namespace PokeSharp.Compiler.Core.Serialization.Converters;
 
 public class NumericTypeConverter : IPbsConverter
 {
-    private static readonly ImmutableArray<Type> NumericTypes = [
+    private static readonly ImmutableArray<Type> NumericTypes =
+    [
         typeof(int),
         typeof(short),
         typeof(long),
@@ -17,19 +18,22 @@ public class NumericTypeConverter : IPbsConverter
         typeof(byte),
         typeof(float),
         typeof(double),
-        typeof(decimal)
+        typeof(decimal),
     ];
-    
+
     public bool CanConvert(string sectionName, PropertyInfo property, object? value)
     {
-        if (value is null) return false;
+        if (value is null)
+            return false;
 
-        return NumericTypes.Any(t => t.IsInstanceOfType(value)) && NumericTypes.Any(t => t.IsAssignableTo(property.PropertyType));
+        return NumericTypes.Any(t => t.IsInstanceOfType(value))
+            && NumericTypes.Any(t => t.IsAssignableTo(property.PropertyType));
     }
 
     public object? Convert(string sectionName, PropertyInfo property, object? value)
     {
-        if (value is null) return null;
+        if (value is null)
+            return null;
 
         var sourceType = value.GetType();
         var targetType = property.PropertyType;
@@ -40,7 +44,9 @@ public class NumericTypeConverter : IPbsConverter
 
         // Check if both types are numeric
         if (!NumericTypes.Contains(sourceType) || !NumericTypes.Contains(targetType))
-            throw new InvalidOperationException($"Cannot convert from {sourceType.Name} to {targetType.Name}");
+            throw new InvalidOperationException(
+                $"Cannot convert from {sourceType.Name} to {targetType.Name}"
+            );
 
         try
         {
@@ -51,8 +57,9 @@ public class NumericTypeConverter : IPbsConverter
             if (!IsConversionLossless(value, convertedValue, sourceType))
             {
                 throw new InvalidOperationException(
-                    $"Conversion from {sourceType.Name} to {targetType.Name} would result in data loss. " +
-                    $"Original value: {value}, Converted value: {convertedValue}");
+                    $"Conversion from {sourceType.Name} to {targetType.Name} would result in data loss. "
+                        + $"Original value: {value}, Converted value: {convertedValue}"
+                );
             }
 
             return convertedValue;
@@ -60,24 +67,33 @@ public class NumericTypeConverter : IPbsConverter
         catch (OverflowException)
         {
             throw new InvalidOperationException(
-                $"Conversion from {sourceType.Name} to {targetType.Name} would cause overflow. " +
-                $"Value {value} is outside the range of {targetType.Name}");
+                $"Conversion from {sourceType.Name} to {targetType.Name} would cause overflow. "
+                    + $"Value {value} is outside the range of {targetType.Name}"
+            );
         }
     }
-    
-    private static bool IsConversionLossless(object originalValue, object convertedValue, Type originalType)
+
+    private static bool IsConversionLossless(
+        object originalValue,
+        object convertedValue,
+        Type originalType
+    )
     {
         try
         {
             // Convert the converted value back to the original type
             var backConverted = System.Convert.ChangeType(convertedValue, originalType);
-            
+
             // For floating point types, we need special handling due to precision
-            if (originalType == typeof(float) || originalType == typeof(double) || originalType == typeof(decimal))
+            if (
+                originalType == typeof(float)
+                || originalType == typeof(double)
+                || originalType == typeof(decimal)
+            )
             {
                 return IsFloatingPointEqual(originalValue, backConverted);
             }
-            
+
             // For integer types, exact equality should work
             return originalValue.Equals(backConverted);
         }
@@ -93,12 +109,14 @@ public class NumericTypeConverter : IPbsConverter
         // Handle different floating point type comparisons
         var d1 = System.Convert.ToDouble(value1);
         var d2 = System.Convert.ToDouble(value2);
-        
+
         // Use a small epsilon for floating point comparison
         // or check for exact equality for special values (infinity, NaN)
-        if (double.IsNaN(d1) && double.IsNaN(d2)) return true;
-        if (double.IsInfinity(d1) && double.IsInfinity(d2)) return d1.Equals(d2);
-        
+        if (double.IsNaN(d1) && double.IsNaN(d2))
+            return true;
+        if (double.IsInfinity(d1) && double.IsInfinity(d2))
+            return d1.Equals(d2);
+
         // For finite numbers, check if they're exactly equal
         // This works well for most integer-to-float conversions
         return d1.Equals(d2);

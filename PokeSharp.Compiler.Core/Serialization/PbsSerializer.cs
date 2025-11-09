@@ -79,9 +79,14 @@ public readonly struct ParsedData
 public readonly record struct PbsParseResult(
     Dictionary<string, ParsedData> LastSection,
     string SectionName,
-    FileLineData LineData);
+    FileLineData LineData
+);
 
-public readonly record struct Section<T>(Dictionary<string, ParsedData> Data, T Id, FileLineData LineData);
+public readonly record struct Section<T>(
+    Dictionary<string, ParsedData> Data,
+    T Id,
+    FileLineData LineData
+);
 
 public readonly record struct LineWithNumber(string Line, int LineNumber);
 
@@ -92,18 +97,14 @@ public partial class PbsSerializer
     private readonly SchemaBuilder _schemaBuilder = new();
 
     public List<IPbsConverter> Converters { get; } =
-    [
-        new LocalizingTextConverter(),
-        new NumericTypeConverter(),
-        new CollectionConverter()
-    ];
+    [new LocalizingTextConverter(), new NumericTypeConverter(), new CollectionConverter()];
 
-    public async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(StreamReader fileReader,
-                                                                      FileLineData lineData,
-                                                                      IReadOnlyDictionary<string, SchemaEntry>? schema =
-                                                                          null,
-                                                                      [EnumeratorCancellation]
-                                                                      CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(
+        StreamReader fileReader,
+        FileLineData lineData,
+        IReadOnlyDictionary<string, SchemaEntry>? schema = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         var lineNumber = 1;
         string? sectionName = null;
@@ -121,8 +122,11 @@ public partial class PbsSerializer
                 {
                     if (sectionName is not null)
                     {
-                        yield return new PbsParseResult(lastSection, sectionName,
-                            lineData.WithLine(sectionHeaderLine ?? "", sectionHeaderLineNumber));
+                        yield return new PbsParseResult(
+                            lastSection,
+                            sectionName,
+                            lineData.WithLine(sectionHeaderLine ?? "", sectionHeaderLineNumber)
+                        );
                     }
 
                     sectionHeaderLine = line;
@@ -136,7 +140,8 @@ public partial class PbsSerializer
                     {
                         lineData = lineData.WithLine(line, lineNumber);
                         throw new PbsFormatException(
-                            $"Expected a section at the beginning of the file.\\nThis error may also occur if the file was not saved in UTF-8.\n{lineData.LineReport}");
+                            $"Expected a section at the beginning of the file.\\nThis error may also occur if the file was not saved in UTF-8.\n{lineData.LineReport}"
+                        );
                     }
 
                     match = KeyValuePair.Match(line);
@@ -144,18 +149,24 @@ public partial class PbsSerializer
                     {
                         lineData = lineData.WithSection(sectionName, null, line);
                         throw new PbsFormatException(
-                            $"Bad line syntax (expected syntax like XXX=YYY).\n{lineData.LineReport}");
+                            $"Bad line syntax (expected syntax like XXX=YYY).\n{lineData.LineReport}"
+                        );
                     }
 
                     var key = match.Groups[1].Value;
                     var value = match.Groups[2].Value;
                     lineData = lineData.WithSection(sectionName, key, line);
 
-                    if (schema is not null && schema.TryGetValue(key, out var entry) &&
-                        entry.FieldStructure == PbsFieldStructure.Repeating)
+                    if (
+                        schema is not null
+                        && schema.TryGetValue(key, out var entry)
+                        && entry.FieldStructure == PbsFieldStructure.Repeating
+                    )
                     {
-                        if (!lastSection.TryGetValue(key, out var existingValue) ||
-                            !existingValue.TryGetList(out var list))
+                        if (
+                            !lastSection.TryGetValue(key, out var existingValue)
+                            || !existingValue.TryGetList(out var list)
+                        )
                         {
                             list = [];
                             lastSection[key] = new ParsedData(list, lineData);
@@ -173,26 +184,40 @@ public partial class PbsSerializer
             lineNumber++;
         }
 
-        if (sectionName is null) yield break;
+        if (sectionName is null)
+            yield break;
 
-        yield return new PbsParseResult(lastSection, sectionName,
-            lineData.WithLine(sectionHeaderLine ?? "", sectionHeaderLineNumber));
+        yield return new PbsParseResult(
+            lastSection,
+            sectionName,
+            lineData.WithLine(sectionHeaderLine ?? "", sectionHeaderLineNumber)
+        );
     }
 
     private async IAsyncEnumerable<Section<string>> ParseFileSections(
-        StreamReader fileReader, FileLineData lineData, IReadOnlyDictionary<string, SchemaEntry>? schema = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        StreamReader fileReader,
+        FileLineData lineData,
+        IReadOnlyDictionary<string, SchemaEntry>? schema = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
-        await foreach (var (section, name, currentLine) in ParseFileSectionsEx(fileReader, lineData, schema,
-                           cancellationToken))
+        await foreach (
+            var (section, name, currentLine) in ParseFileSectionsEx(
+                fileReader,
+                lineData,
+                schema,
+                cancellationToken
+            )
+        )
         {
             yield return new Section<string>(section, name, currentLine);
         }
     }
 
-    public async IAsyncEnumerable<LineWithNumber> ParseFileLines(string filename,
-                                                                 [EnumeratorCancellation]
-                                                                 CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<LineWithNumber> ParseFileLines(
+        string filename,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         using var fileReader = new StreamReader(filename);
         var lineNumber = 1;
@@ -207,9 +232,10 @@ public partial class PbsSerializer
         }
     }
 
-    public async IAsyncEnumerable<LineWithNumber> ParsePreppedLines(string filename,
-                                                                    [EnumeratorCancellation]
-                                                                    CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<LineWithNumber> ParsePreppedLines(
+        string filename,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         using var fileReader = new StreamReader(filename);
 
@@ -232,21 +258,29 @@ public partial class PbsSerializer
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
     private static partial Regex KeyValuePair { get; }
 
-    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(string path,
-                                                                    [EnumeratorCancellation] CancellationToken cancellationToken =
-                                                                        default)
+    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(
+        string path,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
 
-        if (attribute.IsOptional && !File.Exists(path)) yield break;
+        if (attribute.IsOptional && !File.Exists(path))
+            yield break;
 
         var schema = _schemaBuilder.BuildSchema(typeof(T));
         using var fileStream = new StreamReader(path);
 
         var initialLineData = new FileLineData(path);
 
-        await foreach (var (contents, sectionName, lineData) in ParseFileSections(fileStream, initialLineData, schema,
-                           cancellationToken))
+        await foreach (
+            var (contents, sectionName, lineData) in ParseFileSections(
+                fileStream,
+                initialLineData,
+                schema,
+                cancellationToken
+            )
+        )
         {
             var result = Activator.CreateInstance<T>();
             var mappedProperties = new HashSet<string>();
@@ -255,28 +289,51 @@ public partial class PbsSerializer
                 var property = typeof(T).GetProperty(schemaEntry.PropertyName);
                 if (property is null)
                     throw new InvalidOperationException(
-                        $"Property '{schemaEntry.PropertyName}' not found on type '{typeof(T).Name}'.");
+                        $"Property '{schemaEntry.PropertyName}' not found on type '{typeof(T).Name}'."
+                    );
 
                 if (key == "SectionName")
                 {
-                    SetValueToProperty("SectionName", lineData, result, property,
-                        CsvParser.GetCsvRecord(sectionName, schemaEntry, lineData));
+                    SetValueToProperty(
+                        "SectionName",
+                        lineData,
+                        result,
+                        property,
+                        CsvParser.GetCsvRecord(sectionName, schemaEntry, lineData)
+                    );
                     mappedProperties.Add(schemaEntry.PropertyName);
                     continue;
                 }
 
-                if (!contents.TryGetValue(key, out var value)) continue;
+                if (!contents.TryGetValue(key, out var value))
+                    continue;
 
                 value.Match(
-                    stringValue => SetValueToProperty(sectionName, value.LineData, result, property, 
-                        CsvParser.GetCsvRecord(stringValue, schemaEntry, value.LineData)),
+                    stringValue =>
+                        SetValueToProperty(
+                            sectionName,
+                            value.LineData,
+                            result,
+                            property,
+                            CsvParser.GetCsvRecord(stringValue, schemaEntry, value.LineData)
+                        ),
                     list =>
                     {
-                        var propertyOutput = list.Select(item => CsvParser.GetCsvRecord(item, schemaEntry, value.LineData))
+                        var propertyOutput = list.Select(item =>
+                                CsvParser.GetCsvRecord(item, schemaEntry, value.LineData)
+                            )
                             .ToList();
-                        SetValueToProperty(sectionName, value.LineData, result, property, propertyOutput);
+                        SetValueToProperty(
+                            sectionName,
+                            value.LineData,
+                            result,
+                            property,
+                            propertyOutput
+                        );
                     },
-                    () => throw new InvalidOperationException($"Property '{property.Name}' is null."));
+                    () =>
+                        throw new InvalidOperationException($"Property '{property.Name}' is null.")
+                );
 
                 mappedProperties.Add(schemaEntry.PropertyName);
             }
@@ -284,8 +341,10 @@ public partial class PbsSerializer
             var missingProperties = new List<string>();
             foreach (var property in typeof(T).GetProperties())
             {
-                if (property.GetCustomAttribute<RequiredMemberAttribute>() is not null &&
-                    !mappedProperties.Contains(property.Name))
+                if (
+                    property.GetCustomAttribute<RequiredMemberAttribute>() is not null
+                    && !mappedProperties.Contains(property.Name)
+                )
                 {
                     missingProperties.Add(property.Name);
                 }
@@ -294,16 +353,24 @@ public partial class PbsSerializer
             if (missingProperties.Count > 0)
             {
                 throw new PbsSchemaException(
-                    $"The following properties are required but were not found in the file: {string.Join(", ", missingProperties)}\n{lineData.LineReport}");
+                    $"The following properties are required but were not found in the file: {string.Join(", ", missingProperties)}\n{lineData.LineReport}"
+                );
             }
 
             yield return new ModelWithLine<T>(result, lineData);
         }
     }
 
-    private void SetValueToProperty(string sectionName, FileLineData lineData, object? target, PropertyInfo property, object? value)
+    private void SetValueToProperty(
+        string sectionName,
+        FileLineData lineData,
+        object? target,
+        PropertyInfo property,
+        object? value
+    )
     {
-        if (value is null) return;
+        if (value is null)
+            return;
 
         if (property.PropertyType.IsInstanceOfType(value))
         {
@@ -314,7 +381,8 @@ public partial class PbsSerializer
         var converter = Converters.FirstOrDefault(c => c.CanConvert(sectionName, property, value));
         if (converter is null)
             throw new PbsParseException(
-                $"Could not find a converter for the property {property.Name}.\n{lineData.LineReport}");
+                $"Could not find a converter for the property {property.Name}.\n{lineData.LineReport}"
+            );
 
         var convertedValue = converter.Convert(sectionName, property, value);
         property.SetValue(target, convertedValue);
@@ -322,17 +390,24 @@ public partial class PbsSerializer
 
     public static async Task AddPbsHeaderToFile(StreamWriter fileWriter)
     {
-        await fileWriter.WriteLineAsync("# See the documentation on the wiki to learn how to edit this file.");
+        await fileWriter.WriteLineAsync(
+            "# See the documentation on the wiki to learn how to edit this file."
+        );
     }
 
-    public async Task WritePbsFile<T>(string path, IEnumerable<T> entities, Func<T, string, object?> propertyGetter)
+    public async Task WritePbsFile<T>(
+        string path,
+        IEnumerable<T> entities,
+        Func<T, string, object?> propertyGetter
+    )
     {
         var schema = _schemaBuilder.BuildSchema(typeof(T));
 
         if (!schema.TryGetValue("SectionName", out var sectionName))
         {
             throw new PbsSchemaException(
-                $"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field.");
+                $"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field."
+            );
         }
 
         await using var fileWriter = new StreamWriter(path, false, Encoding.UTF8);
@@ -341,16 +416,23 @@ public partial class PbsSerializer
         foreach (var entity in entities)
         {
             await fileWriter.WriteLineAsync("#-------------------------------");
-            await fileWriter.WriteLineAsync($"[{propertyGetter(entity, sectionName.PropertyName)}]");
+            await fileWriter.WriteLineAsync(
+                $"[{propertyGetter(entity, sectionName.PropertyName)}]"
+            );
 
             foreach (var (key, value) in schema)
             {
-                if (key == "SectionName") continue;
+                if (key == "SectionName")
+                    continue;
 
                 var elementValue = propertyGetter(entity, value.PropertyName);
-                if (elementValue is null) continue;
+                if (elementValue is null)
+                    continue;
 
-                if (value.FieldStructure == PbsFieldStructure.Repeating && elementValue is IEnumerable list)
+                if (
+                    value.FieldStructure == PbsFieldStructure.Repeating
+                    && elementValue is IEnumerable list
+                )
                 {
                     foreach (var item in list)
                     {

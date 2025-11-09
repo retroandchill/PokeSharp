@@ -6,11 +6,10 @@ public static partial class TextFormatter
 {
     [GeneratedRegex(@"\s*\#.*$")]
     private static partial Regex CommentRegex { get; }
-    
-    
+
     [GeneratedRegex(@"[,\""]")]
     private static partial Regex CommaOrQuoteCharacter { get; }
-    
+
     public static int? FindIndex<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
     {
         int? index = null;
@@ -25,7 +24,7 @@ public static partial class TextFormatter
 
             count++;
         }
-        
+
         return index;
     }
 
@@ -33,17 +32,18 @@ public static partial class TextFormatter
     {
         var removeComments = CommentRegex.Replace(line, "");
         return removeComments.Trim();
-        
     }
 
     public static string CsvQuote(string? str, bool always = false)
     {
-        if (string.IsNullOrEmpty(str)) return string.Empty;
+        if (string.IsNullOrEmpty(str))
+            return string.Empty;
 
-        if (!always && !CommaOrQuoteCharacter.IsMatch(str)) return str;
+        if (!always && !CommaOrQuoteCharacter.IsMatch(str))
+            return str;
 
         return $"\"{str.Replace("\"", "\\\"")}\"";
     }
-    
+
     public static string CsvQuoteAlways(string? str) => CsvQuote(str, true);
 }

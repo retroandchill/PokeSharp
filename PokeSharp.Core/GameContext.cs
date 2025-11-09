@@ -21,25 +21,29 @@ public sealed class GameContext([ReadOnly] IServiceProvider services, Name conte
         }
     }
 
-    public T GetService<T>() where T : class
+    public T GetService<T>()
+        where T : class
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         return services.GetRequiredService<T>();
     }
 
-    public bool TryGetService<T>([NotNullWhen(true)] out T? service) where T : class
+    public bool TryGetService<T>([NotNullWhen(true)] out T? service)
+        where T : class
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         service = services.GetService<T>();
         return service is not null;
     }
-    
+
     public void Dispose()
     {
-        if (_disposed) return;
-        
-        if (services is IDisposable disposable) disposable.Dispose();
-        
+        if (_disposed)
+            return;
+
+        if (services is IDisposable disposable)
+            disposable.Dispose();
+
         _disposed = true;
     }
 }

@@ -8,9 +8,8 @@ namespace PokeSharp.Data.Core;
 [GameDataEntity]
 public readonly partial record struct BodyColor
 {
-
     public required Name Id { get; init; }
-    
+
     public required Text Name { get; init; }
 
     #region Defaults
@@ -19,13 +18,8 @@ public readonly partial record struct BodyColor
 
     public static void AddDefaultValues()
     {
-
         Register(
-            new BodyColor
-            {
-                Id = "Red",
-                Name = Text.Localized(LocalizationNamespace, "Red", "Red"),
-            }
+            new BodyColor { Id = "Red", Name = Text.Localized(LocalizationNamespace, "Red", "Red") }
         );
 
         Register(
@@ -99,7 +93,6 @@ public readonly partial record struct BodyColor
                 Name = Text.Localized(LocalizationNamespace, "Pink", "Pink"),
             }
         );
-
     }
     #endregion
 }

@@ -6,11 +6,10 @@ namespace PokeSharp.Data.Core;
 [GameDataEntity]
 public partial record Environment
 {
-
     public required Name Id { get; init; }
 
     public required Text Name { get; init; }
-    
+
     public Name BattleBase { get; init; }
 
     #region Defaults
@@ -24,7 +23,7 @@ public partial record Environment
             {
                 Id = "Grass",
                 Name = Text.Localized(LocalizationNamespace, "Grass", "Grass"),
-                BattleBase = "grass"
+                BattleBase = "grass",
             }
         );
 
@@ -33,7 +32,7 @@ public partial record Environment
             {
                 Id = "TallGrass",
                 Name = Text.Localized(LocalizationNamespace, "TallGrass", "Tall grass"),
-                BattleBase = "grass"
+                BattleBase = "grass",
             }
         );
 
@@ -42,7 +41,7 @@ public partial record Environment
             {
                 Id = "MovingWater",
                 Name = Text.Localized(LocalizationNamespace, "MovingWater", "Moving water"),
-                BattleBase = "water"
+                BattleBase = "water",
             }
         );
 
@@ -51,7 +50,7 @@ public partial record Environment
             {
                 Id = "StillWater",
                 Name = Text.Localized(LocalizationNamespace, "StillWater", "Still water"),
-                BattleBase = "water"
+                BattleBase = "water",
             }
         );
 
@@ -60,7 +59,7 @@ public partial record Environment
             {
                 Id = "Puddle",
                 Name = Text.Localized(LocalizationNamespace, "Puddle", "Puddle"),
-                BattleBase = "puddle"
+                BattleBase = "puddle",
             }
         );
 
@@ -68,7 +67,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Underwater",
-                Name = Text.Localized(LocalizationNamespace, "Underwater", "Underwater")
+                Name = Text.Localized(LocalizationNamespace, "Underwater", "Underwater"),
             }
         );
 
@@ -76,7 +75,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Cave",
-                Name = Text.Localized(LocalizationNamespace, "Cave", "Cave")
+                Name = Text.Localized(LocalizationNamespace, "Cave", "Cave"),
             }
         );
 
@@ -84,7 +83,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Rock",
-                Name = Text.Localized(LocalizationNamespace, "Rock", "Rock")
+                Name = Text.Localized(LocalizationNamespace, "Rock", "Rock"),
             }
         );
 
@@ -101,7 +100,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Forest",
-                Name = Text.Localized(LocalizationNamespace, "Forest", "Forest")
+                Name = Text.Localized(LocalizationNamespace, "Forest", "Forest"),
             }
         );
 
@@ -118,7 +117,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Snow",
-                Name = Text.Localized(LocalizationNamespace, "Snow", "Snow")
+                Name = Text.Localized(LocalizationNamespace, "Snow", "Snow"),
             }
         );
 
@@ -135,7 +134,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Volcano",
-                Name = Text.Localized(LocalizationNamespace, "Volcano", "Volcano")
+                Name = Text.Localized(LocalizationNamespace, "Volcano", "Volcano"),
             }
         );
 
@@ -143,7 +142,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Graveyard",
-                Name = Text.Localized(LocalizationNamespace, "Graveyard", "Graveyard")
+                Name = Text.Localized(LocalizationNamespace, "Graveyard", "Graveyard"),
             }
         );
 
@@ -151,7 +150,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Sky",
-                Name = Text.Localized(LocalizationNamespace, "Sky", "Sky")
+                Name = Text.Localized(LocalizationNamespace, "Sky", "Sky"),
             }
         );
 
@@ -159,7 +158,7 @@ public partial record Environment
             new Environment
             {
                 Id = "Space",
-                Name = Text.Localized(LocalizationNamespace, "Space", "Space")
+                Name = Text.Localized(LocalizationNamespace, "Space", "Space"),
             }
         );
 
@@ -167,10 +166,9 @@ public partial record Environment
             new Environment
             {
                 Id = "UltraSpace",
-                Name = Text.Localized(LocalizationNamespace, "UltraSpace", "Ultra Space")
+                Name = Text.Localized(LocalizationNamespace, "UltraSpace", "Ultra Space"),
             }
         );
-
     }
     #endregion
 }

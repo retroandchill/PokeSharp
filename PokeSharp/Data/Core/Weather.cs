@@ -6,11 +6,10 @@ namespace PokeSharp.Data.Core;
 [GameDataEntity]
 public partial record Weather
 {
-
     public required Name Id { get; init; }
 
     public required Text Name { get; init; }
-    
+
     public required Name Category { get; init; }
 
     #region Defaults
@@ -90,7 +89,6 @@ public partial record Weather
                 Category = BattleWeather.Fog,
             }
         );
-
     }
     #endregion
 }

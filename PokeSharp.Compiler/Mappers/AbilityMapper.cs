@@ -8,6 +8,6 @@ namespace PokeSharp.Compiler.Mappers;
 public static partial class AbilityMapper
 {
     public static partial Ability ToGameData(this AbilityInfo dto);
-    
+
     public static partial AbilityInfo ToDto(this Ability entity);
 }

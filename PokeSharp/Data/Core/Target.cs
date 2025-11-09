@@ -13,19 +13,18 @@ public enum TargetCount : byte
 [GameDataEntity]
 public partial record Target
 {
-
     public required Name Id { get; init; }
 
     public required Text Name { get; init; }
-    
+
     public TargetCount NumTargets { get; init; }
-    
+
     public bool TargetsFoe { get; init; }
-    
+
     public bool TargetsAll { get; init; }
-    
+
     public bool AffectsFoeSide { get; init; }
-    
+
     public bool LongRange { get; init; }
 
     #region Defaults
@@ -35,11 +34,7 @@ public partial record Target
     public static void AddDefaultValues()
     {
         Register(
-            new Target
-            {
-                Id = "User",
-                Name = Text.Localized(LocalizationNamespace, "User", "User")
-            }
+            new Target { Id = "User", Name = Text.Localized(LocalizationNamespace, "User", "User") }
         );
 
         Register(
@@ -47,7 +42,7 @@ public partial record Target
             {
                 Id = "NearAlly",
                 Name = Text.Localized(LocalizationNamespace, "NearAlly", "Near Ally"),
-                NumTargets = TargetCount.SingleTarget
+                NumTargets = TargetCount.SingleTarget,
             }
         );
 
@@ -56,7 +51,7 @@ public partial record Target
             {
                 Id = "UserOrNearAlly",
                 Name = Text.Localized(LocalizationNamespace, "UserOrNearAlly", "User or Near Ally"),
-                NumTargets = TargetCount.SingleTarget
+                NumTargets = TargetCount.SingleTarget,
             }
         );
 
@@ -87,7 +82,7 @@ public partial record Target
                 Id = "NearFoe",
                 Name = Text.Localized(LocalizationNamespace, "NearFoe", "Near Foe"),
                 NumTargets = TargetCount.SingleTarget,
-                TargetsFoe = true
+                TargetsFoe = true,
             }
         );
 
@@ -97,7 +92,7 @@ public partial record Target
                 Id = "RandomNearFoe",
                 Name = Text.Localized(LocalizationNamespace, "RandomNearFoe", "Random Near Foe"),
                 NumTargets = TargetCount.SingleTarget,
-                TargetsFoe = true
+                TargetsFoe = true,
             }
         );
 
@@ -107,7 +102,7 @@ public partial record Target
                 Id = "AllNearFoes",
                 Name = Text.Localized(LocalizationNamespace, "AllNearFoes", "All Near Foes"),
                 NumTargets = TargetCount.MultipleTargets,
-                TargetsFoe = true
+                TargetsFoe = true,
             }
         );
 
@@ -139,7 +134,7 @@ public partial record Target
                 Id = "NearOther",
                 Name = Text.Localized(LocalizationNamespace, "NearOther", "Near Other"),
                 NumTargets = TargetCount.SingleTarget,
-                TargetsFoe = true
+                TargetsFoe = true,
             }
         );
 
@@ -149,7 +144,7 @@ public partial record Target
                 Id = "AllNearOthers",
                 Name = Text.Localized(LocalizationNamespace, "AllNearOthers", "All Near Others"),
                 NumTargets = TargetCount.MultipleTargets,
-                TargetsFoe = true
+                TargetsFoe = true,
             }
         );
 
@@ -180,7 +175,7 @@ public partial record Target
             new Target
             {
                 Id = "UserSide",
-                Name = Text.Localized(LocalizationNamespace, "UserSide", "User Side")
+                Name = Text.Localized(LocalizationNamespace, "UserSide", "User Side"),
             }
         );
 
@@ -189,7 +184,7 @@ public partial record Target
             {
                 Id = "FoeSide",
                 Name = Text.Localized(LocalizationNamespace, "FoeSide", "Foe Side"),
-                AffectsFoeSide = true
+                AffectsFoeSide = true,
             }
         );
 
@@ -198,10 +193,9 @@ public partial record Target
             {
                 Id = "BothSides",
                 Name = Text.Localized(LocalizationNamespace, "BothSides", "Both Sides"),
-                AffectsFoeSide = true
+                AffectsFoeSide = true,
             }
         );
-
     }
     #endregion
 }

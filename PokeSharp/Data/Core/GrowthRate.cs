@@ -30,7 +30,9 @@ public partial record GrowthRate
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(exp, 0);
         var max = MaxLevel;
-        return exp >= MaximumExp ? max : Enumerable.Range(1, max).Last(i => exp >= GetMinimumExpForLevel(i));
+        return exp >= MaximumExp
+            ? max
+            : Enumerable.Range(1, max).Last(i => exp >= GetMinimumExpForLevel(i));
     }
 
     #region Defaults

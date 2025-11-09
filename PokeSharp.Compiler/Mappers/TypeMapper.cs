@@ -8,6 +8,6 @@ namespace PokeSharp.Compiler.Mappers;
 public static partial class TypeMapper
 {
     public static partial PokemonType ToGameData(this PokemonTypeInfo dto);
-    
+
     public static partial PokemonTypeInfo ToDto(this PokemonType entity);
 }

@@ -10,11 +10,11 @@ public record AbilityInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
-    
+
     public Text Name { get; init; } = TextConstants.Unnamed;
-    
+
     [PbsType(PbsFieldType.UnformattedText)]
     public Text Description { get; init; } = TextConstants.ThreeQuestions;
-    
+
     public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
 }

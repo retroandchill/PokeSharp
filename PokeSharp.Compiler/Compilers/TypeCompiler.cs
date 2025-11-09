@@ -12,16 +12,20 @@ public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
     public override int Order => 3;
 
     protected override PokemonType ConvertToEntity(PokemonTypeInfo model) => model.ToGameData();
+
     protected override PokemonTypeInfo ConvertToModel(PokemonType entity) => entity.ToDto();
 
-    protected override PokemonTypeInfo ValidateCompiledModel(PokemonTypeInfo model, FileLineData fileLineData)
+    protected override PokemonTypeInfo ValidateCompiledModel(
+        PokemonTypeInfo model,
+        FileLineData fileLineData
+    )
     {
         // Remove duplicate weaknesses/resistances/immunities
         return model with
         {
-            Weaknesses = [..model.Weaknesses.Distinct()],
-            Resistances = [..model.Resistances.Distinct()],
-            Immunities = [..model.Immunities.Distinct()]
+            Weaknesses = [.. model.Weaknesses.Distinct()],
+            Resistances = [.. model.Resistances.Distinct()],
+            Immunities = [.. model.Immunities.Distinct()],
         };
     }
 
@@ -29,20 +33,29 @@ public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
     {
         var typeIds = entities.Select(x => x.Id).ToHashSet();
         var exceptions = new List<ValidationException>();
-        
+
         foreach (var type in entities)
         {
-            exceptions.AddRange(type.Weaknesses.Where(otherType => !typeIds.Contains(otherType))
-                .Select(otherType =>
-                    new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Weaknesses).")));
-            exceptions.AddRange(type.Resistances.Where(otherType => !typeIds.Contains(otherType))
-                .Select(otherType =>
-                    new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Resistances).")));
-            exceptions.AddRange(type.Immunities.Where(otherType => !typeIds.Contains(otherType))
-                .Select(otherType =>
-                    new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Immunities).")));
+            exceptions.AddRange(
+                type.Weaknesses.Where(otherType => !typeIds.Contains(otherType))
+                    .Select(otherType => new ValidationException(
+                        $"'{otherType}' is not a defined type (type {type.Id}, Weaknesses)."
+                    ))
+            );
+            exceptions.AddRange(
+                type.Resistances.Where(otherType => !typeIds.Contains(otherType))
+                    .Select(otherType => new ValidationException(
+                        $"'{otherType}' is not a defined type (type {type.Id}, Resistances)."
+                    ))
+            );
+            exceptions.AddRange(
+                type.Immunities.Where(otherType => !typeIds.Contains(otherType))
+                    .Select(otherType => new ValidationException(
+                        $"'{otherType}' is not a defined type (type {type.Id}, Immunities)."
+                    ))
+            );
         }
-        
+
         if (exceptions.Count > 0)
         {
             throw new AggregateException("One or more validation errors occurred:", exceptions);

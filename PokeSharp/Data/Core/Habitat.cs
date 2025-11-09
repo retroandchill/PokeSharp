@@ -6,7 +6,6 @@ namespace PokeSharp.Data.Core;
 [GameDataEntity]
 public readonly partial record struct Habitat
 {
-
     public required Name Id { get; init; }
 
     public required Text Name { get; init; }
@@ -42,11 +41,7 @@ public readonly partial record struct Habitat
         );
 
         Register(
-            new Habitat
-            {
-                Id = "Sea",
-                Name = Text.Localized(LocalizationNamespace, "Sea", "Sea"),
-            }
+            new Habitat { Id = "Sea", Name = Text.Localized(LocalizationNamespace, "Sea", "Sea") }
         );
 
         Register(
@@ -88,7 +83,6 @@ public readonly partial record struct Habitat
                 Name = Text.Localized(LocalizationNamespace, "Rare", "Rare"),
             }
         );
-
     }
     #endregion
 }

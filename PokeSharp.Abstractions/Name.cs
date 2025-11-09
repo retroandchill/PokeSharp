@@ -12,7 +12,8 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
 #if UNREAL_ENGINE
     private readonly FName _value;
 #else
-    private readonly uint _value;
+    private readonly uint _comparisonIndex;
+    private readonly uint _displayStringIndex;
 #endif
     
 #if UNREAL_ENGINE
@@ -27,8 +28,9 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
         #if UNREAL_ENGINE
         _value = new FName(name);
         #else
-        _value = NameTable.GetOrAddEntry(name);
-        #endif
+        _comparisonIndex = NameTable.GetOrAddEntry(name);
+        _displayStringIndex = NameTable.GetOrAddEntry(name, true);
+#endif
     }
 
     public Name(string name) : this(name.AsSpan())
@@ -74,7 +76,12 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
 
     public static bool operator ==(Name lhs, Name rhs)
     {
+#if UNREAL_ENGINE
         return lhs._value == rhs._value;
+#else
+        return lhs._comparisonIndex == rhs._comparisonIndex;
+#endif
+
     }
     
     public static bool operator !=(Name lhs, Name rhs)
@@ -88,7 +95,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
         // TODO: Add additional interop to UnrealSharp to make this comparison directly using StringViews
         return lhs._value == (rhs ?? string.Empty);
 #else
-        return NameTable.Equals(lhs._value, rhs);
+        return NameTable.Equals(lhs._comparisonIndex, rhs);
 #endif
     }
     
@@ -104,7 +111,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
         // TODO: Add additional interop to UnrealSharp to make this comparison directly using StringViews
         return lhs._value == rhs.ToString();
 #else
-        return NameTable.Equals(lhs._value, rhs);
+        return NameTable.Equals(lhs._comparisonIndex, rhs);
 #endif
     }
     
@@ -130,14 +137,18 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     
     public bool Equals(Name other)
     {
+#if UNREAL_ENGINE
         return _value == other._value;
+#else
+        return _comparisonIndex == other._comparisonIndex;
+#endif
     }
     public int CompareTo(Name other)
     {
 #if UNREAL_ENGINE
         return _value.CompareTo(other._value);
 #else
-        return (int)(_value - other._value);
+        return (int)(_comparisonIndex - other._comparisonIndex);
 #endif
     }
 
@@ -156,7 +167,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
 #if UNREAL_ENGINE
         return _value.ToString();
 #else
-        return NameTable.GetString(_value);
+        return NameTable.GetString(_displayStringIndex);
 #endif
     }
 
@@ -165,7 +176,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
 #if UNREAL_ENGINE
         return _value.GetHashCode();
 #else
-        return (int)_value;
+        return (int)_comparisonIndex;
 #endif
     }
 }
@@ -192,25 +203,33 @@ internal static class NameTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ComputeHash(ReadOnlySpan<char> span)
+    private static int ComputeHash(ReadOnlySpan<char> span, bool caseSensitive = false)
     {
         var hash = 0;
         
         foreach (var t in span)
         {
-            var c = char.ToLowerInvariant(t);
+            var c = caseSensitive ? t : char.ToLowerInvariant(t);
             hash = ((hash << 5) + hash) ^ c;
         }
         return hash;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool SpanEqualsString(ReadOnlySpan<char> span, string str)
+    private static bool SpanEqualsString(ReadOnlySpan<char> span, string str, bool caseSensitive = false)
     {
         if (span.Length != str.Length) return false;
         
         for (var i = 0; i < span.Length; i++)
         {
+            if (caseSensitive)
+            {
+                if (span[i] != str[i])
+                    return false;
+                
+                continue;
+            }
+            
             if (char.ToLowerInvariant(span[i]) != char.ToLowerInvariant(str[i]))
                 return false;
         }
@@ -218,16 +237,16 @@ internal static class NameTable
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint GetOrAddEntry(ReadOnlySpan<char> value)
+    public static uint GetOrAddEntry(ReadOnlySpan<char> value, bool caseSensitive = false)
     {
-        var hash = ComputeHash(value);
+        var hash = ComputeHash(value, caseSensitive);
         var bucketIndex = hash & BucketMask; // Fast modulo for power of 2
         var bucket = HashBuckets[bucketIndex];
         
         // Search existing entries in this bucket
         foreach (var entry in bucket)
         {
-            if (entry.Hash == hash && SpanEqualsString(value, entry.Value))
+            if (entry.Hash == hash && SpanEqualsString(value, entry.Value, caseSensitive))
             {
                 return entry.Id;
             }

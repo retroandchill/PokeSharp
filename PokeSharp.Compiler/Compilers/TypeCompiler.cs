@@ -30,9 +30,15 @@ public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
         
         foreach (var type in entities)
         {
-            exceptions.AddRange(from otherType in type.Weaknesses where !typeIds.Contains(otherType) select new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Weaknesses)."));
-            exceptions.AddRange(from otherType in type.Resistances where !typeIds.Contains(otherType) select new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Resistances)."));
-            exceptions.AddRange(from otherType in type.Immunities where !typeIds.Contains(otherType) select new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Immunities)."));
+            exceptions.AddRange(type.Weaknesses.Where(otherType => !typeIds.Contains(otherType))
+                .Select(otherType =>
+                    new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Weaknesses).")));
+            exceptions.AddRange(type.Resistances.Where(otherType => !typeIds.Contains(otherType))
+                .Select(otherType =>
+                    new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Resistances).")));
+            exceptions.AddRange(type.Immunities.Where(otherType => !typeIds.Contains(otherType))
+                .Select(otherType =>
+                    new ValidationException($"'{otherType}' is not a defined type (type {type.Id}, Immunities).")));
         }
         
         if (exceptions.Count > 0)

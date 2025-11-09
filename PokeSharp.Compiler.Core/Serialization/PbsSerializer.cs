@@ -244,14 +244,14 @@ public partial class PbsSerializer
                 {
                     foreach (var item in list)
                     {
-                        await fileWriter.WriteLineAsync($"{key} = ");
+                        await fileWriter.WriteAsync($"{key} = ");
                         await CsvWriter.WriteCsvRecord(item, fileWriter, value);
                         await fileWriter.WriteLineAsync();
                     }
                 }
                 else
                 {
-                    await fileWriter.WriteLineAsync($"{key} = ");
+                    await fileWriter.WriteAsync($"{key} = ");
                     await CsvWriter.WriteCsvRecord(elementValue, fileWriter, value);
                     await fileWriter.WriteLineAsync();   
                 }

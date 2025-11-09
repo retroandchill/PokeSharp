@@ -188,6 +188,8 @@ public static partial class CsvParser
 
         var subarrays = repeat && schema.TypeEntries.Length > 1;
         var values = SplitCsvLine(record).ToImmutableArray();
+        if ((values.Length == 0 || values.Length == 1 && string.IsNullOrWhiteSpace(values[0])) && schema.FieldStructure == PbsFieldStructure.Array) return new List<object?>();
+        
         var index = -1;
         while (true)
         {

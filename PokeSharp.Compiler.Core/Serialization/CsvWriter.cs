@@ -10,6 +10,9 @@ public static class CsvWriter
     public static async Task WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
     {
         var recordSet = record is IEnumerable asEnumerable ? asEnumerable.Flatten().ToImmutableArray() : [record];
+        
+        if (recordSet.IsEmpty) return;
+        
         var index = -1;
         var noMoreValues = false;
         while (true)
@@ -39,6 +42,7 @@ public static class CsvWriter
                 if (index > 0) await writer.WriteAsync(',');
                 if (value is null) continue;
 
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (typeData.Type)
                 {
                     case PbsFieldType.Enumerable:
@@ -52,8 +56,8 @@ public static class CsvWriter
                         break;
                 }
             }
-
-            if (noMoreValues) break;
+            
+            if ((!noMoreValues && index >= recordSet.Length - 1) || noMoreValues) break;
         }
     }
 

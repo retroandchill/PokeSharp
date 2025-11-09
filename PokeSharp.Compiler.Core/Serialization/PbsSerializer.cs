@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -144,53 +145,50 @@ public partial class PbsSerializer
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
     private static partial Regex KeyValuePair { get; }
 
-    public async IAsyncEnumerable<T> ReadFromFile<T>(ImmutableArray<string> paths, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<T> ReadFromFile<T>(string path, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
 
-        if (attribute.IsOptional && !paths.Any(File.Exists)) yield break;
+        if (attribute.IsOptional && !File.Exists(path)) yield break;
 
         var schema = _schemaBuilder.BuildSchema(typeof(T));
-        foreach (var path in paths)
-        {
-            using var fileStream = new StreamReader(path);
+        using var fileStream = new StreamReader(path);
             
-            _fileLineData.File = path;
+        _fileLineData.File = path;
 
-            await foreach (var (contents, sectionName) in ParseFileSections(fileStream, schema, cancellationToken))
+        await foreach (var (contents, sectionName) in ParseFileSections(fileStream, schema, cancellationToken))
+        {
+            var result = Activator.CreateInstance<T>();
+            foreach (var (key, schemaEntry) in schema)
             {
-                var result = Activator.CreateInstance<T>();
-                foreach (var (key, schemaEntry) in schema)
-                {
-                    var property = typeof(T).GetProperty(schemaEntry.PropertyName);
-                    if (property is null) throw new InvalidOperationException($"Property '{schemaEntry.PropertyName}' not found on type '{typeof(T).Name}'.");
+                var property = typeof(T).GetProperty(schemaEntry.PropertyName);
+                if (property is null) throw new InvalidOperationException($"Property '{schemaEntry.PropertyName}' not found on type '{typeof(T).Name}'.");
                     
-                    if (key == "SectionName")
-                    {
-                        SetValueToProperty(sectionName, result, property, CsvParser.GetCsvRecord(sectionName, schemaEntry));
-                        continue;
-                    }
-
-                    if (!contents.TryGetValue(key, out var value)) continue;
-
-                    switch (value)
-                    {
-                        case IList<string> list:
-                            var propertyOutput = list.Select(item => CsvParser.GetCsvRecord(item, schemaEntry)).ToList();
-                            SetValueToProperty(sectionName, result, property, propertyOutput);
-                            break;
-                        case string stringValue:
-                            SetValueToProperty(sectionName, result, property, CsvParser.GetCsvRecord(stringValue, schemaEntry));
-                            break;
-                        case null:
-                            throw new InvalidOperationException($"Property '{property.Name}' is null.");
-                        default:
-                            throw new InvalidOperationException($"Unexpected value type '{value.GetType().Name}' for property '{property.Name}'.");   
-                    }
+                if (key == "SectionName")
+                {
+                    SetValueToProperty(sectionName, result, property, CsvParser.GetCsvRecord(sectionName, schemaEntry));
+                    continue;
                 }
-                
-                yield return result;
+
+                if (!contents.TryGetValue(key, out var value)) continue;
+
+                switch (value)
+                {
+                    case IList<string> list:
+                        var propertyOutput = list.Select(item => CsvParser.GetCsvRecord(item, schemaEntry)).ToList();
+                        SetValueToProperty(sectionName, result, property, propertyOutput);
+                        break;
+                    case string stringValue:
+                        SetValueToProperty(sectionName, result, property, CsvParser.GetCsvRecord(stringValue, schemaEntry));
+                        break;
+                    case null:
+                        throw new InvalidOperationException($"Property '{property.Name}' is null.");
+                    default:
+                        throw new InvalidOperationException($"Unexpected value type '{value.GetType().Name}' for property '{property.Name}'.");   
+                }
             }
+                
+            yield return result;
         }
     }
 
@@ -210,5 +208,54 @@ public partial class PbsSerializer
         
         var convertedValue = converter.Convert(sectionName, property, value);
         property.SetValue(target, convertedValue);
+    }
+
+    public static async Task AddPbsHeaderToFile(StreamWriter fileWriter, CancellationToken cancellationToken = default)
+    {
+        await fileWriter.WriteLineAsync($"# See the documentation on the wiki to learn how to edit this file.");
+    }
+
+    public async Task WritePbsFile<T>(string path, IEnumerable<T> entities, Func<T, string, object?> propertyGetter, CancellationToken cancellationToken = default)
+    {
+        var schema = _schemaBuilder.BuildSchema(typeof(T));
+        
+        if (!schema.TryGetValue("SectionName", out var sectionName))
+        {
+            throw new PbsSchemaException(
+                $"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field.");
+        }
+        
+        await using var fileWriter = new StreamWriter(path);
+        await AddPbsHeaderToFile(fileWriter, cancellationToken);
+
+        foreach (var entity in entities)
+        {
+            await fileWriter.WriteLineAsync("#-------------------------------");
+            await fileWriter.WriteLineAsync($"[{propertyGetter(entity, sectionName.PropertyName)}]");
+
+            foreach (var (key, value) in schema)
+            {
+                if (key == "SectionName") continue;
+                
+                var elementValue = propertyGetter(entity, value.PropertyName);
+                if (elementValue is null) continue;
+
+                if (value.FieldStructure == PbsFieldStructure.Repeating && elementValue is IEnumerable list)
+                {
+                    foreach (var item in list)
+                    {
+                        await fileWriter.WriteLineAsync($"{key} = ");
+                        await CsvWriter.WriteCsvRecord(item, fileWriter, value);
+                        await fileWriter.WriteLineAsync();
+                    }
+                }
+                else
+                {
+                    await fileWriter.WriteLineAsync($"{key} = ");
+                    await CsvWriter.WriteCsvRecord(elementValue, fileWriter, value);
+                    await fileWriter.WriteLineAsync();   
+                }
+            }
+        }
     }
 }

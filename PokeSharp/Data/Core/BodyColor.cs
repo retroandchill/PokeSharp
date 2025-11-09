@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using System.Collections;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;

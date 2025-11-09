@@ -10,7 +10,8 @@ public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
 {
     public override int Order => 1;
 
-    protected override PokemonType Convert(PokemonTypeInfo model) => model.ToGameData();
+    protected override PokemonType ConvertToEntity(PokemonTypeInfo model) => model.ToGameData();
+    protected override PokemonTypeInfo ConvertToModel(PokemonType entity) => entity.ToDto();
 
     protected override PokemonTypeInfo ValidateCompiledModel(PokemonTypeInfo model)
     {

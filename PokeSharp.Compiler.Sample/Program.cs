@@ -63,6 +63,7 @@ try
     var compilerService = context.GetService<PbsCompilerService>();
 
     await compilerService.CompilePbsFiles();
+    await compilerService.WritePbsFiles();
 }
 finally
 {

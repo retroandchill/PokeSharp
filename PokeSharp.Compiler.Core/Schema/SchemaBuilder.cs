@@ -45,9 +45,9 @@ public class SchemaBuilder
         return schemaInternal;
     }
 
-    private Dictionary<string, SchemaEntry> BuildSchemaInternal(Type targetType)
+    private OrderedDictionary<string, SchemaEntry> BuildSchemaInternal(Type targetType)
     {
-        var schema = new Dictionary<string, SchemaEntry>();
+        var schema = new OrderedDictionary<string, SchemaEntry>();
 
         foreach (var property in targetType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {

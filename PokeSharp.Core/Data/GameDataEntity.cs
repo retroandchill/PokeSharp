@@ -40,7 +40,7 @@ public interface ILoadedGameDataEntity : IGameDataEntity
     public static abstract void Save();
 }
 
-public interface ILoadedGameDataEntity<in TEntity> : IGameDataEntity
+public interface ILoadedGameDataEntity<TEntity> : ILoadedGameDataEntity, IGameDataEntity<TEntity> where TEntity : IGameDataEntity<TEntity>
 {
     public static abstract void Import(IEnumerable<TEntity> entities);
 }

@@ -5,9 +5,9 @@ namespace PokeSharp.Compiler.Core.Schema;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 [MeansImplicitUse]
-public sealed class PbsDataAttribute(params string[] baseFilenames) : Attribute
+public sealed class PbsDataAttribute(string baseFilename) : Attribute
 {
-    public ImmutableArray<string> BaseFilenames { get; } = [..baseFilenames];
+    public string BaseFilename { get; } = baseFilename;
 
     public bool IsOptional { get; init; } = false;
 }

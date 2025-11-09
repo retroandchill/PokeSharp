@@ -20,4 +20,12 @@ public sealed class PbsCompilerService
             await compiler.Compile(_serializer, cancellationToken);
         }
     }
+    
+    public async Task WritePbsFiles(CancellationToken cancellationToken = default)
+    {
+        foreach (var compiler in _compilers)
+        {
+            await compiler.WriteToFile(_serializer, cancellationToken);
+        }
+    }
 }

@@ -7,7 +7,7 @@ namespace PokeSharp.Compiler.Core.Serialization;
 
 public static class CsvWriter
 {
-    public static async Task<object?> WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
+    public static async Task WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
     {
         var recordSet = record is IEnumerable asEnumerable ? asEnumerable.Flatten().ToImmutableArray() : [record];
         var index = -1;
@@ -55,8 +55,6 @@ public static class CsvWriter
 
             if (noMoreValues) break;
         }
-
-        return record;
     }
 
     private static async Task WriteEnumRecord(object? record, StreamWriter writer, Type? enumType)

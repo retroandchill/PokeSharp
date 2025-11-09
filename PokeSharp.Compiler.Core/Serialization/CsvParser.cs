@@ -53,75 +53,75 @@ public static partial class CsvParser
         return values.Where(v => v is not null)!;
     }
     
-    public static object? CastCsvValue(string value, SchemaTypeData schema)
+    public static object? CastCsvValue(string value, SchemaTypeData schema, FileLineData fileLineData)
     {
         return schema.Type switch
         {
-            PbsFieldType.Integer => ParseInt(value),
-            PbsFieldType.UnsignedInteger => ParseUnsigned(value),
-            PbsFieldType.PositiveInteger => ParsePositive(value),
-            PbsFieldType.Hexadecimal => ParseHex(value),
-            PbsFieldType.Float => ParseFloat(value),
-            PbsFieldType.Boolean => ParseBoolean(value),
-            PbsFieldType.Name => ParseName(value),
+            PbsFieldType.Integer => ParseInt(value, fileLineData),
+            PbsFieldType.UnsignedInteger => ParseUnsigned(value, fileLineData),
+            PbsFieldType.PositiveInteger => ParsePositive(value, fileLineData),
+            PbsFieldType.Hexadecimal => ParseHex(value, fileLineData),
+            PbsFieldType.Float => ParseFloat(value, fileLineData),
+            PbsFieldType.Boolean => ParseBoolean(value, fileLineData),
+            PbsFieldType.Name => ParseName(value, fileLineData),
             PbsFieldType.String or PbsFieldType.UnformattedText => value,
-            PbsFieldType.Symbol => ParseSymbol(value),
-            PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType),
-            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType),
-            _ => throw new PbsParseException($"Unknown schema '{schema}'.")
+            PbsFieldType.Symbol => ParseSymbol(value, fileLineData),
+            PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType, fileLineData),
+            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType, fileLineData),
+            _ => throw new PbsParseException($"Unknown schema '{schema}'.\n{fileLineData.LineReport}")
         };
     }
     
 
-    private static long ParseInt(string value)
+    private static long ParseInt(string value, FileLineData fileLineData)
     {
         return long.TryParse(value, out var result)
             ? result
-            : throw new PbsParseException($"Field '{value}' is not an integer.");
+            : throw new PbsParseException($"Field '{value}' is not an integer.\n{fileLineData.LineReport}");
     }
 
-    private static ulong ParseUnsigned(string value)
+    private static ulong ParseUnsigned(string value, FileLineData fileLineData)
     {
         if (!ulong.TryParse(value, out var result))
         {
             throw new PbsParseException(
-                $"Field '{value}' is not a positive integer or 0.");
+                $"Field '{value}' is not a positive integer or 0.\n{fileLineData.LineReport}");
         }
 
         return result;
     }
 
-    private static ulong ParsePositive(string value)
+    private static ulong ParsePositive(string value, FileLineData fileLineData)
     {
         if (!ulong.TryParse(value, out var result) || result == 0)
         {
             throw new PbsParseException(
-                $"Field '{value}' is not a positive integer.");
+                $"Field '{value}' is not a positive integer.\n{fileLineData.LineReport}");
         }
 
         return result;
     }
 
-    private static ulong ParseHex(string value)
+    private static ulong ParseHex(string value, FileLineData fileLineData)
     {
         if (!ulong.TryParse(value, NumberStyles.HexNumber, null, out var result))
         {
             throw new PbsParseException(
-                $"Field '{value}' is not a hexadecimal number.");
+                $"Field '{value}' is not a hexadecimal number.\n{fileLineData.LineReport}");
         }
 
         return result;
     }
 
-    private static decimal ParseFloat(string value)
+    private static decimal ParseFloat(string value, FileLineData fileLineData)
     {
-        return decimal.TryParse(value, out var result) ? result : throw new PbsParseException($"Field '{value}' is not a number.");
+        return decimal.TryParse(value, out var result) ? result : throw new PbsParseException($"Field '{value}' is not a number.\n{fileLineData.LineReport}");
     }
 
-    private static bool ParseBoolean(string value)
+    private static bool ParseBoolean(string value, FileLineData fileLineData)
     {
         if (TrueFormats.IsMatch(value)) return true;
-        return FalseFormats.IsMatch(value) ? false : throw new PbsParseException($"Field '{value}' is not a Boolean value (true, false, 1, 0).");
+        return FalseFormats.IsMatch(value) ? false : throw new PbsParseException($"Field '{value}' is not a Boolean value (true, false, 1, 0).\n{fileLineData.LineReport}");
     }
 
     [GeneratedRegex("^(?:1|TRUE|YES|Y)$", RegexOptions.IgnoreCase)]
@@ -130,30 +130,30 @@ public static partial class CsvParser
     [GeneratedRegex("^(?:0|FALSE|NO|N)$", RegexOptions.IgnoreCase)]
     private static partial Regex FalseFormats { get; }
 
-    private static string ParseName(string value)
+    private static string ParseName(string value, FileLineData fileLineData)
     {
-        return NameFormat.IsMatch(value) ? value : throw new PbsParseException($"Field '{value}' is not a valid name.");
+        return NameFormat.IsMatch(value) ? value : throw new PbsParseException($"Field '{value}' is not a valid name.\n{fileLineData.LineReport}");
     }
 
     [GeneratedRegex(@"^(?![0-9])\w+$")]
     private static partial Regex NameFormat { get; }
 
-    private static Name ParseSymbol(string value)
+    private static Name ParseSymbol(string value, FileLineData fileLineData)
     {
-        return ParseName(value);
+        return ParseName(value, fileLineData);
     }
 
-    private static object ParseEnumField(string value, Type? enumeration)
+    private static object ParseEnumField(string value, Type? enumeration, FileLineData fileLineData)
     {
         // TODO: For now we're just going to map to an enum type, but this will need to be more robust.
 
-        if (enumeration is null) throw new PbsParseException("Enumeration not defined.");
+        if (enumeration is null) throw new PbsParseException($"Enumeration not defined.\n{fileLineData.LineReport}");
 
         if (enumeration.IsEnum)
         {
             if (!Enum.TryParse(enumeration, value, true, out var result))
             {
-                throw new PbsParseException($"Field '{value}' is not a valid value for enumeration '{enumeration}'.");
+                throw new PbsParseException($"Field '{value}' is not a valid value for enumeration '{enumeration}'.\n{fileLineData.LineReport}");
             }
             
             return result;
@@ -162,12 +162,12 @@ public static partial class CsvParser
         return value;
     }
 
-    private static object? ParseEnumOrInt(string value, Type? enumeration)
+    private static object? ParseEnumOrInt(string value, Type? enumeration, FileLineData fileLineData)
     {
-        return int.TryParse(value, out var result) ? result : ParseEnumField(value, enumeration);
+        return int.TryParse(value, out var result) ? result : ParseEnumField(value, enumeration, fileLineData);
     }
 
-    public static object? GetCsvRecord(string record, SchemaEntry schema)
+    public static object? GetCsvRecord(string record, SchemaEntry schema, FileLineData fileLineData)
     {
         var result = new List<object?>();
         var repeat = false;
@@ -210,7 +210,7 @@ public static partial class CsvParser
                     break;
                 }
 
-                parsedValues.Add(CastCsvValue(values[index], typeData));
+                parsedValues.Add(CastCsvValue(values[index], typeData, fileLineData));
             }
 
             if (parsedValues.Count > 0)

@@ -42,8 +42,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
 
     public async Task WriteToFile(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        await serializer.WritePbsFile(_fileName, TEntity.Entities.Select(ConvertToModel), 
-            GetPropertyForPbs, cancellationToken);
+        await serializer.WritePbsFile(_fileName, TEntity.Entities.Select(ConvertToModel), GetPropertyForPbs);
     }
 
     protected abstract TEntity ConvertToEntity(TModel model);

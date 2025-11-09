@@ -75,54 +75,54 @@ public partial class Item
 {
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public required Text Name { get; init; }
 
-    public Text NamePlural { get; init; } = TextConstants.Unnamed;
+    public required Text NamePlural { get; init; }
 
-    private readonly Text? _portionName;
-    public Text PortionName
+    public required Text PortionName
     {
-        get => _portionName ?? Name;
-        init => _portionName = value;
+        get;
+        init;
     }
 
-    private readonly Text? _portionNamePlural;
-    public Text PortionNamePlural
+    public required Text PortionNamePlural
     {
-        get => _portionNamePlural ?? NamePlural;
-        init => _portionNamePlural = value;
+        get;
+        init;
     }
 
-    public int Pocket { get; init; } = 1;
+    public required int Pocket { get; init; }
 
-    public int Price { get; init; } = 0;
+    public required int Price { get; init; }
 
-    private readonly int? _sellPrice;
-    public int SellPrice
+    public required int SellPrice
     {
-        get => _sellPrice ?? Price / 2;
-        init => _sellPrice = value;
+        get;
+        init;
     }
 
-    public int BPPrice { get; init; } = 1;
+    public required int BPPrice { get; init; }
 
-    public FieldUse FieldUse { get; init; } = FieldUse.NoFieldUse;
+    public required FieldUse FieldUse { get; init; }
 
-    public BattleUse BattleUse { get; init; } = BattleUse.NoBattleUse;
+    public required BattleUse BattleUse { get; init; }
 
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required IReadOnlySet<Name> Flags { get; init; }
 
-    public bool IsConsumable { get; init; }
+    public required bool Consumable { 
+        get => !IsImportant && field;
+        init; 
+    }
 
-    public bool ShowQuantity
+    public required bool ShowQuantity
     {
         get => field || !IsImportant;
         init;
-    } = true;
+    }
 
-    public Name Move { get; init; }
+    public required Name Move { get; init; }
 
-    public Text Description { get; init; } = TextConstants.ThreeQuestions;
+    public required Text Description { get; init; }
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 
@@ -162,14 +162,13 @@ public partial class Item
 
     public bool CanHold => !IsImportant;
 
-    public bool ConsumedAfterUse => !IsImportant && IsConsumable;
+    public bool ConsumedAfterUse => !IsImportant && Consumable;
 }
 
 public static class ItemTags
 {
     public static readonly Name Mail = "Mail";
     public static readonly Name IconMail = "IconMail";
-    public static readonly Name Medicine = "IconMail";
     public static readonly Name PokeBall = "PokeBall";
     public static readonly Name SnagBall = "SnagBall";
     public static readonly Name Berry = "Berry";

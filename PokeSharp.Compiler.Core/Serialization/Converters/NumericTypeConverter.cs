@@ -36,7 +36,7 @@ public class NumericTypeConverter : IPbsConverter
             return null;
 
         var sourceType = value.GetType();
-        var targetType = property.PropertyType;
+        var targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
 
         // If types are the same, no conversion needed
         if (sourceType == targetType)

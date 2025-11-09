@@ -35,4 +35,15 @@ public class MoveCompiler(ILogger<MoveCompiler> logger) : PbsCompiler<Move, Move
         );
         return model with { Category = DamageCategory.Status };
     }
+
+    protected override object? GetPropertyForPbs(MoveInfo model, string key)
+    {
+        var result = base.GetPropertyForPbs(model, key);
+        if (key is nameof(MoveInfo.Power) or nameof(MoveInfo.Priority) or nameof(MoveInfo.EffectChance) && result is 0)
+        {
+            return null;
+        }
+        
+        return result;
+    }
 }

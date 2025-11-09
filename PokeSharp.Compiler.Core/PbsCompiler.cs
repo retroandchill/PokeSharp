@@ -81,7 +81,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
             ArgumentNullException.ThrowIfNull(property);
             _propertyMap.Add(key, property);
         }
-
+        
         var elementValue = property.GetValue(model);
         switch (elementValue)
         {

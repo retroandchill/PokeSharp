@@ -31,8 +31,8 @@ public readonly struct Name
 #if UNREAL_ENGINE
         _value = new FName(name);
 #else
-        _comparisonIndex = NameTable.GetOrAddEntry(name);
-        _displayStringIndex = NameTable.GetOrAddEntry(name, true);
+        _comparisonIndex = NameTable.Instance.GetOrAddEntry(name);
+        _displayStringIndex = NameTable.DisplayStringInstance.GetOrAddEntry(name);
 #endif
     }
 
@@ -95,7 +95,7 @@ public readonly struct Name
         // TODO: Add additional interop to UnrealSharp to make this comparison directly using StringViews
         return lhs._value == (rhs ?? string.Empty);
 #else
-        return NameTable.Equals(lhs._comparisonIndex, rhs);
+        return NameTable.Instance.Equals(lhs._comparisonIndex, rhs);
 #endif
     }
 
@@ -110,7 +110,7 @@ public readonly struct Name
         // TODO: Add additional interop to UnrealSharp to make this comparison directly using StringViews
         return lhs._value == rhs.ToString();
 #else
-        return NameTable.Equals(lhs._comparisonIndex, rhs);
+        return NameTable.Instance.Equals(lhs._comparisonIndex, rhs);
 #endif
     }
 
@@ -167,7 +167,7 @@ public readonly struct Name
 #if UNREAL_ENGINE
         return _value.ToString();
 #else
-        return NameTable.GetString(_displayStringIndex);
+        return NameTable.DisplayStringInstance.GetString(_displayStringIndex);
 #endif
     }
 
@@ -184,33 +184,39 @@ public readonly struct Name
 #if !UNREAL_ENGINE
 internal readonly record struct NameHashEntry(uint Id, int Hash, string Value);
 
-internal static class NameTable
+internal class NameTable
 {
     private const int BucketCount = 1024;
     private const int BucketMask = BucketCount - 1;
 
-    private static readonly ConcurrentBag<NameHashEntry>[] HashBuckets =
-        new ConcurrentBag<NameHashEntry>[BucketCount];
-    private static readonly ConcurrentDictionary<uint, string> IDToString = new();
+    private readonly bool _caseSensitive;
+    private readonly ConcurrentBag<NameHashEntry>[] _hashBuckets = new ConcurrentBag<NameHashEntry>[
+        BucketCount
+    ];
+    private readonly ConcurrentDictionary<uint, string> _idToString = new();
 
-    private static uint _nextId = 1;
+    private uint _nextId = 1;
 
-    static NameTable()
+    public static NameTable Instance { get; } = new();
+    public static NameTable DisplayStringInstance { get; } = new(true);
+
+    public NameTable(bool caseSensitive = false)
     {
+        _caseSensitive = caseSensitive;
         for (var i = 0; i < BucketCount; i++)
         {
-            HashBuckets[i] = [];
+            _hashBuckets[i] = [];
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ComputeHash(ReadOnlySpan<char> span, bool caseSensitive = false)
+    private int ComputeHash(ReadOnlySpan<char> span)
     {
         var hash = 0;
 
         foreach (var t in span)
         {
-            var c = caseSensitive ? t : char.ToLowerInvariant(t);
+            var c = _caseSensitive ? t : char.ToLowerInvariant(t);
             hash = ((hash << 5) + hash) ^ c;
         }
         return hash;
@@ -243,19 +249,19 @@ internal static class NameTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint GetOrAddEntry(ReadOnlySpan<char> value, bool caseSensitive = false)
+    public uint GetOrAddEntry(ReadOnlySpan<char> value)
     {
         if (IsNoneSpan(value))
             return 0;
 
-        var hash = ComputeHash(value, caseSensitive);
+        var hash = ComputeHash(value);
         var bucketIndex = hash & BucketMask; // Fast modulo for power of 2
-        var bucket = HashBuckets[bucketIndex];
+        var bucket = _hashBuckets[bucketIndex];
 
         // Search existing entries in this bucket
         foreach (var entry in bucket)
         {
-            if (entry.Hash == hash && SpanEqualsString(value, entry.Value, caseSensitive))
+            if (entry.Hash == hash && SpanEqualsString(value, entry.Value))
             {
                 return entry.Id;
             }
@@ -269,26 +275,26 @@ internal static class NameTable
 
         // Add to both bucket and reverse lookup
         bucket.Add(newEntry);
-        IDToString.TryAdd(newId, stringValue);
+        _idToString.TryAdd(newId, stringValue);
 
         return newId;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string GetString(uint id)
+    public string GetString(uint id)
     {
-        return IDToString.GetValueOrDefault(id, "None");
+        return _idToString.GetValueOrDefault(id, "None");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool Equals(uint id, ReadOnlySpan<char> span)
+    public bool Equals(uint id, ReadOnlySpan<char> span)
     {
         if (id == 0)
         {
             return IsNoneSpan(span);
         }
 
-        return IDToString.TryGetValue(id, out var value) && SpanEqualsString(span, value);
+        return _idToString.TryGetValue(id, out var value) && SpanEqualsString(span, value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -302,7 +302,10 @@ public static partial class CsvParser
             foreach (var typeData in schema.TypeEntries)
             {
                 index++;
-                if (typeData.IsOptional && string.IsNullOrEmpty(values[index]))
+                if (
+                    typeData.IsOptional
+                    && (values.Length <= index || string.IsNullOrEmpty(values[index]))
+                )
                 {
                     parsedValues.Add(null);
                     continue;

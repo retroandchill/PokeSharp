@@ -38,13 +38,10 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
         FileLineData fileLineData
     )
     {
-        foreach (
-            var evolutionData in model.Evolutions.Select(evolution =>
-                Evolution.Get(evolution.Method)
-            )
-        )
+        foreach (var evolution in model.Evolutions.Where(evo => evo.Method.IsValid))
         {
-            if (evolutionData.Parameter is null)
+            var evolutionData = Evolution.Get(evolution.Method);
+            if (evolution.Parameter is not null || evolutionData.Parameter is null)
                 continue;
 
             throw new PbsParseException(
@@ -99,7 +96,9 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
                     );
                 }
 
-                var paramType = Evolution.Get(evolution.EvolutionMethod).Parameter;
+                var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo)
+                    ? evo.Parameter
+                    : null;
                 var paramValue = evolution.Parameter?.ToString() ?? string.Empty;
                 if (paramType is null)
                 {
@@ -120,6 +119,16 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
                     {
                         throw new PbsParseException($"{e}\n{fileLineData.LineReport}", e);
                     }
+                }
+                else if (paramType == typeof(Species))
+                {
+                    var asName = new Name(paramValue);
+                    if (!allSpeciesKeys.Contains(asName))
+                        throw new PbsParseException(
+                            $"Species '{evolution.Species}' is not defined.\n{fileLineData.LineReport}"
+                        );
+
+                    evolutionList.Add(evolution with { Parameter = asName });
                 }
                 else if (
                     paramType.IsEnum
@@ -150,18 +159,38 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
         // Collect all pre-evolutions and distribute them to all species
         var allEvolutions = newEvolutions
             .SelectMany(s => s.Value, (s, e) => (Species: s.Key, Evolution: e))
-            .ToImmutableDictionary(
+            .GroupBy(
                 x => x.Evolution.Species,
                 x => x.Evolution with { Species = x.Species, IsPrevious = true }
-            );
+            )
+            .ToImmutableDictionary(x => x.Key, x => x.ToList());
         for (var i = 0; i < entities.Length; i++)
         {
             var species = entities[i];
             var speciesId = species.SpeciesId;
             var evolutionList = newEvolutions[speciesId];
-            evolutionList.AddRange(allEvolutions[speciesId]);
+            if (allEvolutions.TryGetValue(speciesId, out var previousEvolutions))
+            {
+                evolutionList.AddRange(previousEvolutions);
+            }
 
             entities[i] = species with { Evolutions = [.. evolutionList] };
         }
+    }
+
+    protected override object? GetPropertyForPbs(SpeciesInfo model, string key)
+    {
+        var original = base.GetPropertyForPbs(model, key);
+
+        return key switch
+        {
+            nameof(SpeciesInfo.Incense)
+            or nameof(SpeciesInfo.Habitat) when original is Name { IsNone: true } => null,
+            nameof(SpeciesInfo.Height)
+            or nameof(SpeciesInfo.Weight) when original is decimal asDecimal => asDecimal.ToString(
+                "0.0"
+            ),
+            _ => original,
+        };
     }
 }

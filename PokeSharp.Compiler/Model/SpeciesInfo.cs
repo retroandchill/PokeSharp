@@ -19,7 +19,8 @@ public readonly record struct LevelUpMoveInfo(
 
 public readonly record struct EvolutionMethodInfo(
     Name Species,
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution))] Name Method,
+    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)]
+        Name Method,
     string? Parameter = null
 );
 

@@ -87,21 +87,44 @@ public class SchemaBuilder
     private static SchemaEntry GetSchemaEntry(PropertyInfo property)
     {
         var propType = GetUnderlyingType(property.PropertyType);
+        var typeAttribute = property.GetCustomAttribute<PbsTypeAttribute>();
 
         var fieldTypes = !TypeUtils.IsSimpleType(propType)
             ? GetComplexFieldType(propType)
-            : [GetFieldType(property, propType)];
+            : GetSimpleFieldType(property, propType, typeAttribute);
 
         return new SchemaEntry(property.Name, fieldTypes)
         {
-            FieldStructure = GetFieldStructure(property),
+            FieldStructure = GetFieldStructure(property, typeAttribute),
         };
     }
 
-    private static SchemaTypeData GetFieldType(PropertyInfo property, Type propType)
+    private static ImmutableArray<SchemaTypeData> GetSimpleFieldType(
+        PropertyInfo property,
+        Type propType,
+        PbsTypeAttribute? typeAttribute
+    )
     {
-        var typeAttribute = property.GetCustomAttribute<PbsTypeAttribute>();
+        if (typeAttribute?.FixedSize > 0 && property.PropertyType.IsCollectionType)
+        {
+            return
+            [
+                .. Enumerable.Repeat(
+                    GetFieldType(property, propType, typeAttribute),
+                    typeAttribute.FixedSize
+                ),
+            ];
+        }
 
+        return [GetFieldType(property, propType, typeAttribute)];
+    }
+
+    private static SchemaTypeData GetFieldType(
+        PropertyInfo property,
+        Type propType,
+        PbsTypeAttribute? typeAttribute
+    )
+    {
         if (typeAttribute is null)
             return InferFieldType(propType);
 
@@ -133,7 +156,10 @@ public class SchemaBuilder
         );
     }
 
-    private static ImmutableArray<SchemaTypeData> GetComplexFieldType(Type propType)
+    private static ImmutableArray<SchemaTypeData> GetComplexFieldType(
+        Type propType,
+        PbsTypeAttribute? typeAttribute = null
+    )
     {
         var properties = propType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
@@ -179,7 +205,7 @@ public class SchemaBuilder
                 );
             }
 
-            var fieldType = GetFieldType(property, propertyType) with
+            var fieldType = GetFieldType(property, propertyType, typeAttribute) with
             {
                 IsOptional = parameter.HasDefaultValue,
             };
@@ -301,9 +327,15 @@ public class SchemaBuilder
             : type;
     }
 
-    private static PbsFieldStructure GetFieldStructure(PropertyInfo property)
+    private static PbsFieldStructure GetFieldStructure(
+        PropertyInfo property,
+        PbsTypeAttribute? typeAttribute
+    )
     {
-        if (property.PropertyType.IsCollectionType)
+        if (
+            property.PropertyType.IsCollectionType
+            && (typeAttribute is null || typeAttribute.FixedSize <= 0)
+        )
         {
             return property.GetCustomAttribute<PbsKeyRepeatAttribute>() is not null
                 ? PbsFieldStructure.Repeating

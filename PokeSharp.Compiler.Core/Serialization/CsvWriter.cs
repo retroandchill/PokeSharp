@@ -11,8 +11,8 @@ public static class CsvWriter
     public static async Task WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
     {
         var recordSet = record is IEnumerable asEnumerable and not string
-            ? asEnumerable.Flatten().ToImmutableArray()
-            : DeconstructIfNecessary(record);
+            ? asEnumerable.Flatten().SelectMany(DeconstructIfNecessary).ToImmutableArray()
+            : DeconstructIfNecessary(record).ToImmutableArray();
 
         if (recordSet.IsEmpty)
             return;
@@ -24,7 +24,7 @@ public static class CsvWriter
             foreach (var typeData in schema.TypeEntries)
             {
                 index++;
-                var value = recordSet[index];
+                var value = index < recordSet.Length ? recordSet[index] : null;
                 if (typeData.IsOptional)
                 {
                     var laterValueFound = false;
@@ -69,7 +69,7 @@ public static class CsvWriter
         }
     }
 
-    private static ImmutableArray<object?> DeconstructIfNecessary(object? record)
+    private static IEnumerable<object?> DeconstructIfNecessary(object? record)
     {
         if (record is null)
             return [null];
@@ -78,7 +78,7 @@ public static class CsvWriter
         if (TypeUtils.IsSimpleType(recordType))
             return [record];
 
-        return [.. recordType.GetProperties().Select(p => p.GetValue(record))];
+        return recordType.GetProperties().Select(p => p.GetValue(record));
     }
 
     private static async Task WriteEnumRecord(object? record, StreamWriter writer, Type? enumType)

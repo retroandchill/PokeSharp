@@ -9,6 +9,8 @@ namespace PokeSharp.Data.Pbs;
 public readonly record struct SpeciesForm(Name Species, int Form = 0)
 {
     public static implicit operator SpeciesForm(Name species) => new(species);
+
+    public static implicit operator SpeciesForm(string species) => new(species);
 }
 
 public readonly record struct LevelUpMove(Name Move, int Level);

@@ -53,16 +53,28 @@ public static partial class SpeciesMapper
 
     private static ImmutableArray<EVYieldInfo> MapEVs(IReadOnlyDictionary<Name, int> stats)
     {
-        return [.. stats.Select(x => new EVYieldInfo(x.Key, x.Value)).Where(x => x.Amount > 0)];
+        return
+        [
+            .. stats
+                .Select(x => new EVYieldInfo(x.Key, x.Value))
+                .Where(x => x.Amount > 0)
+        ];
     }
 
-    private static EvolutionMethodInfo MapEvolutionMethodInfo(EvolutionInfo evolutionInfo)
+    private static ImmutableArray<EvolutionMethodInfo> MapEvolutionMethodInfos(
+        ImmutableArray<EvolutionInfo> evolutionInfo
+    )
     {
-        return new EvolutionMethodInfo(
-            evolutionInfo.Species,
-            evolutionInfo.EvolutionMethod,
-            evolutionInfo.Parameter?.ToString()
-        );
+        return
+        [
+            .. evolutionInfo
+                .Where(e => !e.IsPrevious)
+                .Select(e => new EvolutionMethodInfo(
+                    e.Species,
+                    e.EvolutionMethod,
+                    e.Parameter?.ToString()
+                )),
+        ];
     }
 
     private static EvolutionInfo MapEvolutionInfo(EvolutionMethodInfo evolutionInfo)
@@ -77,5 +89,10 @@ public static partial class SpeciesMapper
     private static int ConvertDecimalUnit(decimal value)
     {
         return (int)Math.Round(value * 10);
+    }
+
+    private static decimal ConvertUnit(int value)
+    {
+        return value / 10.0m;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 
 namespace PokeSharp.Compiler.Core.Schema;
 
@@ -67,30 +68,39 @@ public class SchemaBuilder
 
     private static SchemaEntry GetSchemaEntry(PropertyInfo property)
     {
-        var typeAttribute = property.GetCustomAttribute<PbsTypeAttribute>();
-        var propType = GetUnderlyingType(property.PropertyType);
-        PbsFieldType fieldType;
-        if (typeAttribute is not null)
-        {
-            if (!IsValidFieldType(propType, typeAttribute.FieldType))
-            {
-                throw new PbsSchemaException($"Property '{property.Name}' has an invalid type. Expected '{typeAttribute.FieldType}' but got '{property.PropertyType}'.");
-            }
-
-            fieldType = typeAttribute.FieldType;
-        }
-        else
-        {
-            fieldType = InferFieldType(propType);
-        }
+        var fieldType = GetFieldType(property);
 
         return new SchemaEntry(property.Name, [fieldType])
         {
             FieldStructure = GetFieldStructure(property),
         };
     }
-    
-    private static bool IsValidFieldType(Type propType, PbsFieldType declaredType)
+
+    private static SchemaTypeData GetFieldType(PropertyInfo property)
+    {
+        var propType = GetUnderlyingType(property.PropertyType);
+        var typeAttribute = property.GetCustomAttribute<PbsTypeAttribute>();
+
+        if (typeAttribute is null) return InferFieldType(propType);
+        
+        if (!IsValidFieldType(propType, typeAttribute.FieldType, typeAttribute.EnumType))
+        {
+            throw new PbsSchemaException($"Property '{property.Name}' has an invalid type. Expected '{typeAttribute.FieldType}' but got '{property.PropertyType}'.");
+        }
+
+        if (typeAttribute.FieldType is not (PbsFieldType.Enumerable or PbsFieldType.EnumerableOrInteger))
+            return new SchemaTypeData(typeAttribute.FieldType);
+            
+        if (typeAttribute.EnumType is null && !propType.IsEnum)
+        {
+            throw new PbsSchemaException($"Property '{property.Name}' has an enumerable type but no enum type was specified.");
+        }
+                
+        return new SchemaTypeData(typeAttribute.FieldType, false, typeAttribute.EnumType ?? propType, typeAttribute.AllowNone);
+
+    }
+
+    private static bool IsValidFieldType(Type propType, PbsFieldType declaredType, Type? enumType)
     {
         return declaredType switch
         {
@@ -108,8 +118,8 @@ public class SchemaBuilder
             PbsFieldType.Name or PbsFieldType.String or PbsFieldType.UnformattedText => propType == typeof(string) ||
                 propType == typeof(Name) || propType == typeof(Text),
             PbsFieldType.Symbol => propType == typeof(Name),
-            PbsFieldType.Enumerable => propType.IsEnum,
-            PbsFieldType.EnumerableOrInteger => propType.IsEnum || propType == typeof(int) ||
+            PbsFieldType.Enumerable => IsValidEnumType(propType, enumType),
+            PbsFieldType.EnumerableOrInteger => IsValidEnumType(propType, enumType) || propType == typeof(int) ||
                                                 propType == typeof(short) || propType == typeof(long) ||
                                                 propType == typeof(sbyte) || propType == typeof(float) ||
                                                 propType == typeof(double) || propType == typeof(decimal),
@@ -117,31 +127,39 @@ public class SchemaBuilder
         };
     }
 
-    private static PbsFieldType InferFieldType(Type propType)
+    private static bool IsValidEnumType(Type propType, Type? enumType)
+    {
+        if (enumType is null) return propType.IsEnum;
+        
+        var gameDataEntityInterface = enumType.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>));
+        if (gameDataEntityInterface is null) return false;
+        
+        var keyType = gameDataEntityInterface.GetGenericArguments()[0];
+        return propType.IsAssignableFrom(keyType);
+    }
+
+    private static SchemaTypeData InferFieldType(Type propType)
     {
         if (propType.IsEnum)
-            return PbsFieldType.Enumerable;
+            return new SchemaTypeData(PbsFieldType.Enumerable, false, propType);
         
         if (propType == typeof(int) || propType == typeof(short) || propType == typeof(long) || propType == typeof(sbyte)) 
-            return PbsFieldType.Integer;
+            return new SchemaTypeData(PbsFieldType.Integer);
         
         if (propType == typeof(uint) || propType == typeof(ushort) || propType == typeof(ulong) || propType == typeof(byte)) 
-            return PbsFieldType.UnsignedInteger;
+            return new SchemaTypeData(PbsFieldType.UnsignedInteger);
         
         if (propType == typeof(float) || propType == typeof(double) || propType == typeof(decimal))
-            return PbsFieldType.Float;
+            return new SchemaTypeData(PbsFieldType.Float);
         
         if (propType == typeof(bool))
-            return PbsFieldType.Boolean;
+            return new SchemaTypeData(PbsFieldType.Boolean);
         
         if (propType == typeof(string) || propType == typeof(Text))
-            return PbsFieldType.String;
+            return new SchemaTypeData(PbsFieldType.String);
 
-        if (propType == typeof(Name))
-            return PbsFieldType.Symbol;
-        
-        
-        return PbsFieldType.UnformattedText;
+        return propType == typeof(Name) ? new SchemaTypeData(PbsFieldType.Symbol) : new SchemaTypeData(PbsFieldType.UnformattedText);
     }
 
     private static Type GetUnderlyingType(Type type)

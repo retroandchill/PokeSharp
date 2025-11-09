@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Core.Data;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
@@ -66,8 +67,8 @@ public static partial class CsvParser
             PbsFieldType.Name => ParseName(value, fileLineData),
             PbsFieldType.String or PbsFieldType.UnformattedText => value,
             PbsFieldType.Symbol => ParseSymbol(value, fileLineData),
-            PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType, fileLineData),
-            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType, fileLineData),
+            PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType, schema.AllowNone, fileLineData),
+            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType, schema.AllowNone, fileLineData),
             _ => throw new PbsParseException($"Unknown schema '{schema}'.\n{fileLineData.LineReport}")
         };
     }
@@ -143,28 +144,79 @@ public static partial class CsvParser
         return ParseName(value, fileLineData);
     }
 
-    private static object ParseEnumField(string value, Type? enumeration, FileLineData fileLineData)
+    private static object? ParseEnumField(string value, Type? enumeration, bool allowNone, FileLineData fileLineData)
     {
-        // TODO: For now we're just going to map to an enum type, but this will need to be more robust.
-
         if (enumeration is null) throw new PbsParseException($"Enumeration not defined.\n{fileLineData.LineReport}");
 
         if (enumeration.IsEnum)
         {
-            if (!Enum.TryParse(enumeration, value, true, out var result))
-            {
-                throw new PbsParseException($"Field '{value}' is not a valid value for enumeration '{enumeration}'.\n{fileLineData.LineReport}");
-            }
-            
-            return result;
+            return Enum.TryParse(enumeration, value, true, out var result) ? result : throw new PbsParseException($"Field '{value}' is not a valid value for enumeration '{enumeration}'.\n{fileLineData.LineReport}");
         }
         
-        return value;
+        var dataTypeInterface = enumeration.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>));
+        if (dataTypeInterface is null) return value;
+        
+        var instantiatedMethod = ParseDataEnumMethod.MakeGenericMethod(enumeration, dataTypeInterface.GetGenericArguments()[0]);
+        return instantiatedMethod.Invoke(null, [value, allowNone, fileLineData]);
     }
 
-    private static object? ParseEnumOrInt(string value, Type? enumeration, FileLineData fileLineData)
+    private static readonly MethodInfo ParseDataEnumMethod =
+        typeof(CsvParser).GetMethod(nameof(ParseDataEnum), BindingFlags.NonPublic | BindingFlags.Static)!;
+
+    private static TKey ParseDataEnum<TEntity, TKey>(string value, bool allowNone, FileLineData fileLineData)
+        where TEntity : IGameDataEntity<TKey, TEntity> where TKey : notnull
     {
-        return int.TryParse(value, out var result) ? result : ParseEnumField(value, enumeration, fileLineData);
+        var key = ConvertKey<TKey>(value, fileLineData);
+        if (allowNone && IsNone(key)) return key;
+        
+        return TEntity.Exists(key) ? key : throw new PbsParseException($"Undefined value {value} in {typeof(TEntity)}.\n{fileLineData.LineReport}");
+    }
+
+    private static bool IsNone<TKey>(TKey key) where TKey : notnull
+    {
+        if (typeof(TKey) != typeof(Name)) return false;
+        
+        var asName = (Name)(object)key;
+        return asName.IsNone;
+
+    } 
+
+    private static TKey ConvertKey<TKey>(string value, FileLineData fileLineData) where TKey : notnull
+    {
+        if (typeof(TKey).IsAssignableFrom(typeof(string)))
+        { 
+            return (TKey)(object)value;
+        }
+        
+        var implicitConversion = typeof(TKey).GetMethod("op_Implicit", [typeof(string)]);
+        if (implicitConversion is not null && implicitConversion.ReturnType.IsAssignableTo(typeof(TKey)))
+        {
+            return (TKey)implicitConversion.Invoke(null, [value])!;
+        }
+        
+        var parseInterface = typeof(TKey).GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IParsable<>) && i.GetGenericArguments()[0] == typeof(TKey));
+        if (parseInterface is not null)
+        {
+            var parseMethod = ParseKeyMethod.MakeGenericMethod(typeof(TKey));
+            return (TKey)parseMethod.Invoke(null, [value, fileLineData])!;
+        }
+
+        throw new PbsParseException($"Incorrect key type {typeof(TKey)}\n{fileLineData.LineReport}");
+    }
+
+    private static readonly MethodInfo ParseKeyMethod =
+        typeof(CsvParser).GetMethod(nameof(ParseKey), BindingFlags.NonPublic | BindingFlags.Static)!;
+    
+    private static TKey ParseKey<TKey>(string value, FileLineData fileLineData) where TKey : IParsable<TKey>
+    {
+        return TKey.TryParse(value, null, out var result) ? result : throw new PbsParseException($"Could not parse {value} to type {typeof(TKey)}\n{fileLineData.LineReport}");
+    }
+
+    private static object? ParseEnumOrInt(string value, Type? enumeration, bool allowNone, FileLineData fileLineData)
+    {
+        return int.TryParse(value, out var result) ? result : ParseEnumField(value, enumeration, allowNone, fileLineData);
     }
 
     public static object? GetCsvRecord(string record, SchemaEntry schema, FileLineData fileLineData)

@@ -239,6 +239,8 @@ internal static class NameTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static uint GetOrAddEntry(ReadOnlySpan<char> value, bool caseSensitive = false)
     {
+        if (IsNoneSpan(value)) return 0;
+        
         var hash = ComputeHash(value, caseSensitive);
         var bucketIndex = hash & BucketMask; // Fast modulo for power of 2
         var bucket = HashBuckets[bucketIndex];

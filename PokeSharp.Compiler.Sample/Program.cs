@@ -10,9 +10,11 @@ using Environment = PokeSharp.Data.Core.Environment;
 
 var builder = new GameContextBuilder("test");
 
-builder.Services.AddSingleton<PbsCompilerService>()
+builder.Services.AddLogging()
+    .AddSingleton<PbsCompilerService>()
     .AddSingleton<IPbsCompiler, TypeCompiler>()
     .AddSingleton<IPbsCompiler, AbilityCompiler>()
+    .AddSingleton<IPbsCompiler, MoveCompiler>()
     .AddGrowthRateData()
     .AddGenderRatioData()
     .AddEggGroupData()

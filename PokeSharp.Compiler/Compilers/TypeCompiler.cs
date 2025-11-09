@@ -9,7 +9,7 @@ namespace PokeSharp.Compiler.Compilers;
 
 public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
 {
-    public override int Order => 1;
+    public override int Order => 3;
 
     protected override PokemonType ConvertToEntity(PokemonTypeInfo model) => model.ToGameData();
     protected override PokemonTypeInfo ConvertToModel(PokemonType entity) => entity.ToDto();

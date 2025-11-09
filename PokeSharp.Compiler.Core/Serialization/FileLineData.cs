@@ -1,58 +1,45 @@
 ﻿namespace PokeSharp.Compiler.Core.Serialization;
 
-public class FileLineData
+public record FileLineData(string File)
 {
-    public string File { get; set; } = string.Empty;
-    
-    private string _lineData = string.Empty;
-    
-    private int _lineNumber = 0;
+    private string LineData { get; init; } = string.Empty;
 
-    private string? _section;
+    private int LineNumber { get; init; }
 
-    private string? _key;
-    
-    private string? _value;
+    private string? Section { get; init; }
 
-    public void Clear()
+    private string? Key { get; init; }
+
+    private string? Value { get; init; }
+
+    public FileLineData WithSection(string? section, string? key, string? value)
     {
-        File = string.Empty;
-        _lineData = string.Empty;
-        _lineNumber = 0;
-        _section = null;
-        _key = null;
-        _value = null;
+        return this with
+        {
+            Section = section,
+            Key = key,
+            Value = value is not null && value.Length > 200 ? $"{value[..200]}..." : value ?? string.Empty
+        };
     }
 
-    public void SetSection(string? section, string? key, string? value)
+    public FileLineData WithLine(string line, int lineNumber)
     {
-        _section = section;
-        _key = key;
-        if (value is not null && value.Length > 200)
+        return this with
         {
-            _value = $"{value[..200]}...";
-        }
-        else
-        {
-            _value = value ?? string.Empty;
-        }
-    }
-
-    public void SetLine(string line, int lineNumber)
-    {
-        _section = null;
-        _lineData = line.Length > 200 ? $"{line[..200]}..." : line;
-        _lineNumber = lineNumber;
+            Section = null,
+            LineData = line.Length > 200 ? $"{line[..200]}..." : line,
+            LineNumber = lineNumber,
+        };
     }
 
     public string LineReport
     {
         get
         {
-            if (_section is null)
-                return $"File {File}, line {_lineNumber}\n{_lineData}\n \n";
+            if (Section is null)
+                return $"File {File}, line {LineNumber}\n{LineData}\n \n";
 
-            return _key is null ? $"File {File}, section {_section}\n{_value}\n \n" : $"File {File}, section {_section}, key {_key}\n{_value}\n \n";
+            return Key is null ? $"File {File}, section {Section}\n{Value}\n \n" : $"File {File}, section {Section}, key {Key}\n{Value}\n \n";
         }
     }
 }

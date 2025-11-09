@@ -61,10 +61,7 @@ public enum PbsFieldStructure
     Repeating
 }
 
-public readonly record struct SchemaTypeData(PbsFieldType Type, bool IsOptional = false, Type? EnumType = null)
-{
-    public static implicit operator SchemaTypeData(PbsFieldType type) => new(type);
-}
+public readonly record struct SchemaTypeData(PbsFieldType Type, bool IsOptional = false, Type? EnumType = null, bool AllowNone = false);
 
 public record SchemaEntry(string PropertyName, ImmutableArray<SchemaTypeData> TypeEntries)
 {

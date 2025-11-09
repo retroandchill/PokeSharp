@@ -16,39 +16,39 @@ public partial record Move
 {
     public required Name Id { get; init; }
     
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public required Text Name { get; init; }
 
-    public Name Type { get; init; }
+    public required Name Type { get; init; }
 
-    public DamageCategory DamageCategory { get; init; } = DamageCategory.Status;
+    public required DamageCategory Category { get; init; }
 
-    public int Power { get; init; } = 0;
+    public required int Power { get; init; }
 
-    public int Accuracy { get; init; } = 100;
+    public required int Accuracy { get; init; }
 
-    public int TotalPP { get; init; } = 5;
+    public required int TotalPP { get; init; }
     
-    public Name Target { get; init; }
+    public required Name Target { get; init; }
     
-    public int Priority { get; init; } = 0;
+    public required int Priority { get; init; }
     
-    public Name FunctionCode { get; init; }
+    public required Name FunctionCode { get; init; }
     
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required IReadOnlySet<Name> Flags { get; init; }
     
-    public int EffectChance { get; init; } = 0;
+    public required int EffectChance { get; init; }
     
-    public Text Description { get; init; } = TextConstants.ThreeQuestions;
+    public required Text Description { get; init; }
     
     public bool HasFlag(Name flag) => Flags.Contains(flag);
     
-    public bool IsPhysical => DamageCategory == DamageCategory.Physical;
+    public bool IsPhysical => Category == DamageCategory.Physical;
     
-    public bool IsSpecial => DamageCategory == DamageCategory.Special;
+    public bool IsSpecial => Category == DamageCategory.Special;
     
-    public bool IsDamaging => DamageCategory != DamageCategory.Status;
+    public bool IsDamaging => Category != DamageCategory.Status;
     
-    public bool IsStatus => DamageCategory == DamageCategory.Status;
+    public bool IsStatus => Category == DamageCategory.Status;
 
     public bool IsHiddenMove => Item.Entities.Any(i => i.IsHM && i.Move == Id);
 }

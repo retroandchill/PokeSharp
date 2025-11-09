@@ -13,6 +13,7 @@ public record PokemonTypeInfo
 
     public Text Name { get; init; } = TextConstants.Unnamed;
 
+    [PbsType(PbsFieldType.UnsignedInteger)]
     public int IconPosition { get; init; }
     
     public bool IsSpecialType { get; init; }

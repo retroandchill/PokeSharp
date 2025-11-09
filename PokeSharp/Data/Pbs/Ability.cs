@@ -9,11 +9,11 @@ public partial record Ability
 {
     public required Name Id { get; init; }
     
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public required Text Name { get; init; }
 
-    public Text Description { get; init; } = TextConstants.ThreeQuestions;
+    public required Text Description { get; init; }
     
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required IReadOnlySet<Name> Flags { get; init; }
     
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 }

@@ -31,7 +31,7 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler where TEntity 
     public async Task Compile(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         var entities = await serializer.ReadFromFile<TModel>(_fileName, cancellationToken)
-            .Select(model => ValidateCompiledModel(model, serializer.LineData))
+            .Select(x => ValidateCompiledModel(x.Model, x.LineData))
             .Select(ConvertToEntity)
             .ToListAsync(cancellationToken: cancellationToken);
 

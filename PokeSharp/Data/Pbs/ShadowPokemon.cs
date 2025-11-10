@@ -16,11 +16,11 @@ public partial record ShadowPokemon
 
     public int Form => Id.Form;
 
-    public int GaugeSize { get; init; } = 4000;
+    public required int GaugeSize { get; init; }
 
-    public ImmutableArray<Name> Moves { get; init; } = [];
+    public required ImmutableArray<Name> Moves { get; init; }
 
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required ImmutableArray<Name> Flags { get; init; }
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 }

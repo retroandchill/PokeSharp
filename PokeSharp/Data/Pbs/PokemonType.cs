@@ -26,7 +26,7 @@ public partial record PokemonType
 
     public required ImmutableArray<Name> Immunities { get; init; }
 
-    public required IReadOnlySet<Name> Flags { get; init; }
+    public required ImmutableArray<Name> Flags { get; init; }
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 

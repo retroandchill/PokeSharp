@@ -26,5 +26,5 @@ public record PokemonTypeInfo
 
     public ImmutableArray<Name> Immunities { get; init; } = [];
 
-    public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
+    public ImmutableArray<string> Flags { get; init; } = [];
 }

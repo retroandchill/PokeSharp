@@ -34,7 +34,7 @@ public partial record Move
 
     public required Name FunctionCode { get; init; }
 
-    public required IReadOnlySet<Name> Flags { get; init; }
+    public required ImmutableArray<Name> Flags { get; init; }
 
     public required int EffectChance { get; init; }
 

@@ -5,13 +5,16 @@ using PokeSharp.Data;
 
 namespace PokeSharp.Compiler.Model;
 
-[PbsData("abilities")]
-public record AbilityInfo
+[PbsData("ribbons")]
+public record RibbonInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
     public Text Name { get; init; } = TextConstants.Unnamed;
+
+    [PbsType(PbsFieldType.UnsignedInteger)]
+    public int IconPosition { get; init; }
 
     [PbsType(PbsFieldType.UnformattedText)]
     public Text Description { get; init; } = TextConstants.ThreeQuestions;

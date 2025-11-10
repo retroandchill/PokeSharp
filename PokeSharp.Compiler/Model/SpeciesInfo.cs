@@ -102,7 +102,7 @@ public record SpeciesInfo
 
     public int Generation { get; init; } = 0;
 
-    public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
+    public ImmutableArray<string> Flags { get; init; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
     public ImmutableArray<Name> WildItemCommon { get; init; } = [];
@@ -216,7 +216,7 @@ public record SpeciesFormInfo
 
     public int Generation { get; init; }
 
-    public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
+    public ImmutableArray<string> Flags { get; init; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
     public ImmutableArray<Name> WildItemCommon { get; init; }

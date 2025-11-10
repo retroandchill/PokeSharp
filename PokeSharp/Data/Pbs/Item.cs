@@ -95,7 +95,7 @@ public partial class Item
 
     public required BattleUse BattleUse { get; init; }
 
-    public required IReadOnlySet<Name> Flags { get; init; }
+    public required ImmutableArray<Name> Flags { get; init; }
 
     public required bool Consumable
     {

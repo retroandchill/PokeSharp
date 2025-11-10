@@ -36,7 +36,7 @@ public record MoveInfo
 
     public Name FunctionCode { get; init; }
 
-    public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
+    public ImmutableArray<string> Flags { get; init; } = [];
 
     [PbsType(PbsFieldType.UnsignedInteger)]
     public int EffectChance { get; init; }

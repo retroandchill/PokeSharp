@@ -125,7 +125,7 @@ public partial record Species
 
     public required int Generation { get; init; }
 
-    public required IReadOnlySet<Name> Flags { get; init; }
+    public required ImmutableArray<Name> Flags { get; init; }
 
     public Name MegaStone { get; init; }
 

@@ -459,6 +459,11 @@ public partial class PbsSerializer
         Func<T, string, object?> propertyGetter
     )
     {
+        var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
+
+        if (attribute.IsOptional && !File.Exists(path))
+            return;
+
         var schema = _schemaBuilder.BuildSchema(typeof(T));
 
         if (!schema.TryGetValue("SectionName", out var sectionName))

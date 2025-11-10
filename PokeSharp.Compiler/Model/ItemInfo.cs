@@ -36,7 +36,7 @@ public record ItemInfo
 
     public BattleUse BattleUse { get; init; } = BattleUse.NoBattleUse;
 
-    public IReadOnlySet<string> Flags { get; init; } = ImmutableHashSet<string>.Empty;
+    public ImmutableArray<string> Flags { get; init; } = [];
 
     public bool? Consumable { get; init; }
 

@@ -17,24 +17,25 @@ public partial record TrainerType
 {
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public required Text Name { get; init; }
 
-    public TrainerGender Gender { get; init; } = TrainerGender.Unknown;
+    public required TrainerGender Gender { get; init; }
 
     public bool IsMale => Gender == TrainerGender.Male;
 
     public bool IsFemale => Gender == TrainerGender.Female;
 
-    public int BaseMoney { get; init; } = 30;
+    public required int BaseMoney { get; init; }
 
-    private readonly int? _skillLevel;
-    public int SkillLevel
-    {
-        get => _skillLevel ?? BaseMoney;
-        init => _skillLevel = value;
-    }
+    public required int SkillLevel { get; init; }
 
-    public IReadOnlySet<Name> Flags { get; init; } = ImmutableHashSet<Name>.Empty;
+    public required ImmutableArray<Name> Flags { get; init; }
+
+    public required string? IntroBGM { get; init; }
+
+    public required string? BattleBGM { get; init; }
+
+    public required string? VictoryBGM { get; init; }
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 }

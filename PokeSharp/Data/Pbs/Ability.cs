@@ -13,7 +13,7 @@ public partial record Ability
 
     public required Text Description { get; init; }
 
-    public required IReadOnlySet<Name> Flags { get; init; }
+    public required ImmutableArray<Name> Flags { get; init; }
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 }

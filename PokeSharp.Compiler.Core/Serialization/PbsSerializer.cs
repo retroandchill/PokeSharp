@@ -468,43 +468,79 @@ public partial class PbsSerializer
             );
         }
 
-        await using var fileWriter = new StreamWriter(path, false, Encoding.UTF8);
-        await AddPbsHeaderToFile(fileWriter);
+        string? backupPath = null;
 
-        foreach (var entity in entities)
+        if (File.Exists(path))
         {
-            await fileWriter.WriteLineAsync("#-------------------------------");
-            await fileWriter.WriteLineAsync(
-                $"[{propertyGetter(entity, sectionName.PropertyName)}]"
-            );
+            backupPath = $"{path}.backup";
+            File.Copy(path, backupPath, true);
+        }
 
-            foreach (var (key, value) in schema)
+        try
+        {
+            await using var fileWriter = new StreamWriter(path, false, Encoding.UTF8);
+            await AddPbsHeaderToFile(fileWriter);
+
+            foreach (var entity in entities)
             {
-                if (key == "SectionName")
-                    continue;
+                await fileWriter.WriteLineAsync("#-------------------------------");
+                await fileWriter.WriteLineAsync(
+                    $"[{propertyGetter(entity, sectionName.PropertyName)}]"
+                );
 
-                var elementValue = propertyGetter(entity, value.PropertyName);
-                if (elementValue is null)
-                    continue;
-
-                if (
-                    value.FieldStructure == PbsFieldStructure.Repeating
-                    && elementValue is IEnumerable list
-                )
+                foreach (var (key, value) in schema)
                 {
-                    foreach (var item in list)
+                    if (key == "SectionName")
+                        continue;
+
+                    var elementValue = propertyGetter(entity, value.PropertyName);
+                    if (elementValue is null)
+                        continue;
+
+                    if (
+                        value.FieldStructure == PbsFieldStructure.Repeating
+                        && elementValue is IEnumerable list
+                    )
+                    {
+                        foreach (var item in list)
+                        {
+                            await fileWriter.WriteAsync($"{key} = ");
+                            await CsvWriter.WriteCsvRecord(item, fileWriter, value);
+                            await fileWriter.WriteLineAsync();
+                        }
+                    }
+                    else
                     {
                         await fileWriter.WriteAsync($"{key} = ");
-                        await CsvWriter.WriteCsvRecord(item, fileWriter, value);
+                        await CsvWriter.WriteCsvRecord(elementValue, fileWriter, value);
                         await fileWriter.WriteLineAsync();
                     }
                 }
-                else
-                {
-                    await fileWriter.WriteAsync($"{key} = ");
-                    await CsvWriter.WriteCsvRecord(elementValue, fileWriter, value);
-                    await fileWriter.WriteLineAsync();
-                }
+            }
+        }
+        catch
+        {
+            if (backupPath is null || !File.Exists(backupPath))
+                throw;
+
+            try
+            {
+                File.Move(backupPath, path, true);
+            }
+            catch
+            {
+                File.Delete(path);
+                throw;
+            }
+
+            throw;
+        }
+        finally
+        {
+            // Clean up backup file on success
+            if (backupPath != null && File.Exists(backupPath))
+            {
+                File.Delete(backupPath);
             }
         }
     }

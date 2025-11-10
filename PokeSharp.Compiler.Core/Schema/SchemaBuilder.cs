@@ -131,7 +131,7 @@ public class SchemaBuilder
         if (!IsValidFieldType(propType, typeAttribute.FieldType, typeAttribute.EnumType))
         {
             throw new PbsSchemaException(
-                $"Property '{property.Name}' has an invalid type. Expected '{typeAttribute.FieldType}' but got '{property.PropertyType}'."
+                $"Property '{property.Name}' has an invalid type. Expected '{typeAttribute.FieldType}' but got '{propType}'."
             );
         }
 
@@ -275,7 +275,17 @@ public class SchemaBuilder
             return false;
 
         var keyType = gameDataEntityInterface.GetGenericArguments()[0];
-        return propType.IsAssignableFrom(keyType);
+        if (propType.IsAssignableFrom(keyType))
+            return true;
+
+        var implicitConversion = keyType.GetMethod(
+            "op_Implicit",
+            BindingFlags.Public | BindingFlags.Static,
+            null,
+            [propType],
+            null
+        );
+        return implicitConversion is not null;
     }
 
     private static SchemaTypeData InferFieldType(Type propType)

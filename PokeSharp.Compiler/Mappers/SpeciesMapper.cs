@@ -95,7 +95,7 @@ public static partial class SpeciesMapper
         return
         [
             .. evolutionInfo
-                .Where(e => e is { IsPrevious: false, EvolutionMethod.IsValid: true })
+                .Where(e => !e.IsPrevious)
                 .Select(e => new FormEvolutionMethodInfo(
                     e.Species,
                     e.EvolutionMethod,

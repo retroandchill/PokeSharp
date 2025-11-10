@@ -121,7 +121,10 @@ public record SpeciesInfo
 public readonly record struct SpeciesFormIdentifierInfo(
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
     [property: PbsType(PbsFieldType.PositiveInteger)] int Form
-);
+)
+{
+    public override string ToString() => $"{Species},{Form}";
+}
 
 public readonly record struct FormEvolutionMethodInfo(
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,

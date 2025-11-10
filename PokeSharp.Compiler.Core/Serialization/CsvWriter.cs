@@ -93,7 +93,12 @@ public static class CsvWriter
         Type? enumType
     )
     {
-        // TODO: This needs some more logic, but for now we're just going to write the value.
+        if (enumType is not null && enumType.IsEnum)
+        {
+            var underlyingType = Enum.GetUnderlyingType(enumType);
+            record = Convert.ChangeType(record, underlyingType);
+        }
+
         await writer.WriteAsync(record?.ToString() ?? "");
     }
 

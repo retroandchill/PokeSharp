@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
-using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
@@ -13,21 +12,13 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
-public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
+public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
 {
     public override int Order => 9;
 
-    private static readonly Dictionary<string, PropertyInfo> PropertyMap = new();
-
-    static PokemonFormCompiler()
-    {
-        foreach (var property in typeof(SpeciesFormInfo).GetProperties())
-        {
-            var attribute = property.GetCustomAttribute<PbsFieldBaseAttribute>();
-            var name = attribute?.Name ?? property.Name;
-            PropertyMap.Add(name, property);
-        }
-    }
+    private static readonly Dictionary<string, PropertyInfo> PropertyMap = typeof(SpeciesFormInfo)
+        .GetProperties()
+        .ToDictionary(x => x.Name);
 
     public override async Task Compile(
         PbsSerializer serializer,
@@ -37,7 +28,13 @@ public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         var entities = await serializer
             .ReadFromFile(
                 FileName,
-                name => Species.Get(name).ToSpeciesFormInfo(),
+                name =>
+                    Species.Get(name.Split(",")[0]).ToSpeciesFormInfo() with
+                    {
+                        WildItemCommon = default,
+                        WildItemUncommon = default,
+                        WildItemRare = default,
+                    },
                 cancellationToken
             )
             .Select(x => ValidateCompiledModel(x.Model, x.LineData))
@@ -70,10 +67,7 @@ public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         );
     }
 
-    protected override SpeciesFormInfo ConvertToModel(Species entity)
-    {
-        throw new NotImplementedException();
-    }
+    protected override SpeciesFormInfo ConvertToModel(Species entity) => entity.ToSpeciesFormInfo();
 
     protected override SpeciesFormInfo ValidateCompiledModel(
         SpeciesFormInfo model,
@@ -91,9 +85,31 @@ public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
             );
         }
 
+        var baseData = Species.GetSpeciesForm(model.Id.Species, 0);
+
+        var wildItemCommon = model.WildItemCommon;
+        var wildItemUncommon = model.WildItemUncommon;
+        var wildItemRare = model.WildItemRare;
+
+        if (wildItemCommon.IsDefault && wildItemUncommon.IsDefault && wildItemRare.IsDefault)
+        {
+            wildItemCommon = baseData.WildItemCommon;
+            wildItemUncommon = baseData.WildItemUncommon;
+            wildItemRare = baseData.WildItemRare;
+        }
+        else
+        {
+            wildItemCommon = !wildItemCommon.IsDefault ? wildItemCommon : [];
+            wildItemUncommon = !wildItemUncommon.IsDefault ? wildItemUncommon : [];
+            wildItemRare = !wildItemRare.IsDefault ? wildItemRare : [];
+        }
+
         return model with
         {
             Types = [.. model.Types.Distinct()],
+            WildItemCommon = wildItemCommon,
+            WildItemUncommon = wildItemUncommon,
+            WildItemRare = wildItemRare,
         };
     }
 
@@ -231,14 +247,6 @@ public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         if (original is null)
             return null;
 
-        if (
-            key is nameof(SpeciesFormInfo.Height) or nameof(SpeciesFormInfo.Weight)
-            && original is decimal asDecimal
-        )
-        {
-            original = asDecimal.ToString("0.0");
-        }
-
         var baseForm = Species.GetSpeciesForm(model.Id.Species, 0).ToSpeciesFormInfo();
 
         if (
@@ -259,7 +267,18 @@ public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         var property = PropertyMap[key];
         var baseFormValue = property.GetValue(baseForm);
 
-        return !CompareEqual(original, baseFormValue) ? original : null;
+        if (CompareEqual(original, baseFormValue))
+            return null;
+
+        if (
+            key is nameof(SpeciesFormInfo.Height) or nameof(SpeciesFormInfo.Weight)
+            && original is decimal asDecimal
+        )
+        {
+            return asDecimal.ToString("0.0");
+        }
+
+        return original;
     }
 
     private static bool CompareEqual(object? object1, object? object2)
@@ -267,14 +286,26 @@ public class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         if (Equals(object1, object2))
             return true;
 
-        if (object1 is IEnumerable collection1 && object2 is IEnumerable collection2)
+        if (object1 is IList collection1 && object2 is IList collection2)
         {
-            return collection1
-                .Cast<object?>()
-                .Zip(collection2.Cast<object?>())
-                .All(x => CompareEqual(x.First, x.Second));
+            if (collection1.Count != collection2.Count)
+                return false;
+
+            for (var i = 0; i < collection1.Count; i++)
+            {
+                var item1 = collection1[i];
+                var item2 = collection2[i];
+                if (!CompareEqual(item1, item2))
+                    return false;
+            }
         }
 
-        return false;
+        if (object1 is not IEnumerable enumerable1 || object2 is not IEnumerable enumerable2)
+            return false;
+
+        var enumerable1Options = enumerable1.Cast<object>().ToHashSet();
+        var enumerable2Options = enumerable2.Cast<object>().ToHashSet();
+
+        return enumerable1Options.SetEquals(enumerable2Options);
     }
 }

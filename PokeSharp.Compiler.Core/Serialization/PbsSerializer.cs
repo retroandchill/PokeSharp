@@ -266,8 +266,17 @@ public partial class PbsSerializer
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
     private static partial Regex KeyValuePair { get; }
 
+    public IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(
+        string path,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return ReadFromFile(path, _ => Activator.CreateInstance<T>(), cancellationToken);
+    }
+
     public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(
         string path,
+        Func<string, T> modelFactory,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
@@ -290,7 +299,7 @@ public partial class PbsSerializer
             )
         )
         {
-            var result = Activator.CreateInstance<T>();
+            var result = modelFactory(sectionName);
             var mappedProperties = new HashSet<string>();
             foreach (var (key, schemaEntry) in schema)
             {

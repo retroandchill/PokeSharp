@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Abstractions;
-using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -8,7 +7,10 @@ using Riok.Mapperly.Abstractions;
 
 namespace PokeSharp.Compiler.Mappers;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[Mapper(
+    RequiredMappingStrategy = RequiredMappingStrategy.Target,
+    PreferParameterlessConstructors = false
+)]
 public static partial class SpeciesMapper
 {
     [MapProperty(nameof(SpeciesInfo.Pokedex), nameof(Species.PokedexEntry))]
@@ -20,9 +22,23 @@ public static partial class SpeciesMapper
     [MapperIgnoreTarget(nameof(Species.MegaMessage))]
     public static partial Species ToGameData(this SpeciesInfo dto);
 
+    [MapProperty(nameof(SpeciesInfo.Pokedex), nameof(Species.PokedexEntry))]
+    [MapProperty(nameof(SpeciesInfo.Moves), nameof(Species.LevelUpMoves))]
+    public static partial Species ToGameData(
+        this SpeciesFormInfo dto,
+        Text name,
+        Name growthRate,
+        Name genderRatio,
+        Name incense
+    );
+
     [MapProperty(nameof(Species.PokedexEntry), nameof(SpeciesInfo.Pokedex))]
     [MapProperty(nameof(Species.LevelUpMoves), nameof(SpeciesInfo.Moves))]
     public static partial SpeciesInfo ToDto(this Species entity);
+
+    [MapProperty(nameof(Species.PokedexEntry), nameof(SpeciesInfo.Pokedex))]
+    [MapProperty(nameof(Species.LevelUpMoves), nameof(SpeciesInfo.Moves))]
+    public static partial SpeciesFormInfo ToSpeciesFormInfo(this Species baseForm);
 
     private static Name MapToName(SpeciesForm form) => form.Species;
 
@@ -53,12 +69,7 @@ public static partial class SpeciesMapper
 
     private static ImmutableArray<EVYieldInfo> MapEVs(IReadOnlyDictionary<Name, int> stats)
     {
-        return
-        [
-            .. stats
-                .Select(x => new EVYieldInfo(x.Key, x.Value))
-                .Where(x => x.Amount > 0)
-        ];
+        return [.. stats.Select(x => new EVYieldInfo(x.Key, x.Value)).Where(x => x.Amount > 0)];
     }
 
     private static ImmutableArray<EvolutionMethodInfo> MapEvolutionMethodInfos(
@@ -77,7 +88,32 @@ public static partial class SpeciesMapper
         ];
     }
 
+    private static ImmutableArray<FormEvolutionMethodInfo> MapFormEvolutionMethodInfos(
+        ImmutableArray<EvolutionInfo> evolutionInfo
+    )
+    {
+        return
+        [
+            .. evolutionInfo
+                .Where(e => e is { IsPrevious: false, EvolutionMethod.IsValid: true })
+                .Select(e => new FormEvolutionMethodInfo(
+                    e.Species,
+                    e.EvolutionMethod,
+                    e.Parameter?.ToString()
+                )),
+        ];
+    }
+
     private static EvolutionInfo MapEvolutionInfo(EvolutionMethodInfo evolutionInfo)
+    {
+        return new EvolutionInfo(
+            evolutionInfo.Species,
+            evolutionInfo.Method,
+            evolutionInfo.Parameter
+        );
+    }
+
+    private static EvolutionInfo MapEvolutionInfo(FormEvolutionMethodInfo evolutionInfo)
     {
         return new EvolutionInfo(
             evolutionInfo.Species,

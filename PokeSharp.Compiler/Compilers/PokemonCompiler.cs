@@ -17,10 +17,6 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 {
     public override int Order => 8;
 
-    protected override Species ConvertToEntity(SpeciesInfo model) => model.ToGameData();
-
-    protected override SpeciesInfo ConvertToModel(Species entity) => entity.ToDto();
-
     public override async Task WriteToFile(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
@@ -32,6 +28,10 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
             GetPropertyForPbs
         );
     }
+
+    protected override Species ConvertToEntity(SpeciesInfo model) => model.ToGameData();
+
+    protected override SpeciesInfo ConvertToModel(Species entity) => entity.ToDto();
 
     protected override SpeciesInfo ValidateCompiledModel(
         SpeciesInfo model,
@@ -157,13 +157,27 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
         }
 
         // Collect all pre-evolutions and distribute them to all species
-        var allEvolutions = newEvolutions
-            .SelectMany(s => s.Value, (s, e) => (Species: s.Key, Evolution: e))
-            .GroupBy(
-                x => x.Evolution.Species,
-                x => x.Evolution with { Species = x.Species, IsPrevious = true }
-            )
-            .ToImmutableDictionary(x => x.Key, x => x.ToList());
+        var allEvolutions = new Dictionary<Name, EvolutionInfo>();
+        foreach (var species in entities)
+        {
+            if (!newEvolutions.TryGetValue(species.SpeciesId, out var evolutions))
+            {
+                evolutions = [];
+                newEvolutions.Add(species.SpeciesId, evolutions);
+            }
+
+            foreach (var evo in evolutions.Where(evo => !allEvolutions.ContainsKey(evo.Species)))
+            {
+                allEvolutions.Add(
+                    evo.Species,
+                    evo with
+                    {
+                        Species = species.SpeciesId,
+                        IsPrevious = true,
+                    }
+                );
+            }
+        }
         for (var i = 0; i < entities.Length; i++)
         {
             var species = entities[i];
@@ -171,7 +185,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
             var evolutionList = newEvolutions[speciesId];
             if (allEvolutions.TryGetValue(speciesId, out var previousEvolutions))
             {
-                evolutionList.AddRange(previousEvolutions);
+                evolutionList.Add(previousEvolutions);
             }
 
             entities[i] = species with { Evolutions = [.. evolutionList] };

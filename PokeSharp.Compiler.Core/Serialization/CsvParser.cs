@@ -264,8 +264,20 @@ public static partial class CsvParser
     public static object? ParseEnumOrInt(string value, Type? enumeration, bool allowNone)
     {
         return int.TryParse(value, out var result)
-            ? result
+            ? ConvertToEnumType(result, enumeration)
             : ParseEnumField(value, enumeration, allowNone);
+    }
+
+    private static object? ConvertToEnumType(int value, Type? enumType)
+    {
+        if (enumType is null)
+            return value;
+
+        return Enum.IsDefined(enumType, value)
+            ? Enum.ToObject(enumType, value)
+            : throw new SerializationException(
+                $"Value {value} is not a valid value for {enumType}."
+            );
     }
 
     public static object? GetCsvRecord(string record, SchemaEntry schema)

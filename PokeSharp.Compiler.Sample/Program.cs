@@ -19,6 +19,7 @@ builder
     .AddSingleton<IPbsCompiler, ItemCompiler>()
     .AddSingleton<IPbsCompiler, BerryPlantCompiler>()
     .AddSingleton<IPbsCompiler, PokemonCompiler>()
+    .AddSingleton<IPbsCompiler, PokemonFormCompiler>()
     .AddGrowthRateData()
     .AddGenderRatioData()
     .AddEggGroupData()

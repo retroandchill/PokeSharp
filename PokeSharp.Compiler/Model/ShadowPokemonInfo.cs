@@ -14,15 +14,15 @@ public readonly record struct ShadowPokemonKey(
 }
 
 [PbsData("shadow_pokemon", IsOptional = true)]
-public record ShadowPokemonInfo
+public class ShadowPokemonInfo
 {
     [PbsSectionName]
     public required ShadowPokemonKey Id { get; init; }
 
-    public int GaugeSize { get; init; } = 4000;
+    public int GaugeSize { get; set; } = 4000;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(PokemonType))]
-    public ImmutableArray<Name> Moves { get; init; } = [];
+    public List<Name> Moves { get; set; } = [];
 
-    public ImmutableArray<string> Flags { get; init; } = [];
+    public List<string> Flags { get; set; } = [];
 }

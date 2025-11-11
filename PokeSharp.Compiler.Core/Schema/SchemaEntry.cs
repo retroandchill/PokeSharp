@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 
 namespace PokeSharp.Compiler.Core.Schema;
 
@@ -66,7 +67,9 @@ public readonly record struct SchemaTypeData(
     bool AllowNone = false
 );
 
-public record SchemaEntry(string PropertyName, ImmutableArray<SchemaTypeData> TypeEntries)
+public record SchemaEntry(PropertyInfo Property, ImmutableArray<SchemaTypeData> TypeEntries)
 {
+    public string PropertyName => Property.Name;
+
     public PbsFieldStructure FieldStructure { get; init; } = PbsFieldStructure.Single;
 }

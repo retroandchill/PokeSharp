@@ -107,6 +107,9 @@ public partial class PbsSerializer
         new ComplexTypeConverter(),
     ];
 
+    public IReadOnlyDictionary<string, SchemaEntry> GetSchema(Type type) =>
+        _schemaBuilder.BuildSchema(type);
+
     public static async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(
         StreamReader fileReader,
         FileLineData lineData,
@@ -260,11 +263,11 @@ public partial class PbsSerializer
         }
     }
 
-    [GeneratedRegex(@"^\s*\[\s*(.*)\s*\]\s*$")]
-    private static partial Regex SectionHeader { get; }
+    [GeneratedRegex(@"^\s*\[\s*(.+)\s*\]\s*$")]
+    public static partial Regex SectionHeader { get; }
 
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
-    private static partial Regex KeyValuePair { get; }
+    public static partial Regex KeyValuePair { get; }
 
     public IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(
         string path,
@@ -313,12 +316,12 @@ public partial class PbsSerializer
                 {
                     try
                     {
-                        SetValueToProperty(
+                        ConversionUtils.SetValueToProperty(
                             "SectionName",
-                            lineData,
                             result,
                             property,
-                            CsvParser.GetCsvRecord(sectionName, schemaEntry)
+                            CsvParser.GetCsvRecord(sectionName, schemaEntry),
+                            Converters
                         );
                     }
                     catch (Exception e)
@@ -337,12 +340,12 @@ public partial class PbsSerializer
                 {
                     value.Match(
                         stringValue =>
-                            SetValueToProperty(
+                            ConversionUtils.SetValueToProperty(
                                 sectionName,
-                                value.LineData,
                                 result,
                                 property,
-                                CsvParser.GetCsvRecord(stringValue, schemaEntry)
+                                CsvParser.GetCsvRecord(stringValue, schemaEntry),
+                                Converters
                             ),
                         list =>
                         {
@@ -350,12 +353,12 @@ public partial class PbsSerializer
                                     CsvParser.GetCsvRecord(item, schemaEntry)
                                 )
                                 .ToList();
-                            SetValueToProperty(
+                            ConversionUtils.SetValueToProperty(
                                 sectionName,
-                                value.LineData,
                                 result,
                                 property,
-                                propertyOutput
+                                propertyOutput,
+                                Converters
                             );
                         },
                         () =>
@@ -393,57 +396,6 @@ public partial class PbsSerializer
 
             yield return new ModelWithLine<T>(result, lineData);
         }
-    }
-
-    private void SetValueToProperty(
-        string sectionName,
-        FileLineData lineData,
-        object? target,
-        PropertyInfo property,
-        object? value
-    )
-    {
-        var converted = ConvertTypeIfNecessary(
-            sectionName,
-            value,
-            property.PropertyType,
-            property,
-            lineData
-        );
-        property.SetValue(target, converted);
-    }
-
-    private object? ConvertTypeIfNecessary(
-        string sectionName,
-        object? value,
-        Type targetType,
-        PropertyInfo property,
-        FileLineData lineData
-    )
-    {
-        if (value is null)
-            return null;
-
-        if (targetType.IsInstanceOfType(value))
-        {
-            return value;
-        }
-
-        var converter = Converters.FirstOrDefault(c =>
-            c.CanConvert(sectionName, property, value, targetType)
-        );
-        if (converter is null)
-            throw new PbsParseException(
-                $"Could not find a converter for the property {property.Name}.\n{lineData.LineReport}"
-            );
-
-        return converter.Convert(
-            sectionName,
-            property,
-            value,
-            targetType,
-            (o, t) => ConvertTypeIfNecessary(sectionName, o, t, property, lineData)
-        );
     }
 
     public static async Task AddPbsHeaderToFile(StreamWriter fileWriter)

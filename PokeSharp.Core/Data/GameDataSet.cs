@@ -6,25 +6,49 @@ public abstract class GameDataSet<TEntity, TKey>
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
-    protected readonly OrderedDictionary<TKey, TEntity> Data = new();
+    private OrderedDictionary<TKey, TEntity> _data = new();
 
-    public IEnumerable<TKey> Keys => Data.Keys;
+    protected OrderedDictionary<TKey, TEntity> Data => _data;
 
-    public IEnumerable<TEntity> Entities => Data.Values;
+    public IEnumerable<TKey> Keys => _data.Keys;
 
-    public int Count => Data.Count;
+    public IEnumerable<TEntity> Entities => _data.Values;
 
-    public bool Exists(TKey key) => Data.ContainsKey(key);
+    public int Count => _data.Count;
+
+    public bool Exists(TKey key) => _data.ContainsKey(key);
 
     public TEntity Get(TKey key)
     {
-        return Data.TryGetValue(key, out var entity)
+        return _data.TryGetValue(key, out var entity)
             ? entity
             : throw new KeyNotFoundException($"Could not find entity with key {key}");
     }
 
     public bool TryGet(TKey key, [NotNullWhen(true)] out TEntity? entity) =>
-        Data.TryGetValue(key, out entity);
+        _data.TryGetValue(key, out entity);
+
+    protected void ReplaceData(IEnumerable<TEntity> entities)
+    {
+        var newData = new OrderedDictionary<TKey, TEntity>();
+        foreach (var entity in entities)
+        {
+            newData.Add(entity.Id, entity);
+        }
+
+        Interlocked.Exchange(ref _data, newData);
+    }
+
+    protected async ValueTask ReplaceDataAsync(IAsyncEnumerable<TEntity> entities)
+    {
+        var newData = new OrderedDictionary<TKey, TEntity>();
+        await foreach (var entity in entities)
+        {
+            newData.Add(entity.Id, entity);
+        }
+
+        Interlocked.Exchange(ref _data, newData);
+    }
 }
 
 public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, TKey>
@@ -41,28 +65,20 @@ public sealed class LoadedGameDataSet<TEntity, TKey>(string outputPath) : GameDa
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
-    public void Import(IEnumerable<TEntity> entities)
+    public void Import(IEnumerable<TEntity> entities) => ReplaceData(entities);
+
+    public ValueTask Load(CancellationToken cancellationToken = default)
     {
-        Data.Clear();
-        foreach (var entity in entities)
-        {
-            Data.Add(entity.Id, entity);
-        }
+        return ReplaceDataAsync(
+            GameContextManager.Current.DataLoader.LoadEntities<TEntity>(
+                outputPath,
+                cancellationToken
+            )
+        );
     }
 
-    public void Load()
+    public ValueTask Save()
     {
-        Data.Clear();
-        foreach (
-            var entity in GameContextManager.Current.DataLoader.LoadEntities<TEntity>(outputPath)
-        )
-        {
-            Data.Add(entity.Id, entity);
-        }
-    }
-
-    public void Save()
-    {
-        GameContextManager.Current.DataLoader.SaveEntities(Data.Values, outputPath);
+        return GameContextManager.Current.DataLoader.SaveEntities(Data.Values, outputPath);
     }
 }

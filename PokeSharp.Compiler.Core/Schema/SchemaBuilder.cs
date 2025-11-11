@@ -67,7 +67,9 @@ public class SchemaBuilder
         var schema = new OrderedDictionary<string, SchemaEntry>();
 
         foreach (
-            var property in targetType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            var property in targetType
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => p.GetCustomAttribute<PbsIgnoreAttribute>() is null)
         )
         {
             var schemaName = GetSchemaName(property);
@@ -93,7 +95,7 @@ public class SchemaBuilder
             ? GetComplexFieldType(propType)
             : GetSimpleFieldType(property, propType, typeAttribute);
 
-        return new SchemaEntry(property.Name, fieldTypes)
+        return new SchemaEntry(property, fieldTypes)
         {
             FieldStructure = GetFieldStructure(property, typeAttribute),
         };
@@ -109,10 +111,16 @@ public class SchemaBuilder
         {
             return
             [
-                .. Enumerable.Repeat(
-                    GetFieldType(property, propType, typeAttribute),
-                    typeAttribute.FixedSize
-                ),
+                .. Enumerable
+                    .Range(0, typeAttribute.FixedSize)
+                    .Select(i =>
+                        GetFieldType(
+                            property,
+                            propType,
+                            typeAttribute,
+                            typeAttribute.FixedSizeIsMax && i > 0
+                        )
+                    ),
             ];
         }
 
@@ -122,11 +130,12 @@ public class SchemaBuilder
     private static SchemaTypeData GetFieldType(
         PropertyInfo property,
         Type propType,
-        PbsTypeAttribute? typeAttribute
+        PbsTypeAttribute? typeAttribute,
+        bool isOptional = false
     )
     {
         if (typeAttribute is null)
-            return InferFieldType(propType);
+            return InferFieldType(propType, isOptional);
 
         if (!IsValidFieldType(propType, typeAttribute.FieldType, typeAttribute.EnumType))
         {
@@ -139,7 +148,7 @@ public class SchemaBuilder
             typeAttribute.FieldType
             is not (PbsFieldType.Enumerable or PbsFieldType.EnumerableOrInteger)
         )
-            return new SchemaTypeData(typeAttribute.FieldType);
+            return new SchemaTypeData(typeAttribute.FieldType, isOptional);
 
         if (typeAttribute.EnumType is null && !propType.IsEnum)
         {
@@ -150,7 +159,7 @@ public class SchemaBuilder
 
         return new SchemaTypeData(
             typeAttribute.FieldType,
-            false,
+            isOptional,
             typeAttribute.EnumType ?? propType,
             typeAttribute.AllowNone
         );
@@ -288,10 +297,10 @@ public class SchemaBuilder
         return implicitConversion is not null;
     }
 
-    private static SchemaTypeData InferFieldType(Type propType)
+    private static SchemaTypeData InferFieldType(Type propType, bool isOptional)
     {
         if (propType.IsEnum)
-            return new SchemaTypeData(PbsFieldType.Enumerable, false, propType);
+            return new SchemaTypeData(PbsFieldType.Enumerable, isOptional, propType);
 
         if (
             propType == typeof(int)
@@ -299,7 +308,7 @@ public class SchemaBuilder
             || propType == typeof(long)
             || propType == typeof(sbyte)
         )
-            return new SchemaTypeData(PbsFieldType.Integer);
+            return new SchemaTypeData(PbsFieldType.Integer, isOptional);
 
         if (
             propType == typeof(uint)
@@ -307,27 +316,27 @@ public class SchemaBuilder
             || propType == typeof(ulong)
             || propType == typeof(byte)
         )
-            return new SchemaTypeData(PbsFieldType.UnsignedInteger);
+            return new SchemaTypeData(PbsFieldType.UnsignedInteger, isOptional);
 
         if (propType == typeof(float) || propType == typeof(double) || propType == typeof(decimal))
-            return new SchemaTypeData(PbsFieldType.Float);
+            return new SchemaTypeData(PbsFieldType.Float, isOptional);
 
         if (propType == typeof(bool))
-            return new SchemaTypeData(PbsFieldType.Boolean);
+            return new SchemaTypeData(PbsFieldType.Boolean, isOptional);
 
         if (propType == typeof(string) || propType == typeof(Text))
-            return new SchemaTypeData(PbsFieldType.String);
+            return new SchemaTypeData(PbsFieldType.String, isOptional);
 
         return propType == typeof(Name)
-            ? new SchemaTypeData(PbsFieldType.Symbol)
-            : new SchemaTypeData(PbsFieldType.UnformattedText);
+            ? new SchemaTypeData(PbsFieldType.Symbol, isOptional)
+            : new SchemaTypeData(PbsFieldType.UnformattedText, isOptional);
     }
 
     private static Type GetUnderlyingType(Type type)
     {
         var nullableUnderlying = Nullable.GetUnderlyingType(type);
         if (nullableUnderlying is not null)
-            return nullableUnderlying;
+            return GetUnderlyingType(nullableUnderlying);
 
         if (type.IsArray)
             return type.GetElementType()!;

@@ -25,97 +25,97 @@ public readonly record struct EvolutionMethodInfo(
 );
 
 [PbsData("pokemon")]
-public record SpeciesInfo
+public class SpeciesInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public Text Name { get; set; } = TextConstants.Unnamed;
 
-    public Text? FormName { get; init; }
+    public Text? FormName { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(PokemonType))]
-    public ImmutableArray<Name> Types { get; init; } = ["NORMAL"];
+    public List<Name> Types { get; set; } = ["NORMAL"];
 
     [PbsType(PbsFieldType.PositiveInteger, FixedSize = 6)]
-    public ImmutableArray<int> BaseStats { get; init; } = [];
+    public List<int> BaseStats { get; set; } = [];
 
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(GenderRatio))]
-    public Name GenderRatio { get; init; } = PokeSharp.Data.Core.GenderRatio.Female50Percent;
+    public Name GenderRatio { get; set; } = PokeSharp.Data.Core.GenderRatio.Female50Percent;
 
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(GrowthRate))]
-    public Name GrowthRate { get; init; } = PokeSharp.Data.Core.GrowthRate.Medium;
+    public Name GrowthRate { get; set; } = PokeSharp.Data.Core.GrowthRate.Medium;
 
     [PbsType(PbsFieldType.PositiveInteger)]
-    public int BaseExp { get; init; } = 100;
+    public int BaseExp { get; set; } = 100;
 
-    public ImmutableArray<EVYieldInfo> EVs { get; init; } = [];
-
-    [PbsType(PbsFieldType.UnsignedInteger)]
-    public int CatchRate { get; init; } = 255;
+    public List<EVYieldInfo> EVs { get; set; } = [];
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int Happiness { get; init; } = 70;
+    public int CatchRate { get; set; } = 255;
+
+    [PbsType(PbsFieldType.UnsignedInteger)]
+    public int Happiness { get; set; } = 70;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Ability))]
-    public ImmutableArray<Name> Abilities { get; init; } = [];
+    public List<Name> Abilities { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Ability))]
-    public ImmutableArray<Name> HiddenAbilities { get; init; } = [];
+    public List<Name> HiddenAbilities { get; set; } = [];
 
-    public ImmutableArray<LevelUpMoveInfo> Moves { get; init; } = [];
-
-    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public ImmutableArray<Name> TutorMoves { get; init; } = [];
+    public List<LevelUpMoveInfo> Moves { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public ImmutableArray<Name> EggMoves { get; init; } = [];
+    public List<Name> TutorMoves { get; set; } = [];
+
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
+    public List<Name> EggMoves { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(EggGroup))]
-    public ImmutableArray<Name> EggGroups { get; init; } = [EggGroup.Undiscovered];
+    public List<Name> EggGroups { get; set; } = [EggGroup.Undiscovered];
 
     [PbsType(PbsFieldType.PositiveInteger)]
-    public int HatchSteps { get; init; } = 1;
+    public int HatchSteps { get; set; } = 1;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public Name Incense { get; init; }
+    public Name Incense { get; set; }
 
-    public ImmutableArray<Name> Offspring { get; init; } = [];
+    public List<Name> Offspring { get; set; } = [];
 
-    public decimal Height { get; init; } = 1;
+    public decimal Height { get; set; } = 1;
 
-    public decimal Weight { get; init; } = 1;
+    public decimal Weight { get; set; } = 1;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyColor))]
-    public Name Color { get; init; } = BodyColor.Red;
+    public Name Color { get; set; } = BodyColor.Red;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyShape))]
-    public Name Shape { get; init; } = BodyShape.Head;
+    public Name Shape { get; set; } = BodyShape.Head;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Habitat))]
-    public Name Habitat { get; init; }
+    public Name Habitat { get; set; }
 
-    public Text Category { get; init; } = TextConstants.ThreeQuestions;
+    public Text Category { get; set; } = TextConstants.ThreeQuestions;
 
     [PbsType(PbsFieldType.UnformattedText)]
-    public Text Pokedex { get; init; } = TextConstants.ThreeQuestions;
+    public Text Pokedex { get; set; } = TextConstants.ThreeQuestions;
 
-    public int Generation { get; init; } = 0;
+    public int Generation { get; set; }
 
-    public ImmutableArray<string> Flags { get; init; } = [];
-
-    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> WildItemCommon { get; init; } = [];
+    public List<string> Flags { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> WildItemUncommon { get; init; } = [];
+    public List<Name> WildItemCommon { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> WildItemRare { get; init; } = [];
+    public List<Name> WildItemUncommon { get; set; } = [];
+
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
+    public List<Name> WildItemRare { get; set; } = [];
 
     [PbsKeyName("Evolution")]
     [PbsKeyRepeat]
-    public ImmutableArray<EvolutionMethodInfo> Evolutions { get; init; } = [];
+    public List<EvolutionMethodInfo> Evolutions { get; set; } = [];
 }
 
 public readonly record struct SpeciesFormIdentifierInfo(
@@ -134,100 +134,100 @@ public readonly record struct FormEvolutionMethodInfo(
 );
 
 [PbsData("pokemon_forms")]
-public record SpeciesFormInfo
+public class SpeciesFormInfo
 {
     [PbsSectionName]
     public required SpeciesFormIdentifierInfo Id { get; init; }
 
-    public Text? FormName { get; init; }
+    public Text? FormName { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int PokedexForm { get; init; }
+    public int PokedexForm { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public Name MegaStone { get; init; }
+    public Name MegaStone { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public Name MegaMove { get; init; }
+    public Name MegaMove { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int UnmegaForm { get; init; }
+    public int UnmegaForm { get; set; }
 
     [PbsType(PbsFieldType.EnumerableOrInteger)]
-    public MegaMessageType MegaMessage { get; init; }
+    public MegaMessageType MegaMessage { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(PokemonType))]
-    public ImmutableArray<Name> Types { get; init; }
+    public List<Name>? Types { get; set; }
 
     [PbsType(PbsFieldType.PositiveInteger, FixedSize = 6)]
-    public ImmutableArray<int> BaseStats { get; init; }
+    public List<int>? BaseStats { get; set; }
 
     [PbsType(PbsFieldType.PositiveInteger)]
-    public int BaseExp { get; init; }
+    public int BaseExp { get; set; }
 
-    public ImmutableArray<EVYieldInfo> EVs { get; init; }
-
-    [PbsType(PbsFieldType.UnsignedInteger)]
-    public int CatchRate { get; init; }
+    public List<EVYieldInfo>? EVs { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int Happiness { get; init; }
+    public int CatchRate { get; set; }
+
+    [PbsType(PbsFieldType.UnsignedInteger)]
+    public int Happiness { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Ability))]
-    public ImmutableArray<Name> Abilities { get; init; }
+    public List<Name>? Abilities { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Ability))]
-    public ImmutableArray<Name> HiddenAbilities { get; init; }
+    public List<Name>? HiddenAbilities { get; set; }
 
-    public ImmutableArray<LevelUpMoveInfo> Moves { get; init; }
-
-    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public ImmutableArray<Name> TutorMoves { get; init; }
+    public List<LevelUpMoveInfo>? Moves { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public ImmutableArray<Name> EggMoves { get; init; }
+    public List<Name>? TutorMoves { get; set; }
+
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
+    public List<Name>? EggMoves { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(EggGroup))]
-    public ImmutableArray<Name> EggGroups { get; init; }
+    public List<Name>? EggGroups { get; set; }
 
     [PbsType(PbsFieldType.PositiveInteger)]
-    public int HatchSteps { get; init; }
+    public int HatchSteps { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))]
-    public ImmutableArray<Name> Offspring { get; init; }
+    public List<Name>? Offspring { get; set; }
 
-    public decimal Height { get; init; }
+    public decimal Height { get; set; }
 
-    public decimal Weight { get; init; }
+    public decimal Weight { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyColor))]
-    public Name Color { get; init; }
+    public Name Color { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyShape))]
-    public Name Shape { get; init; }
+    public Name Shape { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Habitat))]
-    public Name Habitat { get; init; }
+    public Name Habitat { get; set; }
 
-    public Text Category { get; init; }
+    public Text Category { get; set; }
 
     [PbsType(PbsFieldType.UnformattedText)]
-    public Text Pokedex { get; init; }
+    public Text Pokedex { get; set; }
 
-    public int Generation { get; init; }
+    public int Generation { get; set; }
 
-    public ImmutableArray<string> Flags { get; init; } = [];
-
-    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> WildItemCommon { get; init; }
+    public List<string> Flags { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> WildItemUncommon { get; init; }
+    public List<Name>? WildItemCommon { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> WildItemRare { get; init; }
+    public List<Name>? WildItemUncommon { get; set; }
+
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
+    public List<Name>? WildItemRare { get; set; }
 
     [PbsKeyName("Evolution")]
     [PbsKeyRepeat]
-    public ImmutableArray<FormEvolutionMethodInfo> Evolutions { get; init; }
+    public List<FormEvolutionMethodInfo>? Evolutions { get; set; }
 }

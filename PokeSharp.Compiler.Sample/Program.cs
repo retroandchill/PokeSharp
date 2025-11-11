@@ -23,6 +23,7 @@ builder
     .AddSingleton<IPbsCompiler, ShadowPokemonCompiler>()
     .AddSingleton<IPbsCompiler, RibbonCompiler>()
     .AddSingleton<IPbsCompiler, TrainerTypeCompiler>()
+    .AddSingleton<IPbsCompiler, TrainerCompiler>()
     .AddGrowthRateData()
     .AddGenderRatioData()
     .AddEggGroupData()
@@ -47,7 +48,7 @@ builder
     .AddShadowPokemonData()
     .AddRibbonData()
     .AddTrainerTypeData()
-    .AddTrainerData();
+    .AddEnemyTrainerData();
 
 var context = builder.Build();
 

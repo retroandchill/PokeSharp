@@ -8,39 +8,39 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("moves")]
-public record MoveInfo
+public class MoveInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public Text Name { get; set; } = TextConstants.Unnamed;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(PokemonType), AllowNone = true)]
-    public Name Type { get; init; }
+    public Name Type { get; set; }
 
-    public DamageCategory Category { get; init; } = DamageCategory.Status;
-
-    [PbsType(PbsFieldType.UnsignedInteger)]
-    public int Power { get; init; }
+    public DamageCategory Category { get; set; } = DamageCategory.Status;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int Accuracy { get; init; } = 100;
+    public int Power { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int TotalPP { get; init; } = 5;
+    public int Accuracy { get; set; } = 100;
+
+    [PbsType(PbsFieldType.UnsignedInteger)]
+    public int TotalPP { get; set; } = 5;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Target), AllowNone = true)]
-    public Name Target { get; init; }
+    public Name Target { get; set; }
 
-    public int Priority { get; init; }
+    public int Priority { get; set; }
 
-    public Name FunctionCode { get; init; }
+    public Name FunctionCode { get; set; }
 
-    public ImmutableArray<string> Flags { get; init; } = [];
+    public List<string> Flags { get; set; } = [];
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int EffectChance { get; init; }
+    public int EffectChance { get; set; }
 
     [PbsType(PbsFieldType.UnformattedText)]
-    public Text Description { get; init; } = TextConstants.ThreeQuestions;
+    public Text Description { get; set; } = TextConstants.ThreeQuestions;
 }

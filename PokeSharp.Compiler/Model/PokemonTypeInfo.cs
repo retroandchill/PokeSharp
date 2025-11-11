@@ -6,25 +6,25 @@ using PokeSharp.Data;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("types")]
-public record PokemonTypeInfo
+public class PokemonTypeInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public Text Name { get; set; } = TextConstants.Unnamed;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int IconPosition { get; init; }
+    public int IconPosition { get; set; }
 
-    public bool IsSpecialType { get; init; }
+    public bool IsSpecialType { get; set; }
 
-    public bool IsPseudoType { get; init; }
+    public bool IsPseudoType { get; set; }
 
-    public ImmutableArray<Name> Weaknesses { get; init; } = [];
+    public List<Name> Weaknesses { get; set; } = [];
 
-    public ImmutableArray<Name> Resistances { get; init; } = [];
+    public List<Name> Resistances { get; set; } = [];
 
-    public ImmutableArray<Name> Immunities { get; init; } = [];
+    public List<Name> Immunities { get; set; } = [];
 
-    public ImmutableArray<string> Flags { get; init; } = [];
+    public List<string> Flags { get; set; } = [];
 }

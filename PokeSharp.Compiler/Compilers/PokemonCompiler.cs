@@ -4,6 +4,7 @@ using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
+using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Core.Data;
@@ -33,10 +34,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
     protected override SpeciesInfo ConvertToModel(Species entity) => entity.ToDto();
 
-    protected override SpeciesInfo ValidateCompiledModel(
-        SpeciesInfo model,
-        FileLineData fileLineData
-    )
+    protected override void ValidateCompiledModel(SpeciesInfo model, FileLineData fileLineData)
     {
         foreach (var evolution in model.Evolutions.Where(evo => evo.Method.IsValid))
         {
@@ -49,10 +47,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
             );
         }
 
-        return model with
-        {
-            Types = [.. model.Types.Distinct()],
-        };
+        model.Types.DistinctInPlace();
     }
 
     protected override void ValidateAllCompiledEntities(Span<Species> entities)

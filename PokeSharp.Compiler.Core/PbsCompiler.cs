@@ -16,14 +16,13 @@ public interface IPbsCompiler
     Task WriteToFile(PbsSerializer serializer, CancellationToken cancellationToken = default);
 }
 
-public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
-    where TEntity : ILoadedGameDataEntity<TEntity>
+public abstract class PbsCompilerBase<TModel> : IPbsCompiler
 {
     public abstract int Order { get; }
     protected string FileName { get; }
     private readonly Dictionary<string, PropertyInfo> _propertyMap = new();
 
-    protected PbsCompiler()
+    protected PbsCompilerBase()
     {
         var attribute = typeof(TModel).GetCustomAttribute<PbsDataAttribute>();
         if (attribute is null)
@@ -33,46 +32,15 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
         FileName = Path.Join("PBS", $"{attribute.BaseFilename}.txt");
     }
 
-    public virtual async Task Compile(
+    public abstract Task Compile(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
-    )
-    {
-        var entities = await serializer
-            .ReadFromFile<TModel>(FileName, cancellationToken)
-            .Select(x => ValidateCompiledModel(x.Model, x.LineData))
-            .Select(ConvertToEntity)
-            .ToArrayAsync(cancellationToken: cancellationToken);
+    );
 
-        ValidateAllCompiledEntities(entities);
-        TEntity.Import(entities);
-    }
-
-    public virtual async Task WriteToFile(
+    public abstract Task WriteToFile(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
-    )
-    {
-        await serializer.WritePbsFile(
-            FileName,
-            TEntity.Entities.Select(ConvertToModel),
-            GetPropertyForPbs
-        );
-    }
-
-    protected abstract TEntity ConvertToEntity(TModel model);
-
-    protected abstract TModel ConvertToModel(TEntity entity);
-
-    protected virtual TModel ValidateCompiledModel(TModel model, FileLineData fileLineData)
-    {
-        return model;
-    }
-
-    protected virtual void ValidateAllCompiledEntities(Span<TEntity> entities)
-    {
-        // No validation by default
-    }
+    );
 
     protected virtual object? GetPropertyForPbs(TModel model, string key)
     {
@@ -92,5 +60,53 @@ public abstract class PbsCompiler<TEntity, TModel> : IPbsCompiler
             default:
                 return elementValue;
         }
+    }
+}
+
+public abstract class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TModel>
+    where TEntity : ILoadedGameDataEntity<TEntity>
+{
+    public override async Task Compile(
+        PbsSerializer serializer,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var entities = await serializer
+            .ReadFromFile<TModel>(FileName, cancellationToken)
+            .Select(x =>
+            {
+                ValidateCompiledModel(x.Model, x.LineData);
+                return ConvertToEntity(x.Model);
+            })
+            .ToArrayAsync(cancellationToken: cancellationToken);
+
+        ValidateAllCompiledEntities(entities);
+        TEntity.Import(entities);
+    }
+
+    public override async Task WriteToFile(
+        PbsSerializer serializer,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await serializer.WritePbsFile(
+            FileName,
+            TEntity.Entities.Select(ConvertToModel),
+            GetPropertyForPbs
+        );
+    }
+
+    protected abstract TEntity ConvertToEntity(TModel model);
+
+    protected abstract TModel ConvertToModel(TEntity entity);
+
+    protected virtual void ValidateCompiledModel(TModel model, FileLineData fileLineData)
+    {
+        // No validation by default
+    }
+
+    protected virtual void ValidateAllCompiledEntities(Span<TEntity> entities)
+    {
+        // No validation by default
     }
 }

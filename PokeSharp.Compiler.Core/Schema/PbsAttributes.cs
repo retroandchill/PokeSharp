@@ -39,7 +39,12 @@ public sealed class PbsTypeAttribute(PbsFieldType fieldType) : Attribute
     public bool AllowNone { get; init; }
 
     public int FixedSize { get; init; } = -1;
+
+    public bool FixedSizeIsMax { get; init; }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class PbsKeyRepeatAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class PbsIgnoreAttribute : Attribute;

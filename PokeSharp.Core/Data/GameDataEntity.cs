@@ -42,9 +42,9 @@ public interface IRegisteredGameDataEntity<TKey, TEntity>
 
 public interface ILoadedGameDataEntity : IGameDataEntity
 {
-    public static abstract void Load();
+    public static abstract ValueTask Load();
 
-    public static abstract void Save();
+    public static abstract ValueTask Save();
 }
 
 public interface ILoadedGameDataEntity<TEntity> : ILoadedGameDataEntity, IGameDataEntity<TEntity>

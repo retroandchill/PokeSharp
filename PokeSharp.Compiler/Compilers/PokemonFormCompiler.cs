@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
+using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Core.Data;
@@ -12,7 +13,7 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
-public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
+public sealed class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
 {
     public override int Order => 9;
 
@@ -29,12 +30,13 @@ public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
             .ReadFromFile(
                 FileName,
                 name =>
-                    Species.Get(name.Split(",")[0]).ToSpeciesFormInfo() with
-                    {
-                        WildItemCommon = default,
-                        WildItemUncommon = default,
-                        WildItemRare = default,
-                    },
+                {
+                    var formInfo = Species.Get(name.Split(",")[0]).ToSpeciesFormInfo();
+                    formInfo.WildItemCommon = null;
+                    formInfo.WildItemUncommon = null;
+                    formInfo.WildItemRare = null;
+                    return formInfo;
+                },
                 cancellationToken
             )
             .Select(x => ValidateCompiledModel(x.Model, x.LineData))
@@ -56,7 +58,7 @@ public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         );
     }
 
-    protected override Species ConvertToEntity(SpeciesFormInfo model)
+    private static Species ConvertToEntity(SpeciesFormInfo model)
     {
         var baseForm = Species.GetSpeciesForm(model.Id.Species, 0);
         return model.ToGameData(
@@ -67,50 +69,49 @@ public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         );
     }
 
-    protected override SpeciesFormInfo ConvertToModel(Species entity) => entity.ToSpeciesFormInfo();
+    private static SpeciesFormInfo ConvertToModel(Species entity) => entity.ToSpeciesFormInfo();
 
-    protected override SpeciesFormInfo ValidateCompiledModel(
+    private static SpeciesFormInfo ValidateCompiledModel(
         SpeciesFormInfo model,
         FileLineData fileLineData
     )
     {
-        foreach (var evolution in model.Evolutions.Where(evo => evo.Method.IsValid))
+        if (model.Evolutions is not null)
         {
-            var evolutionData = Evolution.Get(evolution.Method);
-            if (evolution.Parameter is not null || evolutionData.Parameter is null)
-                continue;
+            foreach (var evolution in model.Evolutions.Where(evo => evo.Method.IsValid))
+            {
+                var evolutionData = Evolution.Get(evolution.Method);
+                if (evolution.Parameter is not null || evolutionData.Parameter is null)
+                    continue;
 
-            throw new PbsParseException(
-                $"Evolution method {evolutionData.Name} requires a parameter, but none was given.\n{fileLineData}"
-            );
+                throw new PbsParseException(
+                    $"Evolution method {evolutionData.Name} requires a parameter, but none was given.\n{fileLineData}"
+                );
+            }
         }
 
         var baseData = Species.GetSpeciesForm(model.Id.Species, 0);
 
-        var wildItemCommon = model.WildItemCommon;
-        var wildItemUncommon = model.WildItemUncommon;
-        var wildItemRare = model.WildItemRare;
-
-        if (wildItemCommon.IsDefault && wildItemUncommon.IsDefault && wildItemRare.IsDefault)
+        if (
+            model.WildItemCommon is null
+            && model.WildItemUncommon is null
+            && model.WildItemRare is null
+        )
         {
-            wildItemCommon = baseData.WildItemCommon;
-            wildItemUncommon = baseData.WildItemUncommon;
-            wildItemRare = baseData.WildItemRare;
+            model.WildItemCommon = baseData.WildItemCommon.ToList();
+            model.WildItemUncommon = baseData.WildItemUncommon.ToList();
+            model.WildItemRare = baseData.WildItemRare.ToList();
         }
         else
         {
-            wildItemCommon = !wildItemCommon.IsDefault ? wildItemCommon : [];
-            wildItemUncommon = !wildItemUncommon.IsDefault ? wildItemUncommon : [];
-            wildItemRare = !wildItemRare.IsDefault ? wildItemRare : [];
+            model.WildItemCommon ??= [];
+            model.WildItemUncommon ??= [];
+            model.WildItemRare ??= [];
         }
 
-        return model with
-        {
-            Types = [.. model.Types.Distinct()],
-            WildItemCommon = wildItemCommon,
-            WildItemUncommon = wildItemUncommon,
-            WildItemRare = wildItemRare,
-        };
+        model.Types?.DistinctInPlace();
+
+        return model;
     }
 
     private List<Species> ValidateAllCompiledForms(Species[] entities)
@@ -255,9 +256,9 @@ public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
                     or nameof(SpeciesFormInfo.WildItemUncommon)
                     or nameof(SpeciesFormInfo.WildItemRare)
             && (
-                !baseForm.WildItemCommon.SequenceEqual(model.WildItemCommon)
-                || !baseForm.WildItemUncommon.SequenceEqual(model.WildItemUncommon)
-                || !baseForm.WildItemRare.SequenceEqual(model.WildItemRare)
+                !SequenceEqual(baseForm.WildItemCommon, model.WildItemCommon)
+                || !SequenceEqual(baseForm.WildItemUncommon, model.WildItemUncommon)
+                || !SequenceEqual(baseForm.WildItemRare, model.WildItemRare)
             )
         )
         {
@@ -279,6 +280,15 @@ public sealed class PokemonFormCompiler : PbsCompiler<Species, SpeciesFormInfo>
         }
 
         return original;
+    }
+
+    private static bool SequenceEqual<T>(IEnumerable<T>? enumerable1, IEnumerable<T>? enumerable2)
+    {
+        if (ReferenceEquals(enumerable1, enumerable2))
+            return true;
+        if (enumerable1 is null || enumerable2 is null)
+            return false;
+        return enumerable1.SequenceEqual(enumerable2);
     }
 
     private static bool CompareEqual(object? object1, object? object2)

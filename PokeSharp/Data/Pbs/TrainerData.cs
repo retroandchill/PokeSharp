@@ -46,19 +46,23 @@ public record TrainerPokemon
 }
 
 [GameDataEntity(DataPath = "trainers")]
-public partial record Trainer
+public partial record EnemyTrainer
 {
     public static bool Exists(Name trainerType, Text name, int version = 0)
     {
         return Exists(new TrainerIdentifier(trainerType, name, version));
     }
 
-    public static Trainer Get(Name trainerType, Text name, int version = 0)
+    public static EnemyTrainer Get(Name trainerType, Text name, int version = 0)
     {
         return Get(new TrainerIdentifier(trainerType, name, version));
     }
 
-    public static bool TryGet(Name trainerType, Text name, [NotNullWhen(true)] out Trainer? trainer)
+    public static bool TryGet(
+        Name trainerType,
+        Text name,
+        [NotNullWhen(true)] out EnemyTrainer? trainer
+    )
     {
         return TryGet(new TrainerIdentifier(trainerType, name), out trainer);
     }
@@ -67,7 +71,7 @@ public partial record Trainer
         Name trainerType,
         Text name,
         int version,
-        [NotNullWhen(true)] out Trainer? trainer
+        [NotNullWhen(true)] out EnemyTrainer? trainer
     )
     {
         return TryGet(new TrainerIdentifier(trainerType, name, version), out trainer);

@@ -10,16 +10,16 @@ public readonly record struct YieldRangeInfo(
 );
 
 [PbsData("berry_plants")]
-public record BerryPlantInfo
+public class BerryPlantInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
     [PbsType(PbsFieldType.PositiveInteger)]
-    public int HoursPerStage { get; init; } = 3;
+    public int HoursPerStage { get; set; } = 3;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int DryingPerHour { get; init; } = 15;
+    public int DryingPerHour { get; set; } = 15;
 
-    public YieldRangeInfo Yield { get; init; } = new(2, 5);
+    public YieldRangeInfo Yield { get; set; } = new(2, 5);
 }

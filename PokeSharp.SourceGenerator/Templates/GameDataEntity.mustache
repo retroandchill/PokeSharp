@@ -42,9 +42,9 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     {{#IsLoaded}}
     public static void Import(IEnumerable<{{ClassName}}> entities) => Data.Import(entities);
 
-    public static void Load() => Data.Load();
+    public static ValueTask Load() => Data.Load();
 
-    public static void Save() => Data.Save();
+    public static ValueTask Save() => Data.Save();
     {{/IsLoaded}}
     {{^IsLoaded}}
     public static void Register({{ClassName}} entity) => Data.Register(entity);

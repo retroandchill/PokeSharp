@@ -7,44 +7,44 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("items")]
-public record ItemInfo
+public class ItemInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public Text Name { get; set; } = TextConstants.Unnamed;
 
-    public Text NamePlural { get; init; } = TextConstants.Unnamed;
+    public Text NamePlural { get; set; } = TextConstants.Unnamed;
 
-    public Text? PortionName { get; init; }
+    public Text? PortionName { get; set; }
 
-    public Text? PortionNamePlural { get; init; }
+    public Text? PortionNamePlural { get; set; }
 
     [PbsType(PbsFieldType.PositiveInteger)]
-    public int Pocket { get; init; } = 1;
+    public int Pocket { get; set; } = 1;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int Price { get; init; }
+    public int Price { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int? SellPrice { get; init; }
+    public int? SellPrice { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int BPPrice { get; init; } = 1;
+    public int BPPrice { get; set; } = 1;
 
-    public FieldUse FieldUse { get; init; } = FieldUse.NoFieldUse;
+    public FieldUse FieldUse { get; set; } = FieldUse.NoFieldUse;
 
-    public BattleUse BattleUse { get; init; } = BattleUse.NoBattleUse;
+    public BattleUse BattleUse { get; set; } = BattleUse.NoBattleUse;
 
-    public ImmutableArray<string> Flags { get; init; } = [];
+    public List<string> Flags { get; set; } = [];
 
-    public bool? Consumable { get; init; }
+    public bool? Consumable { get; set; }
 
-    public bool? ShowQuantity { get; init; }
+    public bool? ShowQuantity { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move), AllowNone = true)]
-    public Name Move { get; init; }
+    public Name Move { get; set; }
 
     [PbsType(PbsFieldType.UnformattedText)]
-    public Text Description { get; init; } = TextConstants.ThreeQuestions;
+    public Text Description { get; set; } = TextConstants.ThreeQuestions;
 }

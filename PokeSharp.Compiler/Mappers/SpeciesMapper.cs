@@ -42,15 +42,15 @@ public static partial class SpeciesMapper
 
     private static Name MapToName(SpeciesForm form) => form.Species;
 
-    private static IReadOnlyDictionary<Name, int> MapBaseStats(ImmutableArray<int> stats)
+    private static IReadOnlyDictionary<Name, int> MapBaseStats(List<int> stats)
     {
         return Stat
             .AllMain.Where(s => s.PbsOrder >= 0)
-            .Select(s => (s.Id, Value: stats.Length > s.PbsOrder ? stats[s.PbsOrder] : 1))
+            .Select(s => (s.Id, Value: stats.Count > s.PbsOrder ? stats[s.PbsOrder] : 1))
             .ToImmutableDictionary(s => s.Id, s => s.Value);
     }
 
-    private static IReadOnlyDictionary<Name, int> MapEVs(ImmutableArray<EVYieldInfo> stats)
+    private static IReadOnlyDictionary<Name, int> MapEVs(List<EVYieldInfo> stats)
     {
         var statsDictionary = stats.ToDictionary(s => s.Stat, s => s.Amount);
 
@@ -62,17 +62,17 @@ public static partial class SpeciesMapper
         return statsDictionary;
     }
 
-    private static ImmutableArray<int> MapStats(IReadOnlyDictionary<Name, int> stats)
+    private static List<int> MapStats(IReadOnlyDictionary<Name, int> stats)
     {
         return [.. stats.OrderBy(s => Stat.Get(s.Key).PbsOrder).Select(x => x.Value)];
     }
 
-    private static ImmutableArray<EVYieldInfo> MapEVs(IReadOnlyDictionary<Name, int> stats)
+    private static List<EVYieldInfo> MapEVs(IReadOnlyDictionary<Name, int> stats)
     {
         return [.. stats.Select(x => new EVYieldInfo(x.Key, x.Value)).Where(x => x.Amount > 0)];
     }
 
-    private static ImmutableArray<EvolutionMethodInfo> MapEvolutionMethodInfos(
+    private static List<EvolutionMethodInfo> MapEvolutionMethodInfos(
         ImmutableArray<EvolutionInfo> evolutionInfo
     )
     {
@@ -88,7 +88,7 @@ public static partial class SpeciesMapper
         ];
     }
 
-    private static ImmutableArray<FormEvolutionMethodInfo> MapFormEvolutionMethodInfos(
+    private static List<FormEvolutionMethodInfo> MapFormEvolutionMethodInfos(
         ImmutableArray<EvolutionInfo> evolutionInfo
     )
     {

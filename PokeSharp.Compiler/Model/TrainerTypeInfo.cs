@@ -7,26 +7,26 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("trainer_types")]
-public record TrainerTypeInfo
+public class TrainerTypeInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public Text Name { get; set; } = TextConstants.Unnamed;
 
-    public TrainerGender Gender { get; init; } = TrainerGender.Unknown;
-
-    [PbsType(PbsFieldType.UnsignedInteger)]
-    public int BaseMoney { get; init; } = 30;
+    public TrainerGender Gender { get; set; } = TrainerGender.Unknown;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int? SkillLevel { get; init; }
+    public int BaseMoney { get; set; } = 30;
 
-    public ImmutableArray<string> Flags { get; init; } = [];
+    [PbsType(PbsFieldType.UnsignedInteger)]
+    public int? SkillLevel { get; set; }
 
-    public string? IntroBGM { get; init; }
+    public List<string> Flags { get; set; } = [];
 
-    public string? BattleBGM { get; init; }
+    public string? IntroBGM { get; set; }
 
-    public string? VictoryBGM { get; init; }
+    public string? BattleBGM { get; set; }
+
+    public string? VictoryBGM { get; set; }
 }

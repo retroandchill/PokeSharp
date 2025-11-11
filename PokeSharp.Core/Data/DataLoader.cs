@@ -2,7 +2,10 @@
 
 public interface IDataLoader
 {
-    void SaveEntities<T>(IEnumerable<T> entities, string outputPath);
+    ValueTask SaveEntities<T>(IEnumerable<T> entities, string outputPath);
 
-    IEnumerable<T> LoadEntities<T>(string inputPath);
+    IAsyncEnumerable<T> LoadEntities<T>(
+        string inputPath,
+        CancellationToken cancellationToken = default
+    );
 }

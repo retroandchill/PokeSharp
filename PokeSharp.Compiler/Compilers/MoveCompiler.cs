@@ -16,7 +16,7 @@ public class MoveCompiler(ILogger<MoveCompiler> logger) : PbsCompiler<Move, Move
 
     protected override MoveInfo ConvertToModel(Move entity) => entity.ToDto();
 
-    protected override MoveInfo ValidateCompiledModel(MoveInfo model, FileLineData fileLineData)
+    protected override void ValidateCompiledModel(MoveInfo model, FileLineData fileLineData)
     {
         if (model.Category == DamageCategory.Status && model.Power != 0)
         {
@@ -26,14 +26,14 @@ public class MoveCompiler(ILogger<MoveCompiler> logger) : PbsCompiler<Move, Move
         }
 
         if (model.Category == DamageCategory.Status || model.Power != 0)
-            return model;
+            return;
 
         logger.LogWarning(
             "Move {Name} is defined as Physical or Special but has a base damage of 0. Changing it to a Status move.\n{Line}",
             model.Name,
             fileLineData.LineReport
         );
-        return model with { Category = DamageCategory.Status };
+        model.Category = DamageCategory.Status;
     }
 
     protected override object? GetPropertyForPbs(MoveInfo model, string key)

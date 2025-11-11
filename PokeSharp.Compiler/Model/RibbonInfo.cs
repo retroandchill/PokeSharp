@@ -6,18 +6,18 @@ using PokeSharp.Data;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("ribbons")]
-public record RibbonInfo
+public class RibbonInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
 
-    public Text Name { get; init; } = TextConstants.Unnamed;
+    public Text Name { get; set; } = TextConstants.Unnamed;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int IconPosition { get; init; }
+    public int IconPosition { get; set; }
 
     [PbsType(PbsFieldType.UnformattedText)]
-    public Text Description { get; init; } = TextConstants.ThreeQuestions;
+    public Text Description { get; set; } = TextConstants.ThreeQuestions;
 
-    public ImmutableArray<string> Flags { get; init; } = [];
+    public List<string> Flags { get; set; } = [];
 }

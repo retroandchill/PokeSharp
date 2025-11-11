@@ -19,6 +19,8 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 {
     public override int Order => 15;
 
+    private static readonly Dictionary<string, PropertyInfo> _pokemonPropertyMap = new();
+
     private static readonly SchemaEntry PokemonSchemaEntry = new(
         typeof(EnemyTrainerInfo).GetProperty(nameof(EnemyTrainerInfo.Pokemon))!,
         [
@@ -26,9 +28,6 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
             new SchemaTypeData(PbsFieldType.PositiveInteger),
         ]
     );
-
-    private static readonly Dictionary<string, PropertyInfo> _trainerPropertyMap = new();
-    private static readonly Dictionary<string, PropertyInfo> _pokemonPropertyMap = new();
 
     public override async Task Compile(
         PbsSerializer serializer,
@@ -255,11 +254,89 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         }
     }
 
-    public override Task WriteToFile(
+    public override async Task WriteToFile(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
     {
-        throw new NotImplementedException();
+        var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
+        var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
+
+        await FileUtils.WriteFileWithBackupAsync(
+            FileName,
+            async fileWriter =>
+            {
+                await PbsSerializer.AddPbsHeaderToFile(fileWriter);
+
+                foreach (var trainer in EnemyTrainer.Entities.Select(x => x.ToDto()))
+                {
+                    await fileWriter.WriteLineAsync("#-------------------------------");
+                    await fileWriter.WriteLineAsync($"[{trainer.Id}]");
+
+                    foreach (var (key, schemaEntry) in schema)
+                    {
+                        if (key == "SectionName")
+                            continue;
+
+                        var value = GetPropertyForPbs(trainer, key);
+                        if (value is null)
+                            continue;
+
+                        await fileWriter.WriteAsync($"{key} = ");
+                        await CsvWriter.WriteCsvRecord(value, fileWriter, schemaEntry);
+                        await fileWriter.WriteLineAsync();
+                    }
+
+                    foreach (var (i, pokemon) in trainer.Pokemon.Index())
+                    {
+                        await fileWriter.WriteLineAsync(
+                            $"Pokemon = {pokemon.Species},{pokemon.Level}"
+                        );
+
+                        foreach (var (key, schemaEntry) in subschema)
+                        {
+                            var value = GetPropertyForPbs(pokemon, key);
+                            if (value is null)
+                                continue;
+
+                            await fileWriter.WriteAsync($"    {key} = ");
+                            await CsvWriter.WriteCsvRecord(value, fileWriter, schemaEntry);
+                            await fileWriter.WriteLineAsync();
+                        }
+                    }
+                }
+            }
+        );
+    }
+
+    private static object? GetPropertyForPbs(TrainerPokemonInfo model, string key)
+    {
+        if (!_pokemonPropertyMap.TryGetValue(key, out var property))
+        {
+            property = typeof(TrainerPokemonInfo).GetProperty(key);
+            ArgumentNullException.ThrowIfNull(property);
+            _pokemonPropertyMap.Add(key, property);
+        }
+
+        var elementValue = property.GetValue(model);
+        if (
+            elementValue is false
+            || (
+                elementValue is IEnumerable enumerable
+                && CollectionUtils.IsEmptyEnumerable(enumerable)
+            )
+        )
+        {
+            return null;
+        }
+
+        return key switch
+        {
+            nameof(TrainerPokemonInfo.Gender) => !Species.Get(model.Species).IsSingleGendered
+                ? model.Gender?.ToString().ToLowerInvariant()
+                : null,
+            nameof(TrainerPokemonInfo.Shiny) when model.SuperShiny is true => null,
+            _ => elementValue,
+        };
     }
 }

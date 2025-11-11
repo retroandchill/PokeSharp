@@ -37,8 +37,6 @@ public static partial class TrainerMapper
 
     private static List<int> MapStats(IReadOnlyDictionary<Name, int> stats)
     {
-        var allStats = stats.OrderBy(s => Stat.Get(s.Key).PbsOrder).Select(x => x.Value).ToList();
-
-        return allStats.All(x => x == allStats[0]) ? [allStats[0]] : allStats;
+        return stats.OrderBy(s => Stat.Get(s.Key).PbsOrder).Select(x => x.Value).ToList();
     }
 }

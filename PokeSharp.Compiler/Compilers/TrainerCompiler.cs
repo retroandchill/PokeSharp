@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
+using Injectio.Attributes;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
@@ -14,6 +15,7 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
+[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
 public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 {
     public override int Order => 15;

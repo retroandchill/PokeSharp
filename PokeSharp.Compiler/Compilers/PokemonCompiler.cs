@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
@@ -12,6 +13,7 @@ using ZLinq;
 
 namespace PokeSharp.Compiler.Compilers;
 
+[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
 public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 {
     public override int Order => 8;

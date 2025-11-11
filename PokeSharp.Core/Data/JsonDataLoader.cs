@@ -5,6 +5,7 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
 
+[RegisterSingleton(Tags = SerializerTags.Json)]
 public partial class JsonDataLoader : IDataLoader
 {
     [CreateSyncVersion]

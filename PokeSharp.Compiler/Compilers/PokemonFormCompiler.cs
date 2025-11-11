@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
@@ -14,6 +15,7 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
+[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
 public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
 {
     public override int Order => 9;

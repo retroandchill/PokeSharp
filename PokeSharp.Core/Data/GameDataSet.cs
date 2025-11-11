@@ -42,8 +42,9 @@ public abstract partial class GameDataSet<TEntity, TKey>
     }
 }
 
+[RegisterSingleton]
 public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, TKey>
-    where TEntity : IGameDataEntity<TKey, TEntity>
+    where TEntity : IRegisteredGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
     public void Register(TEntity entity)
@@ -52,9 +53,9 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
     }
 }
 
-public sealed partial class LoadedGameDataSet<TEntity, TKey>(string outputPath)
-    : GameDataSet<TEntity, TKey>
-    where TEntity : IGameDataEntity<TKey, TEntity>
+[RegisterSingleton]
+public sealed partial class LoadedGameDataSet<TEntity, TKey> : GameDataSet<TEntity, TKey>
+    where TEntity : ILoadedGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
     [CreateSyncVersion]
@@ -72,7 +73,7 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>(string outputPath)
     {
         return ReplaceDataAsync(
             GameContextManager.Current.DataLoader.LoadEntitiesAsync<TEntity>(
-                outputPath,
+                TEntity.DataPath,
                 cancellationToken
             )
         );
@@ -83,7 +84,7 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>(string outputPath)
     {
         return GameContextManager.Current.DataLoader.SaveEntitiesAsync(
             Data.Values,
-            outputPath,
+            TEntity.DataPath,
             cancellationToken
         );
     }

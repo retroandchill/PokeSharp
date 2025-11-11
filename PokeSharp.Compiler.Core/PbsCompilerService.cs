@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
+using Injectio.Attributes;
 using PokeSharp.Compiler.Core.Serialization;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Core;
 
+[RegisterSingleton]
 public sealed partial class PbsCompilerService
 {
     private readonly ImmutableArray<IPbsCompiler> _compilers;

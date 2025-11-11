@@ -1,4 +1,5 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
@@ -6,6 +7,7 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
+[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
 public class ItemCompiler : PbsCompiler<Item, ItemInfo>
 {
     public override int Order => 6;

@@ -11,6 +11,11 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     
     private static Name _currentContextId;
 
+
+    {{#IsLoaded}}
+    public static string DataPath => "{{DataPath}}";
+    {{/IsLoaded}}
+
     [field: AllowNull]
     private static {{EntityType}}GameDataSet<{{ClassName}}, {{Key}}> Data
     {
@@ -59,17 +64,4 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     {{#Identifiers}}
     public static readonly {{../Key}} {{Identifier}} = "{{Identifier}}";   
     {{/Identifiers}}
-}
-
-public static partial class {{ClassName}}Extensions
-{
-    public static IServiceCollection Add{{ClassName}}Data(this IServiceCollection serviceCollection)
-    {
-        {{#IsLoaded}}
-        return serviceCollection.AddSingleton(_ => new {{EntityType}}GameDataSet<{{ClassName}}, {{key}}>("{{DataPath}}"));
-        {{/IsLoaded}}
-        {{^IsLoaded}}
-        return serviceCollection.AddSingleton<{{EntityType}}GameDataSet<{{ClassName}}, {{key}}>>();
-        {{/IsLoaded}}
-    }
 }

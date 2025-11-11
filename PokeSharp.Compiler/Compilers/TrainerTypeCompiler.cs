@@ -1,10 +1,12 @@
-﻿using PokeSharp.Compiler.Core;
+﻿using Injectio.Attributes;
+using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
+[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
 public class TrainerTypeCompiler : PbsCompiler<TrainerType, TrainerTypeInfo>
 {
     public override int Order => 14;

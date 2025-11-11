@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
@@ -8,6 +9,7 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
+[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
 public class MoveCompiler(ILogger<MoveCompiler> logger) : PbsCompiler<Move, MoveInfo>
 {
     public override int Order => 5;

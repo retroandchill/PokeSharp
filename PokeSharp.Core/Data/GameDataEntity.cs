@@ -42,6 +42,8 @@ public interface IRegisteredGameDataEntity<TKey, TEntity>
 
 public interface ILoadedGameDataEntity : IGameDataEntity
 {
+    static abstract string DataPath { get; }
+
     static abstract void Load();
 
     static abstract ValueTask LoadAsync(CancellationToken cancellationToken = default);

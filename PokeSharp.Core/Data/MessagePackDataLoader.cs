@@ -5,6 +5,7 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
 
+[RegisterSingleton(Tags = SerializerTags.MessagePack)]
 public partial class MessagePackDataLoader : IDataLoader
 {
     private readonly MessagePackSerializerOptions _options =

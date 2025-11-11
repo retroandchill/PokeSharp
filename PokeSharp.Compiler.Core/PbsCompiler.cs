@@ -81,7 +81,7 @@ public abstract class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TModel>
             .ToArrayAsync(cancellationToken: cancellationToken);
 
         ValidateAllCompiledEntities(entities);
-        TEntity.Import(entities);
+        await TEntity.Import(entities, cancellationToken);
     }
 
     public override async Task WriteToFile(

@@ -1,8 +1,6 @@
-﻿using System.Collections.Immutable;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
-using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;

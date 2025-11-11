@@ -65,7 +65,14 @@ public sealed class LoadedGameDataSet<TEntity, TKey>(string outputPath) : GameDa
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
-    public void Import(IEnumerable<TEntity> entities) => ReplaceData(entities);
+    public async ValueTask Import(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ReplaceData(entities);
+        await Save(cancellationToken);
+    }
 
     public ValueTask Load(CancellationToken cancellationToken = default)
     {
@@ -77,8 +84,12 @@ public sealed class LoadedGameDataSet<TEntity, TKey>(string outputPath) : GameDa
         );
     }
 
-    public ValueTask Save()
+    public ValueTask Save(CancellationToken cancellationToken = default)
     {
-        return GameContextManager.Current.DataLoader.SaveEntities(Data.Values, outputPath);
+        return GameContextManager.Current.DataLoader.SaveEntities(
+            Data.Values,
+            outputPath,
+            cancellationToken
+        );
     }
 }

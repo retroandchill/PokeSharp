@@ -3,7 +3,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Compiler.Compilers;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Sample.Data;
 using PokeSharp.Core;
+using PokeSharp.Core.Data;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using Environment = PokeSharp.Data.Core.Environment;
@@ -12,6 +14,7 @@ var builder = new GameContextBuilder("test");
 
 builder
     .Services.AddLogging()
+    .AddSingleton<IDataLoader, NullDataLoader>()
     .AddSingleton<PbsCompilerService>()
     .AddSingleton<IPbsCompiler, TypeCompiler>()
     .AddSingleton<IPbsCompiler, AbilityCompiler>()

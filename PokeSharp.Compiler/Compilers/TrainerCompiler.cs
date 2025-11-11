@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
@@ -19,7 +17,7 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 {
     public override int Order => 15;
 
-    private static readonly Dictionary<string, PropertyInfo> _pokemonPropertyMap = new();
+    private readonly Dictionary<string, PropertyInfo> _pokemonPropertyMap = new();
 
     private static readonly SchemaEntry PokemonSchemaEntry = new(
         typeof(EnemyTrainerInfo).GetProperty(nameof(EnemyTrainerInfo.Pokemon))!,
@@ -45,9 +43,7 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 
         var fileLineData = new FileLineData(FileName);
         var result = new List<EnemyTrainer>();
-        await foreach (
-            var (line, lineNumber) in serializer.ParsePreppedLines(FileName, cancellationToken)
-        )
+        await foreach (var (line, _) in serializer.ParsePreppedLines(FileName, cancellationToken))
         {
             var matchSectionHeader = PbsSerializer.SectionHeader.Match(line);
             if (matchSectionHeader.Success)
@@ -148,7 +144,7 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
             result.Add(currentTrainer.ToGameData());
         }
 
-        EnemyTrainer.Import(result);
+        await EnemyTrainer.Import(result, cancellationToken);
     }
 
     private static void ValidateCompiledTrainer(EnemyTrainerInfo trainer, FileLineData fileLineData)
@@ -287,7 +283,7 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
                         await fileWriter.WriteLineAsync();
                     }
 
-                    foreach (var (i, pokemon) in trainer.Pokemon.Index())
+                    foreach (var pokemon in trainer.Pokemon)
                     {
                         await fileWriter.WriteLineAsync(
                             $"Pokemon = {pokemon.Species},{pokemon.Level}"
@@ -309,7 +305,7 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         );
     }
 
-    private static object? GetPropertyForPbs(TrainerPokemonInfo model, string key)
+    private object? GetPropertyForPbs(TrainerPokemonInfo model, string key)
     {
         if (!_pokemonPropertyMap.TryGetValue(key, out var property))
         {

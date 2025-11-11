@@ -40,11 +40,11 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     public static bool TryGet({{Key}} key, {{#IsReferenceType}}[NotNullWhen(true)] {{/IsReferenceType}}out {{ClassName}}{{#IsReferenceType}}?{{/IsReferenceType}} entity) => Data.TryGet(key, out entity);
     
     {{#IsLoaded}}
-    public static void Import(IEnumerable<{{ClassName}}> entities) => Data.Import(entities);
+    public static ValueTask Import(IEnumerable<{{ClassName}}> entities, CancellationToken cancellationToken = default) => Data.Import(entities, cancellationToken);
 
-    public static ValueTask Load() => Data.Load();
+    public static ValueTask Load(CancellationToken cancellationToken = default) => Data.Load(cancellationToken);
 
-    public static ValueTask Save() => Data.Save();
+    public static ValueTask Save(CancellationToken cancellationToken = default) => Data.Save(cancellationToken);
     {{/IsLoaded}}
     {{^IsLoaded}}
     public static void Register({{ClassName}} entity) => Data.Register(entity);

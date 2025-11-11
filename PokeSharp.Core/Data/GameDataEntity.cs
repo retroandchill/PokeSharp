@@ -42,15 +42,18 @@ public interface IRegisteredGameDataEntity<TKey, TEntity>
 
 public interface ILoadedGameDataEntity : IGameDataEntity
 {
-    public static abstract ValueTask Load();
+    public static abstract ValueTask Load(CancellationToken cancellationToken = default);
 
-    public static abstract ValueTask Save();
+    public static abstract ValueTask Save(CancellationToken cancellationToken = default);
 }
 
 public interface ILoadedGameDataEntity<TEntity> : ILoadedGameDataEntity, IGameDataEntity<TEntity>
     where TEntity : IGameDataEntity<TEntity>
 {
-    public static abstract void Import(IEnumerable<TEntity> entities);
+    public static abstract ValueTask Import(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public interface ILoadedGameDataEntity<TKey, TEntity>

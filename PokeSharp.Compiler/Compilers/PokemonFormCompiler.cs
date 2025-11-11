@@ -43,7 +43,7 @@ public sealed class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
             .Select(ConvertToEntity)
             .ToArrayAsync(cancellationToken: cancellationToken);
 
-        Species.Import(ValidateAllCompiledForms(entities));
+        await Species.Import(ValidateAllCompiledForms(entities), cancellationToken);
     }
 
     public override async Task WriteToFile(

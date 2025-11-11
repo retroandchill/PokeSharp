@@ -85,35 +85,5 @@ namespace PokeSharp.SourceGenerator.Properties {
                 return ResourceManager.GetString("GameDataEntityTemplate", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to #nullable enable
-        ///using UnrealSharp;
-        ///using UnrealSharp.Core;
-        ///
-        ///namespace {{Namespace}};
-        ///
-        ///{{#Extensions}}
-        ///public static partial class {{../ClassName}}_{{EngineName}}
-        ///{
-        ///    {{#Properties}}
-        ///    private static readonly FName {{../EngineName}}_{{Identifier}} = &quot;{{Identifier}}&quot;;
-        ///    {{/Properties}}
-        ///        
-        ///    extension({{ExtendedClass}})
-        ///    {
-        ///        {{#Properties}}
-        ///        public static FName {{Identifier}} =&gt; {{../EngineName}}_{{Identifier}};
-        ///        {{/Properties}}
-        ///    }
-        ///}
-        ///
-        ///{{/Extensions} [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string StaticIdentifiersTemplate {
-            get {
-                return ResourceManager.GetString("StaticIdentifiersTemplate", resourceCulture);
-            }
-        }
     }
 }

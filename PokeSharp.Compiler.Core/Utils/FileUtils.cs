@@ -1,9 +1,11 @@
 ﻿using System.Text;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Core.Utils;
 
-public static class FileUtils
+public static partial class FileUtils
 {
+    [CreateSyncVersion]
     public static async ValueTask WriteFileWithBackupAsync(
         string path,
         Func<StreamWriter, ValueTask> writeAction

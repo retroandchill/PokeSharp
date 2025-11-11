@@ -2,13 +2,17 @@
 
 public interface IDataLoader
 {
-    ValueTask SaveEntities<T>(
+    void SaveEntities<T>(IEnumerable<T> entities, string outputPath);
+
+    ValueTask SaveEntitiesAsync<T>(
         IEnumerable<T> entities,
         string outputPath,
         CancellationToken cancellationToken = default
     );
 
-    IAsyncEnumerable<T> LoadEntities<T>(
+    IEnumerable<T> LoadEntities<T>(string inputPath);
+
+    IAsyncEnumerable<T> LoadEntitiesAsync<T>(
         string inputPath,
         CancellationToken cancellationToken = default
     );

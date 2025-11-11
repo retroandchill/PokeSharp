@@ -16,12 +16,12 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 {
     public override int Order => 8;
 
-    public override async Task WriteToFile(
+    public override async Task WriteToFileAsync(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
     {
-        await serializer.WritePbsFile(
+        await serializer.WritePbsFileAsync(
             FileName,
             Species.AllSpecies.Select(ConvertToModel),
             GetPropertyForPbs

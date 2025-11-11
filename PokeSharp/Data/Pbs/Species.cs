@@ -1,11 +1,14 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.Data.Core;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;
 
+[MessagePackObject(true)]
 public readonly record struct SpeciesForm(Name Species, int Form = 0)
 {
     public static implicit operator SpeciesForm(Name species) => new(species);
@@ -15,8 +18,10 @@ public readonly record struct SpeciesForm(Name Species, int Form = 0)
     public override string ToString() => Form > 0 ? $"{Species},{Form}" : Species.ToString();
 }
 
+[MessagePackObject(true)]
 public readonly record struct LevelUpMove(Name Move, int Level);
 
+[MessagePackObject(true)]
 public record EvolutionInfo(
     Name Species,
     Name EvolutionMethod,
@@ -39,6 +44,7 @@ public enum MegaMessageType
 }
 
 [GameDataEntity(DataPath = "pokemon")]
+[MessagePackObject(true)]
 public partial record Species
 {
     public static Species GetSpeciesForm(Name species, int form)
@@ -52,7 +58,10 @@ public partial record Species
 
     public required SpeciesForm Id { get; init; }
 
+    [IgnoreMember]
     public Name SpeciesId => Id.Species;
+
+    [IgnoreMember]
     public int Form => Id.Form;
 
     public required Text Name { get; init; }
@@ -135,28 +144,35 @@ public partial record Species
 
     public MegaMessageType MegaMessage { get; init; }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public int? DefaultForm
     {
         get
         {
-            var regex = new Regex("DefaultForm_(\\d+)");
-            foreach (var flag in Flags)
+            foreach (
+                var match in Flags
+                    .Select(flag => DefaultFormPattern.Match(flag))
+                    .Where(match => match.Success)
+            )
             {
-                var match = regex.Match(flag);
-                if (match.Success)
-                {
-                    return int.Parse(match.Groups[1].Value);
-                }
+                return int.Parse(match.Groups[1].Value);
             }
 
             return null;
         }
     }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public int BaseForm => DefaultForm ?? Form;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsSingleGendered => Core.GenderRatio.Get(GenderRatio).IsSingleGender;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public int BaseStatTotal => BaseStats.Values.Sum();
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
@@ -186,6 +202,8 @@ public partial record Species
             );
     }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public Name PreviousSpecies
     {
         get
@@ -282,6 +300,8 @@ public partial record Species
         return false;
     }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public int MinimumLevel
     {
         get
@@ -309,4 +329,7 @@ public partial record Species
             return evolutionMethodData.AnyLevelUp ? previousMinLevel + 1 : (int)evo.Parameter!;
         }
     }
+
+    [GeneratedRegex("DefaultForm_(\\d+)")]
+    private static partial Regex DefaultFormPattern { get; }
 }

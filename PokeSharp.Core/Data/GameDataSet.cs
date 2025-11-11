@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
 
-public abstract class GameDataSet<TEntity, TKey>
+public abstract partial class GameDataSet<TEntity, TKey>
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
@@ -28,17 +29,7 @@ public abstract class GameDataSet<TEntity, TKey>
     public bool TryGet(TKey key, [NotNullWhen(true)] out TEntity? entity) =>
         _data.TryGetValue(key, out entity);
 
-    protected void ReplaceData(IEnumerable<TEntity> entities)
-    {
-        var newData = new OrderedDictionary<TKey, TEntity>();
-        foreach (var entity in entities)
-        {
-            newData.Add(entity.Id, entity);
-        }
-
-        Interlocked.Exchange(ref _data, newData);
-    }
-
+    [CreateSyncVersion]
     protected async ValueTask ReplaceDataAsync(IAsyncEnumerable<TEntity> entities)
     {
         var newData = new OrderedDictionary<TKey, TEntity>();
@@ -61,32 +52,36 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
     }
 }
 
-public sealed class LoadedGameDataSet<TEntity, TKey>(string outputPath) : GameDataSet<TEntity, TKey>
+public sealed partial class LoadedGameDataSet<TEntity, TKey>(string outputPath)
+    : GameDataSet<TEntity, TKey>
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
-    public async ValueTask Import(
+    [CreateSyncVersion]
+    public async ValueTask ImportAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default
     )
     {
         ReplaceData(entities);
-        await Save(cancellationToken);
+        await SaveAsync(cancellationToken);
     }
 
-    public ValueTask Load(CancellationToken cancellationToken = default)
+    [CreateSyncVersion]
+    public ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
         return ReplaceDataAsync(
-            GameContextManager.Current.DataLoader.LoadEntities<TEntity>(
+            GameContextManager.Current.DataLoader.LoadEntitiesAsync<TEntity>(
                 outputPath,
                 cancellationToken
             )
         );
     }
 
-    public ValueTask Save(CancellationToken cancellationToken = default)
+    [CreateSyncVersion]
+    public ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
-        return GameContextManager.Current.DataLoader.SaveEntities(
+        return GameContextManager.Current.DataLoader.SaveEntitiesAsync(
             Data.Values,
             outputPath,
             cancellationToken

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 using ZLinq;
@@ -6,6 +8,7 @@ using ZLinq;
 namespace PokeSharp.Data.Pbs;
 
 [GameDataEntity(DataPath = "types")]
+[MessagePackObject(true)]
 public partial record PokemonType
 {
     public required Name Id { get; init; }
@@ -14,6 +17,8 @@ public partial record PokemonType
 
     public required int IconPosition { get; init; }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsPhysicalType => !IsSpecialType;
 
     public required bool IsSpecialType { get; init; }

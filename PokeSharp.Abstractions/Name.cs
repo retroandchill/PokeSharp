@@ -1,4 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
+using MessagePack;
+using PokeSharp.Abstractions.Serializers.Json;
+using PokeSharp.Abstractions.Serializers.MessagePack;
 #if UNREAL_ENGINE
 using UnrealSharp.Core;
 #else
@@ -7,6 +11,8 @@ using System.Collections.Concurrent;
 
 namespace PokeSharp.Abstractions;
 
+[MessagePackFormatter(typeof(NameMessagePackFormatter))]
+[JsonConverter(typeof(NameJsonConverter))]
 public readonly struct Name
     : IEquatable<Name>,
         IEquatable<string>,

@@ -1,0 +1,22 @@
+﻿using MessagePack;
+using MessagePack.Formatters;
+
+namespace PokeSharp.Abstractions.Serializers.MessagePack;
+
+public class NameMessagePackFormatter : IMessagePackFormatter<Name>
+{
+    public void Serialize(
+        ref MessagePackWriter writer,
+        Name value,
+        MessagePackSerializerOptions options
+    )
+    {
+        writer.Write(value.ToString());
+    }
+
+    public Name Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+    {
+        var readString = reader.ReadString();
+        return !string.IsNullOrEmpty(readString) ? readString : Name.None;
+    }
+}

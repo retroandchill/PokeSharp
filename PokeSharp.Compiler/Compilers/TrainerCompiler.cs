@@ -10,10 +10,11 @@ using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Game;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
-public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
+public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 {
     public override int Order => 15;
 
@@ -27,7 +28,8 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         ]
     );
 
-    public override async Task Compile(
+    [CreateSyncVersion]
+    public override async Task CompileAsync(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
@@ -43,7 +45,9 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 
         var fileLineData = new FileLineData(FileName);
         var result = new List<EnemyTrainer>();
-        await foreach (var (line, _) in serializer.ParsePreppedLines(FileName, cancellationToken))
+        await foreach (
+            var (line, _) in serializer.ParsePreppedLinesAsync(FileName, cancellationToken)
+        )
         {
             var matchSectionHeader = PbsSerializer.SectionHeader.Match(line);
             if (matchSectionHeader.Success)
@@ -144,7 +148,7 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
             result.Add(currentTrainer.ToGameData());
         }
 
-        await EnemyTrainer.Import(result, cancellationToken);
+        await EnemyTrainer.ImportAsync(result, cancellationToken);
     }
 
     private static void ValidateCompiledTrainer(EnemyTrainerInfo trainer, FileLineData fileLineData)
@@ -250,7 +254,8 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         }
     }
 
-    public override async Task WriteToFile(
+    [CreateSyncVersion]
+    public override async Task WriteToFileAsync(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
@@ -258,51 +263,49 @@ public class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
         var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
 
-        await FileUtils.WriteFileWithBackupAsync(
-            FileName,
-            async fileWriter =>
+        await FileUtils.WriteFileWithBackupAsync(FileName, WriteAction);
+        return;
+
+        async ValueTask WriteAction(StreamWriter fileWriter)
+        {
+            await PbsSerializer.AddPbsHeaderToFileAsync(fileWriter);
+
+            foreach (var trainer in EnemyTrainer.Entities.Select(x => x.ToDto()))
             {
-                await PbsSerializer.AddPbsHeaderToFile(fileWriter);
+                await fileWriter.WriteLineAsync("#-------------------------------");
+                await fileWriter.WriteLineAsync($"[{trainer.Id}]");
 
-                foreach (var trainer in EnemyTrainer.Entities.Select(x => x.ToDto()))
+                foreach (var (key, schemaEntry) in schema)
                 {
-                    await fileWriter.WriteLineAsync("#-------------------------------");
-                    await fileWriter.WriteLineAsync($"[{trainer.Id}]");
+                    if (key == "SectionName")
+                        continue;
 
-                    foreach (var (key, schemaEntry) in schema)
+                    var value = GetPropertyForPbs(trainer, key);
+                    if (value is null)
+                        continue;
+
+                    await fileWriter.WriteAsync($"{key} = ");
+                    await CsvWriter.WriteCsvRecordAsync(value, fileWriter, schemaEntry);
+                    await fileWriter.WriteLineAsync();
+                }
+
+                foreach (var pokemon in trainer.Pokemon)
+                {
+                    await fileWriter.WriteLineAsync($"Pokemon = {pokemon.Species},{pokemon.Level}");
+
+                    foreach (var (key, schemaEntry) in subschema)
                     {
-                        if (key == "SectionName")
-                            continue;
-
-                        var value = GetPropertyForPbs(trainer, key);
+                        var value = GetPropertyForPbs(pokemon, key);
                         if (value is null)
                             continue;
 
-                        await fileWriter.WriteAsync($"{key} = ");
-                        await CsvWriter.WriteCsvRecord(value, fileWriter, schemaEntry);
+                        await fileWriter.WriteAsync($"    {key} = ");
+                        await CsvWriter.WriteCsvRecordAsync(value, fileWriter, schemaEntry);
                         await fileWriter.WriteLineAsync();
-                    }
-
-                    foreach (var pokemon in trainer.Pokemon)
-                    {
-                        await fileWriter.WriteLineAsync(
-                            $"Pokemon = {pokemon.Species},{pokemon.Level}"
-                        );
-
-                        foreach (var (key, schemaEntry) in subschema)
-                        {
-                            var value = GetPropertyForPbs(pokemon, key);
-                            if (value is null)
-                                continue;
-
-                            await fileWriter.WriteAsync($"    {key} = ");
-                            await CsvWriter.WriteCsvRecord(value, fileWriter, schemaEntry);
-                            await fileWriter.WriteLineAsync();
-                        }
                     }
                 }
             }
-        );
+        }
     }
 
     private object? GetPropertyForPbs(TrainerPokemonInfo model, string key)

@@ -3,12 +3,18 @@ using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Utils;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
-public static class CsvWriter
+public static partial class CsvWriter
 {
-    public static async Task WriteCsvRecord(object? record, StreamWriter writer, SchemaEntry schema)
+    [CreateSyncVersion]
+    public static async Task WriteCsvRecordAsync(
+        object? record,
+        StreamWriter writer,
+        SchemaEntry schema
+    )
     {
         var recordSet = record is IEnumerable asEnumerable and not string
             ? asEnumerable.Flatten().SelectMany(DeconstructIfNecessary).ToImmutableArray()
@@ -53,13 +59,13 @@ public static class CsvWriter
                 switch (typeData.Type)
                 {
                     case PbsFieldType.Enumerable:
-                        await WriteEnumRecord(value, writer, typeData.EnumType);
+                        await WriteEnumRecordAsync(value, writer, typeData.EnumType);
                         break;
                     case PbsFieldType.EnumerableOrInteger:
-                        await WriteEnumOrIntegerRecord(value, writer, typeData.EnumType);
+                        await WriteEnumOrIntegerRecordAsync(value, writer, typeData.EnumType);
                         break;
                     default:
-                        await WriteOtherRecordType(value, writer, typeData.Type);
+                        await WriteOtherRecordTypeAsync(value, writer, typeData.Type);
                         break;
                 }
             }
@@ -81,13 +87,19 @@ public static class CsvWriter
         return recordType.GetProperties().Select(p => p.GetValue(record));
     }
 
-    private static async Task WriteEnumRecord(object? record, StreamWriter writer, Type? enumType)
+    [CreateSyncVersion]
+    private static async Task WriteEnumRecordAsync(
+        object? record,
+        StreamWriter writer,
+        Type? enumType
+    )
     {
         // TODO: This needs some more logic, but for now we're just going to write the value.
         await writer.WriteAsync(record?.ToString() ?? "");
     }
 
-    private static async Task WriteEnumOrIntegerRecord(
+    [CreateSyncVersion]
+    private static async Task WriteEnumOrIntegerRecordAsync(
         object? record,
         StreamWriter writer,
         Type? enumType
@@ -102,7 +114,8 @@ public static class CsvWriter
         await writer.WriteAsync(record?.ToString() ?? "");
     }
 
-    private static async Task WriteOtherRecordType(
+    [CreateSyncVersion]
+    private static async Task WriteOtherRecordTypeAsync(
         object? record,
         StreamWriter writer,
         PbsFieldType schema

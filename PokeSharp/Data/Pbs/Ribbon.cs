@@ -1,10 +1,12 @@
 ﻿using System.Collections.Immutable;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;
 
 [GameDataEntity(DataPath = "ribbons")]
+[MessagePackObject(true)]
 public partial record Ribbon
 {
     public required Name Id { get; init; }

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 
@@ -12,6 +14,7 @@ public enum DamageCategory : byte
 }
 
 [GameDataEntity(DataPath = "moves")]
+[MessagePackObject(true)]
 public partial record Move
 {
     public required Name Id { get; init; }
@@ -42,13 +45,23 @@ public partial record Move
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsPhysical => Category == DamageCategory.Physical;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsSpecial => Category == DamageCategory.Special;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsDamaging => Category != DamageCategory.Status;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsStatus => Category == DamageCategory.Status;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsHiddenMove => Item.Entities.Any(i => i.IsHM && i.Move == Id);
 }

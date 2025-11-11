@@ -9,6 +9,7 @@ using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization.Converters;
 using PokeSharp.Compiler.Core.Utils;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
@@ -110,7 +111,8 @@ public partial class PbsSerializer
     public IReadOnlyDictionary<string, SchemaEntry> GetSchema(Type type) =>
         _schemaBuilder.BuildSchema(type);
 
-    public static async IAsyncEnumerable<PbsParseResult> ParseFileSectionsEx(
+    [CreateSyncVersion]
+    public static async IAsyncEnumerable<PbsParseResult> ParseFileSectionsExAsync(
         StreamReader fileReader,
         FileLineData lineData,
         IReadOnlyDictionary<string, SchemaEntry>? schema = null,
@@ -205,7 +207,8 @@ public partial class PbsSerializer
         );
     }
 
-    private async IAsyncEnumerable<Section<string>> ParseFileSections(
+    [CreateSyncVersion]
+    private async IAsyncEnumerable<Section<string>> ParseFileSectionsAsync(
         StreamReader fileReader,
         FileLineData lineData,
         IReadOnlyDictionary<string, SchemaEntry>? schema = null,
@@ -213,7 +216,7 @@ public partial class PbsSerializer
     )
     {
         await foreach (
-            var (section, name, currentLine) in ParseFileSectionsEx(
+            var (section, name, currentLine) in ParseFileSectionsExAsync(
                 fileReader,
                 lineData,
                 schema,
@@ -225,7 +228,8 @@ public partial class PbsSerializer
         }
     }
 
-    public async IAsyncEnumerable<LineWithNumber> ParseFileLines(
+    [CreateSyncVersion]
+    public async IAsyncEnumerable<LineWithNumber> ParseFileLinesAsync(
         string filename,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
@@ -243,7 +247,8 @@ public partial class PbsSerializer
         }
     }
 
-    public async IAsyncEnumerable<LineWithNumber> ParsePreppedLines(
+    [CreateSyncVersion]
+    public async IAsyncEnumerable<LineWithNumber> ParsePreppedLinesAsync(
         string filename,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
@@ -269,15 +274,17 @@ public partial class PbsSerializer
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
     public static partial Regex KeyValuePair { get; }
 
-    public IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(
+    [CreateSyncVersion]
+    public IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
         string path,
         CancellationToken cancellationToken = default
     )
     {
-        return ReadFromFile(path, _ => Activator.CreateInstance<T>(), cancellationToken);
+        return ReadFromFileAsync(path, _ => Activator.CreateInstance<T>(), cancellationToken);
     }
 
-    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFile<T>(
+    [CreateSyncVersion]
+    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
         string path,
         Func<string, T> modelFactory,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
@@ -294,7 +301,7 @@ public partial class PbsSerializer
         var initialLineData = new FileLineData(path);
 
         await foreach (
-            var (contents, sectionName, lineData) in ParseFileSections(
+            var (contents, sectionName, lineData) in ParseFileSectionsAsync(
                 fileStream,
                 initialLineData,
                 schema,
@@ -398,14 +405,16 @@ public partial class PbsSerializer
         }
     }
 
-    public static async Task AddPbsHeaderToFile(StreamWriter fileWriter)
+    [CreateSyncVersion]
+    public static async Task AddPbsHeaderToFileAsync(StreamWriter fileWriter)
     {
         await fileWriter.WriteLineAsync(
             "# See the documentation on the wiki to learn how to edit this file."
         );
     }
 
-    public async Task WritePbsFile<T>(
+    [CreateSyncVersion]
+    public async Task WritePbsFileAsync<T>(
         string path,
         IEnumerable<T> entities,
         Func<T, string, object?> propertyGetter
@@ -425,49 +434,49 @@ public partial class PbsSerializer
             );
         }
 
-        await FileUtils.WriteFileWithBackupAsync(
-            path,
-            async fileWriter =>
+        await FileUtils.WriteFileWithBackupAsync(path, WriteAction);
+        return;
+
+        async ValueTask WriteAction(StreamWriter fileWriter)
+        {
+            await AddPbsHeaderToFileAsync(fileWriter);
+
+            foreach (var entity in entities)
             {
-                await AddPbsHeaderToFile(fileWriter);
+                await fileWriter.WriteLineAsync("#-------------------------------");
+                await fileWriter.WriteLineAsync(
+                    $"[{propertyGetter(entity, sectionName.PropertyName)}]"
+                );
 
-                foreach (var entity in entities)
+                foreach (var (key, value) in schema)
                 {
-                    await fileWriter.WriteLineAsync("#-------------------------------");
-                    await fileWriter.WriteLineAsync(
-                        $"[{propertyGetter(entity, sectionName.PropertyName)}]"
-                    );
+                    if (key == "SectionName")
+                        continue;
 
-                    foreach (var (key, value) in schema)
+                    var elementValue = propertyGetter(entity, value.PropertyName);
+                    if (elementValue is null)
+                        continue;
+
+                    if (
+                        value.FieldStructure == PbsFieldStructure.Repeating
+                        && elementValue is IEnumerable list
+                    )
                     {
-                        if (key == "SectionName")
-                            continue;
-
-                        var elementValue = propertyGetter(entity, value.PropertyName);
-                        if (elementValue is null)
-                            continue;
-
-                        if (
-                            value.FieldStructure == PbsFieldStructure.Repeating
-                            && elementValue is IEnumerable list
-                        )
-                        {
-                            foreach (var item in list)
-                            {
-                                await fileWriter.WriteAsync($"{key} = ");
-                                await CsvWriter.WriteCsvRecord(item, fileWriter, value);
-                                await fileWriter.WriteLineAsync();
-                            }
-                        }
-                        else
+                        foreach (var item in list)
                         {
                             await fileWriter.WriteAsync($"{key} = ");
-                            await CsvWriter.WriteCsvRecord(elementValue, fileWriter, value);
+                            await CsvWriter.WriteCsvRecordAsync(item, fileWriter, value);
                             await fileWriter.WriteLineAsync();
                         }
                     }
+                    else
+                    {
+                        await fileWriter.WriteAsync($"{key} = ");
+                        await CsvWriter.WriteCsvRecordAsync(elementValue, fileWriter, value);
+                        await fileWriter.WriteLineAsync();
+                    }
                 }
             }
-        );
+        }
     }
 }

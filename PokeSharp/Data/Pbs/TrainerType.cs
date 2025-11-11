@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 
@@ -13,6 +15,7 @@ public enum TrainerGender : byte
 }
 
 [GameDataEntity(DataPath = "trainer_types")]
+[MessagePackObject(true)]
 public partial record TrainerType
 {
     public required Name Id { get; init; }
@@ -21,8 +24,12 @@ public partial record TrainerType
 
     public required TrainerGender Gender { get; init; }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsMale => Gender == TrainerGender.Male;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsFemale => Gender == TrainerGender.Female;
 
     public required int BaseMoney { get; init; }

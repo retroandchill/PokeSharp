@@ -40,7 +40,10 @@ public class GameDataGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, INamedTypeSymbol type)
     {
-        var info = type.GetAttributes().Select(a => a.GetGameDataEntityInfo()).Single();
+        var info = type.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "GameDataEntityAttribute")
+            .Select(a => a.GetGameDataEntityInfo())
+            .Single();
 
         var idProperty = type.GetPublicProperties().SingleOrDefault(p => p.Name == "Id");
 

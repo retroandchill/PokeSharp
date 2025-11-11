@@ -1,10 +1,15 @@
-﻿using PokeSharp.Abstractions;
+﻿using System.Text.Json.Serialization;
+using MessagePack;
+using PokeSharp.Abstractions.Serializers.Json;
+using PokeSharp.Abstractions.Serializers.MessagePack;
 #if UNREAL_ENGINE
 using UnrealSharp.Core;
 #endif
 
 namespace PokeSharp.Abstractions;
 
+[MessagePackFormatter(typeof(TextMessagePackFormatter))]
+[JsonConverter(typeof(TextJsonConverter))]
 public readonly struct Text : IEquatable<Text>
 {
 #if UNREAL_ENGINE

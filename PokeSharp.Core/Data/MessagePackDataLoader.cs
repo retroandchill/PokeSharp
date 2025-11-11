@@ -1,0 +1,48 @@
+﻿using System.Runtime.CompilerServices;
+using MessagePack;
+using MessagePack.Resolvers;
+using Zomp.SyncMethodGenerator;
+
+namespace PokeSharp.Core.Data;
+
+public partial class MessagePackDataLoader : IDataLoader
+{
+    private readonly MessagePackSerializerOptions _options =
+        MessagePackSerializerOptions.Standard.WithResolver(ContractlessStandardResolver.Instance);
+
+    [CreateSyncVersion]
+    public async ValueTask SaveEntitiesAsync<T>(
+        IEnumerable<T> entities,
+        string outputPath,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await using var fileStream = File.OpenWrite($"{outputPath}.pkdata");
+        await MessagePackSerializer.SerializeAsync(
+            fileStream,
+            entities,
+            _options,
+            cancellationToken
+        );
+    }
+
+    [CreateSyncVersion]
+    public async IAsyncEnumerable<T> LoadEntitiesAsync<T>(
+        string inputPath,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
+    {
+        await using var fileStream = File.OpenRead($"{inputPath}.pkdata");
+        foreach (
+            var entity in await MessagePackSerializer.DeserializeAsync<IEnumerable<T>>(
+                fileStream,
+                _options,
+                cancellationToken
+            )
+        )
+        {
+            yield return entity;
+        }
+        ;
+    }
+}

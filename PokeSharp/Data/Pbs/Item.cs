@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.SourceGenerator.Attributes;
 
@@ -71,6 +73,7 @@ public enum BattleUse : byte
 }
 
 [GameDataEntity(DataPath = "items")]
+[MessagePackObject(true)]
 public partial class Item
 {
     public required Name Id { get; init; }
@@ -115,42 +118,80 @@ public partial class Item
 
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsTM => FieldUse == FieldUse.TM;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsHM => FieldUse == FieldUse.HM;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsTR => FieldUse == FieldUse.TR;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsMachine => IsTM || IsHM || IsTR;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsMail => HasFlag(ItemTags.Mail) || HasFlag(ItemTags.IconMail);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsIconMail => HasFlag(ItemTags.IconMail);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsPokeBall => HasFlag(ItemTags.PokeBall) || HasFlag(ItemTags.SnagBall);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsBerry => HasFlag(ItemTags.Berry);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsKeyItem => HasFlag(ItemTags.KeyItem);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsEvolutionStone => HasFlag(ItemTags.EvolutionStone);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsFossil => HasFlag(ItemTags.Fossil);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsApricorn => HasFlag(ItemTags.Apricorn);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsGem => HasFlag(ItemTags.TypeGem);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsMulch => HasFlag(ItemTags.Mulch);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsMegaStone => HasFlag(ItemTags.MegaStone);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsScent => HasFlag(ItemTags.Scent);
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool IsImportant => IsKeyItem || IsHM || IsTM;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool CanHold => !IsImportant;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public bool ConsumedAfterUse => !IsImportant && Consumable;
 }
 

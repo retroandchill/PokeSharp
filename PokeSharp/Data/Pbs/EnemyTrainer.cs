@@ -1,13 +1,17 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+using MessagePack;
 using PokeSharp.Abstractions;
 using PokeSharp.Data.Core;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;
 
+[MessagePackObject(true)]
 public readonly record struct TrainerIdentifier(Name TrainerType, Text Name, int Version = 0);
 
+[MessagePackObject(true)]
 public record TrainerPokemon
 {
     public required Name Species { get; init; }
@@ -46,6 +50,7 @@ public record TrainerPokemon
 }
 
 [GameDataEntity(DataPath = "trainers")]
+[MessagePackObject(true)]
 public partial record EnemyTrainer
 {
     public static bool Exists(Name trainerType, Text name, int version = 0)
@@ -79,10 +84,16 @@ public partial record EnemyTrainer
 
     public required TrainerIdentifier Id { get; init; }
 
+    [IgnoreMember]
+    [JsonIgnore]
     public Name TrainerTypeId => Id.TrainerType;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public Text Name => Id.Name;
 
+    [IgnoreMember]
+    [JsonIgnore]
     public int Version => Id.Version;
 
     public ImmutableArray<Name> Items { get; init; } = [];

@@ -10,10 +10,11 @@ using PokeSharp.Compiler.Model;
 using PokeSharp.Core.Data;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
-public sealed class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
+public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
 {
     public override int Order => 9;
 
@@ -21,13 +22,14 @@ public sealed class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
         .GetProperties()
         .ToDictionary(x => x.Name);
 
-    public override async Task Compile(
+    [CreateSyncVersion]
+    public override async Task CompileAsync(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
     {
         var entities = await serializer
-            .ReadFromFile(
+            .ReadFromFileAsync(
                 FileName,
                 name =>
                 {
@@ -43,15 +45,16 @@ public sealed class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
             .Select(ConvertToEntity)
             .ToArrayAsync(cancellationToken: cancellationToken);
 
-        await Species.Import(ValidateAllCompiledForms(entities), cancellationToken);
+        await Species.ImportAsync(ValidateAllCompiledForms(entities), cancellationToken);
     }
 
-    public override async Task WriteToFile(
+    [CreateSyncVersion]
+    public override async Task WriteToFileAsync(
         PbsSerializer serializer,
         CancellationToken cancellationToken = default
     )
     {
-        await serializer.WritePbsFile(
+        await serializer.WritePbsFileAsync(
             FileName,
             Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel),
             GetPropertyForPbs

@@ -3,7 +3,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Compiler.Compilers;
 using PokeSharp.Compiler.Core;
-using PokeSharp.Compiler.Sample.Data;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Data.Core;
@@ -14,7 +13,7 @@ var builder = new GameContextBuilder("test");
 
 builder
     .Services.AddLogging()
-    .AddSingleton<IDataLoader, NullDataLoader>()
+    .AddSingleton<IDataLoader, MessagePackDataLoader>()
     .AddSingleton<PbsCompilerService>()
     .AddSingleton<IPbsCompiler, TypeCompiler>()
     .AddSingleton<IPbsCompiler, AbilityCompiler>()
@@ -77,8 +76,7 @@ try
 
     var compilerService = context.GetService<PbsCompilerService>();
 
-    await compilerService.CompilePbsFiles();
-    await compilerService.WritePbsFiles();
+    await compilerService.CompilePbsFilesAsync();
 }
 finally
 {

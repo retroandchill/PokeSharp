@@ -1,6 +1,14 @@
 ﻿namespace PokeSharp.Core.Settings;
 
-public static class GameSettings
+public class GameSettings
 {
-    public const int MaxLevel = 100;
+    public static GameSettings Instance { get; } = new();
+
+    public int MaxLevel { get; init; } = 100;
+
+    public int ShinyChance { get; init; } = 16;
+
+    public bool ApplyHappinessSoftCap { get; init; } = true;
+
+    public bool DisableIVsAndEVs { get; init; } = false;
 }

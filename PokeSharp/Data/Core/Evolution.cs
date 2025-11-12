@@ -1,8 +1,223 @@
 ﻿using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
+using PokeSharp.Core.Settings;
+using PokeSharp.Core.State;
 using PokeSharp.Data.Pbs;
+using PokeSharp.Game;
+using PokeSharp.Game.Items;
+using PokeSharp.Services;
+using PokeSharp.Services.DayNightCycle;
+using PokeSharp.Services.Overworld;
 using PokeSharp.SourceGenerator.Attributes;
+using PokeSharp.Utilities;
 
 namespace PokeSharp.Data.Core;
+
+public interface IEvolutionDelegates
+{
+    Type? Parameter { get; }
+
+    Delegate? LevelUpPredicate { get; }
+    Delegate? UseItemPredicate { get; }
+    Delegate? EvolutionPredicate { get; }
+    Delegate? OnTradePredicate { get; }
+    Delegate? AfterBattlePredicate { get; }
+    Delegate? EventPredicate { get; }
+    Delegate? AfterEvolutionCallback { get; }
+
+    bool CallOnLevelUp(Pokemon pokemon, object? parameter);
+    bool CallUseItem(Pokemon pokemon, object? parameter, Name itemUsed);
+    bool CallOnTrade(Pokemon pokemon, object? parameter, Pokemon otherPokemon);
+    bool CallAfterBattle(Pokemon pokemon, int partyIndex, object? parameter);
+    bool CallEvent(Pokemon pokemon, object? parameter, object? value);
+    bool CallAfterEvolution(Pokemon pokemon, Name evoSpecies, object? parameter, Name newSpecies);
+}
+
+public class EvolutionDelegates : IEvolutionDelegates
+{
+    public Type? Parameter => null;
+
+    Delegate? IEvolutionDelegates.LevelUpPredicate => LevelUpPredicate;
+    public Func<Pokemon, bool>? LevelUpPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.UseItemPredicate => UseItemPredicate;
+    public Func<Pokemon, Name, bool>? UseItemPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.EvolutionPredicate => EvolutionPredicate;
+    public Func<Pokemon, bool>? EvolutionPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.OnTradePredicate => OnTradePredicate;
+    public Func<Pokemon, Pokemon, bool>? OnTradePredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.AfterBattlePredicate => AfterBattlePredicate;
+    public Func<Pokemon, int, bool>? AfterBattlePredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.EventPredicate => EventPredicate;
+    public Func<Pokemon, object?, bool>? EventPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.AfterEvolutionCallback => AfterEvolutionCallback;
+    public Func<Pokemon, Name, Name, bool>? AfterEvolutionCallback { get; init; }
+
+    public bool CallOnLevelUp(Pokemon pokemon, object? parameter)
+    {
+        return LevelUpPredicate is not null && parameter is null && LevelUpPredicate(pokemon);
+    }
+
+    public bool CallUseItem(Pokemon pokemon, object? parameter, Name itemUsed)
+    {
+        return UseItemPredicate is not null && parameter is null && UseItemPredicate(pokemon, itemUsed);
+    }
+
+    public bool CallOnTrade(Pokemon pokemon, object? parameter, Pokemon otherPokemon)
+    {
+        return OnTradePredicate is not null && parameter is null && OnTradePredicate(pokemon, otherPokemon);
+    }
+
+    public bool CallAfterBattle(Pokemon pokemon, int partyIndex, object? parameter)
+    {
+        return AfterBattlePredicate is not null && parameter is null && AfterBattlePredicate(pokemon, partyIndex);
+    }
+
+    public bool CallEvent(Pokemon pokemon, object? parameter, object? value)
+    {
+        return EventPredicate is not null && parameter is null && EventPredicate(pokemon, value);
+    }
+
+    public bool CallAfterEvolution(Pokemon pokemon, Name evoSpecies, object? parameter, Name newSpecies)
+    {
+        return AfterEvolutionCallback is not null
+            && parameter is null
+            && AfterEvolutionCallback(pokemon, evoSpecies, newSpecies);
+    }
+}
+
+public class EvolutionDelegates<T> : IEvolutionDelegates
+{
+    public Type Parameter => typeof(T);
+
+    Delegate? IEvolutionDelegates.LevelUpPredicate => LevelUpPredicate;
+    public Func<Pokemon, T, bool>? LevelUpPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.UseItemPredicate => UseItemPredicate;
+    public Func<Pokemon, T, Name, bool>? UseItemPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.EvolutionPredicate => EvolutionPredicate;
+    public Func<Pokemon, T, bool>? EvolutionPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.OnTradePredicate => OnTradePredicate;
+    public Func<Pokemon, T, Pokemon, bool>? OnTradePredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.AfterBattlePredicate => AfterBattlePredicate;
+    public Func<Pokemon, int, T, bool>? AfterBattlePredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.EventPredicate => EventPredicate;
+    public Func<Pokemon, T, T, bool>? EventPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.AfterEvolutionCallback => AfterEvolutionCallback;
+    public Func<Pokemon, Name, T, Name, bool>? AfterEvolutionCallback { get; init; }
+
+    public bool CallOnLevelUp(Pokemon pokemon, object? parameter)
+    {
+        return LevelUpPredicate is not null && parameter is T cast && LevelUpPredicate(pokemon, cast);
+    }
+
+    public bool CallUseItem(Pokemon pokemon, object? parameter, Name itemUsed)
+    {
+        return UseItemPredicate is not null && parameter is T cast && UseItemPredicate(pokemon, cast, itemUsed);
+    }
+
+    public bool CallOnTrade(Pokemon pokemon, object? parameter, Pokemon otherPokemon)
+    {
+        return OnTradePredicate is not null && parameter is T cast && OnTradePredicate(pokemon, cast, otherPokemon);
+    }
+
+    public bool CallAfterBattle(Pokemon pokemon, int partyIndex, object? parameter)
+    {
+        return AfterBattlePredicate is not null
+            && parameter is T cast
+            && AfterBattlePredicate(pokemon, partyIndex, cast);
+    }
+
+    public bool CallEvent(Pokemon pokemon, object? parameter, object? value)
+    {
+        return EventPredicate is not null
+            && parameter is T cast
+            && value is T castValue
+            && EventPredicate(pokemon, cast, castValue);
+    }
+
+    public bool CallAfterEvolution(Pokemon pokemon, Name evoSpecies, object? parameter, Name newSpecies)
+    {
+        return AfterEvolutionCallback is not null
+            && parameter is T cast
+            && AfterEvolutionCallback(pokemon, evoSpecies, cast, newSpecies);
+    }
+}
+
+public class EvolutionDelegates<TKey, TEntity> : IEvolutionDelegates
+    where TKey : notnull
+    where TEntity : IGameDataEntity<TKey, TEntity>
+{
+    public Type Parameter => typeof(TEntity);
+
+    Delegate? IEvolutionDelegates.LevelUpPredicate => LevelUpPredicate;
+    public Func<Pokemon, TKey, bool>? LevelUpPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.UseItemPredicate => UseItemPredicate;
+    public Func<Pokemon, TKey, Name, bool>? UseItemPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.EvolutionPredicate => EvolutionPredicate;
+    public Func<Pokemon, TKey, bool>? EvolutionPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.OnTradePredicate => OnTradePredicate;
+    public Func<Pokemon, TKey, Pokemon, bool>? OnTradePredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.AfterBattlePredicate => AfterBattlePredicate;
+    public Func<Pokemon, int, TKey, bool>? AfterBattlePredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.EventPredicate => EventPredicate;
+    public Func<Pokemon, TKey, TKey, bool>? EventPredicate { get; init; }
+
+    Delegate? IEvolutionDelegates.AfterEvolutionCallback => AfterEvolutionCallback;
+    public Func<Pokemon, Name, TKey, Name, bool>? AfterEvolutionCallback { get; init; }
+
+    public bool CallOnLevelUp(Pokemon pokemon, object? parameter)
+    {
+        return LevelUpPredicate is not null && parameter is TKey cast && LevelUpPredicate(pokemon, cast);
+    }
+
+    public bool CallUseItem(Pokemon pokemon, object? parameter, Name itemUsed)
+    {
+        return UseItemPredicate is not null && parameter is TKey cast && UseItemPredicate(pokemon, cast, itemUsed);
+    }
+
+    public bool CallOnTrade(Pokemon pokemon, object? parameter, Pokemon otherPokemon)
+    {
+        return OnTradePredicate is not null && parameter is TKey cast && OnTradePredicate(pokemon, cast, otherPokemon);
+    }
+
+    public bool CallAfterBattle(Pokemon pokemon, int partyIndex, object? parameter)
+    {
+        return AfterBattlePredicate is not null
+            && parameter is TKey cast
+            && AfterBattlePredicate(pokemon, partyIndex, cast);
+    }
+
+    public bool CallEvent(Pokemon pokemon, object? parameter, object? value)
+    {
+        return EventPredicate is not null
+            && parameter is TKey cast
+            && value is TKey castValue
+            && EventPredicate(pokemon, cast, castValue);
+    }
+
+    public bool CallAfterEvolution(Pokemon pokemon, Name evoSpecies, object? parameter, Name newSpecies)
+    {
+        return AfterEvolutionCallback is not null
+            && parameter is TKey cast
+            && AfterEvolutionCallback(pokemon, evoSpecies, cast, newSpecies);
+    }
+}
 
 /// <summary>
 /// Represents an evolution step or method for a Pokémon entity, defining how it can evolve under specific conditions or actions.
@@ -21,42 +236,61 @@ public partial record Evolution
     /// <summary>
     /// Represents a configurable parameter associated with the evolution data.
     /// </summary>
-    public Type? Parameter { get; init; }
+    public Type? Parameter => Delegates?.Parameter;
 
     /// <summary>
     /// Indicates whether any level-up condition is required for the evolution.
     /// </summary>
     public bool AnyLevelUp { get; init; }
 
+    public required IEvolutionDelegates Delegates { get; init; }
+
     /// <summary>
     /// Gets the procedure or conditions required for leveling up.
     /// </summary>
-    public string? LevelUpProc { get; init; }
+    public Delegate? LevelUpProc => Delegates?.LevelUpPredicate;
 
     /// <summary>
     /// Gets the procedure or conditions required when an item is used.
     /// </summary>
-    public string? UseItemProc { get; init; }
+    public Delegate? UseItemProc => Delegates?.UseItemPredicate;
 
     /// <summary>
     /// Indicates the process to be executed during a trade evolution.
     /// </summary>
-    public string? OnTradeProc { get; init; }
+    public Delegate? OnTradeProc => Delegates?.OnTradePredicate;
 
     /// <summary>
     /// Gets the identifier of the procedure triggered after a battle.
     /// </summary>
-    public string? AfterBattleProc { get; init; }
+    public Delegate? AfterBattleProc => Delegates?.AfterBattlePredicate;
 
     /// <summary>
     /// Represents the event procedure associated with this evolution.
     /// </summary>
-    public string? EventProc { get; init; }
+    public Delegate? EventProc => Delegates?.EventPredicate;
 
     /// <summary>
     /// Represents the process or procedure that takes place after the evolution of an entity.
     /// </summary>
-    public string? AfterEvolutionProc { get; init; }
+    public Delegate? AfterEvolutionProc => Delegates?.AfterEvolutionCallback;
+
+    public bool CallOnLevelUp(Pokemon pokemon, object? parameter) => Delegates.CallOnLevelUp(pokemon, parameter);
+
+    public bool CallUseItem(Pokemon pokemon, object? parameter, Name itemUsed) =>
+        Delegates.CallUseItem(pokemon, parameter, itemUsed);
+
+    public bool CallOnTrade(Pokemon pokemon, object? parameter, Pokemon otherPokemon) =>
+        Delegates.CallOnTrade(pokemon, parameter, otherPokemon);
+
+    public bool CallAfterBattle(Pokemon pokemon, int partyIndex, object? parameter) =>
+        Delegates.CallAfterBattle(pokemon, partyIndex, parameter);
+
+    public bool CallEvent(Pokemon pokemon, object? parameter, object? value) =>
+        Delegates.CallEvent(pokemon, parameter, value);
+
+    public bool CallAfterEvolution(Pokemon pokemon, Name evoSpecies, object? parameter, Name newSpecies) =>
+        Delegates.CallAfterEvolution(pokemon, evoSpecies, parameter, newSpecies);
 
     #region Defaults
 
@@ -74,9 +308,10 @@ public partial record Evolution
             {
                 Id = "Level",
                 Name = Text.Localized(LocalizationNamespace, "Level", "Level"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217918 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:72>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter,
+                },
             }
         );
 
@@ -85,9 +320,10 @@ public partial record Evolution
             {
                 Id = "LevelMale",
                 Name = Text.Localized(LocalizationNamespace, "LevelMale", "LevelMale"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217828 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:80>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && pkmn.IsMale,
+                },
             }
         );
 
@@ -96,9 +332,10 @@ public partial record Evolution
             {
                 Id = "LevelFemale",
                 Name = Text.Localized(LocalizationNamespace, "LevelFemale", "LevelFemale"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217738 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:88>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && pkmn.IsFemale,
+                },
             }
         );
 
@@ -107,9 +344,10 @@ public partial record Evolution
             {
                 Id = "LevelDay",
                 Name = Text.Localized(LocalizationNamespace, "LevelDay", "LevelDay"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217648 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:96>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && DayNightService.Instance.IsDay,
+                },
             }
         );
 
@@ -118,9 +356,10 @@ public partial record Evolution
             {
                 Id = "LevelNight",
                 Name = Text.Localized(LocalizationNamespace, "LevelNight", "LevelNight"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217558 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:104>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && DayNightService.Instance.IsNight,
+                },
             }
         );
 
@@ -129,9 +368,10 @@ public partial record Evolution
             {
                 Id = "LevelMorning",
                 Name = Text.Localized(LocalizationNamespace, "LevelMorning", "LevelMorning"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217468 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:112>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && DayNightService.Instance.IsMorning,
+                },
             }
         );
 
@@ -140,9 +380,11 @@ public partial record Evolution
             {
                 Id = "LevelAfternoon",
                 Name = Text.Localized(LocalizationNamespace, "LevelAfternoon", "LevelAfternoon"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217378 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:120>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter && DayNightService.Instance.IsAfternoon,
+                },
             }
         );
 
@@ -151,9 +393,10 @@ public partial record Evolution
             {
                 Id = "LevelEvening",
                 Name = Text.Localized(LocalizationNamespace, "LevelEvening", "LevelEvening"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217288 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:128>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && DayNightService.Instance.IsEvening,
+                },
             }
         );
 
@@ -162,9 +405,11 @@ public partial record Evolution
             {
                 Id = "LevelNoWeather",
                 Name = Text.Localized(LocalizationNamespace, "LevelNoWeather", "LevelNoWeather"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307217198 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:136>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter && OverworldWeatherService.Instance.WeatherType.IsNone,
+                },
             }
         );
 
@@ -173,9 +418,12 @@ public partial record Evolution
             {
                 Id = "LevelSun",
                 Name = Text.Localized(LocalizationNamespace, "LevelSun", "LevelSun"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x00000253072170a8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:144>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter
+                        && OverworldWeatherService.Instance.Weather?.Category == BattleWeather.Sun,
+                },
             }
         );
 
@@ -184,9 +432,12 @@ public partial record Evolution
             {
                 Id = "LevelRain",
                 Name = Text.Localized(LocalizationNamespace, "LevelRain", "LevelRain"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216fb8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:153>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter
+                        && OverworldWeatherService.Instance.Weather?.Category == BattleWeather.Rain,
+                },
             }
         );
 
@@ -195,9 +446,12 @@ public partial record Evolution
             {
                 Id = "LevelSnow",
                 Name = Text.Localized(LocalizationNamespace, "LevelSnow", "LevelSnow"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216ec8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:162>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter
+                        && OverworldWeatherService.Instance.Weather?.Category == BattleWeather.Hail,
+                },
             }
         );
 
@@ -206,9 +460,12 @@ public partial record Evolution
             {
                 Id = "LevelSandstorm",
                 Name = Text.Localized(LocalizationNamespace, "LevelSandstorm", "LevelSandstorm"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216dd8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:171>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter
+                        && OverworldWeatherService.Instance.Weather?.Category == BattleWeather.Sandstorm,
+                },
             }
         );
 
@@ -217,9 +474,10 @@ public partial record Evolution
             {
                 Id = "LevelCycling",
                 Name = Text.Localized(LocalizationNamespace, "LevelCycling", "LevelCycling"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216ce8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:180>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && PokemonGlobal.Instance.IsCycling,
+                },
             }
         );
 
@@ -228,9 +486,10 @@ public partial record Evolution
             {
                 Id = "LevelSurfing",
                 Name = Text.Localized(LocalizationNamespace, "LevelSurfing", "LevelSurfing"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216bf8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:188>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && PokemonGlobal.Instance.IsSurfing,
+                },
             }
         );
 
@@ -239,9 +498,10 @@ public partial record Evolution
             {
                 Id = "LevelDiving",
                 Name = Text.Localized(LocalizationNamespace, "LevelDiving", "LevelDiving"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216b08 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:196>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && PokemonGlobal.Instance.IsDiving,
+                },
             }
         );
 
@@ -250,20 +510,25 @@ public partial record Evolution
             {
                 Id = "LevelDarkness",
                 Name = Text.Localized(LocalizationNamespace, "LevelDarkness", "LevelDarkness"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216a18 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:204>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter && GameMap.Instance.HasMetadataTag(MapMetadataTags.DarkMap),
+                },
             }
         );
 
+        Name darkType = "DARK";
         Register(
             new Evolution
             {
                 Id = "LevelDarkInParty",
                 Name = Text.Localized(LocalizationNamespace, "LevelDarkInParty", "LevelDarkInParty"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216928 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:212>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter && PlayerTrainer.Instance.HasPokemonOfType(darkType),
+                },
             }
         );
 
@@ -272,9 +537,10 @@ public partial record Evolution
             {
                 Id = "AttackGreater",
                 Name = Text.Localized(LocalizationNamespace, "AttackGreater", "AttackGreater"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216838 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:220>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && pkmn.Attack > pkmn.Defense,
+                },
             }
         );
 
@@ -283,9 +549,10 @@ public partial record Evolution
             {
                 Id = "AtkDefEqual",
                 Name = Text.Localized(LocalizationNamespace, "AtkDefEqual", "AtkDefEqual"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216748 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:228>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && pkmn.Attack == pkmn.Defense,
+                },
             }
         );
 
@@ -294,9 +561,10 @@ public partial record Evolution
             {
                 Id = "DefenseGreater",
                 Name = Text.Localized(LocalizationNamespace, "DefenseGreater", "DefenseGreater"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216658 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:236>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter && pkmn.Attack < pkmn.Defense,
+                },
             }
         );
 
@@ -305,9 +573,11 @@ public partial record Evolution
             {
                 Id = "Silcoon",
                 Name = Text.Localized(LocalizationNamespace, "Silcoon", "Silcoon"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216568 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:244>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter && ((pkmn.PersonalityValue >> 16) & 0xFFFF) % 10 < 5,
+                },
             }
         );
 
@@ -316,9 +586,11 @@ public partial record Evolution
             {
                 Id = "Cascoon",
                 Name = Text.Localized(LocalizationNamespace, "Cascoon", "Cascoon"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216478 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:252>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) =>
+                        pkmn.Level >= parmeter && ((pkmn.PersonalityValue >> 16) & 0xFFFF) % 10 >= 5,
+                },
             }
         );
 
@@ -327,20 +599,32 @@ public partial record Evolution
             {
                 Id = "Ninjask",
                 Name = Text.Localized(LocalizationNamespace, "Ninjask", "Ninjask"),
-                Parameter = typeof(int),
-                LevelUpProc =
-                    "#<Proc:0x0000025307216388 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:260>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parmeter) => pkmn.Level >= parmeter,
+                },
             }
         );
 
+        Name pokeBall = "POKEBALL";
         Register(
             new Evolution
             {
                 Id = "Shedinja",
                 Name = Text.Localized(LocalizationNamespace, "Shedinja", "Shedinja"),
-                Parameter = typeof(int),
-                AfterEvolutionProc =
-                    "#<Proc:0x0000025307216298 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:268>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    AfterEvolutionCallback = (pkmn, newSpecies, _, _) =>
+                    {
+                        if (PlayerTrainer.Instance.IsPartyFull || !Bag.Instance.HasItem(pokeBall))
+                            return false;
+
+                        pkmn.DuplicateForEvolution(newSpecies);
+                        Bag.Instance.RemoveItem(pokeBall);
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -350,8 +634,11 @@ public partial record Evolution
                 Id = "Happiness",
                 Name = Text.Localized(LocalizationNamespace, "Happiness", "Happiness"),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072161d0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:280>",
+                Delegates = new EvolutionDelegates
+                {
+                    LevelUpPredicate = pkmn =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220),
+                },
             }
         );
 
@@ -361,8 +648,11 @@ public partial record Evolution
                 Id = "HappinessMale",
                 Name = Text.Localized(LocalizationNamespace, "HappinessMale", "HappinessMale"),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307216108 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:288>",
+                Delegates = new EvolutionDelegates
+                {
+                    LevelUpPredicate = pkmn =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220) && pkmn.IsMale,
+                },
             }
         );
 
@@ -372,8 +662,11 @@ public partial record Evolution
                 Id = "HappinessFemale",
                 Name = Text.Localized(LocalizationNamespace, "HappinessFemale", "HappinessFemale"),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307216040 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:296>",
+                Delegates = new EvolutionDelegates
+                {
+                    LevelUpPredicate = pkmn =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220) && pkmn.IsFemale,
+                },
             }
         );
 
@@ -383,8 +676,12 @@ public partial record Evolution
                 Id = "HappinessDay",
                 Name = Text.Localized(LocalizationNamespace, "HappinessDay", "HappinessDay"),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215f78 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:304>",
+                Delegates = new EvolutionDelegates
+                {
+                    LevelUpPredicate = pkmn =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220)
+                        && DayNightService.Instance.IsDay,
+                },
             }
         );
 
@@ -394,8 +691,12 @@ public partial record Evolution
                 Id = "HappinessNight",
                 Name = Text.Localized(LocalizationNamespace, "HappinessNight", "HappinessNight"),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215eb0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:312>",
+                Delegates = new EvolutionDelegates
+                {
+                    LevelUpPredicate = pkmn =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220)
+                        && DayNightService.Instance.IsNight,
+                },
             }
         );
 
@@ -404,10 +705,13 @@ public partial record Evolution
             {
                 Id = "HappinessMove",
                 Name = Text.Localized(LocalizationNamespace, "HappinessMove", "HappinessMove"),
-                Parameter = typeof(Move),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215de8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:321>",
+                Delegates = new EvolutionDelegates<Name, Move>
+                {
+                    LevelUpPredicate = (pkmn, parameter) =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220)
+                        && pkmn.Moves.Any(m => m.Id == parameter),
+                },
             }
         );
 
@@ -416,10 +720,13 @@ public partial record Evolution
             {
                 Id = "HappinessMoveType",
                 Name = Text.Localized(LocalizationNamespace, "HappinessMoveType", "HappinessMoveType"),
-                Parameter = typeof(PokemonType),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215d20 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:332>",
+                Delegates = new EvolutionDelegates<Name, PokemonType>
+                {
+                    LevelUpPredicate = (pkmn, parameter) =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220)
+                        && pkmn.Moves.Any(m => m.Type == parameter),
+                },
             }
         );
 
@@ -428,12 +735,22 @@ public partial record Evolution
             {
                 Id = "HappinessHoldItem",
                 Name = Text.Localized(LocalizationNamespace, "HappinessHoldItem", "HappinessHoldItem"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215c58 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:343>",
-                AfterEvolutionProc =
-                    "#<Proc:0x0000025307215c30 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:346>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) =>
+                        pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220)
+                        && pkmn.HasSpecificItem(parameter),
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -443,8 +760,10 @@ public partial record Evolution
                 Id = "MaxHappiness",
                 Name = Text.Localized(LocalizationNamespace, "MaxHappiness", "MaxHappiness"),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215b68 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:356>",
+                Delegates = new EvolutionDelegates
+                {
+                    LevelUpPredicate = pkmn => pkmn.Happiness >= Pokemon.MaxHappiness,
+                },
             }
         );
 
@@ -453,10 +772,11 @@ public partial record Evolution
             {
                 Id = "Beauty",
                 Name = Text.Localized(LocalizationNamespace, "Beauty", "Beauty"),
-                Parameter = typeof(int),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215a78 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:365>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (pkmn, parameter) => pkmn.Beauty >= parameter,
+                },
             }
         );
 
@@ -465,12 +785,20 @@ public partial record Evolution
             {
                 Id = "HoldItem",
                 Name = Text.Localized(LocalizationNamespace, "HoldItem", "HoldItem"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072159b0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:374>",
-                AfterEvolutionProc =
-                    "#<Proc:0x0000025307215988 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:377>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) => pkmn.HasSpecificItem(parameter),
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -479,12 +807,20 @@ public partial record Evolution
             {
                 Id = "HoldItemMale",
                 Name = Text.Localized(LocalizationNamespace, "HoldItemMale", "HoldItemMale"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072158c0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:388>",
-                AfterEvolutionProc =
-                    "#<Proc:0x0000025307215898 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:391>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) => pkmn.HasSpecificItem(parameter) && pkmn.IsMale,
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -493,12 +829,20 @@ public partial record Evolution
             {
                 Id = "HoldItemFemale",
                 Name = Text.Localized(LocalizationNamespace, "HoldItemFemale", "HoldItemFemale"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072157d0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:402>",
-                AfterEvolutionProc =
-                    "#<Proc:0x00000253072157a8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:405>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) => pkmn.HasSpecificItem(parameter) && pkmn.IsFemale,
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -507,12 +851,21 @@ public partial record Evolution
             {
                 Id = "DayHoldItem",
                 Name = Text.Localized(LocalizationNamespace, "DayHoldItem", "DayHoldItem"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072156e0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:416>",
-                AfterEvolutionProc =
-                    "#<Proc:0x00000253072156b8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:419>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) =>
+                        pkmn.HasSpecificItem(parameter) && DayNightService.Instance.IsDay,
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -521,12 +874,21 @@ public partial record Evolution
             {
                 Id = "NightHoldItem",
                 Name = Text.Localized(LocalizationNamespace, "NightHoldItem", "NightHoldItem"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072155f0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:430>",
-                AfterEvolutionProc =
-                    "#<Proc:0x00000253072155c8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:433>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) =>
+                        pkmn.HasSpecificItem(parameter) && DayNightService.Instance.IsNight,
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -535,12 +897,22 @@ public partial record Evolution
             {
                 Id = "HoldItemHappiness",
                 Name = Text.Localized(LocalizationNamespace, "HoldItemHappiness", "HoldItemHappiness"),
-                Parameter = typeof(Item),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215500 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:444>",
-                AfterEvolutionProc =
-                    "#<Proc:0x00000253072154d8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:447>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    LevelUpPredicate = (pkmn, parameter) =>
+                        pkmn.HasSpecificItem(parameter)
+                        && pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220),
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
@@ -549,10 +921,11 @@ public partial record Evolution
             {
                 Id = "HasMove",
                 Name = Text.Localized(LocalizationNamespace, "HasMove", "HasMove"),
-                Parameter = typeof(Move),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215410 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:458>",
+                Delegates = new EvolutionDelegates<Name, Move>
+                {
+                    LevelUpPredicate = (pkmn, parameter) => pkmn.Moves.Any(m => m.Id == parameter),
+                },
             }
         );
 
@@ -561,10 +934,11 @@ public partial record Evolution
             {
                 Id = "HasMoveType",
                 Name = Text.Localized(LocalizationNamespace, "HasMoveType", "HasMoveType"),
-                Parameter = typeof(PokemonType),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215348 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:467>",
+                Delegates = new EvolutionDelegates<Name, PokemonType>
+                {
+                    LevelUpPredicate = (pkmn, parameter) => pkmn.Moves.Any(m => m.Type == parameter),
+                },
             }
         );
 
@@ -573,10 +947,11 @@ public partial record Evolution
             {
                 Id = "HasInParty",
                 Name = Text.Localized(LocalizationNamespace, "HasInParty", "HasInParty"),
-                Parameter = typeof(Species),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215280 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:476>",
+                Delegates = new EvolutionDelegates<SpeciesForm, Species>
+                {
+                    LevelUpPredicate = (_, parameter) => PlayerTrainer.Instance.HasSpecies(parameter.Species),
+                },
             }
         );
 
@@ -585,10 +960,11 @@ public partial record Evolution
             {
                 Id = "Location",
                 Name = Text.Localized(LocalizationNamespace, "Location", "Location"),
-                Parameter = typeof(int),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307215190 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:485>",
+                Delegates = new EvolutionDelegates<Name>
+                {
+                    LevelUpPredicate = (_, parameter) => GameMap.Instance.MapId == parameter,
+                },
             }
         );
 
@@ -597,10 +973,11 @@ public partial record Evolution
             {
                 Id = "LocationFlag",
                 Name = Text.Localized(LocalizationNamespace, "LocationFlag", "LocationFlag"),
-                Parameter = typeof(string),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x00000253072150a0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:494>",
+                Delegates = new EvolutionDelegates<Name>
+                {
+                    LevelUpPredicate = (_, parameter) => GameMap.Instance.HasMetadataTag(parameter),
+                },
             }
         );
 
@@ -609,10 +986,11 @@ public partial record Evolution
             {
                 Id = "Region",
                 Name = Text.Localized(LocalizationNamespace, "Region", "Region"),
-                Parameter = typeof(int),
                 AnyLevelUp = true,
-                LevelUpProc =
-                    "#<Proc:0x0000025307214fb0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:503>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    LevelUpPredicate = (_, parameter) => GameMap.Instance.RegionId == parameter,
+                },
             }
         );
 
@@ -621,9 +999,10 @@ public partial record Evolution
             {
                 Id = "Item",
                 Name = Text.Localized(LocalizationNamespace, "Item", "Item"),
-                Parameter = typeof(Item),
-                UseItemProc =
-                    "#<Proc:0x0000025307214ee8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:515>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    UseItemPredicate = (_, parameter, item) => item == parameter,
+                },
             }
         );
 
@@ -632,9 +1011,10 @@ public partial record Evolution
             {
                 Id = "ItemMale",
                 Name = Text.Localized(LocalizationNamespace, "ItemMale", "ItemMale"),
-                Parameter = typeof(Item),
-                UseItemProc =
-                    "#<Proc:0x0000025307214e20 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:523>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    UseItemPredicate = (pkmn, parameter, item) => item == parameter && pkmn.IsMale,
+                },
             }
         );
 
@@ -643,9 +1023,10 @@ public partial record Evolution
             {
                 Id = "ItemFemale",
                 Name = Text.Localized(LocalizationNamespace, "ItemFemale", "ItemFemale"),
-                Parameter = typeof(Item),
-                UseItemProc =
-                    "#<Proc:0x0000025307214d58 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:531>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    UseItemPredicate = (pkmn, parameter, item) => item == parameter && pkmn.IsFemale,
+                },
             }
         );
 
@@ -654,9 +1035,10 @@ public partial record Evolution
             {
                 Id = "ItemDay",
                 Name = Text.Localized(LocalizationNamespace, "ItemDay", "ItemDay"),
-                Parameter = typeof(Item),
-                UseItemProc =
-                    "#<Proc:0x0000025307214c90 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:539>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    UseItemPredicate = (_, parameter, item) => item == parameter && DayNightService.Instance.IsDay,
+                },
             }
         );
 
@@ -665,9 +1047,10 @@ public partial record Evolution
             {
                 Id = "ItemNight",
                 Name = Text.Localized(LocalizationNamespace, "ItemNight", "ItemNight"),
-                Parameter = typeof(Item),
-                UseItemProc =
-                    "#<Proc:0x0000025307214bc8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:547>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    UseItemPredicate = (_, parameter, item) => item == parameter && DayNightService.Instance.IsNight,
+                },
             }
         );
 
@@ -676,9 +1059,12 @@ public partial record Evolution
             {
                 Id = "ItemHappiness",
                 Name = Text.Localized(LocalizationNamespace, "ItemHappiness", "ItemHappiness"),
-                Parameter = typeof(Item),
-                UseItemProc =
-                    "#<Proc:0x0000025307214b00 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:555>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    UseItemPredicate = (pkmn, parameter, item) =>
+                        item == parameter
+                        && pkmn.Happiness >= (GameSettings.Instance.ApplyHappinessSoftCap ? 160 : 220),
+                },
             }
         );
 
@@ -687,8 +1073,7 @@ public partial record Evolution
             {
                 Id = "Trade",
                 Name = Text.Localized(LocalizationNamespace, "Trade", "Trade"),
-                OnTradeProc =
-                    "#<Proc:0x0000025307214a38 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:565>",
+                Delegates = new EvolutionDelegates { OnTradePredicate = (_, _) => true },
             }
         );
 
@@ -697,8 +1082,7 @@ public partial record Evolution
             {
                 Id = "TradeMale",
                 Name = Text.Localized(LocalizationNamespace, "TradeMale", "TradeMale"),
-                OnTradeProc =
-                    "#<Proc:0x0000025307214970 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:572>",
+                Delegates = new EvolutionDelegates { OnTradePredicate = (pkmn, _) => pkmn.IsMale },
             }
         );
 
@@ -707,8 +1091,7 @@ public partial record Evolution
             {
                 Id = "TradeFemale",
                 Name = Text.Localized(LocalizationNamespace, "TradeFemale", "TradeFemale"),
-                OnTradeProc =
-                    "#<Proc:0x00000253072148a8 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:579>",
+                Delegates = new EvolutionDelegates { OnTradePredicate = (pkmn, _) => pkmn.IsFemale },
             }
         );
 
@@ -717,8 +1100,7 @@ public partial record Evolution
             {
                 Id = "TradeDay",
                 Name = Text.Localized(LocalizationNamespace, "TradeDay", "TradeDay"),
-                OnTradeProc =
-                    "#<Proc:0x00000253072147e0 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:586>",
+                Delegates = new EvolutionDelegates { OnTradePredicate = (_, _) => DayNightService.Instance.IsDay },
             }
         );
 
@@ -727,8 +1109,7 @@ public partial record Evolution
             {
                 Id = "TradeNight",
                 Name = Text.Localized(LocalizationNamespace, "TradeNight", "TradeNight"),
-                OnTradeProc =
-                    "#<Proc:0x0000025307214718 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:593>",
+                Delegates = new EvolutionDelegates { OnTradePredicate = (_, _) => DayNightService.Instance.IsNight },
             }
         );
 
@@ -737,22 +1118,33 @@ public partial record Evolution
             {
                 Id = "TradeItem",
                 Name = Text.Localized(LocalizationNamespace, "TradeItem", "TradeItem"),
-                Parameter = typeof(Item),
-                OnTradeProc =
-                    "#<Proc:0x0000025307214650 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:601>",
-                AfterEvolutionProc =
-                    "#<Proc:0x0000025307214628 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:604>",
+                Delegates = new EvolutionDelegates<Name, Item>
+                {
+                    OnTradePredicate = (pkmn, parameter, _) => pkmn.HasSpecificItem(parameter),
+                    AfterEvolutionCallback = (pkmn, newSpecies, parameter, evoSpecies) =>
+                    {
+                        if (evoSpecies != newSpecies || !pkmn.HasSpecificItem(parameter))
+                            return false;
+
+                        pkmn.Item = null;
+
+                        return true;
+                    },
+                },
             }
         );
 
+        Name everstone = "EVERSTONE";
         Register(
             new Evolution
             {
                 Id = "TradeSpecies",
                 Name = Text.Localized(LocalizationNamespace, "TradeSpecies", "TradeSpecies"),
-                Parameter = typeof(Species),
-                OnTradeProc =
-                    "#<Proc:0x0000025307214560 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:614>",
+                Delegates = new EvolutionDelegates<SpeciesForm, Species>
+                {
+                    OnTradePredicate = (pkmn, parameter, otherPkmn) =>
+                        pkmn.Species == parameter.Species && !otherPkmn.HasSpecificItem(everstone),
+                },
             }
         );
 
@@ -761,9 +1153,12 @@ public partial record Evolution
             {
                 Id = "BattleDealCriticalHit",
                 Name = Text.Localized(LocalizationNamespace, "BattleDealCriticalHit", "BattleDealCriticalHit"),
-                Parameter = typeof(int),
-                AfterBattleProc =
-                    "#<Proc:0x0000025307214470 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:625>",
+                Delegates = new EvolutionDelegates<int>
+                {
+                    AfterBattlePredicate = (_, partyIndex, parameter) =>
+                        GameTemp.Instance.PartyCriticalHitsDealt.Count > partyIndex
+                        && GameTemp.Instance.PartyCriticalHitsDealt[partyIndex] >= parameter,
+                },
             }
         );
 
@@ -772,9 +1167,10 @@ public partial record Evolution
             {
                 Id = "Event",
                 Name = Text.Localized(LocalizationNamespace, "Event", "Event"),
-                Parameter = typeof(int),
-                EventProc =
-                    "#<Proc:0x0000025307214358 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:657>",
+                Delegates = new EvolutionDelegates<Name>
+                {
+                    EventPredicate = (_, parameter, value) => parameter == value,
+                },
             }
         );
 
@@ -783,11 +1179,22 @@ public partial record Evolution
             {
                 Id = "EventAfterDamageTaken",
                 Name = Text.Localized(LocalizationNamespace, "EventAfterDamageTaken", "EventAfterDamageTaken"),
-                Parameter = typeof(int),
-                AfterBattleProc =
-                    "#<Proc:0x0000025307214268 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:665>",
-                EventProc =
-                    "#<Proc:0x0000025307214240 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:673>",
+                Delegates = new EvolutionDelegates<Name>
+                {
+                    AfterBattlePredicate = (pkmn, partyIndex, _) =>
+                    {
+                        if (
+                            GameTemp.Instance.PartyCriticalHitsDealt.Count > partyIndex
+                            && GameTemp.Instance.PartyCriticalHitsDealt[partyIndex] >= 49
+                        )
+                        {
+                            pkmn.ReadyToEvolve = true;
+                        }
+
+                        return false;
+                    },
+                    EventPredicate = (pkmn, parameter, value) => parameter == value && pkmn.ReadyToEvolve,
+                },
             }
         );
     }

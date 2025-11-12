@@ -25,10 +25,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         .ToDictionary(x => x.Name);
 
     [CreateSyncVersion]
-    public override async Task CompileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         var entities = await serializer
             .ReadFromFileAsync(
@@ -51,10 +48,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
     }
 
     [CreateSyncVersion]
-    public override async Task WriteToFileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         await serializer.WritePbsFileAsync(
             FileName,
@@ -66,20 +60,12 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
     private static Species ConvertToEntity(SpeciesFormInfo model)
     {
         var baseForm = Species.GetSpeciesForm(model.Id.Species, 0);
-        return model.ToGameData(
-            baseForm.Name,
-            baseForm.GrowthRate,
-            baseForm.GenderRatio,
-            baseForm.Incense
-        );
+        return model.ToGameData(baseForm.Name, baseForm.GrowthRate, baseForm.GenderRatio, baseForm.Incense);
     }
 
     private static SpeciesFormInfo ConvertToModel(Species entity) => entity.ToSpeciesFormInfo();
 
-    private static SpeciesFormInfo ValidateCompiledModel(
-        SpeciesFormInfo model,
-        FileLineData fileLineData
-    )
+    private static SpeciesFormInfo ValidateCompiledModel(SpeciesFormInfo model, FileLineData fileLineData)
     {
         if (model.Evolutions is not null)
         {
@@ -97,11 +83,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
 
         var baseData = Species.GetSpeciesForm(model.Id.Species, 0);
 
-        if (
-            model.WildItemCommon is null
-            && model.WildItemUncommon is null
-            && model.WildItemRare is null
-        )
+        if (model.WildItemCommon is null && model.WildItemUncommon is null && model.WildItemRare is null)
         {
             model.WildItemCommon = baseData.WildItemCommon.ToList();
             model.WildItemUncommon = baseData.WildItemUncommon.ToList();
@@ -128,17 +110,11 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         foreach (var species in allSpecies)
         {
             // Validate all evolutions
-            fileLineData = fileLineData.WithSection(
-                species.SpeciesId,
-                nameof(SpeciesInfo.Evolutions),
-                null
-            );
+            fileLineData = fileLineData.WithSection(species.SpeciesId, nameof(SpeciesInfo.Evolutions), null);
             var evolutionList = new List<EvolutionInfo>(species.Evolutions.Length);
             foreach (var evolution in species.Evolutions)
             {
-                var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo)
-                    ? evo.Parameter
-                    : null;
+                var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo) ? evo.Parameter : null;
                 var paramValue = evolution.Parameter?.ToString() ?? string.Empty;
                 if (paramType is null)
                 {
@@ -148,12 +124,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
                 {
                     try
                     {
-                        evolutionList.Add(
-                            evolution with
-                            {
-                                Parameter = (int)CsvParser.ParseUnsigned(paramValue),
-                            }
-                        );
+                        evolutionList.Add(evolution with { Parameter = (int)CsvParser.ParseUnsigned(paramValue) });
                     }
                     catch (SerializationException e)
                     {
@@ -164,10 +135,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
                     paramType.IsEnum
                     || paramType
                         .GetInterfaces()
-                        .Any(i =>
-                            i.IsGenericType
-                            && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>)
-                        )
+                        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>))
                 )
                 {
                     evolutionList.Add(
@@ -199,27 +167,13 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
             {
                 if (!allEvolutions.ContainsKey(evo.Species))
                 {
-                    allEvolutions.Add(
-                        evo.Species,
-                        evo with
-                        {
-                            Species = species.SpeciesId,
-                            IsPrevious = true,
-                        }
-                    );
+                    allEvolutions.Add(evo.Species, evo with { Species = species.SpeciesId, IsPrevious = true });
                 }
 
                 var formKey = new SpeciesForm(evo.Species, species.Form);
                 if (species.Form > 0 && !allEvolutions.ContainsKey(formKey))
                 {
-                    allEvolutions.Add(
-                        formKey,
-                        evo with
-                        {
-                            Species = species.SpeciesId,
-                            IsPrevious = true,
-                        }
-                    );
+                    allEvolutions.Add(formKey, evo with { Species = species.SpeciesId, IsPrevious = true });
                 }
             }
         }
@@ -276,10 +230,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         if (CompareEqual(original, baseFormValue))
             return null;
 
-        if (
-            key is nameof(SpeciesFormInfo.Height) or nameof(SpeciesFormInfo.Weight)
-            && original is decimal asDecimal
-        )
+        if (key is nameof(SpeciesFormInfo.Height) or nameof(SpeciesFormInfo.Weight) && original is decimal asDecimal)
         {
             return asDecimal.ToString("0.0");
         }

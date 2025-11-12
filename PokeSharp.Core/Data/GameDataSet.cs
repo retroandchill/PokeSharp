@@ -3,22 +3,72 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
 
+/// <summary>
+/// Represents a collection of game data entities organized by unique keys.
+/// </summary>
+/// <typeparam name="TEntity">The type of the entities stored in this data set.</typeparam>
+/// <typeparam name="TKey">The type of the key used to identify entities.</typeparam>
 public abstract partial class GameDataSet<TEntity, TKey>
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
     private OrderedDictionary<TKey, TEntity> _data = new();
 
+    /// <summary>
+    /// Gets the internal collection of game data entities organized as an ordered dictionary.
+    /// Provides the ability to access, manipulate, and manage the stored game data.
+    /// </summary>
+    /// <remarks>
+    /// This property is protected and provides access to the underlying ordered dictionary
+    /// that represents the dataset of entities. It is used within the class and subclasses
+    /// to perform operations like adding or retrieving entities by their unique keys.
+    /// </remarks>
     protected OrderedDictionary<TKey, TEntity> Data => _data;
 
+    /// <summary>
+    /// Provides a collection of all unique keys associated with the game data entities in the dataset.
+    /// Enables enumeration and retrieval of keys for identification and operation purposes.
+    /// </summary>
+    /// <remarks>
+    /// This property is public and exposes the keys present in the underlying collection.
+    /// It allows for iteration over the keys and serves as a reference for identifying entities
+    /// within the dataset by their respective unique keys.
+    /// </remarks>
     public IEnumerable<TKey> Keys => _data.Keys;
 
+    /// <summary>
+    /// Provides access to the collection of entities stored in the dataset.
+    /// </summary>
+    /// <remarks>
+    /// This property offers an enumerable sequence of all entities contained within the dataset, allowing iteration
+    /// over the values managed by the underlying ordered dictionary. It simplifies access to the stored data
+    /// without needing direct interaction with the internal data structure.
+    /// </remarks>
     public IEnumerable<TEntity> Entities => _data.Values;
 
+    /// <summary>
+    /// Gets the total number of entities currently stored in the dataset.
+    /// </summary>
+    /// <remarks>
+    /// This property provides the count of elements within the internal data collection, reflecting
+    /// the number of key-entity pairs stored in the dataset. It is a read-only property and updates
+    /// dynamically as entities are added or removed from the dataset.
+    /// </remarks>
     public int Count => _data.Count;
 
+    /// <summary>
+    /// Determines whether an entity with the specified key exists in the data set.
+    /// </summary>
+    /// <param name="key">The key of the entity to locate in the data set.</param>
+    /// <returns>True if an entity with the specified key exists; otherwise, false.</returns>
     public bool Exists(TKey key) => _data.ContainsKey(key);
 
+    /// <summary>
+    /// Retrieves an entity associated with the specified key from the data set.
+    /// </summary>
+    /// <param name="key">The key of the entity to retrieve.</param>
+    /// <returns>The entity associated with the specified key.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when no entity with the specified key is found.</exception>
     public TEntity Get(TKey key)
     {
         return _data.TryGetValue(key, out var entity)
@@ -26,9 +76,24 @@ public abstract partial class GameDataSet<TEntity, TKey>
             : throw new KeyNotFoundException($"Could not find entity with key {key}");
     }
 
-    public bool TryGet(TKey key, [NotNullWhen(true)] out TEntity? entity) =>
-        _data.TryGetValue(key, out entity);
+    /// <summary>
+    /// Attempts to retrieve an entity with the specified key from the data set.
+    /// </summary>
+    /// <param name="key">The key of the entity to locate in the data set.</param>
+    /// <param name="entity">
+    /// When this method returns, contains the entity associated with the specified key,
+    /// if it is found in the data set; otherwise, null. This parameter is passed uninitialized.
+    /// </param>
+    /// <returns>
+    /// True if an entity with the specified key is found in the data set; otherwise, false.
+    /// </returns>
+    public bool TryGet(TKey key, [NotNullWhen(true)] out TEntity? entity) => _data.TryGetValue(key, out entity);
 
+    /// <summary>
+    /// Replaces the current data set with a new set of entities provided asynchronously.
+    /// </summary>
+    /// <param name="entities">The asynchronous enumerable of entities to replace the current data set with.</param>
+    /// <returns>A ValueTask representing the asynchronous operation.</returns>
     [CreateSyncVersion]
     protected async ValueTask ReplaceDataAsync(IAsyncEnumerable<TEntity> entities)
     {
@@ -42,43 +107,73 @@ public abstract partial class GameDataSet<TEntity, TKey>
     }
 }
 
+/// <summary>
+/// Represents a specialized data set for managing and registering game data entities.
+/// This class extends the base functionality of <see cref="GameDataSet{TEntity, TKey}"/> to include
+/// registration capabilities for entities that implement <see cref="IRegisteredGameDataEntity{TKey, TEntity}"/>.
+/// </summary>
+/// <typeparam name="TEntity">
+/// The type of entities stored in this data set. Must implement <see cref="IRegisteredGameDataEntity{TKey, TEntity}"/>.
+/// </typeparam>
+/// <typeparam name="TKey">
+/// The type of the key used to uniquely identify entities in the data set.
+/// </typeparam>
 [RegisterSingleton]
 public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, TKey>
     where TEntity : IRegisteredGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
+    /// <summary>
+    /// Registers a new entity in the data set.
+    /// </summary>
+    /// <param name="entity">The entity to be added to the data set.</param>
     public void Register(TEntity entity)
     {
         Data.Add(entity.Id, entity);
     }
 }
 
+/// <summary>
+/// Represents a specialized data set for managing game data entities that are loaded dynamically.
+/// </summary>
+/// <typeparam name="TEntity">The type of the loaded game data entities stored in this data set.</typeparam>
+/// <typeparam name="TKey">The type of the key used to uniquely identify entities.</typeparam>
 [RegisterSingleton]
 public sealed partial class LoadedGameDataSet<TEntity, TKey> : GameDataSet<TEntity, TKey>
     where TEntity : ILoadedGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
+    /// <summary>
+    /// Imports a collection of entities into the data set asynchronously.
+    /// </summary>
+    /// <param name="entities">The collection of entities to import into the data set.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     [CreateSyncVersion]
-    public async ValueTask ImportAsync(
-        IEnumerable<TEntity> entities,
-        CancellationToken cancellationToken = default
-    )
+    public async ValueTask ImportAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         ReplaceData(entities);
         await SaveAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Asynchronously loads the game data entities into the data set.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     [CreateSyncVersion]
     public ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
         return ReplaceDataAsync(
-            GameContextManager.Current.DataLoader.LoadEntitiesAsync<TEntity>(
-                TEntity.DataPath,
-                cancellationToken
-            )
+            GameContextManager.Current.DataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken)
         );
     }
 
+    /// <summary>
+    /// Asynchronously saves the current collection of entities to the storage.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous save operation.</returns>
     [CreateSyncVersion]
     public ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {

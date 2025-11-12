@@ -13,13 +13,7 @@ public static class ConversionUtils
         IReadOnlyList<IPbsConverter> converters
     )
     {
-        var converted = ConvertTypeIfNecessary(
-            sectionName,
-            value,
-            property.PropertyType,
-            property,
-            converters
-        );
+        var converted = ConvertTypeIfNecessary(sectionName, value, property.PropertyType, property, converters);
         property.SetValue(target, converted);
     }
 
@@ -39,13 +33,9 @@ public static class ConversionUtils
             return value;
         }
 
-        var converter = converters.FirstOrDefault(c =>
-            c.CanConvert(sectionName, property, value, targetType)
-        );
+        var converter = converters.FirstOrDefault(c => c.CanConvert(sectionName, property, value, targetType));
         if (converter is null)
-            throw new InvalidOperationException(
-                $"Could not find a converter for the property {property.Name}."
-            );
+            throw new InvalidOperationException($"Could not find a converter for the property {property.Name}.");
 
         return converter.Convert(
             sectionName,

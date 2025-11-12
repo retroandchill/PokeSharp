@@ -4,30 +4,46 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Represents a change in a specific stat of a Pokémon.
+/// </summary>
+/// <param name="Stat">The stat that is being changed.</param>
+/// <param name="Change">The amount of change in the stat.</param>
 public readonly record struct StatChange(Name Stat, int Change);
 
+/// <summary>
+/// Represents a nature in the game, which affects the stat changes for a Pokémon.
+/// </summary>
 [GameDataEntity]
 public partial record Nature
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Represents the name of the nature as a required text value.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// Represents the collection of stat changes associated with a specific nature.
+    /// </summary>
     public ImmutableArray<StatChange> StatChanges { get; init; } = [];
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.Nature";
 
+    /// <summary>
+    /// Adds default values for Natures to the game data.
+    /// </summary>
+    /// <remarks>
+    /// This method populates the Nature-related data with predefined default values.
+    /// It is intended to initialize the game with a standard set of Nature definitions.
+    /// </remarks>
     public static void AddDefaultValues()
     {
-        Register(
-            new Nature
-            {
-                Id = "HARDY",
-                Name = Text.Localized(LocalizationNamespace, "HARDY", "Hardy"),
-            }
-        );
+        Register(new Nature { Id = "HARDY", Name = Text.Localized(LocalizationNamespace, "HARDY", "Hardy") });
 
         Register(
             new Nature
@@ -52,11 +68,7 @@ public partial record Nature
             {
                 Id = "ADAMANT",
                 Name = Text.Localized(LocalizationNamespace, "ADAMANT", "Adamant"),
-                StatChanges =
-                [
-                    new StatChange(Stat.ATTACK, 10),
-                    new StatChange(Stat.SPECIAL_ATTACK, -10),
-                ],
+                StatChanges = [new StatChange(Stat.ATTACK, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
             }
         );
 
@@ -65,11 +77,7 @@ public partial record Nature
             {
                 Id = "NAUGHTY",
                 Name = Text.Localized(LocalizationNamespace, "NAUGHTY", "Naughty"),
-                StatChanges =
-                [
-                    new StatChange(Stat.ATTACK, 10),
-                    new StatChange(Stat.SPECIAL_DEFENSE, -10),
-                ],
+                StatChanges = [new StatChange(Stat.ATTACK, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
             }
         );
 
@@ -82,13 +90,7 @@ public partial record Nature
             }
         );
 
-        Register(
-            new Nature
-            {
-                Id = "DOCILE",
-                Name = Text.Localized(LocalizationNamespace, "DOCILE", "Docile"),
-            }
-        );
+        Register(new Nature { Id = "DOCILE", Name = Text.Localized(LocalizationNamespace, "DOCILE", "Docile") });
 
         Register(
             new Nature
@@ -104,11 +106,7 @@ public partial record Nature
             {
                 Id = "IMPISH",
                 Name = Text.Localized(LocalizationNamespace, "IMPISH", "Impish"),
-                StatChanges =
-                [
-                    new StatChange(Stat.DEFENSE, 10),
-                    new StatChange(Stat.SPECIAL_ATTACK, -10),
-                ],
+                StatChanges = [new StatChange(Stat.DEFENSE, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
             }
         );
 
@@ -117,11 +115,7 @@ public partial record Nature
             {
                 Id = "LAX",
                 Name = Text.Localized(LocalizationNamespace, "LAX", "Lax"),
-                StatChanges =
-                [
-                    new StatChange(Stat.DEFENSE, 10),
-                    new StatChange(Stat.SPECIAL_DEFENSE, -10),
-                ],
+                StatChanges = [new StatChange(Stat.DEFENSE, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
             }
         );
 
@@ -143,24 +137,14 @@ public partial record Nature
             }
         );
 
-        Register(
-            new Nature
-            {
-                Id = "SERIOUS",
-                Name = Text.Localized(LocalizationNamespace, "SERIOUS", "Serious"),
-            }
-        );
+        Register(new Nature { Id = "SERIOUS", Name = Text.Localized(LocalizationNamespace, "SERIOUS", "Serious") });
 
         Register(
             new Nature
             {
                 Id = "JOLLY",
                 Name = Text.Localized(LocalizationNamespace, "JOLLY", "Jolly"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPEED, 10),
-                    new StatChange(Stat.SPECIAL_ATTACK, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPEED, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
             }
         );
 
@@ -169,11 +153,7 @@ public partial record Nature
             {
                 Id = "NAIVE",
                 Name = Text.Localized(LocalizationNamespace, "NAIVE", "Naive"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPEED, 10),
-                    new StatChange(Stat.SPECIAL_DEFENSE, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPEED, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
             }
         );
 
@@ -182,11 +162,7 @@ public partial record Nature
             {
                 Id = "MODEST",
                 Name = Text.Localized(LocalizationNamespace, "MODEST", "Modest"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_ATTACK, 10),
-                    new StatChange(Stat.ATTACK, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.ATTACK, -10)],
             }
         );
 
@@ -195,11 +171,7 @@ public partial record Nature
             {
                 Id = "MILD",
                 Name = Text.Localized(LocalizationNamespace, "MILD", "Mild"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_ATTACK, 10),
-                    new StatChange(Stat.DEFENSE, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.DEFENSE, -10)],
             }
         );
 
@@ -208,32 +180,18 @@ public partial record Nature
             {
                 Id = "QUIET",
                 Name = Text.Localized(LocalizationNamespace, "QUIET", "Quiet"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_ATTACK, 10),
-                    new StatChange(Stat.SPEED, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.SPEED, -10)],
             }
         );
 
-        Register(
-            new Nature
-            {
-                Id = "BASHFUL",
-                Name = Text.Localized(LocalizationNamespace, "BASHFUL", "Bashful"),
-            }
-        );
+        Register(new Nature { Id = "BASHFUL", Name = Text.Localized(LocalizationNamespace, "BASHFUL", "Bashful") });
 
         Register(
             new Nature
             {
                 Id = "RASH",
                 Name = Text.Localized(LocalizationNamespace, "RASH", "Rash"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_ATTACK, 10),
-                    new StatChange(Stat.SPECIAL_DEFENSE, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
             }
         );
 
@@ -242,11 +200,7 @@ public partial record Nature
             {
                 Id = "CALM",
                 Name = Text.Localized(LocalizationNamespace, "CALM", "Calm"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_DEFENSE, 10),
-                    new StatChange(Stat.ATTACK, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.ATTACK, -10)],
             }
         );
 
@@ -255,11 +209,7 @@ public partial record Nature
             {
                 Id = "GENTLE",
                 Name = Text.Localized(LocalizationNamespace, "GENTLE", "Gentle"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_DEFENSE, 10),
-                    new StatChange(Stat.DEFENSE, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.DEFENSE, -10)],
             }
         );
 
@@ -268,11 +218,7 @@ public partial record Nature
             {
                 Id = "SASSY",
                 Name = Text.Localized(LocalizationNamespace, "SASSY", "Sassy"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_DEFENSE, 10),
-                    new StatChange(Stat.SPEED, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.SPEED, -10)],
             }
         );
 
@@ -281,21 +227,11 @@ public partial record Nature
             {
                 Id = "CAREFUL",
                 Name = Text.Localized(LocalizationNamespace, "CAREFUL", "Careful"),
-                StatChanges =
-                [
-                    new StatChange(Stat.SPECIAL_DEFENSE, 10),
-                    new StatChange(Stat.SPECIAL_ATTACK, -10),
-                ],
+                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
             }
         );
 
-        Register(
-            new Nature
-            {
-                Id = "QUIRKY",
-                Name = Text.Localized(LocalizationNamespace, "QUIRKY", "Quirky"),
-            }
-        );
+        Register(new Nature { Id = "QUIRKY", Name = Text.Localized(LocalizationNamespace, "QUIRKY", "Quirky") });
     }
     #endregion
 }

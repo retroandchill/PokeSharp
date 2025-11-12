@@ -86,11 +86,7 @@ public readonly record struct PbsParseResult(
     FileLineData LineData
 );
 
-public readonly record struct Section<T>(
-    Dictionary<string, ParsedData> Data,
-    T Id,
-    FileLineData LineData
-);
+public readonly record struct Section<T>(Dictionary<string, ParsedData> Data, T Id, FileLineData LineData);
 
 public readonly record struct LineWithNumber(string Line, int LineNumber);
 
@@ -101,15 +97,9 @@ public partial class PbsSerializer
     private readonly SchemaBuilder _schemaBuilder = new();
 
     public List<IPbsConverter> Converters { get; } =
-    [
-        new LocalizingTextConverter(),
-        new NumericTypeConverter(),
-        new CollectionConverter(),
-        new ComplexTypeConverter(),
-    ];
+    [new LocalizingTextConverter(), new NumericTypeConverter(), new CollectionConverter(), new ComplexTypeConverter()];
 
-    public IReadOnlyDictionary<string, SchemaEntry> GetSchema(Type type) =>
-        _schemaBuilder.BuildSchema(type);
+    public IReadOnlyDictionary<string, SchemaEntry> GetSchema(Type type) => _schemaBuilder.BuildSchema(type);
 
     [CreateSyncVersion]
     public static async IAsyncEnumerable<PbsParseResult> ParseFileSectionsExAsync(
@@ -356,9 +346,7 @@ public partial class PbsSerializer
                             ),
                         list =>
                         {
-                            var propertyOutput = list.Select(item =>
-                                    CsvParser.GetCsvRecord(item, schemaEntry)
-                                )
+                            var propertyOutput = list.Select(item => CsvParser.GetCsvRecord(item, schemaEntry))
                                 .ToList();
                             ConversionUtils.SetValueToProperty(
                                 sectionName,
@@ -368,10 +356,7 @@ public partial class PbsSerializer
                                 Converters
                             );
                         },
-                        () =>
-                            throw new InvalidOperationException(
-                                $"Property '{property.Name}' is null."
-                            )
+                        () => throw new InvalidOperationException($"Property '{property.Name}' is null.")
                     );
                 }
                 catch (Exception e)
@@ -408,9 +393,7 @@ public partial class PbsSerializer
     [CreateSyncVersion]
     public static async Task AddPbsHeaderToFileAsync(StreamWriter fileWriter)
     {
-        await fileWriter.WriteLineAsync(
-            "# See the documentation on the wiki to learn how to edit this file."
-        );
+        await fileWriter.WriteLineAsync("# See the documentation on the wiki to learn how to edit this file.");
     }
 
     [CreateSyncVersion]
@@ -429,9 +412,7 @@ public partial class PbsSerializer
 
         if (!schema.TryGetValue("SectionName", out var sectionName))
         {
-            throw new PbsSchemaException(
-                $"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field."
-            );
+            throw new PbsSchemaException($"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field.");
         }
 
         await FileUtils.WriteFileWithBackupAsync(path, WriteAction);
@@ -444,9 +425,7 @@ public partial class PbsSerializer
             foreach (var entity in entities)
             {
                 await fileWriter.WriteLineAsync("#-------------------------------");
-                await fileWriter.WriteLineAsync(
-                    $"[{propertyGetter(entity, sectionName.PropertyName)}]"
-                );
+                await fileWriter.WriteLineAsync($"[{propertyGetter(entity, sectionName.PropertyName)}]");
 
                 foreach (var (key, value) in schema)
                 {
@@ -457,10 +436,7 @@ public partial class PbsSerializer
                     if (elementValue is null)
                         continue;
 
-                    if (
-                        value.FieldStructure == PbsFieldStructure.Repeating
-                        && elementValue is IEnumerable list
-                    )
+                    if (value.FieldStructure == PbsFieldStructure.Repeating && elementValue is IEnumerable list)
                     {
                         foreach (var item in list)
                         {

@@ -9,10 +9,7 @@ namespace PokeSharp.Compiler.Mappers;
 public static partial class ItemMapper
 {
     [MapPropertyFromSource(nameof(ItemInfo.PortionName), Use = nameof(MapPortionNameTo))]
-    [MapPropertyFromSource(
-        nameof(ItemInfo.PortionNamePlural),
-        Use = nameof(MapPortionNamePluralTo)
-    )]
+    [MapPropertyFromSource(nameof(ItemInfo.PortionNamePlural), Use = nameof(MapPortionNamePluralTo))]
     [MapPropertyFromSource(nameof(ItemInfo.SellPrice), Use = nameof(MapSellPriceTo))]
     [MapPropertyFromSource(nameof(ItemInfo.Consumable), Use = nameof(MapConsumableTo))]
     [MapPropertyFromSource(nameof(ItemInfo.ShowQuantity), Use = nameof(MapShowQuantityTo))]

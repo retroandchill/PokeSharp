@@ -2,8 +2,14 @@
 
 namespace PokeSharp.Data;
 
+/// <summary>
+/// Contains all the default data for the game.
+/// </summary>
 public static class DefaultData
 {
+    /// <summary>
+    /// Initializes all default data entities.
+    /// </summary>
     public static void AddAll()
     {
         GrowthRate.AddDefaultValues();

@@ -3,6 +3,9 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Specifies the trigger conditions for an encounter in the game.
+/// </summary>
 public enum EncounterTrigger : byte
 {
     /// <summary>
@@ -36,21 +39,46 @@ public enum EncounterTrigger : byte
     Contest,
 }
 
+/// <summary>
+/// Represents the type of an encounter within the game.
+/// </summary>
+/// <remarks>
+/// The <c>EncounterType</c> record defines key properties associated with an encounter,
+/// including its unique identifier, name, trigger type, and trigger chance.
+/// It supports the addition of default values for standard encounters.
+/// </remarks>
 [GameDataEntity]
 public partial record EncounterType
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Gets the name of the encounter type.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// Represents the trigger type of an encounter in the game.
+    /// </summary>
     public required EncounterTrigger Type { get; init; }
 
+    /// <summary>
+    /// Represents the probability of triggering a specific encounter type.
+    /// </summary>
     public int TriggerChance { get; init; }
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.EncounterType";
 
+    /// <summary>
+    /// Adds default values to the EncounterType entity.
+    /// </summary>
+    /// <remarks>
+    /// This method is designed to initialize default data or reset state related to
+    /// the EncounterType entity within the context of PokeSharp game data handling.
+    /// </remarks>
     public static void AddDefaultValues()
     {
         Register(

@@ -4,33 +4,69 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Represents an evolution step or method for a Pokémon entity, defining how it can evolve under specific conditions or actions.
+/// </summary>
 [GameDataEntity]
 public partial record Evolution
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Gets the name representation associated with the evolution entity. This property is required and immutable.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// Represents a configurable parameter associated with the evolution data.
+    /// </summary>
     public Type? Parameter { get; init; }
 
+    /// <summary>
+    /// Indicates whether any level-up condition is required for the evolution.
+    /// </summary>
     public bool AnyLevelUp { get; init; }
 
+    /// <summary>
+    /// Gets the procedure or conditions required for leveling up.
+    /// </summary>
     public string? LevelUpProc { get; init; }
 
+    /// <summary>
+    /// Gets the procedure or conditions required when an item is used.
+    /// </summary>
     public string? UseItemProc { get; init; }
 
+    /// <summary>
+    /// Indicates the process to be executed during a trade evolution.
+    /// </summary>
     public string? OnTradeProc { get; init; }
 
+    /// <summary>
+    /// Gets the identifier of the procedure triggered after a battle.
+    /// </summary>
     public string? AfterBattleProc { get; init; }
 
+    /// <summary>
+    /// Represents the event procedure associated with this evolution.
+    /// </summary>
     public string? EventProc { get; init; }
 
+    /// <summary>
+    /// Represents the process or procedure that takes place after the evolution of an entity.
+    /// </summary>
     public string? AfterEvolutionProc { get; init; }
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.Evolution";
 
+    /// <summary>
+    /// Adds default values to the Evolution entity.
+    /// This method initializes the entity with predefined values that are assumed
+    /// to be commonly associated with the Evolution context in the application.
+    /// </summary>
     public static void AddDefaultValues()
     {
         Register(
@@ -224,11 +260,7 @@ public partial record Evolution
             new Evolution
             {
                 Id = "LevelDarkInParty",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "LevelDarkInParty",
-                    "LevelDarkInParty"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "LevelDarkInParty", "LevelDarkInParty"),
                 Parameter = typeof(int),
                 LevelUpProc =
                     "#<Proc:0x0000025307216928 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:212>",
@@ -383,11 +415,7 @@ public partial record Evolution
             new Evolution
             {
                 Id = "HappinessMoveType",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "HappinessMoveType",
-                    "HappinessMoveType"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "HappinessMoveType", "HappinessMoveType"),
                 Parameter = typeof(PokemonType),
                 AnyLevelUp = true,
                 LevelUpProc =
@@ -399,11 +427,7 @@ public partial record Evolution
             new Evolution
             {
                 Id = "HappinessHoldItem",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "HappinessHoldItem",
-                    "HappinessHoldItem"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "HappinessHoldItem", "HappinessHoldItem"),
                 Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
@@ -510,11 +534,7 @@ public partial record Evolution
             new Evolution
             {
                 Id = "HoldItemHappiness",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "HoldItemHappiness",
-                    "HoldItemHappiness"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "HoldItemHappiness", "HoldItemHappiness"),
                 Parameter = typeof(Item),
                 AnyLevelUp = true,
                 LevelUpProc =
@@ -740,11 +760,7 @@ public partial record Evolution
             new Evolution
             {
                 Id = "BattleDealCriticalHit",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "BattleDealCriticalHit",
-                    "BattleDealCriticalHit"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "BattleDealCriticalHit", "BattleDealCriticalHit"),
                 Parameter = typeof(int),
                 AfterBattleProc =
                     "#<Proc:0x0000025307214470 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:625>",
@@ -766,11 +782,7 @@ public partial record Evolution
             new Evolution
             {
                 Id = "EventAfterDamageTaken",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "EventAfterDamageTaken",
-                    "EventAfterDamageTaken"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "EventAfterDamageTaken", "EventAfterDamageTaken"),
                 Parameter = typeof(int),
                 AfterBattleProc =
                     "#<Proc:0x0000025307214268 D:/dev/pokemon-essentials-plugins/Data/Scripts/010_Data/001_Hardcoded data/007_Evolution.rb:665>",

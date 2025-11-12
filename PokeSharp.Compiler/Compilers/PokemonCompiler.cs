@@ -18,16 +18,9 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 {
     public override int Order => 8;
 
-    public override async Task WriteToFileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        await serializer.WritePbsFileAsync(
-            FileName,
-            Species.AllSpecies.Select(ConvertToModel),
-            GetPropertyForPbs
-        );
+        await serializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel), GetPropertyForPbs);
     }
 
     protected override Species ConvertToEntity(SpeciesInfo model) => model.ToGameData();
@@ -59,28 +52,14 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
         foreach (var species in entities)
         {
             // Enumerate all offspring and validate them
-            fileLineData = fileLineData.WithSection(
-                species.SpeciesId,
-                nameof(SpeciesInfo.Offspring),
-                null
-            );
-            foreach (
-                var offspring in species.Offspring.Where(offspring =>
-                    !allSpeciesKeys.Contains(offspring)
-                )
-            )
+            fileLineData = fileLineData.WithSection(species.SpeciesId, nameof(SpeciesInfo.Offspring), null);
+            foreach (var offspring in species.Offspring.Where(offspring => !allSpeciesKeys.Contains(offspring)))
             {
-                throw new PbsParseException(
-                    $"Species '{offspring}' is not defined.\n{fileLineData.LineReport}"
-                );
+                throw new PbsParseException($"Species '{offspring}' is not defined.\n{fileLineData.LineReport}");
             }
 
             // Validate all evolutions
-            fileLineData = fileLineData.WithSection(
-                species.SpeciesId,
-                nameof(SpeciesInfo.Evolutions),
-                null
-            );
+            fileLineData = fileLineData.WithSection(species.SpeciesId, nameof(SpeciesInfo.Evolutions), null);
             var evolutionList = new List<EvolutionInfo>(species.Evolutions.Length);
             foreach (var evolution in species.Evolutions)
             {
@@ -91,9 +70,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
                     );
                 }
 
-                var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo)
-                    ? evo.Parameter
-                    : null;
+                var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo) ? evo.Parameter : null;
                 var paramValue = evolution.Parameter?.ToString() ?? string.Empty;
                 if (paramType is null)
                 {
@@ -103,12 +80,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
                 {
                     try
                     {
-                        evolutionList.Add(
-                            evolution with
-                            {
-                                Parameter = (int)CsvParser.ParseUnsigned(paramValue),
-                            }
-                        );
+                        evolutionList.Add(evolution with { Parameter = (int)CsvParser.ParseUnsigned(paramValue) });
                     }
                     catch (SerializationException e)
                     {
@@ -129,10 +101,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
                     paramType.IsEnum
                     || paramType
                         .GetInterfaces()
-                        .Any(i =>
-                            i.IsGenericType
-                            && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>)
-                        )
+                        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>))
                 )
                 {
                     evolutionList.Add(
@@ -163,14 +132,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
             foreach (var evo in evolutions.Where(evo => !allEvolutions.ContainsKey(evo.Species)))
             {
-                allEvolutions.Add(
-                    evo.Species,
-                    evo with
-                    {
-                        Species = species.SpeciesId,
-                        IsPrevious = true,
-                    }
-                );
+                allEvolutions.Add(evo.Species, evo with { Species = species.SpeciesId, IsPrevious = true });
             }
         }
         for (var i = 0; i < entities.Length; i++)
@@ -193,12 +155,9 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
         return key switch
         {
-            nameof(SpeciesInfo.Incense)
-            or nameof(SpeciesInfo.Habitat) when original is Name { IsNone: true } => null,
-            nameof(SpeciesInfo.Height)
-            or nameof(SpeciesInfo.Weight) when original is decimal asDecimal => asDecimal.ToString(
-                "0.0"
-            ),
+            nameof(SpeciesInfo.Incense) or nameof(SpeciesInfo.Habitat) when original is Name { IsNone: true } => null,
+            nameof(SpeciesInfo.Height) or nameof(SpeciesInfo.Weight) when original is decimal asDecimal =>
+                asDecimal.ToString("0.0"),
             _ => original,
         };
     }

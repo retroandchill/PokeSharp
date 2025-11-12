@@ -3,6 +3,9 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Enumeration representing the type of stat in the game.
+/// </summary>
 public enum StatType : byte
 {
     /// <summary>
@@ -21,32 +24,69 @@ public enum StatType : byte
     Battle,
 }
 
+/// <summary>
+/// Represents a statistical entity used in the context of the application.
+/// </summary>
 [GameDataEntity]
 public partial record Stat
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Represents the name of the stat. This property is required and is of type Text.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// Represents a brief name associated with the stat.
+    /// </summary>
     public required Text NameBrief { get; init; }
 
+    /// <summary>
+    /// Represents the classification of a stat, determining its context or usage, such as main stats or battle-related stats.
+    /// </summary>
     public StatType StatType { get; init; }
 
+    /// <summary>
+    /// Represents the order in which the stat appears in the PBS (Pokémon Base Stats) configuration.
+    /// </summary>
     public int PbsOrder { get; init; }
 
-    public static IEnumerable<Stat> AllMain =>
-        Stat.Entities.Where(x => x.StatType is StatType.Main or StatType.MainBattle);
+    /// <summary>
+    /// Provides access to all <see cref="Stat"/> entities classified as either <see cref="StatType.Main"/> or <see cref="StatType.MainBattle"/>.
+    /// </summary>
+    /// <remarks>
+    /// Intended for use cases where main or main-battle statistics need to be collated or referenced.
+    /// </remarks>
+    public static IEnumerable<Stat> AllMain => Entities.Where(x => x.StatType is StatType.Main or StatType.MainBattle);
 
-    public static IEnumerable<Stat> AllMainBattle =>
-        Stat.Entities.Where(x => x.StatType == StatType.MainBattle);
+    /// <summary>
+    /// Retrieves a collection of all statistical entities classified specifically as <see cref="StatType.MainBattle"/>.
+    /// </summary>
+    public static IEnumerable<Stat> AllMainBattle => Entities.Where(x => x.StatType == StatType.MainBattle);
 
+    /// <summary>
+    /// Retrieves a collection of stats that include entities of type
+    /// <see cref="StatType.Battle"/> or <see cref="StatType.MainBattle"/>.
+    /// </summary>
     public static IEnumerable<Stat> AllBattle =>
-        Stat.Entities.Where(x => x.StatType is StatType.Battle or StatType.MainBattle);
+        Entities.Where(x => x.StatType is StatType.Battle or StatType.MainBattle);
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.Stat";
 
+    /// <summary>
+    /// Adds default statistical values to the `Stat` data entity.
+    /// This method is responsible for registering a predefined set of default
+    /// statistics commonly used in the game. These statistics include primary
+    /// attributes like HP, Attack, Defense, Special Attack, Special Defense, Speed,
+    /// and additional battle-related statistics such as Accuracy and Evasion.
+    /// Each statistic is configured with its unique identifier, localized name,
+    /// type classification, and an order of appearance (if applicable). The method
+    /// uses the `Register` method to add these statistics to the system.
+    /// </summary>
     public static void AddDefaultValues()
     {
         Register(

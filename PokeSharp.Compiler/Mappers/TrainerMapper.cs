@@ -7,10 +7,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace PokeSharp.Compiler.Mappers;
 
-[Mapper(
-    RequiredMappingStrategy = RequiredMappingStrategy.Target,
-    PreferParameterlessConstructors = false
-)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target, PreferParameterlessConstructors = false)]
 public static partial class TrainerMapper
 {
     public static partial EnemyTrainer ToGameData(this EnemyTrainerInfo dto);

@@ -49,9 +49,7 @@ public class GameDataGenerator : IIncrementalGenerator
 
         if (idProperty is null)
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(NoIdPropertyDiagnostic, type.Locations[0], type.Name)
-            );
+            context.ReportDiagnostic(Diagnostic.Create(NoIdPropertyDiagnostic, type.Locations[0], type.Name));
             return;
         }
 
@@ -68,8 +66,7 @@ public class GameDataGenerator : IIncrementalGenerator
             Identifiers = type.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m =>
-                    m.Name == "AddDefaultValues"
-                    && m is { IsStatic: true, Parameters.Length: 0, ReturnsVoid: true }
+                    m.Name == "AddDefaultValues" && m is { IsStatic: true, Parameters.Length: 0, ReturnsVoid: true }
                 )
                 .SelectMany(GetIdentifiers)
                 .Select(x => new { Identifier = x })
@@ -117,16 +114,13 @@ public class GameDataGenerator : IIncrementalGenerator
             )
             .SelectMany(invocation =>
             {
-                var objectCreation = (ObjectCreationExpressionSyntax)
-                    invocation.ArgumentList.Arguments[0].Expression;
+                var objectCreation = (ObjectCreationExpressionSyntax)invocation.ArgumentList.Arguments[0].Expression;
                 return objectCreation
                     .Initializer!.Expressions.OfType<AssignmentExpressionSyntax>()
                     .Where(assignment =>
                         assignment.Left is IdentifierNameSyntax { Identifier.ValueText: "Id" }
                         && assignment.Right is LiteralExpressionSyntax literal
-                        && literal.Token.IsKind(
-                            Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken
-                        )
+                        && literal.Token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken)
                     )
                     .Select(x => ((LiteralExpressionSyntax)x.Right).Token.ValueText);
             });

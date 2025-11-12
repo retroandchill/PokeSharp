@@ -3,26 +3,52 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Represents a body shape entity that is part of the game's data.
+/// </summary>
+/// <remarks>
+/// A body shape is identified by an <see cref="Id"/> and has a localized <see cref="Name"/>.
+/// It is used to categorize entities or characters within the game based on their physical forms.
+/// </remarks>
+/// <threadsafety>
+/// This type is immutable and thread-safe since its properties are readonly once initialized.
+/// </threadsafety>
+/// <example>
+/// The AddDefaultValues method registers a list of predefined body shapes with localized names.
+/// </example>
 [GameDataEntity]
 public readonly partial record struct BodyShape
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Gets the localized name of the body shape.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="Name"/> property provides a text representation that is localized
+    /// to match the player's language settings, enhancing accessibility and comprehension.
+    /// </remarks>
+    /// <threadsafety>
+    /// This property is immutable and thread-safe as it is readonly after initialization.
+    /// </threadsafety>
     public required Text Name { get; init; }
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.BodyShape";
 
+    /// <summary>
+    /// Populates the body shape registry with a predefined set of default values.
+    /// </summary>
+    /// <remarks>
+    /// This method registers a series of body shapes, each represented by a unique identifier
+    /// and a localized name. These shapes define different structural forms for entities
+    /// within the application, such as "Head", "Winged", "Quadruped", and others.
+    /// </remarks>
     public static void AddDefaultValues()
     {
-        Register(
-            new BodyShape
-            {
-                Id = "Head",
-                Name = Text.Localized(LocalizationNamespace, "Head", "Head"),
-            }
-        );
+        Register(new BodyShape { Id = "Head", Name = Text.Localized(LocalizationNamespace, "Head", "Head") });
 
         Register(
             new BodyShape
@@ -32,28 +58,14 @@ public readonly partial record struct BodyShape
             }
         );
 
+        Register(new BodyShape { Id = "Finned", Name = Text.Localized(LocalizationNamespace, "Finned", "Finned") });
+
         Register(
-            new BodyShape
-            {
-                Id = "Finned",
-                Name = Text.Localized(LocalizationNamespace, "Finned", "Finned"),
-            }
+            new BodyShape { Id = "HeadArms", Name = Text.Localized(LocalizationNamespace, "HeadArms", "Head and arms") }
         );
 
         Register(
-            new BodyShape
-            {
-                Id = "HeadArms",
-                Name = Text.Localized(LocalizationNamespace, "HeadArms", "Head and arms"),
-            }
-        );
-
-        Register(
-            new BodyShape
-            {
-                Id = "HeadBase",
-                Name = Text.Localized(LocalizationNamespace, "HeadBase", "Head and base"),
-            }
+            new BodyShape { Id = "HeadBase", Name = Text.Localized(LocalizationNamespace, "HeadBase", "Head and base") }
         );
 
         Register(
@@ -65,52 +77,24 @@ public readonly partial record struct BodyShape
         );
 
         Register(
-            new BodyShape
-            {
-                Id = "HeadLegs",
-                Name = Text.Localized(LocalizationNamespace, "HeadLegs", "Head and legs"),
-            }
+            new BodyShape { Id = "HeadLegs", Name = Text.Localized(LocalizationNamespace, "HeadLegs", "Head and legs") }
         );
 
         Register(
-            new BodyShape
-            {
-                Id = "Quadruped",
-                Name = Text.Localized(LocalizationNamespace, "Quadruped", "Quadruped"),
-            }
+            new BodyShape { Id = "Quadruped", Name = Text.Localized(LocalizationNamespace, "Quadruped", "Quadruped") }
+        );
+
+        Register(new BodyShape { Id = "Winged", Name = Text.Localized(LocalizationNamespace, "Winged", "Winged") });
+
+        Register(
+            new BodyShape { Id = "Multiped", Name = Text.Localized(LocalizationNamespace, "Multiped", "Multiped") }
         );
 
         Register(
-            new BodyShape
-            {
-                Id = "Winged",
-                Name = Text.Localized(LocalizationNamespace, "Winged", "Winged"),
-            }
+            new BodyShape { Id = "MultiBody", Name = Text.Localized(LocalizationNamespace, "MultiBody", "Multi Body") }
         );
 
-        Register(
-            new BodyShape
-            {
-                Id = "Multiped",
-                Name = Text.Localized(LocalizationNamespace, "Multiped", "Multiped"),
-            }
-        );
-
-        Register(
-            new BodyShape
-            {
-                Id = "MultiBody",
-                Name = Text.Localized(LocalizationNamespace, "MultiBody", "Multi Body"),
-            }
-        );
-
-        Register(
-            new BodyShape
-            {
-                Id = "Bipedal",
-                Name = Text.Localized(LocalizationNamespace, "Bipedal", "Bipedal"),
-            }
-        );
+        Register(new BodyShape { Id = "Bipedal", Name = Text.Localized(LocalizationNamespace, "Bipedal", "Bipedal") });
 
         Register(
             new BodyShape
@@ -121,11 +105,7 @@ public readonly partial record struct BodyShape
         );
 
         Register(
-            new BodyShape
-            {
-                Id = "Insectoid",
-                Name = Text.Localized(LocalizationNamespace, "Insectoid", "Insectoid"),
-            }
+            new BodyShape { Id = "Insectoid", Name = Text.Localized(LocalizationNamespace, "Insectoid", "Insectoid") }
         );
     }
     #endregion

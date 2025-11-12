@@ -31,10 +31,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
     );
 
     [CreateSyncVersion]
-    public override async Task CompileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
         schema.Add(PokemonSchemaEntry.PropertyName, PokemonSchemaEntry);
@@ -47,9 +44,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 
         var fileLineData = new FileLineData(FileName);
         var result = new List<EnemyTrainer>();
-        await foreach (
-            var (line, _) in serializer.ParsePreppedLinesAsync(FileName, cancellationToken)
-        )
+        await foreach (var (line, _) in serializer.ParsePreppedLinesAsync(FileName, cancellationToken))
         {
             var matchSectionHeader = PbsSerializer.SectionHeader.Match(line);
             if (matchSectionHeader.Success)
@@ -128,9 +123,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
             {
                 if (currentPokemon is null)
                 {
-                    throw new PbsParseException(
-                        $"Pokémon hasn't been defined yet!\n{fileLineData.LineReport}"
-                    );
+                    throw new PbsParseException($"Pokémon hasn't been defined yet!\n{fileLineData.LineReport}");
                 }
 
                 ConversionUtils.SetValueToProperty(
@@ -157,9 +150,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
     {
         if (trainer.Pokemon.Count == 0)
         {
-            throw new PbsParseException(
-                $"Trainer with ID '{trainer.Id}' has no Pokémon.\n{fileLineData.LineReport}"
-            );
+            throw new PbsParseException($"Trainer with ID '{trainer.Id}' has no Pokémon.\n{fileLineData.LineReport}");
         }
 
         var maxLevel = GrowthRate.MaxLevel;
@@ -175,10 +166,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
                 );
             }
 
-            if (
-                pokemon.Name.HasValue
-                && pokemon.Name.Value.AsReadOnlySpan().Length > Pokemon.NameSizeLimit
-            )
+            if (pokemon.Name.HasValue && pokemon.Name.Value.AsReadOnlySpan().Length > Pokemon.NameSizeLimit)
             {
                 throw new PbsParseException(
                     $"Invalid Pokémon nickname: {pokemon.Name.Value} (must be 1-{Pokemon.NameSizeLimit} characters).\n{fileLineData.LineReport}"
@@ -192,9 +180,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
                 foreach (var stat in mainStats)
                 {
                     newIVs[stat.PbsOrder] =
-                        pokemon.IV.Count > stat.PbsOrder
-                            ? pokemon.IV[stat.PbsOrder]
-                            : pokemon.IV[0];
+                        pokemon.IV.Count > stat.PbsOrder ? pokemon.IV[stat.PbsOrder] : pokemon.IV[0];
                     if (newIVs[stat.PbsOrder] > Pokemon.IVStatLimit)
                     {
                         throw new PbsParseException(
@@ -215,9 +201,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
                 foreach (var stat in mainStats)
                 {
                     newEVs[stat.PbsOrder] =
-                        pokemon.EV.Count > stat.PbsOrder
-                            ? pokemon.EV[stat.PbsOrder]
-                            : pokemon.EV[0];
+                        pokemon.EV.Count > stat.PbsOrder ? pokemon.EV[stat.PbsOrder] : pokemon.EV[0];
                     evTotal += newEVs[stat.PbsOrder];
                     if (newEVs[stat.PbsOrder] > Pokemon.EVStatLimit)
                     {
@@ -257,10 +241,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
     }
 
     [CreateSyncVersion]
-    public override async Task WriteToFileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
         var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
@@ -322,10 +303,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         var elementValue = property.GetValue(model);
         if (
             elementValue is false
-            || (
-                elementValue is IEnumerable enumerable
-                && CollectionUtils.IsEmptyEnumerable(enumerable)
-            )
+            || (elementValue is IEnumerable enumerable && CollectionUtils.IsEmptyEnumerable(enumerable))
         )
         {
             return null;

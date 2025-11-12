@@ -5,16 +5,53 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Represents the growth rate of an entity in the game, including experience points,
+/// level calculations, and related data.
+/// </summary>
 [GameDataEntity]
 public partial record GrowthRate
 {
+    /// <summary>
+    /// Gets the maximum allowable level for entities, as defined by game settings.
+    /// Serves as an upper boundary for level-based calculations and validations.
+    /// </summary>
     public static int MaxLevel => GameSettings.MaxLevel;
 
+    /// <inheritdoc />
     public required Name Id { get; init; }
+
+    /// <summary>
+    /// Gets the display name associated with this growth rate.
+    /// Represents the localized or human-readable identifier for the growth rate definition.
+    /// </summary>
     public required Text Name { get; init; }
+
+    /// <summary>
+    /// Represents a collection of experience values associated with specific levels.
+    /// These values define the minimum experience required for an entity to reach each corresponding level.
+    /// </summary>
     public required ImmutableArray<int> ExpValues { get; init; }
+
+    /// <summary>
+    /// Defines the formula used to calculate the experience points required
+    /// for leveling up, based on a given level.
+    /// Serves as the primary mechanism for determining progression requirements
+    /// in the growth rate calculation.
+    /// </summary>
+    /// <remarks>
+    /// This formula is only applied when the level is outside the range of values defined in <see cref="ExpValues"/>.
+    /// </remarks>
     public required Func<int, int> ExpFormula { get; init; }
 
+    /// <summary>
+    /// Calculates the minimum experience points required to reach a given level.
+    /// Ensures the level is within the valid range and computes the value using predefined experience values
+    /// or a formula if required.
+    /// </summary>
+    /// <param name="level">The level for which the minimum experience points are calculated. Must be greater than 0.</param>
+    /// <returns>The minimum experience points required to reach the specified level.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the provided level is less than or equal to 0.</exception>
     public int GetMinimumExpForLevel(int level)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(level, 0);
@@ -22,23 +59,46 @@ public partial record GrowthRate
         return level < ExpValues.Length ? ExpValues[level] : ExpFormula(level);
     }
 
+    /// <summary>
+    /// Gets the maximum experience points required to reach the highest allowable level.
+    /// Calculated based on the predefined experience formula or values for the maximum level.
+    /// </summary>
     public int MaximumExp => GetMinimumExpForLevel(MaxLevel);
 
+    /// <summary>
+    /// Adds two experience point values together and calculates the total experience required
+    /// for the resulting sum to advance levels.
+    /// </summary>
+    /// <param name="exp1">The first experience point value. Must be non-negative.</param>
+    /// <param name="exp2">The second experience point value. Must be non-negative.</param>
+    /// <returns>The total minimum experience points corresponding to the sum of the input values.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when one or both of the provided experience values are negative.</exception>
     public int AddExp(int exp1, int exp2) => GetMinimumExpForLevel(exp1 + exp2);
 
+    /// <summary>
+    /// Determines the level corresponding to a given amount of experience points.
+    /// Ensures the experience value is non-negative and calculates the level based on
+    /// predefined experience thresholds or a formula.
+    /// </summary>
+    /// <param name="exp">The experience points for which the level is calculated. Must be non-negative.</param>
+    /// <returns>The level corresponding to the provided experience points.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the provided experience points are less than 0.</exception>
     public int GetLevelFromExp(int exp)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(exp, 0);
         var max = MaxLevel;
-        return exp >= MaximumExp
-            ? max
-            : Enumerable.Range(1, max).Last(i => exp >= GetMinimumExpForLevel(i));
+        return exp >= MaximumExp ? max : Enumerable.Range(1, max).Last(i => exp >= GetMinimumExpForLevel(i));
     }
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.GrowthRate";
 
+    /// <summary>
+    /// Adds default values to the GrowthRate data entity.
+    /// Initializes predefined default values for the entity, ensuring consistency
+    /// and alignment with the expected data structure.
+    /// </summary>
     public static void AddDefaultValues()
     {
         // csharpier-ignore-start

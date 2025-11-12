@@ -19,8 +19,7 @@ public readonly record struct LevelUpMoveInfo(
 
 public readonly record struct EvolutionMethodInfo(
     Name Species,
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)]
-        Name Method,
+    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)] Name Method,
     string? Parameter = null
 );
 
@@ -128,8 +127,7 @@ public readonly record struct SpeciesFormIdentifierInfo(
 
 public readonly record struct FormEvolutionMethodInfo(
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)]
-        Name Method,
+    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)] Name Method,
     string? Parameter = null
 );
 

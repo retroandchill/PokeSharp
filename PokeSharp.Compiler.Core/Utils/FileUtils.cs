@@ -6,10 +6,7 @@ namespace PokeSharp.Compiler.Core.Utils;
 public static partial class FileUtils
 {
     [CreateSyncVersion]
-    public static async ValueTask WriteFileWithBackupAsync(
-        string path,
-        Func<StreamWriter, ValueTask> writeAction
-    )
+    public static async ValueTask WriteFileWithBackupAsync(string path, Func<StreamWriter, ValueTask> writeAction)
     {
         string? backupPath = null;
 

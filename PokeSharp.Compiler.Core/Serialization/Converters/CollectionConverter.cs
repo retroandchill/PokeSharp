@@ -6,12 +6,7 @@ namespace PokeSharp.Compiler.Core.Serialization.Converters;
 
 public class CollectionConverter : IPbsConverter
 {
-    public bool CanConvert(
-        string sectionName,
-        PropertyInfo property,
-        object? value,
-        Type targetType
-    )
+    public bool CanConvert(string sectionName, PropertyInfo property, object? value, Type targetType)
     {
         if (value is null)
             return false;
@@ -91,9 +86,7 @@ public class CollectionConverter : IPbsConverter
         // Handle IEnumerable implementations
         var enumerableInterface = collectionType
             .GetInterfaces()
-            .FirstOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-            );
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
         return enumerableInterface?.GetGenericArguments().FirstOrDefault();
     }
@@ -163,19 +156,12 @@ public class CollectionConverter : IPbsConverter
             {
                 var createMethod = typeof(ImmutableArray)
                     .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                    .Where(m =>
-                        m
-                            is {
-                                Name: nameof(ImmutableArray.ToImmutableArray),
-                                IsGenericMethodDefinition: true
-                            }
-                    )
+                    .Where(m => m is { Name: nameof(ImmutableArray.ToImmutableArray), IsGenericMethodDefinition: true })
                     .FirstOrDefault(m =>
                     {
                         var parameters = m.GetParameters();
                         return parameters is [{ ParameterType.IsGenericType: true }]
-                            && parameters[0].ParameterType.GetGenericTypeDefinition()
-                                == typeof(IEnumerable<>);
+                            && parameters[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
                     });
 
                 if (createMethod != null)

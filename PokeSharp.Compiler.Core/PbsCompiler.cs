@@ -39,17 +39,11 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
 
     public abstract void Compile(PbsSerializer serializer);
 
-    public abstract Task CompileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    );
+    public abstract Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
 
     public abstract void WriteToFile(PbsSerializer serializer);
 
-    public abstract Task WriteToFileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    );
+    public abstract Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
 
     protected virtual object? GetPropertyForPbs(TModel model, string key)
     {
@@ -76,10 +70,7 @@ public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TMo
     where TEntity : ILoadedGameDataEntity<TEntity>
 {
     [CreateSyncVersion]
-    public override async Task CompileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
         var entities = await serializer
             .ReadFromFileAsync<TModel>(FileName, cancellationToken)
@@ -95,16 +86,9 @@ public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TMo
     }
 
     [CreateSyncVersion]
-    public override async Task WriteToFileAsync(
-        PbsSerializer serializer,
-        CancellationToken cancellationToken = default
-    )
+    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        await serializer.WritePbsFileAsync(
-            FileName,
-            TEntity.Entities.Select(ConvertToModel),
-            GetPropertyForPbs
-        );
+        await serializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel), GetPropertyForPbs);
     }
 
     protected abstract TEntity ConvertToEntity(TModel model);

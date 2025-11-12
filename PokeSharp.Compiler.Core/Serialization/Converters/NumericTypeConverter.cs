@@ -21,18 +21,12 @@ public class NumericTypeConverter : IPbsConverter
         typeof(decimal),
     ];
 
-    public bool CanConvert(
-        string sectionName,
-        PropertyInfo property,
-        object? value,
-        Type targetType
-    )
+    public bool CanConvert(string sectionName, PropertyInfo property, object? value, Type targetType)
     {
         if (value is null)
             return false;
 
-        return NumericTypes.Any(t => t.IsInstanceOfType(value))
-            && NumericTypes.Any(t => t.IsAssignableTo(targetType));
+        return NumericTypes.Any(t => t.IsInstanceOfType(value)) && NumericTypes.Any(t => t.IsAssignableTo(targetType));
     }
 
     public object? Convert(
@@ -55,9 +49,7 @@ public class NumericTypeConverter : IPbsConverter
 
         // Check if both types are numeric
         if (!NumericTypes.Contains(sourceType) || !NumericTypes.Contains(targetType))
-            throw new InvalidOperationException(
-                $"Cannot convert from {sourceType.Name} to {targetType.Name}"
-            );
+            throw new InvalidOperationException($"Cannot convert from {sourceType.Name} to {targetType.Name}");
 
         try
         {
@@ -84,11 +76,7 @@ public class NumericTypeConverter : IPbsConverter
         }
     }
 
-    private static bool IsConversionLossless(
-        object originalValue,
-        object convertedValue,
-        Type originalType
-    )
+    private static bool IsConversionLossless(object originalValue, object convertedValue, Type originalType)
     {
         try
         {
@@ -96,11 +84,7 @@ public class NumericTypeConverter : IPbsConverter
             var backConverted = System.Convert.ChangeType(convertedValue, originalType);
 
             // For floating point types, we need special handling due to precision
-            if (
-                originalType == typeof(float)
-                || originalType == typeof(double)
-                || originalType == typeof(decimal)
-            )
+            if (originalType == typeof(float) || originalType == typeof(double) || originalType == typeof(decimal))
             {
                 return IsFloatingPointEqual(originalValue, backConverted);
             }

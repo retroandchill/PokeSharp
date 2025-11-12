@@ -7,10 +7,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace PokeSharp.Compiler.Mappers;
 
-[Mapper(
-    RequiredMappingStrategy = RequiredMappingStrategy.Target,
-    PreferParameterlessConstructors = false
-)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target, PreferParameterlessConstructors = false)]
 public static partial class SpeciesMapper
 {
     [MapProperty(nameof(SpeciesInfo.Pokedex), nameof(Species.PokedexEntry))]
@@ -72,19 +69,13 @@ public static partial class SpeciesMapper
         return [.. stats.Select(x => new EVYieldInfo(x.Key, x.Value)).Where(x => x.Amount > 0)];
     }
 
-    private static List<EvolutionMethodInfo> MapEvolutionMethodInfos(
-        ImmutableArray<EvolutionInfo> evolutionInfo
-    )
+    private static List<EvolutionMethodInfo> MapEvolutionMethodInfos(ImmutableArray<EvolutionInfo> evolutionInfo)
     {
         return
         [
             .. evolutionInfo
                 .Where(e => !e.IsPrevious)
-                .Select(e => new EvolutionMethodInfo(
-                    e.Species,
-                    e.EvolutionMethod,
-                    e.Parameter?.ToString()
-                )),
+                .Select(e => new EvolutionMethodInfo(e.Species, e.EvolutionMethod, e.Parameter?.ToString())),
         ];
     }
 
@@ -96,30 +87,18 @@ public static partial class SpeciesMapper
         [
             .. evolutionInfo
                 .Where(e => !e.IsPrevious)
-                .Select(e => new FormEvolutionMethodInfo(
-                    e.Species,
-                    e.EvolutionMethod,
-                    e.Parameter?.ToString()
-                )),
+                .Select(e => new FormEvolutionMethodInfo(e.Species, e.EvolutionMethod, e.Parameter?.ToString())),
         ];
     }
 
     private static EvolutionInfo MapEvolutionInfo(EvolutionMethodInfo evolutionInfo)
     {
-        return new EvolutionInfo(
-            evolutionInfo.Species,
-            evolutionInfo.Method,
-            evolutionInfo.Parameter
-        );
+        return new EvolutionInfo(evolutionInfo.Species, evolutionInfo.Method, evolutionInfo.Parameter);
     }
 
     private static EvolutionInfo MapEvolutionInfo(FormEvolutionMethodInfo evolutionInfo)
     {
-        return new EvolutionInfo(
-            evolutionInfo.Species,
-            evolutionInfo.Method,
-            evolutionInfo.Parameter
-        );
+        return new EvolutionInfo(evolutionInfo.Species, evolutionInfo.Method, evolutionInfo.Parameter);
     }
 
     private static int ConvertDecimalUnit(decimal value)

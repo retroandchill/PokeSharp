@@ -6,12 +6,7 @@ namespace PokeSharp.Compiler.Core.Serialization.Converters;
 
 public class ComplexTypeConverter : IPbsConverter
 {
-    public bool CanConvert(
-        string sectionName,
-        PropertyInfo property,
-        object? value,
-        Type targetType
-    )
+    public bool CanConvert(string sectionName, PropertyInfo property, object? value, Type targetType)
     {
         return !TypeUtils.IsSimpleType(targetType)
             && value is IList list
@@ -28,9 +23,7 @@ public class ComplexTypeConverter : IPbsConverter
     {
         ArgumentNullException.ThrowIfNull(value);
         var arguments = (IList)value;
-        var targetConstructor = targetType
-            .GetConstructors()
-            .First(c => c.GetParameters().Length == arguments.Count);
+        var targetConstructor = targetType.GetConstructors().First(c => c.GetParameters().Length == arguments.Count);
 
         var parameterList = targetConstructor.GetParameters();
         for (var i = 0; i < arguments.Count; i++)

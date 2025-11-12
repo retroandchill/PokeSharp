@@ -3,6 +3,9 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Represents the gender of a Pokémon.
+/// </summary>
 public enum PokemonGender : byte
 {
     /// <summary>
@@ -21,6 +24,9 @@ public enum PokemonGender : byte
     Genderless = 2,
 }
 
+/// <summary>
+/// Represents specific gender ratio classifications that define unique gender distributions for Pokémon.
+/// </summary>
 public enum SpecialGenderRatio : byte
 {
     /// <summary>
@@ -44,6 +50,15 @@ public enum SpecialGenderRatio : byte
     GenderlessOnly,
 }
 
+/// <summary>
+/// Represents data for defining a Pokémon's gender ratio, which determines the probability
+/// of encountering a Pokémon as a specific gender or as a single-gender Pokémon.
+/// </summary>
+/// <remarks>
+/// The <see cref="GenderRatioData"/> structure provides a mechanism to configure and analyze
+/// gender ratios, accommodating single-gender Pokémon, genderless Pokémon,
+/// and Pokémon with variable gender probabilities.
+/// </remarks>
 public readonly struct GenderRatioData
 {
     private readonly SpecialGenderRatio _specialGenderRatio;
@@ -142,20 +157,56 @@ public readonly struct GenderRatioData
     }
 }
 
+/// <summary>
+/// Represents a gender ratio definition, specifying how likely a Pokémon is to be
+/// encountered as a specific gender, a single-gender species, or genderless.
+/// </summary>
+/// <remarks>
+/// The <see cref="GenderRatio"/> structure includes properties for identifying
+/// and naming the gender ratio configuration, alongside associated ratio data.
+/// It also provides functionality to determine whether the ratio defines a
+/// single-gender specification and integrates default data handling.
+/// </remarks>
 [GameDataEntity]
 public readonly partial record struct GenderRatio
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Represents the name associated with the gender ratio entity.
+    /// This property provides a textual identifier or descriptor
+    /// that can be used for display, comparisons, or localization purposes.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// Represents the gender distribution ratio for an entity.
+    /// This property specifies the likelihood of a particular gender
+    /// being associated with the entity, encapsulating male, female,
+    /// or genderless probabilities.
+    /// </summary>
     public required GenderRatioData Ratio { get; init; }
 
+    /// <summary>
+    /// Determines if the entity is associated with a single gender configuration.
+    /// The property evaluates dependent gender ratio data to identify whether
+    /// the entity exclusively pertains to a specific gender category (such as male-only,
+    /// female-only, or genderless-only).
+    /// </summary>
     public bool IsSingleGender => Ratio.IsSingleGender;
 
     #region Defaults
     private const string LocalizationNamespace = "GameData.GenderRatio";
 
+    /// <summary>
+    /// Registers a predefined set of default gender ratios to the game data.
+    /// </summary>
+    /// <remarks>
+    /// This method defines and registers standard gender ratio patterns used in the game,
+    /// including specific predefined ratios such as always male, always female, genderless,
+    /// and various distributions of male-to-female probabilities.
+    /// </remarks>
     public static void AddDefaultValues()
     {
         Register(
@@ -189,11 +240,7 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "FemaleOneEighth",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "FemaleOneEighth",
-                    "Female One Eighth"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "FemaleOneEighth", "Female One Eighth"),
                 Ratio = GenderRatioData.FemaleChance(32),
             }
         );
@@ -202,11 +249,7 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "Female25Percent",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "Female25Percent",
-                    "Female 25 Percent"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "Female25Percent", "Female 25 Percent"),
                 Ratio = GenderRatioData.FemaleChance(64),
             }
         );
@@ -215,11 +258,7 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "Female50Percent",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "Female50Percent",
-                    "Female 50 Percent"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "Female50Percent", "Female 50 Percent"),
                 Ratio = GenderRatioData.FemaleChance(128),
             }
         );
@@ -228,11 +267,7 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "Female75Percent",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "Female75Percent",
-                    "Female 75 Percent"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "Female75Percent", "Female 75 Percent"),
                 Ratio = GenderRatioData.FemaleChance(192),
             }
         );
@@ -241,11 +276,7 @@ public readonly partial record struct GenderRatio
             new GenderRatio
             {
                 Id = "FemaleSevenEighths",
-                Name = Text.Localized(
-                    LocalizationNamespace,
-                    "FemaleSevenEighths",
-                    "Female Seven Eighths"
-                ),
+                Name = Text.Localized(LocalizationNamespace, "FemaleSevenEighths", "Female Seven Eighths"),
                 Ratio = GenderRatioData.FemaleChance(224),
             }
         );

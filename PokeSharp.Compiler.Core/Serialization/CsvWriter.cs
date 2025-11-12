@@ -10,11 +10,7 @@ namespace PokeSharp.Compiler.Core.Serialization;
 public static partial class CsvWriter
 {
     [CreateSyncVersion]
-    public static async Task WriteCsvRecordAsync(
-        object? record,
-        StreamWriter writer,
-        SchemaEntry schema
-    )
+    public static async Task WriteCsvRecordAsync(object? record, StreamWriter writer, SchemaEntry schema)
     {
         var recordSet = record is IEnumerable asEnumerable and not string
             ? asEnumerable.Flatten().SelectMany(DeconstructIfNecessary).ToImmutableArray()
@@ -88,22 +84,14 @@ public static partial class CsvWriter
     }
 
     [CreateSyncVersion]
-    private static async Task WriteEnumRecordAsync(
-        object? record,
-        StreamWriter writer,
-        Type? enumType
-    )
+    private static async Task WriteEnumRecordAsync(object? record, StreamWriter writer, Type? enumType)
     {
         // TODO: This needs some more logic, but for now we're just going to write the value.
         await writer.WriteAsync(record?.ToString() ?? "");
     }
 
     [CreateSyncVersion]
-    private static async Task WriteEnumOrIntegerRecordAsync(
-        object? record,
-        StreamWriter writer,
-        Type? enumType
-    )
+    private static async Task WriteEnumOrIntegerRecordAsync(object? record, StreamWriter writer, Type? enumType)
     {
         if (enumType is not null && enumType.IsEnum)
         {
@@ -115,18 +103,12 @@ public static partial class CsvWriter
     }
 
     [CreateSyncVersion]
-    private static async Task WriteOtherRecordTypeAsync(
-        object? record,
-        StreamWriter writer,
-        PbsFieldType schema
-    )
+    private static async Task WriteOtherRecordTypeAsync(object? record, StreamWriter writer, PbsFieldType schema)
     {
         switch (record)
         {
             case string str:
-                await writer.WriteAsync(
-                    (schema == PbsFieldType.UnformattedText) ? str : TextFormatter.CsvQuote(str)
-                );
+                await writer.WriteAsync((schema == PbsFieldType.UnformattedText) ? str : TextFormatter.CsvQuote(str));
                 break;
             case Name name:
                 await writer.WriteAsync(name.ToString());

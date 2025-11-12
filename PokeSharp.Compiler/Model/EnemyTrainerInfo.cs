@@ -13,8 +13,7 @@ public readonly record struct TrainerKey(
     int Version = 0
 )
 {
-    public override string ToString() =>
-        Version > 0 ? $"{TrainerType},{Name},{Version}" : $"{TrainerType},{Name}";
+    public override string ToString() => Version > 0 ? $"{TrainerType},{Name},{Version}" : $"{TrainerType},{Name}";
 }
 
 [PbsData("trainers")]

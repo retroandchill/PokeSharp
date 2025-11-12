@@ -44,5 +44,12 @@ public partial record TrainerType
 
     public required string? VictoryBGM { get; init; }
 
+    /// <summary>
+    /// Determines whether the specified flag is present in the list of flags.
+    /// </summary>
+    /// <param name="flag">The flag to check for in the list of flags.</param>
+    /// <returns>
+    /// <c>true</c> if the specified flag is present in the list of flags; otherwise, <c>false</c>.
+    /// </returns>
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 }

@@ -24,11 +24,10 @@ public static class CollectionUtils
         }
     }
 
-    private static readonly MethodInfo TryGetNonEnumeratedCountMethod =
-        typeof(Enumerable).GetMethod(
-            nameof(Enumerable.TryGetNonEnumeratedCount),
-            BindingFlags.Public | BindingFlags.Static
-        )!;
+    private static readonly MethodInfo TryGetNonEnumeratedCountMethod = typeof(Enumerable).GetMethod(
+        nameof(Enumerable.TryGetNonEnumeratedCount),
+        BindingFlags.Public | BindingFlags.Static
+    )!;
 
     public static bool IsEmptyEnumerable(IEnumerable enumerable)
     {
@@ -36,9 +35,7 @@ public static class CollectionUtils
         var enumerableType = enumerable.GetType();
         var genericEnumerableInterface = enumerableType
             .GetInterfaces()
-            .FirstOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-            );
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
         if (genericEnumerableInterface == null)
             return false;

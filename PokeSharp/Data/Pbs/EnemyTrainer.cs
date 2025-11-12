@@ -63,21 +63,12 @@ public partial record EnemyTrainer
         return Get(new TrainerIdentifier(trainerType, name, version));
     }
 
-    public static bool TryGet(
-        Name trainerType,
-        Text name,
-        [NotNullWhen(true)] out EnemyTrainer? trainer
-    )
+    public static bool TryGet(Name trainerType, Text name, [NotNullWhen(true)] out EnemyTrainer? trainer)
     {
         return TryGet(new TrainerIdentifier(trainerType, name), out trainer);
     }
 
-    public static bool TryGet(
-        Name trainerType,
-        Text name,
-        int version,
-        [NotNullWhen(true)] out EnemyTrainer? trainer
-    )
+    public static bool TryGet(Name trainerType, Text name, int version, [NotNullWhen(true)] out EnemyTrainer? trainer)
     {
         return TryGet(new TrainerIdentifier(trainerType, name, version), out trainer);
     }

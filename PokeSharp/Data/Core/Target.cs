@@ -3,39 +3,78 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Specifies the number of targets for an action or effect.
+/// </summary>
 public enum TargetCount : byte
 {
+    /// <summary>
+    /// The move have no specific target.
+    /// </summary>
     NoTargets,
+
+    /// <summary>
+    /// The move hits a single target.
+    /// </summary>
     SingleTarget,
+
+    /// <summary>
+    /// The move hits multiple targets.
+    /// </summary>
     MultipleTargets,
 }
 
+/// <summary>
+/// Represents a target configuration within the PokeSharp framework. A target defines
+/// how and where an action, ability, or effect can be applied in the context of the game.
+/// </summary>
 [GameDataEntity]
 public partial record Target
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Gets the name associated with the target.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// The number of targets that the move can affect.
+    /// </summary>
     public TargetCount NumTargets { get; init; }
 
+    /// <summary>
+    /// Indicates whether the target entity is directed at a foe.
+    /// </summary>
     public bool TargetsFoe { get; init; }
 
+    /// <summary>
+    /// Indicates whether the target affects all entities.
+    /// </summary>
     public bool TargetsAll { get; init; }
 
+    /// <summary>
+    /// Determines whether the target affects the foe's side in the game environment.
+    /// </summary>
     public bool AffectsFoeSide { get; init; }
 
+    /// <summary>
+    /// Represents whether the target has long-range capabilities.
+    /// </summary>
     public bool LongRange { get; init; }
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.Target";
 
+    /// <summary>
+    /// Adds default values to the Target data entity. This method is used to
+    /// set predefined configuration or properties associated with the Target.
+    /// </summary>
     public static void AddDefaultValues()
     {
-        Register(
-            new Target { Id = "User", Name = Text.Localized(LocalizationNamespace, "User", "User") }
-        );
+        Register(new Target { Id = "User", Name = Text.Localized(LocalizationNamespace, "User", "User") });
 
         Register(
             new Target
@@ -171,13 +210,7 @@ public partial record Target
             }
         );
 
-        Register(
-            new Target
-            {
-                Id = "UserSide",
-                Name = Text.Localized(LocalizationNamespace, "UserSide", "User Side"),
-            }
-        );
+        Register(new Target { Id = "UserSide", Name = Text.Localized(LocalizationNamespace, "UserSide", "User Side") });
 
         Register(
             new Target

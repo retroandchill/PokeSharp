@@ -18,10 +18,7 @@ public record FileLineData(string File)
         {
             Section = section,
             Key = key,
-            Value =
-                value is not null && value.Length > 200
-                    ? $"{value[..200]}..."
-                    : value ?? string.Empty,
+            Value = value is not null && value.Length > 200 ? $"{value[..200]}..." : value ?? string.Empty,
         };
     }
 

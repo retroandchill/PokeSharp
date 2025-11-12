@@ -42,11 +42,7 @@ public static partial class CsvParser
 
                 if (quoteCount != 2)
                 {
-                    if (
-                        value.Count(c => c == '"') == 2
-                        && value.StartsWith("\\\"")
-                        && value.EndsWith("\\\"")
-                    )
+                    if (value.Count(c => c == '"') == 2 && value.StartsWith("\\\"") && value.EndsWith("\\\""))
                     {
                         values[i] = values[i]![2..^3];
                     }
@@ -73,11 +69,7 @@ public static partial class CsvParser
             PbsFieldType.String or PbsFieldType.UnformattedText => value,
             PbsFieldType.Symbol => ParseSymbol(value),
             PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType, schema.AllowNone),
-            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(
-                value,
-                schema.EnumType,
-                schema.AllowNone
-            ),
+            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType, schema.AllowNone),
             _ => throw new SerializationException($"Unknown schema '{schema}'."),
         };
     }
@@ -132,9 +124,7 @@ public static partial class CsvParser
             return true;
         return FalseFormats.IsMatch(value)
             ? false
-            : throw new SerializationException(
-                $"Field '{value}' is not a Boolean value (true, false, 1, 0)."
-            );
+            : throw new SerializationException($"Field '{value}' is not a Boolean value (true, false, 1, 0).");
     }
 
     [GeneratedRegex("^(?:1|TRUE|YES|Y)$", RegexOptions.IgnoreCase)]
@@ -174,9 +164,7 @@ public static partial class CsvParser
 
         var dataTypeInterface = enumeration
             .GetInterfaces()
-            .FirstOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>)
-            );
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>));
         if (dataTypeInterface is null)
             return value;
 
@@ -224,10 +212,7 @@ public static partial class CsvParser
         }
 
         var implicitConversion = typeof(TKey).GetMethod("op_Implicit", [typeof(string)]);
-        if (
-            implicitConversion is not null
-            && implicitConversion.ReturnType.IsAssignableTo(typeof(TKey))
-        )
+        if (implicitConversion is not null && implicitConversion.ReturnType.IsAssignableTo(typeof(TKey)))
         {
             return (TKey)implicitConversion.Invoke(null, [value])!;
         }
@@ -275,9 +260,7 @@ public static partial class CsvParser
 
         return Enum.IsDefined(enumType, value)
             ? Enum.ToObject(enumType, value)
-            : throw new SerializationException(
-                $"Value {value} is not a valid value for {enumType}."
-            );
+            : throw new SerializationException($"Value {value} is not a valid value for {enumType}.");
     }
 
     public static object? GetCsvRecord(string record, SchemaEntry schema)
@@ -314,10 +297,7 @@ public static partial class CsvParser
             foreach (var typeData in schema.TypeEntries)
             {
                 index++;
-                if (
-                    typeData.IsOptional
-                    && (values.Length <= index || string.IsNullOrEmpty(values[index]))
-                )
+                if (typeData.IsOptional && (values.Length <= index || string.IsNullOrEmpty(values[index])))
                 {
                     parsedValues.Add(null);
                     continue;

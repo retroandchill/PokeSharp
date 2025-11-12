@@ -3,17 +3,18 @@ using MessagePack.Formatters;
 
 namespace PokeSharp.Abstractions.Serializers.MessagePack;
 
+/// <summary>
+/// Provides a MessagePack formatter for the <see cref="Name"/> struct.
+/// </summary>
 public class NameMessagePackFormatter : IMessagePackFormatter<Name>
 {
-    public void Serialize(
-        ref MessagePackWriter writer,
-        Name value,
-        MessagePackSerializerOptions options
-    )
+    /// <inheritdoc />
+    public void Serialize(ref MessagePackWriter writer, Name value, MessagePackSerializerOptions options)
     {
         writer.Write(value.ToString());
     }
 
+    /// <inheritdoc />
     public Name Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
     {
         var readString = reader.ReadString();

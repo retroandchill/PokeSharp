@@ -3,19 +3,37 @@ using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
 
+/// <summary>
+/// Represents a game environment entity in the system, which includes an identifier,
+/// a display name, and an optional base environment used for battles.
+/// </summary>
 [GameDataEntity]
 public partial record GameEnvironment
 {
+    /// <inheritdoc />
     public required Name Id { get; init; }
 
+    /// <summary>
+    /// Gets or initializes the name associated with the game environment.
+    /// </summary>
     public required Text Name { get; init; }
 
+    /// <summary>
+    /// Represents the base name reference for a battle environment in the game.
+    /// Used within the GameEnvironment structure to provide a unique or identifiable
+    /// label for battle-related contexts.
+    /// </summary>
     public Name BattleBase { get; init; }
 
     #region Defaults
 
     private const string LocalizationNamespace = "GameData.Environment";
 
+    /// <summary>
+    /// Adds default values to the game environment. This method is designed to populate
+    /// or initialize specific data points within the environment with predetermined values
+    /// to ensure consistency and correctness during the game's execution.
+    /// </summary>
     public static void AddDefaultValues()
     {
         Register(
@@ -71,21 +89,9 @@ public partial record GameEnvironment
             }
         );
 
-        Register(
-            new GameEnvironment
-            {
-                Id = "Cave",
-                Name = Text.Localized(LocalizationNamespace, "Cave", "Cave"),
-            }
-        );
+        Register(new GameEnvironment { Id = "Cave", Name = Text.Localized(LocalizationNamespace, "Cave", "Cave") });
 
-        Register(
-            new GameEnvironment
-            {
-                Id = "Rock",
-                Name = Text.Localized(LocalizationNamespace, "Rock", "Rock"),
-            }
-        );
+        Register(new GameEnvironment { Id = "Rock", Name = Text.Localized(LocalizationNamespace, "Rock", "Rock") });
 
         Register(
             new GameEnvironment
@@ -97,11 +103,7 @@ public partial record GameEnvironment
         );
 
         Register(
-            new GameEnvironment
-            {
-                Id = "Forest",
-                Name = Text.Localized(LocalizationNamespace, "Forest", "Forest"),
-            }
+            new GameEnvironment { Id = "Forest", Name = Text.Localized(LocalizationNamespace, "Forest", "Forest") }
         );
 
         Register(
@@ -113,13 +115,7 @@ public partial record GameEnvironment
             }
         );
 
-        Register(
-            new GameEnvironment
-            {
-                Id = "Snow",
-                Name = Text.Localized(LocalizationNamespace, "Snow", "Snow"),
-            }
-        );
+        Register(new GameEnvironment { Id = "Snow", Name = Text.Localized(LocalizationNamespace, "Snow", "Snow") });
 
         Register(
             new GameEnvironment
@@ -131,11 +127,7 @@ public partial record GameEnvironment
         );
 
         Register(
-            new GameEnvironment
-            {
-                Id = "Volcano",
-                Name = Text.Localized(LocalizationNamespace, "Volcano", "Volcano"),
-            }
+            new GameEnvironment { Id = "Volcano", Name = Text.Localized(LocalizationNamespace, "Volcano", "Volcano") }
         );
 
         Register(
@@ -146,21 +138,9 @@ public partial record GameEnvironment
             }
         );
 
-        Register(
-            new GameEnvironment
-            {
-                Id = "Sky",
-                Name = Text.Localized(LocalizationNamespace, "Sky", "Sky"),
-            }
-        );
+        Register(new GameEnvironment { Id = "Sky", Name = Text.Localized(LocalizationNamespace, "Sky", "Sky") });
 
-        Register(
-            new GameEnvironment
-            {
-                Id = "Space",
-                Name = Text.Localized(LocalizationNamespace, "Space", "Space"),
-            }
-        );
+        Register(new GameEnvironment { Id = "Space", Name = Text.Localized(LocalizationNamespace, "Space", "Space") });
 
         Register(
             new GameEnvironment

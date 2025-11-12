@@ -4,12 +4,7 @@ namespace PokeSharp.Compiler.Core.Serialization.Converters;
 
 public interface IPbsConverter
 {
-    public bool CanConvert(
-        string sectionName,
-        PropertyInfo property,
-        object? value,
-        Type targetType
-    );
+    public bool CanConvert(string sectionName, PropertyInfo property, object? value, Type targetType);
 
     public object? Convert(
         string sectionName,
@@ -22,12 +17,7 @@ public interface IPbsConverter
 
 public abstract class PbsConverter<TTo, TFrom> : IPbsConverter
 {
-    public bool CanConvert(
-        string sectionName,
-        PropertyInfo property,
-        object? value,
-        Type targetType
-    )
+    public bool CanConvert(string sectionName, PropertyInfo property, object? value, Type targetType)
     {
         return targetType.IsAssignableFrom(typeof(TTo)) && value is TFrom;
     }

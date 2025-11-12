@@ -5,12 +5,17 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
 
+/// <summary>
+/// A data loader that facilitates saving and loading entities using MessagePack serialization.
+/// </summary>
 [RegisterSingleton(Tags = SerializerTags.MessagePack)]
 public partial class MessagePackDataLoader : IDataLoader
 {
-    private readonly MessagePackSerializerOptions _options =
-        MessagePackSerializerOptions.Standard.WithResolver(ContractlessStandardResolver.Instance);
+    private readonly MessagePackSerializerOptions _options = MessagePackSerializerOptions.Standard.WithResolver(
+        ContractlessStandardResolver.Instance
+    );
 
+    /// <inheritdoc />
     [CreateSyncVersion]
     public async ValueTask SaveEntitiesAsync<T>(
         IEnumerable<T> entities,
@@ -19,14 +24,10 @@ public partial class MessagePackDataLoader : IDataLoader
     )
     {
         await using var fileStream = File.OpenWrite($"{outputPath}.pkdata");
-        await MessagePackSerializer.SerializeAsync(
-            fileStream,
-            entities,
-            _options,
-            cancellationToken
-        );
+        await MessagePackSerializer.SerializeAsync(fileStream, entities, _options, cancellationToken);
     }
 
+    /// <inheritdoc />
     [CreateSyncVersion]
     public async IAsyncEnumerable<T> LoadEntitiesAsync<T>(
         string inputPath,

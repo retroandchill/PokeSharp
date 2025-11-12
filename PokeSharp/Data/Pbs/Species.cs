@@ -22,12 +22,7 @@ public readonly record struct SpeciesForm(Name Species, int Form = 0)
 public readonly record struct LevelUpMove(Name Move, int Level);
 
 [MessagePackObject(true)]
-public record EvolutionInfo(
-    Name Species,
-    Name EvolutionMethod,
-    object? Parameter = null,
-    bool IsPrevious = false
-);
+public record EvolutionInfo(Name Species, Name EvolutionMethod, object? Parameter = null, bool IsPrevious = false);
 
 public readonly record struct EvolutionFamily(
     Name PreviousSpecies,
@@ -150,11 +145,7 @@ public partial record Species
     {
         get
         {
-            foreach (
-                var match in Flags
-                    .Select(flag => DefaultFormPattern.Match(flag))
-                    .Where(match => match.Success)
-            )
+            foreach (var match in Flags.Select(flag => DefaultFormPattern.Match(flag)).Where(match => match.Success))
             {
                 return int.Parse(match.Groups[1].Value);
             }
@@ -175,31 +166,26 @@ public partial record Species
     [JsonIgnore]
     public int BaseStatTotal => BaseStats.Values.Sum();
 
+    /// <summary>
+    /// Determines whether the specified flag is present in the list of flags.
+    /// </summary>
+    /// <param name="flag">The flag to check for in the list of flags.</param>
+    /// <returns>
+    /// <c>true</c> if the specified flag is present in the list of flags; otherwise, <c>false</c>.
+    /// </returns>
     public bool HasFlag(Name flag) => Flags.Contains(flag);
 
     public IEnumerable<EvolutionInfo> GetEvolutions(bool excludeInvalid = false)
     {
-        return Evolutions.Where(evo =>
-            !evo.IsPrevious && (!evo.EvolutionMethod.IsNone || !excludeInvalid)
-        );
+        return Evolutions.Where(evo => !evo.IsPrevious && (!evo.EvolutionMethod.IsNone || !excludeInvalid));
     }
 
     public IEnumerable<EvolutionFamily> GetFamilyEvolutions(bool excludeInvalid = true)
     {
         return GetEvolutions(excludeInvalid)
-            .OrderBy(e =>
-                Keys.Index().Where(i => i.Item == e.Species).Select(i => i.Index).FirstOrDefault()
-            )
-            .Select(e => new EvolutionFamily(
-                SpeciesId,
-                e.Species,
-                e.EvolutionMethod,
-                e.Parameter,
-                e.IsPrevious
-            ))
-            .SelectMany(e =>
-                new[] { e }.Concat(Get(e.Species).GetFamilyEvolutions(excludeInvalid))
-            );
+            .OrderBy(e => Keys.Index().Where(i => i.Item == e.Species).Select(i => i.Index).FirstOrDefault())
+            .Select(e => new EvolutionFamily(SpeciesId, e.Species, e.EvolutionMethod, e.Parameter, e.IsPrevious))
+            .SelectMany(e => new[] { e }.Concat(Get(e.Species).GetFamilyEvolutions(excludeInvalid)));
     }
 
     [IgnoreMember]
@@ -256,9 +242,7 @@ public partial record Species
     public bool BreedingCanProduce(Name otherSpecies)
     {
         var otherFamily = Get(otherSpecies).GetFamilySpecies();
-        return Offspring.Length > 0
-            ? otherFamily.Intersect(Offspring).Any()
-            : otherFamily.Contains(SpeciesId);
+        return Offspring.Length > 0 ? otherFamily.Intersect(Offspring).Any() : otherFamily.Contains(SpeciesId);
     }
 
     public ImmutableArray<Name> GetEggMoves()
@@ -267,9 +251,7 @@ public partial record Species
             return EggMoves;
 
         var previousSpecies = PreviousSpecies;
-        return previousSpecies != SpeciesId
-            ? GetSpeciesForm(previousSpecies, Form).GetEggMoves()
-            : EggMoves;
+        return previousSpecies != SpeciesId ? GetSpeciesForm(previousSpecies, Form).GetEggMoves() : EggMoves;
     }
 
     public bool FamilyEvolutionsHaveMethod(Name method, object? parameter = null)
@@ -320,10 +302,7 @@ public partial record Species
                 return 1;
 
             var evolutionMethodData = Evolution.Get(evo.EvolutionMethod);
-            if (
-                evolutionMethodData.LevelUpProc is null
-                && evolutionMethodData.Id != Evolution.Shedinja
-            )
+            if (evolutionMethodData.LevelUpProc is null && evolutionMethodData.Id != Evolution.Shedinja)
                 return previousMinLevel;
 
             return evolutionMethodData.AnyLevelUp ? previousMinLevel + 1 : (int)evo.Parameter!;

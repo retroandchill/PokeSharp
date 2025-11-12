@@ -9,8 +9,7 @@ namespace PokeSharp.Compiler.Core.Schema;
 
 public class SchemaBuilder
 {
-    private readonly Dictionary<Type, IReadOnlyDictionary<string, SchemaEntry>> _schemasByType =
-        new();
+    private readonly Dictionary<Type, IReadOnlyDictionary<string, SchemaEntry>> _schemasByType = new();
     private readonly Dictionary<Type, SchemaEntry> _subSchemaEntries = new();
 
     public IReadOnlyDictionary<string, SchemaEntry> BuildSchema(Type targetType)
@@ -24,28 +23,19 @@ public class SchemaBuilder
 
         if (targetType is { IsClass: false, IsValueType: false })
         {
-            throw new ArgumentException(
-                $"Type '{targetType.Name}' must be a class or struct.",
-                nameof(targetType)
-            );
+            throw new ArgumentException($"Type '{targetType.Name}' must be a class or struct.", nameof(targetType));
         }
 
         // Ensure it's not abstract
         if (targetType.IsAbstract)
         {
-            throw new ArgumentException(
-                $"Type '{targetType.Name}' cannot be abstract.",
-                nameof(targetType)
-            );
+            throw new ArgumentException($"Type '{targetType.Name}' cannot be abstract.", nameof(targetType));
         }
 
         // Ensure it's not an interface
         if (targetType.IsInterface)
         {
-            throw new ArgumentException(
-                $"Type '{targetType.Name}' cannot be an interface.",
-                nameof(targetType)
-            );
+            throw new ArgumentException($"Type '{targetType.Name}' cannot be an interface.", nameof(targetType));
         }
 
         // Ensure it has a parameterless constructor (for classes)
@@ -95,10 +85,7 @@ public class SchemaBuilder
             ? GetComplexFieldType(propType)
             : GetSimpleFieldType(property, propType, typeAttribute);
 
-        return new SchemaEntry(property, fieldTypes)
-        {
-            FieldStructure = GetFieldStructure(property, typeAttribute),
-        };
+        return new SchemaEntry(property, fieldTypes) { FieldStructure = GetFieldStructure(property, typeAttribute) };
     }
 
     private static ImmutableArray<SchemaTypeData> GetSimpleFieldType(
@@ -114,12 +101,7 @@ public class SchemaBuilder
                 .. Enumerable
                     .Range(0, typeAttribute.FixedSize)
                     .Select(i =>
-                        GetFieldType(
-                            property,
-                            propType,
-                            typeAttribute,
-                            typeAttribute.FixedSizeIsMax && i > 0
-                        )
+                        GetFieldType(property, propType, typeAttribute, typeAttribute.FixedSizeIsMax && i > 0)
                     ),
             ];
         }
@@ -144,10 +126,7 @@ public class SchemaBuilder
             );
         }
 
-        if (
-            typeAttribute.FieldType
-            is not (PbsFieldType.Enumerable or PbsFieldType.EnumerableOrInteger)
-        )
+        if (typeAttribute.FieldType is not (PbsFieldType.Enumerable or PbsFieldType.EnumerableOrInteger))
             return new SchemaTypeData(typeAttribute.FieldType, isOptional);
 
         if (typeAttribute.EnumType is null && !propType.IsEnum)
@@ -176,16 +155,12 @@ public class SchemaBuilder
 
         if (constructors.Length > 1)
         {
-            throw new PbsSchemaException(
-                $"Type '{propType.Name}' has multiple constructors. Only one is allowed."
-            );
+            throw new PbsSchemaException($"Type '{propType.Name}' has multiple constructors. Only one is allowed.");
         }
 
         if (constructors.Length == 0)
         {
-            throw new PbsSchemaException(
-                $"Type '{propType.Name}' has no constructors. At least one is required."
-            );
+            throw new PbsSchemaException($"Type '{propType.Name}' has no constructors. At least one is required.");
         }
 
         var constructor = constructors[0];
@@ -235,9 +210,8 @@ public class SchemaBuilder
                 || propType == typeof(float)
                 || propType == typeof(double)
                 || propType == typeof(decimal),
-            PbsFieldType.UnsignedInteger
-            or PbsFieldType.PositiveInteger
-            or PbsFieldType.Hexadecimal => propType == typeof(int)
+            PbsFieldType.UnsignedInteger or PbsFieldType.PositiveInteger or PbsFieldType.Hexadecimal => propType
+                == typeof(int)
                 || propType == typeof(short)
                 || propType == typeof(long)
                 || propType == typeof(sbyte)
@@ -252,8 +226,7 @@ public class SchemaBuilder
                 || propType == typeof(double)
                 || propType == typeof(decimal),
             PbsFieldType.Boolean => propType == typeof(bool),
-            PbsFieldType.Name or PbsFieldType.String or PbsFieldType.UnformattedText => propType
-                == typeof(string)
+            PbsFieldType.Name or PbsFieldType.String or PbsFieldType.UnformattedText => propType == typeof(string)
                 || propType == typeof(Name)
                 || propType == typeof(Text),
             PbsFieldType.Symbol => propType == typeof(Name),
@@ -277,9 +250,7 @@ public class SchemaBuilder
 
         var gameDataEntityInterface = enumType
             .GetInterfaces()
-            .FirstOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>)
-            );
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>));
         if (gameDataEntityInterface is null)
             return false;
 
@@ -341,20 +312,12 @@ public class SchemaBuilder
         if (type.IsArray)
             return type.GetElementType()!;
 
-        return type is { IsGenericType: true, IsCollectionType: true }
-            ? type.GenericTypeArguments[0]
-            : type;
+        return type is { IsGenericType: true, IsCollectionType: true } ? type.GenericTypeArguments[0] : type;
     }
 
-    private static PbsFieldStructure GetFieldStructure(
-        PropertyInfo property,
-        PbsTypeAttribute? typeAttribute
-    )
+    private static PbsFieldStructure GetFieldStructure(PropertyInfo property, PbsTypeAttribute? typeAttribute)
     {
-        if (
-            property.PropertyType.IsCollectionType
-            && (typeAttribute is null || typeAttribute.FixedSize <= 0)
-        )
+        if (property.PropertyType.IsCollectionType && (typeAttribute is null || typeAttribute.FixedSize <= 0))
         {
             return property.GetCustomAttribute<PbsKeyRepeatAttribute>() is not null
                 ? PbsFieldStructure.Repeating

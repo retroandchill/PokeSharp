@@ -48,9 +48,7 @@ public static class CollectionTypeHelper
                     return true;
 
                 return type.GetInterfaces()
-                    .Any(i =>
-                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                    );
+                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
             }
         }
     }

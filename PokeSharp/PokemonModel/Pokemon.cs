@@ -10,6 +10,7 @@ using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Game;
 using PokeSharp.Game.Items;
+using PokeSharp.PokemonModel.Forms;
 using PokeSharp.Services.Evolution;
 using PokeSharp.Services.Happiness;
 using PokeSharp.Services.Healing;

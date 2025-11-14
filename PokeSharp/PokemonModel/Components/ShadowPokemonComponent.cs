@@ -1,4 +1,5 @@
-﻿using Injectio.Attributes;
+﻿using System.Collections.Immutable;
+using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Data.Core;
@@ -90,6 +91,109 @@ public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowP
         AdjustHeart(-amount);
     }
 
+    private static readonly Name ShadowRush = "SHADOWRUSH";
+
+    public void MakeShadow()
+    {
+        IsShadow = true;
+        HyperMode = false;
+        SavedExp = 0;
+        SavedEVs.Clear();
+        foreach (var stat in Stat.AllMain)
+        {
+            SavedEVs.Add(stat.Id, 0);
+        }
+        HeartGauge = MaxGaugeSize;
+        ShadowMoves.Clear();
+
+        var data = ShadowData;
+        if (data is not null)
+        {
+            foreach (var moveId in data.Moves)
+            {
+                ShadowMoves.Add(moveId);
+                if (ShadowMoves.Count >= Pokemon.MaxMoves)
+                    break;
+            }
+        }
+
+        if (ShadowMoves.Count == 0 && Move.Exists(ShadowRush))
+        {
+            ShadowMoves.Add(ShadowRush);
+        }
+
+        if (ShadowMoves.Count == 0)
+            return;
+
+        for (var i = ShadowMoves.Count; i < Pokemon.MaxMoves; i++)
+        {
+            ShadowMoves.Add(Name.None);
+        }
+
+        foreach (var move in _pokemon.Moves)
+        {
+            ShadowMoves.Add(move.Id);
+        }
+
+        UpdateShadowMoves();
+    }
+
+    public void UpdateShadowMoves()
+    {
+        if (ShadowMoves.Count == 0)
+            return;
+
+        if (!IsShadow)
+        {
+            if (ShadowMoves.Count > Pokemon.MaxMoves)
+            {
+                var restoredMoves = ShadowMoves.Skip(Pokemon.MaxMoves).ToArray();
+                ReplaceMoves(restoredMoves);
+            }
+
+            ShadowMoves.Clear();
+            return;
+        }
+
+        var newMoves = ShadowMoves.Take(Pokemon.MaxMoves).Where(m => m.IsValid).ToList();
+        var numShadowMoves = newMoves.Count;
+
+        var numOriginalMoves = HeartStage switch
+        {
+            <= 1 => 3,
+            2 => 2,
+            < 5 => 1,
+            _ => 0,
+        };
+        if (numOriginalMoves > 0)
+        {
+            var relearnedCount = 0;
+            foreach (var move in ShadowMoves.Skip(Pokemon.MaxMoves + numShadowMoves).Where(m => m.IsValid))
+            {
+                newMoves.Add(move);
+                relearnedCount++;
+                if (relearnedCount >= numOriginalMoves)
+                    break;
+            }
+        }
+
+        ReplaceMoves(newMoves);
+    }
+
+    private void ReplaceMoves(IReadOnlyCollection<Name> newMoves)
+    {
+        _pokemon.Moves = _pokemon.Moves.Where(x => newMoves.Contains(x.Id)).ToList();
+
+        foreach (var move in newMoves)
+        {
+            if (_pokemon.MoveCount >= Pokemon.MaxMoves)
+                break;
+            _pokemon.LearnMove(move);
+        }
+    }
+
+    public bool IsPurifiable => IsShadow && HeartGauge == 0 && GameServices.ShadowPokemonHandler.IsPurifiable(_pokemon);
+
     public IPokemonComponent Clone(Pokemon newPokemon)
     {
         var result = (ShadowPokemonComponent)MemberwiseClone();
@@ -112,15 +216,19 @@ public class ShadowPokemonComponentFactory : IPokemonComponentFactory
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public class ShadowPokemonHandler(IEnumerable<IHeartGaugeChangeAmountsProvider> providers)
-    : IPokemonFaintHandler,
-        ICanEvolveEvaluator,
-        IRelearnMoveChecker,
-        IHappinessChangeBlocker
+public class ShadowPokemonHandler(
+    IEnumerable<IHeartGaugeChangeAmountsProvider> providers,
+    IEnumerable<IPurifiableEvaluator> purifiableEvaluators
+) : IPokemonFaintHandler, ICanEvolveEvaluator, IRelearnMoveChecker, IHappinessChangeBlocker
 {
     private readonly Dictionary<Name, HeartGaugeChangeAmounts> _amounts = providers
         .SelectMany(x => x.GetAmounts())
         .ToDictionary();
+
+    private readonly ImmutableArray<IPurifiableEvaluator> _purifiableEvaluators =
+    [
+        .. purifiableEvaluators.OrderBy(e => e.Priority),
+    ];
 
     int IPokemonFaintHandler.Priority => 30;
 
@@ -131,6 +239,11 @@ public class ShadowPokemonHandler(IEnumerable<IHeartGaugeChangeAmountsProvider> 
     public HeartGaugeChangeAmounts GetAmounts(Name nature)
     {
         return _amounts.TryGetValue(nature, out var result) ? result : new HeartGaugeChangeAmounts(100, 100, 100, 100);
+    }
+
+    public bool IsPurifiable(Pokemon pokemon)
+    {
+        return _purifiableEvaluators.All(e => e.IsPurifiable(pokemon));
     }
 
     public bool CanEvolve(Pokemon pokemon)
@@ -192,6 +305,24 @@ public sealed class DefaultHeartGaugeChangeAmountsProvider : IHeartGaugeChangeAm
     };
 
     public IEnumerable<KeyValuePair<Name, HeartGaugeChangeAmounts>> GetAmounts() => _amounts;
+}
+
+public interface IPurifiableEvaluator
+{
+    int Priority { get; }
+
+    bool IsPurifiable(Pokemon pokemon);
+}
+
+public sealed class ShadowLugiaPurifiableEvaluator : IPurifiableEvaluator
+{
+    public int Priority => 10;
+    private static readonly Name Lugia = "LUGIA";
+
+    public bool IsPurifiable(Pokemon pokemon)
+    {
+        return pokemon.IsSpecies(Lugia);
+    }
 }
 
 public static class ShadowPokemonComponentExtensions

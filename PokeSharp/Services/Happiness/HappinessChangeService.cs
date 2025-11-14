@@ -3,6 +3,7 @@ using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Game;
+using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Services.Happiness;
 
@@ -24,9 +25,10 @@ public record HappinessChangeMethod(Name Id, int Change1, int Change2, int Chang
 }
 
 [RegisterSingleton]
+[AutoServiceShortcut]
 public class HappinessChangeService(IEnumerable<IHappinessChangeAdjuster> changeAdjusters)
 {
-    private static readonly GameContextSingleton<HappinessChangeService> InstanceSingleton = new();
+    private static readonly GameServiceCache<HappinessChangeService> InstanceSingleton = new();
 
     public static HappinessChangeService Instance => InstanceSingleton.Instance;
 

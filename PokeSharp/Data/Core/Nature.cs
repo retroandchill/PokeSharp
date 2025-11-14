@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
+using Injectio.Attributes;
 using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -29,209 +31,206 @@ public partial record Nature
     /// Represents the collection of stat changes associated with a specific nature.
     /// </summary>
     public ImmutableArray<StatChange> StatChanges { get; init; } = [];
+}
 
-    #region Defaults
-
+[GameDataRegistration<Nature>]
+[RegisterSingleton<IGameDataProvider<Nature>>]
+public partial class NatureRegistrations
+{
     private const string LocalizationNamespace = "GameData.Nature";
 
-    /// <summary>
-    /// Adds default values for Natures to the game data.
-    /// </summary>
-    /// <remarks>
-    /// This method populates the Nature-related data with predefined default values.
-    /// It is intended to initialize the game with a standard set of Nature definitions.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly Nature Hardy = new()
     {
-        Register(new Nature { Id = "HARDY", Name = Text.Localized(LocalizationNamespace, "HARDY", "Hardy") });
+        Id = "HARDY",
+        Name = Text.Localized(LocalizationNamespace, "HARDY", "Hardy"),
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "LONELY",
-                Name = Text.Localized(LocalizationNamespace, "LONELY", "Lonely"),
-                StatChanges = [new StatChange(Stat.ATTACK, 10), new StatChange(Stat.DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Lonely = new()
+    {
+        Id = "LONELY",
+        Name = Text.Localized(LocalizationNamespace, "LONELY", "Lonely"),
+        StatChanges = [new StatChange(Stat.Attack.Id, 10), new StatChange(Stat.Defense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "BRAVE",
-                Name = Text.Localized(LocalizationNamespace, "BRAVE", "Brave"),
-                StatChanges = [new StatChange(Stat.ATTACK, 10), new StatChange(Stat.SPEED, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Brave = new()
+    {
+        Id = "BRAVE",
+        Name = Text.Localized(LocalizationNamespace, "BRAVE", "Brave"),
+        StatChanges = [new StatChange(Stat.Attack.Id, 10), new StatChange(Stat.Speed.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "ADAMANT",
-                Name = Text.Localized(LocalizationNamespace, "ADAMANT", "Adamant"),
-                StatChanges = [new StatChange(Stat.ATTACK, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Adamant = new()
+    {
+        Id = "ADAMANT",
+        Name = Text.Localized(LocalizationNamespace, "ADAMANT", "Adamant"),
+        StatChanges = [new StatChange(Stat.Attack.Id, 10), new StatChange(Stat.SpecialAttack.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "NAUGHTY",
-                Name = Text.Localized(LocalizationNamespace, "NAUGHTY", "Naughty"),
-                StatChanges = [new StatChange(Stat.ATTACK, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Naughty = new()
+    {
+        Id = "NAUGHTY",
+        Name = Text.Localized(LocalizationNamespace, "NAUGHTY", "Naughty"),
+        StatChanges = [new StatChange(Stat.Attack.Id, 10), new StatChange(Stat.SpecialDefense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "BOLD",
-                Name = Text.Localized(LocalizationNamespace, "BOLD", "Bold"),
-                StatChanges = [new StatChange(Stat.DEFENSE, 10), new StatChange(Stat.ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Bold = new()
+    {
+        Id = "BOLD",
+        Name = Text.Localized(LocalizationNamespace, "BOLD", "Bold"),
+        StatChanges = [new StatChange(Stat.Defense.Id, 10), new StatChange(Stat.Attack.Id, -10)],
+    };
 
-        Register(new Nature { Id = "DOCILE", Name = Text.Localized(LocalizationNamespace, "DOCILE", "Docile") });
+    [GameDataEntityRegistration]
+    internal static readonly Nature Docile = new()
+    {
+        Id = "DOCILE",
+        Name = Text.Localized(LocalizationNamespace, "DOCILE", "Docile"),
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "RELAXED",
-                Name = Text.Localized(LocalizationNamespace, "RELAXED", "Relaxed"),
-                StatChanges = [new StatChange(Stat.DEFENSE, 10), new StatChange(Stat.SPEED, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Relaxed = new()
+    {
+        Id = "RELAXED",
+        Name = Text.Localized(LocalizationNamespace, "RELAXED", "Relaxed"),
+        StatChanges = [new StatChange(Stat.Defense.Id, 10), new StatChange(Stat.Speed.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "IMPISH",
-                Name = Text.Localized(LocalizationNamespace, "IMPISH", "Impish"),
-                StatChanges = [new StatChange(Stat.DEFENSE, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Impish = new()
+    {
+        Id = "IMPISH",
+        Name = Text.Localized(LocalizationNamespace, "IMPISH", "Impish"),
+        StatChanges = [new StatChange(Stat.Defense.Id, 10), new StatChange(Stat.SpecialAttack.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "LAX",
-                Name = Text.Localized(LocalizationNamespace, "LAX", "Lax"),
-                StatChanges = [new StatChange(Stat.DEFENSE, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Lax = new()
+    {
+        Id = "LAX",
+        Name = Text.Localized(LocalizationNamespace, "LAX", "Lax"),
+        StatChanges = [new StatChange(Stat.Defense.Id, 10), new StatChange(Stat.SpecialDefense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "TIMID",
-                Name = Text.Localized(LocalizationNamespace, "TIMID", "Timid"),
-                StatChanges = [new StatChange(Stat.SPEED, 10), new StatChange(Stat.ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Timid = new()
+    {
+        Id = "TIMID",
+        Name = Text.Localized(LocalizationNamespace, "TIMID", "Timid"),
+        StatChanges = [new StatChange(Stat.Speed.Id, 10), new StatChange(Stat.Attack.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "HASTY",
-                Name = Text.Localized(LocalizationNamespace, "HASTY", "Hasty"),
-                StatChanges = [new StatChange(Stat.SPEED, 10), new StatChange(Stat.DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Hasty = new()
+    {
+        Id = "HASTY",
+        Name = Text.Localized(LocalizationNamespace, "HASTY", "Hasty"),
+        StatChanges = [new StatChange(Stat.Speed.Id, 10), new StatChange(Stat.Defense.Id, -10)],
+    };
 
-        Register(new Nature { Id = "SERIOUS", Name = Text.Localized(LocalizationNamespace, "SERIOUS", "Serious") });
+    [GameDataEntityRegistration]
+    internal static readonly Nature Serious = new()
+    {
+        Id = "SERIOUS",
+        Name = Text.Localized(LocalizationNamespace, "SERIOUS", "Serious"),
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "JOLLY",
-                Name = Text.Localized(LocalizationNamespace, "JOLLY", "Jolly"),
-                StatChanges = [new StatChange(Stat.SPEED, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Jolly = new()
+    {
+        Id = "JOLLY",
+        Name = Text.Localized(LocalizationNamespace, "JOLLY", "Jolly"),
+        StatChanges = [new StatChange(Stat.Speed.Id, 10), new StatChange(Stat.SpecialAttack.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "NAIVE",
-                Name = Text.Localized(LocalizationNamespace, "NAIVE", "Naive"),
-                StatChanges = [new StatChange(Stat.SPEED, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Naive = new()
+    {
+        Id = "NAIVE",
+        Name = Text.Localized(LocalizationNamespace, "NAIVE", "Naive"),
+        StatChanges = [new StatChange(Stat.Speed.Id, 10), new StatChange(Stat.SpecialDefense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "MODEST",
-                Name = Text.Localized(LocalizationNamespace, "MODEST", "Modest"),
-                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Modest = new()
+    {
+        Id = "MODEST",
+        Name = Text.Localized(LocalizationNamespace, "MODEST", "Modest"),
+        StatChanges = [new StatChange(Stat.SpecialAttack.Id, 10), new StatChange(Stat.Attack.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "MILD",
-                Name = Text.Localized(LocalizationNamespace, "MILD", "Mild"),
-                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Mild = new()
+    {
+        Id = "MILD",
+        Name = Text.Localized(LocalizationNamespace, "MILD", "Mild"),
+        StatChanges = [new StatChange(Stat.SpecialAttack.Id, 10), new StatChange(Stat.Defense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "QUIET",
-                Name = Text.Localized(LocalizationNamespace, "QUIET", "Quiet"),
-                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.SPEED, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Quiet = new()
+    {
+        Id = "QUIET",
+        Name = Text.Localized(LocalizationNamespace, "QUIET", "Quiet"),
+        StatChanges = [new StatChange(Stat.SpecialAttack.Id, 10), new StatChange(Stat.Speed.Id, -10)],
+    };
 
-        Register(new Nature { Id = "BASHFUL", Name = Text.Localized(LocalizationNamespace, "BASHFUL", "Bashful") });
+    [GameDataEntityRegistration]
+    internal static readonly Nature Bashful = new()
+    {
+        Id = "BASHFUL",
+        Name = Text.Localized(LocalizationNamespace, "BASHFUL", "Bashful"),
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "RASH",
-                Name = Text.Localized(LocalizationNamespace, "RASH", "Rash"),
-                StatChanges = [new StatChange(Stat.SPECIAL_ATTACK, 10), new StatChange(Stat.SPECIAL_DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Rash = new()
+    {
+        Id = "RASH",
+        Name = Text.Localized(LocalizationNamespace, "RASH", "Rash"),
+        StatChanges = [new StatChange(Stat.SpecialAttack.Id, 10), new StatChange(Stat.SpecialDefense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "CALM",
-                Name = Text.Localized(LocalizationNamespace, "CALM", "Calm"),
-                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Calm = new()
+    {
+        Id = "CALM",
+        Name = Text.Localized(LocalizationNamespace, "CALM", "Calm"),
+        StatChanges = [new StatChange(Stat.SpecialDefense.Id, 10), new StatChange(Stat.Attack.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "GENTLE",
-                Name = Text.Localized(LocalizationNamespace, "GENTLE", "Gentle"),
-                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.DEFENSE, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Gentle = new()
+    {
+        Id = "GENTLE",
+        Name = Text.Localized(LocalizationNamespace, "GENTLE", "Gentle"),
+        StatChanges = [new StatChange(Stat.SpecialDefense.Id, 10), new StatChange(Stat.Defense.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "SASSY",
-                Name = Text.Localized(LocalizationNamespace, "SASSY", "Sassy"),
-                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.SPEED, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Sassy = new()
+    {
+        Id = "SASSY",
+        Name = Text.Localized(LocalizationNamespace, "SASSY", "Sassy"),
+        StatChanges = [new StatChange(Stat.SpecialDefense.Id, 10), new StatChange(Stat.Speed.Id, -10)],
+    };
 
-        Register(
-            new Nature
-            {
-                Id = "CAREFUL",
-                Name = Text.Localized(LocalizationNamespace, "CAREFUL", "Careful"),
-                StatChanges = [new StatChange(Stat.SPECIAL_DEFENSE, 10), new StatChange(Stat.SPECIAL_ATTACK, -10)],
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Nature Careful = new()
+    {
+        Id = "CAREFUL",
+        Name = Text.Localized(LocalizationNamespace, "CAREFUL", "Careful"),
+        StatChanges = [new StatChange(Stat.SpecialDefense.Id, 10), new StatChange(Stat.SpecialAttack.Id, -10)],
+    };
 
-        Register(new Nature { Id = "QUIRKY", Name = Text.Localized(LocalizationNamespace, "QUIRKY", "Quirky") });
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly Nature Quirky = new()
+    {
+        Id = "QUIRKY",
+        Name = Text.Localized(LocalizationNamespace, "QUIRKY", "Quirky"),
+    };
 }

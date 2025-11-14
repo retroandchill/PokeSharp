@@ -1,11 +1,11 @@
 ﻿using PokeSharp.Abstractions;
+using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Core.State;
 
+[AutoServiceShortcut]
 public class GameMap
 {
-    public static GameMap Instance { get; } = new();
-
     public Name MapId { get; }
 
     public bool HasMetadataTag(Name tagName) => false;

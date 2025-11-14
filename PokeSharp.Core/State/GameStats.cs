@@ -1,8 +1,9 @@
-﻿namespace PokeSharp.Core.State;
+﻿using PokeSharp.SourceGenerator.Attributes;
 
+namespace PokeSharp.Core.State;
+
+[AutoServiceShortcut]
 public class GameStats
 {
-    public static GameStats Instance { get; } = new();
-
     public int PokerusInfections { get; set; }
 }

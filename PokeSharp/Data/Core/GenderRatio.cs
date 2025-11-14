@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -195,92 +197,75 @@ public readonly partial record struct GenderRatio
     /// female-only, or genderless-only).
     /// </summary>
     public bool IsSingleGender => Ratio.IsSingleGender;
+}
 
-    #region Defaults
+[GameDataRegistration<GenderRatio>]
+[RegisterSingleton<IGameDataProvider<GenderRatio>>]
+public partial class GenderRatioRegistrations
+{
     private const string LocalizationNamespace = "GameData.GenderRatio";
 
-    /// <summary>
-    /// Registers a predefined set of default gender ratios to the game data.
-    /// </summary>
-    /// <remarks>
-    /// This method defines and registers standard gender ratio patterns used in the game,
-    /// including specific predefined ratios such as always male, always female, genderless,
-    /// and various distributions of male-to-female probabilities.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio AlwaysMale = new()
     {
-        Register(
-            new GenderRatio
-            {
-                Id = "AlwaysMale",
-                Name = Text.Localized(LocalizationNamespace, "AlwaysMale", "Always Male"),
-                Ratio = PokemonGender.Male,
-            }
-        );
+        Id = "AlwaysMale",
+        Name = Text.Localized(LocalizationNamespace, "AlwaysMale", "Always Male"),
+        Ratio = PokemonGender.Male,
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "AlwaysFemale",
-                Name = Text.Localized(LocalizationNamespace, "AlwaysFemale", "Always Female"),
-                Ratio = PokemonGender.Female,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio AlwaysFemale = new()
+    {
+        Id = "AlwaysFemale",
+        Name = Text.Localized(LocalizationNamespace, "AlwaysFemale", "Always Female"),
+        Ratio = PokemonGender.Female,
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "Genderless",
-                Name = Text.Localized(LocalizationNamespace, "Genderless", "Genderless"),
-                Ratio = PokemonGender.Genderless,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio Genderless = new()
+    {
+        Id = "Genderless",
+        Name = Text.Localized(LocalizationNamespace, "Genderless", "Genderless"),
+        Ratio = PokemonGender.Genderless,
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "FemaleOneEighth",
-                Name = Text.Localized(LocalizationNamespace, "FemaleOneEighth", "Female One Eighth"),
-                Ratio = GenderRatioData.FemaleChance(32),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio FemaleOneEighth = new()
+    {
+        Id = "FemaleOneEighth",
+        Name = Text.Localized(LocalizationNamespace, "FemaleOneEighth", "Female One Eighth"),
+        Ratio = GenderRatioData.FemaleChance(32),
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "Female25Percent",
-                Name = Text.Localized(LocalizationNamespace, "Female25Percent", "Female 25 Percent"),
-                Ratio = GenderRatioData.FemaleChance(64),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio Female25Percent = new()
+    {
+        Id = "Female25Percent",
+        Name = Text.Localized(LocalizationNamespace, "Female25Percent", "Female 25 Percent"),
+        Ratio = GenderRatioData.FemaleChance(64),
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "Female50Percent",
-                Name = Text.Localized(LocalizationNamespace, "Female50Percent", "Female 50 Percent"),
-                Ratio = GenderRatioData.FemaleChance(128),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio Female50Percent = new()
+    {
+        Id = "Female50Percent",
+        Name = Text.Localized(LocalizationNamespace, "Female50Percent", "Female 50 Percent"),
+        Ratio = GenderRatioData.FemaleChance(128),
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "Female75Percent",
-                Name = Text.Localized(LocalizationNamespace, "Female75Percent", "Female 75 Percent"),
-                Ratio = GenderRatioData.FemaleChance(192),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio Female75Percent = new()
+    {
+        Id = "Female75Percent",
+        Name = Text.Localized(LocalizationNamespace, "Female75Percent", "Female 75 Percent"),
+        Ratio = GenderRatioData.FemaleChance(192),
+    };
 
-        Register(
-            new GenderRatio
-            {
-                Id = "FemaleSevenEighths",
-                Name = Text.Localized(LocalizationNamespace, "FemaleSevenEighths", "Female Seven Eighths"),
-                Ratio = GenderRatioData.FemaleChance(224),
-            }
-        );
-    }
-
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly GenderRatio FemaleSevenEighths = new()
+    {
+        Id = "FemaleSevenEighths",
+        Name = Text.Localized(LocalizationNamespace, "FemaleSevenEighths", "Female Seven Eighths"),
+        Ratio = GenderRatioData.FemaleChance(224),
+    };
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
@@ -124,12 +125,15 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
     where TKey : notnull
 {
     /// <summary>
-    /// Registers a new entity in the data set.
+    /// Constructs a new instance of the <see cref="RegisteredGameDataSet{TEntity, TKey}"/> class.
     /// </summary>
-    /// <param name="entity">The entity to be added to the data set.</param>
-    public void Register(TEntity entity)
+    /// <param name="providers">Services that will register all the static data.</param>
+    public RegisteredGameDataSet(IEnumerable<IGameDataProvider<TEntity>> providers)
     {
-        Data.Add(entity.Id, entity);
+        foreach (var entity in providers.OrderBy(p => p.Priority).SelectMany(p => p.GetEntitiesToRegister()))
+        {
+            Data.Add(entity.Id, entity);
+        }
     }
 }
 
@@ -139,7 +143,8 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
 /// <typeparam name="TEntity">The type of the loaded game data entities stored in this data set.</typeparam>
 /// <typeparam name="TKey">The type of the key used to uniquely identify entities.</typeparam>
 [RegisterSingleton]
-public sealed partial class LoadedGameDataSet<TEntity, TKey> : GameDataSet<TEntity, TKey>
+public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoader dataLoader)
+    : GameDataSet<TEntity, TKey>
     where TEntity : ILoadedGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
@@ -164,9 +169,7 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey> : GameDataSet<TEnti
     [CreateSyncVersion]
     public ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        return ReplaceDataAsync(
-            GameContextManager.Current.DataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken)
-        );
+        return ReplaceDataAsync(dataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken));
     }
 
     /// <summary>
@@ -177,10 +180,6 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey> : GameDataSet<TEnti
     [CreateSyncVersion]
     public ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
-        return GameContextManager.Current.DataLoader.SaveEntitiesAsync(
-            Data.Values,
-            TEntity.DataPath,
-            cancellationToken
-        );
+        return dataLoader.SaveEntitiesAsync(Data.Values, TEntity.DataPath, cancellationToken);
     }
 }

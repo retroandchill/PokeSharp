@@ -1,9 +1,10 @@
-﻿namespace PokeSharp.Services.DayNightCycle;
+﻿using PokeSharp.SourceGenerator.Attributes;
 
+namespace PokeSharp.Services.DayNightCycle;
+
+[AutoServiceShortcut]
 public class DayNightService
 {
-    public static DayNightService Instance { get; } = new();
-
     public bool IsDay { get; }
 
     public bool IsNight { get; }

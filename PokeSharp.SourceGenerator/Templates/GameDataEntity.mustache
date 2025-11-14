@@ -7,30 +7,15 @@ using PokeSharp.Core.Data;
 
 namespace {{Namespace}};
 
-public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}> {
+partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}> {
     
-    private static Name _currentContextId;
+    private static GameContextSingleton<{{EntityType}}GameDataSet<{{ClassName}}, {{Key}}>> _data = new();
 
+    private static {{EntityType}}GameDataSet<{{ClassName}}, {{Key}}> Data => _data.Instance;
 
     {{#IsLoaded}}
     public static string DataPath => "{{DataPath}}";
     {{/IsLoaded}}
-
-    [field: AllowNull]
-    private static {{EntityType}}GameDataSet<{{ClassName}}, {{Key}}> Data
-    {
-        get
-        {
-            var currentContext = GameContextManager.Current;
-            if (field is null || currentContext.ContextId != _currentContextId)
-            {
-                field = currentContext.GetService<{{EntityType}}GameDataSet<{{ClassName}}, {{Key}}>>();
-                _currentContextId = currentContext.ContextId;
-            }
-            
-            return field;
-        }
-    }
 
     public static IEnumerable<{{Key}}> Keys => Data.Keys;
     
@@ -58,7 +43,7 @@ public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key
     public static ValueTask SaveAsync(CancellationToken cancellationToken = default) => Data.SaveAsync(cancellationToken);
     {{/IsLoaded}}
     {{^IsLoaded}}
-    public static void Register({{ClassName}} entity) => Data.Register(entity);
+    public static void Register({{ClassName}} entity) { }
     {{/IsLoaded}}
 
     {{#Identifiers}}

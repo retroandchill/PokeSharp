@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -41,72 +43,118 @@ public readonly partial record struct EggGroup
 
     /// Specifies the breeding type of an egg group, determining compatibility and breeding behavior.
     public EggGroupType BreedingType { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<EggGroup>]
+[RegisterSingleton<IGameDataProvider<EggGroup>>]
+public partial class EggGroupRegistrations
+{
     private const string LocalizationNamespace = "GameData.EggGroup";
 
-    /// <summary>
-    /// Adds a predefined set of default EggGroup values to the system by registering them.
-    /// This includes various categories such as "Undiscovered," "Monster," "Water1,"
-    /// and more, along with localized names for each group.
-    /// </summary>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Undiscovered = new()
     {
-        Register(
-            new EggGroup
-            {
-                Id = "Undiscovered",
-                Name = Text.Localized(LocalizationNamespace, "Undiscovered", "Undiscovered"),
-            }
-        );
+        Id = "Undiscovered",
+        Name = Text.Localized(LocalizationNamespace, "Undiscovered", "Undiscovered"),
+    };
 
-        Register(new EggGroup { Id = "Monster", Name = Text.Localized(LocalizationNamespace, "Monster", "Monster") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Monster = new()
+    {
+        Id = "Monster",
+        Name = Text.Localized(LocalizationNamespace, "Monster", "Monster"),
+    };
 
-        Register(new EggGroup { Id = "Water1", Name = Text.Localized(LocalizationNamespace, "Water1", "Water 1") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Water1 = new()
+    {
+        Id = "Water1",
+        Name = Text.Localized(LocalizationNamespace, "Water1", "Water 1"),
+    };
 
-        Register(new EggGroup { Id = "Bug", Name = Text.Localized(LocalizationNamespace, "Bug", "Bug") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Bug = new()
+    {
+        Id = "Bug",
+        Name = Text.Localized(LocalizationNamespace, "Bug", "Bug"),
+    };
 
-        Register(new EggGroup { Id = "Flying", Name = Text.Localized(LocalizationNamespace, "Flying", "Flying") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Flying = new()
+    {
+        Id = "Flying",
+        Name = Text.Localized(LocalizationNamespace, "Flying", "Flying"),
+    };
 
-        Register(new EggGroup { Id = "Field", Name = Text.Localized(LocalizationNamespace, "Field", "Field") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Field = new()
+    {
+        Id = "Field",
+        Name = Text.Localized(LocalizationNamespace, "Field", "Field"),
+    };
 
-        Register(new EggGroup { Id = "Fairy", Name = Text.Localized(LocalizationNamespace, "Fairy", "Fairy") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Fairy = new()
+    {
+        Id = "Fairy",
+        Name = Text.Localized(LocalizationNamespace, "Fairy", "Fairy"),
+    };
 
-        Register(new EggGroup { Id = "Grass", Name = Text.Localized(LocalizationNamespace, "Grass", "Grass") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Grass = new()
+    {
+        Id = "Grass",
+        Name = Text.Localized(LocalizationNamespace, "Grass", "Grass"),
+    };
 
-        Register(
-            new EggGroup { Id = "Humanlike", Name = Text.Localized(LocalizationNamespace, "Humanlike", "Humanlike") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Humanlike = new()
+    {
+        Id = "Humanlike",
+        Name = Text.Localized(LocalizationNamespace, "Humanlike", "Humanlike"),
+    };
 
-        Register(new EggGroup { Id = "Water3", Name = Text.Localized(LocalizationNamespace, "Water3", "Water 3") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Water3 = new()
+    {
+        Id = "Water3",
+        Name = Text.Localized(LocalizationNamespace, "Water3", "Water 3"),
+    };
 
-        Register(new EggGroup { Id = "Mineral", Name = Text.Localized(LocalizationNamespace, "Mineral", "Mineral") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Mineral = new()
+    {
+        Id = "Mineral",
+        Name = Text.Localized(LocalizationNamespace, "Mineral", "Mineral"),
+    };
 
-        Register(
-            new EggGroup { Id = "Amorphous", Name = Text.Localized(LocalizationNamespace, "Amorphous", "Amorphous") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Amorphous = new()
+    {
+        Id = "Amorphous",
+        Name = Text.Localized(LocalizationNamespace, "Amorphous", "Amorphous"),
+    };
 
-        Register(new EggGroup { Id = "Water2", Name = Text.Localized(LocalizationNamespace, "Water2", "Water 2") });
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Water2 = new()
+    {
+        Id = "Water2",
+        Name = Text.Localized(LocalizationNamespace, "Water2", "Water 2"),
+    };
 
-        Register(
-            new EggGroup
-            {
-                Id = "Ditto",
-                Name = Text.Localized(LocalizationNamespace, "Ditto", "Ditto"),
-                BreedingType = EggGroupType.WithAnyEggGroup,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Ditto = new()
+    {
+        Id = "Ditto",
+        Name = Text.Localized(LocalizationNamespace, "Ditto", "Ditto"),
+        BreedingType = EggGroupType.WithAnyEggGroup,
+    };
 
-        Register(
-            new EggGroup
-            {
-                Id = "Dragon",
-                Name = Text.Localized(LocalizationNamespace, "Dragon", "Dragon"),
-                BreedingType = EggGroupType.WithNoEggGroups,
-            }
-        );
-    }
-
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly EggGroup Dragon = new()
+    {
+        Id = "Dragon",
+        Name = Text.Localized(LocalizationNamespace, "Dragon", "Dragon"),
+        BreedingType = EggGroupType.WithNoEggGroups,
+    };
 }

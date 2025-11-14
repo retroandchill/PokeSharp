@@ -1,9 +1,10 @@
-﻿namespace PokeSharp.Core.Settings;
+﻿using PokeSharp.SourceGenerator.Attributes;
 
+namespace PokeSharp.Core.Settings;
+
+[AutoServiceShortcut]
 public class GameSettings
 {
-    public static GameSettings Instance { get; } = new();
-
     public int MaxLevel { get; init; } = 100;
 
     public int ShinyChance { get; init; } = 16;

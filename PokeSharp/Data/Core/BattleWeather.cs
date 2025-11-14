@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -20,62 +22,74 @@ public readonly partial record struct BattleWeather
     /// Represents the localized name associated with the battle weather condition.
     /// </summary>
     public required Text Name { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<BattleWeather>]
+[RegisterSingleton<IGameDataProvider<BattleWeather>>]
+public partial class BattleWeatherRegistrations
+{
     private const string LocalizationNamespace = "GameData.BattleWeather";
 
-    /// <summary>
-    /// Populates the default values for the <see cref="BattleWeather"/> entity.
-    /// This method registers various predefined weather conditions, including
-    /// Sun, Rain, Sandstorm, Hail, Fog, and others, with their corresponding localized names
-    /// to the system.
-    /// </summary>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather Sun = new()
     {
-        Register(new BattleWeather { Id = "Sun", Name = Text.Localized(LocalizationNamespace, "Sun", "Sun") });
+        Id = "Sun",
+        Name = Text.Localized(LocalizationNamespace, "Sun", "Sun"),
+    };
 
-        Register(new BattleWeather { Id = "Rain", Name = Text.Localized(LocalizationNamespace, "Rain", "Rain") });
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather Rain = new()
+    {
+        Id = "Rain",
+        Name = Text.Localized(LocalizationNamespace, "Rain", "Rain"),
+    };
 
-        Register(
-            new BattleWeather
-            {
-                Id = "Sandstorm",
-                Name = Text.Localized(LocalizationNamespace, "Sandstorm", "Sandstorm"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather Sandstorm = new()
+    {
+        Id = "Sandstorm",
+        Name = Text.Localized(LocalizationNamespace, "Sandstorm", "Sandstorm"),
+    };
 
-        Register(new BattleWeather { Id = "Hail", Name = Text.Localized(LocalizationNamespace, "Hail", "Hail") });
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather Hail = new()
+    {
+        Id = "Hail",
+        Name = Text.Localized(LocalizationNamespace, "Hail", "Hail"),
+    };
 
-        Register(new BattleWeather { Id = "Fog", Name = Text.Localized(LocalizationNamespace, "Fog", "Fog") });
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather Fog = new()
+    {
+        Id = "Fog",
+        Name = Text.Localized(LocalizationNamespace, "Fog", "Fog"),
+    };
 
-        Register(
-            new BattleWeather { Id = "HarshSun", Name = Text.Localized(LocalizationNamespace, "HarshSun", "Harsh Sun") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather HarshSun = new()
+    {
+        Id = "HarshSun",
+        Name = Text.Localized(LocalizationNamespace, "HarshSun", "Harsh Sun"),
+    };
 
-        Register(
-            new BattleWeather
-            {
-                Id = "HeavyRain",
-                Name = Text.Localized(LocalizationNamespace, "HeavyRain", "Heavy Rain"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather HeavyRain = new()
+    {
+        Id = "HeavyRain",
+        Name = Text.Localized(LocalizationNamespace, "HeavyRain", "Heavy Rain"),
+    };
 
-        Register(
-            new BattleWeather
-            {
-                Id = "StrongWinds",
-                Name = Text.Localized(LocalizationNamespace, "StrongWinds", "Strong Winds"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather StrongWinds = new()
+    {
+        Id = "StrongWinds",
+        Name = Text.Localized(LocalizationNamespace, "StrongWinds", "Strong Winds"),
+    };
 
-        Register(
-            new BattleWeather
-            {
-                Id = "ShadowSky",
-                Name = Text.Localized(LocalizationNamespace, "ShadowSky", "Shadow Sky"),
-            }
-        );
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly BattleWeather ShadowSky = new()
+    {
+        Id = "ShadowSky",
+        Name = Text.Localized(LocalizationNamespace, "ShadowSky", "Shadow Sky"),
+    };
 }

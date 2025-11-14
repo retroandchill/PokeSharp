@@ -7,13 +7,13 @@ using PokeSharp.Game;
 namespace PokeSharp.Services.Happiness;
 
 [RegisterSingleton]
-public class ObtainMapHappinessChangeAdjuster : IHappinessChangeAdjuster
+public class ObtainMapHappinessChangeAdjuster(GameMap gameMap) : IHappinessChangeAdjuster
 {
     public int Priority => 0;
 
     public int AdjustHappinessChange(Pokemon pokemon, HappinessChangeMethod method, int change)
     {
-        if (change > 0 && pokemon.ObtainMap == GameMap.Instance.MapId)
+        if (change > 0 && pokemon.ObtainMap == gameMap.MapId)
         {
             return change + 1;
         }
@@ -59,13 +59,13 @@ public class SootheBellHappinessChangeAdjuster : IHappinessChangeAdjuster
 }
 
 [RegisterSingleton]
-public class SoftCapHappinessChangeAdjuster : IHappinessChangeAdjuster
+public class SoftCapHappinessChangeAdjuster(GameSettings gameSettings) : IHappinessChangeAdjuster
 {
     public int Priority => 1000;
 
     public int AdjustHappinessChange(Pokemon pokemon, HappinessChangeMethod method, int change)
     {
-        if (change > 0 && GameSettings.Instance.ApplyHappinessSoftCap && method.Id != HappinessChangeMethod.EVBerry.Id)
+        if (change > 0 && gameSettings.ApplyHappinessSoftCap && method.Id != HappinessChangeMethod.EVBerry.Id)
         {
             return change * 3 / 2;
         }

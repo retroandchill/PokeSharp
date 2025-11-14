@@ -61,6 +61,29 @@ namespace PokeSharp.SourceGenerator.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to #nullable enable
+        ///using Microsoft.Extensions.DependencyInjection;
+        ///using PokeSharp.Abstractions;
+        ///using PokeSharp.Core;
+        ///
+        ///namespace {{Namespace}};
+        ///
+        ///public static class {{ServiceName}}ServiceShortcut {
+        ///    
+        ///    private static GameContextSingleton&lt;{{ServiceType}}&gt; _instance = new();
+        ///
+        ///    extension(GameServices) {
+        ///        public static {{ServiceType}} {{ServiceName}} =&gt; _instance.Instance;
+        ///    }
+        ///}.
+        /// </summary>
+        internal static string AutoServiceShortcutTemplate {
+            get {
+                return ResourceManager.GetString("AutoServiceShortcutTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #nullable enable
         ///using System.Diagnostics.CodeAnalysis;
         ///using Microsoft.Extensions.DependencyInjection;
         ///using PokeSharp.Abstractions;
@@ -69,20 +92,43 @@ namespace PokeSharp.SourceGenerator.Properties {
         ///
         ///namespace {{Namespace}};
         ///
-        ///public partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity&lt;{{Key}}, {{ClassName}}&gt; {
+        ///partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity&lt;{{Key}}, {{ClassName}}&gt; {
         ///    
-        ///    private static Name _currentContextId;
+        ///    private static GameContextSingleton&lt;{{EntityType}}GameDataSet&lt;{{ClassName}}, {{Key}}&gt;&gt; _data = new();
         ///
-        ///    [field: AllowNull]
-        ///    private static {{EntityType}}GameDataSet&lt;{{ClassName}}, {{Key}}&gt; Data
-        ///    {
-        ///        get
-        ///        {
-        ///          [rest of string was truncated]&quot;;.
+        ///    private static {{EntityType}}GameDataSet&lt;{{ClassName}}, {{Key}}&gt; Data =&gt; _data. [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string GameDataEntityTemplate {
             get {
                 return ResourceManager.GetString("GameDataEntityTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #nullable enable
+        ///using System.Diagnostics.CodeAnalysis;
+        ///using Microsoft.Extensions.DependencyInjection;
+        ///using PokeSharp.Abstractions;
+        ///using PokeSharp.Core;
+        ///using PokeSharp.Core.Data;
+        ///
+        ///namespace {{Namespace}};
+        ///
+        ///partial class {{ClassName}} {
+        ///    
+        ///    public int Priority =&gt; {{Priority}};
+        ///
+        ///    public IEnumerable&lt;{{EntityType}}&gt; GetEntitiesToRegister()
+        ///    {
+        ///        {{#HasRegistrations}}
+        ///        {{#Registrations}}
+        ///        yield return {{Name}};    
+        ///        {{/Registrations}}
+        ///        {{/HasRegi [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string GameDataRegistrationTemplate {
+            get {
+                return ResourceManager.GetString("GameDataRegistrationTemplate", resourceCulture);
             }
         }
     }

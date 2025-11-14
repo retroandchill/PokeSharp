@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Core.Data;
+using PokeSharp.Data.Core;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -24,40 +26,81 @@ public readonly partial record struct BodyColor
     /// Represents a localized name for the corresponding body color.
     /// </summary>
     public required Text Name { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<BodyColor>]
+[RegisterSingleton<IGameDataProvider<BodyColor>>]
+public partial class BodyColorRegistrations
+{
     private const string LocalizationNamespace = "GameData.BodyColor";
 
-    /// <summary>
-    /// Registers default values for the <see cref="BodyColor"/> structure.
-    /// </summary>
-    /// <remarks>
-    /// This method initializes a set of predefined <see cref="BodyColor"/> instances
-    /// with their associated identifiers and localized names. These values are registered
-    /// for use throughout the application.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Red = new()
     {
-        Register(new BodyColor { Id = "Red", Name = Text.Localized(LocalizationNamespace, "Red", "Red") });
+        Id = "Red",
+        Name = Text.Localized(LocalizationNamespace, "Red", "Red"),
+    };
 
-        Register(new BodyColor { Id = "Blue", Name = Text.Localized(LocalizationNamespace, "Blue", "Blue") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Blue = new()
+    {
+        Id = "Blue",
+        Name = Text.Localized(LocalizationNamespace, "Blue", "Blue"),
+    };
 
-        Register(new BodyColor { Id = "Yellow", Name = Text.Localized(LocalizationNamespace, "Yellow", "Yellow") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Yellow = new()
+    {
+        Id = "Yellow",
+        Name = Text.Localized(LocalizationNamespace, "Yellow", "Yellow"),
+    };
 
-        Register(new BodyColor { Id = "Green", Name = Text.Localized(LocalizationNamespace, "Green", "Green") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Green = new()
+    {
+        Id = "Green",
+        Name = Text.Localized(LocalizationNamespace, "Green", "Green"),
+    };
 
-        Register(new BodyColor { Id = "Black", Name = Text.Localized(LocalizationNamespace, "Black", "Black") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Black = new()
+    {
+        Id = "Black",
+        Name = Text.Localized(LocalizationNamespace, "Black", "Black"),
+    };
 
-        Register(new BodyColor { Id = "Brown", Name = Text.Localized(LocalizationNamespace, "Brown", "Brown") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Brown = new()
+    {
+        Id = "Brown",
+        Name = Text.Localized(LocalizationNamespace, "Brown", "Brown"),
+    };
 
-        Register(new BodyColor { Id = "Purple", Name = Text.Localized(LocalizationNamespace, "Purple", "Purple") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Purple = new()
+    {
+        Id = "Purple",
+        Name = Text.Localized(LocalizationNamespace, "Purple", "Purple"),
+    };
 
-        Register(new BodyColor { Id = "Gray", Name = Text.Localized(LocalizationNamespace, "Gray", "Gray") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Gray = new()
+    {
+        Id = "Gray",
+        Name = Text.Localized(LocalizationNamespace, "Gray", "Gray"),
+    };
 
-        Register(new BodyColor { Id = "White", Name = Text.Localized(LocalizationNamespace, "White", "White") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor White = new()
+    {
+        Id = "White",
+        Name = Text.Localized(LocalizationNamespace, "White", "White"),
+    };
 
-        Register(new BodyColor { Id = "Pink", Name = Text.Localized(LocalizationNamespace, "Pink", "Pink") });
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly BodyColor Pink = new()
+    {
+        Id = "Pink",
+        Name = Text.Localized(LocalizationNamespace, "Pink", "Pink"),
+    };
 }

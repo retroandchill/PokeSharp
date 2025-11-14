@@ -8,7 +8,7 @@ namespace PokeSharp.SourceGenerator.Attributes;
 #if POKESHARP_GENERATOR
 [IncludeFile]
 #endif
-public class GameDataEntityAttribute : Attribute
+internal class GameDataEntityAttribute : Attribute
 {
     public string? DataPath { get; init; }
 }

@@ -1,9 +1,10 @@
-﻿namespace PokeSharp.Services;
+﻿using PokeSharp.SourceGenerator.Attributes;
 
+namespace PokeSharp.Services;
+
+[AutoServiceShortcut]
 public class PokemonGlobal
 {
-    public static PokemonGlobal Instance { get; } = new();
-
     public bool IsCycling { get; }
 
     public bool IsSurfing { get; }

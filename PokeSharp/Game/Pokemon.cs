@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.Core.Engine;
 using PokeSharp.Core.Settings;
 using PokeSharp.Core.State;
@@ -93,7 +94,7 @@ public class Pokemon
         {
             if (ForcedForm.HasValue)
                 return ForcedForm.Value;
-            if (GameTemp.Instance.InBattle || GameTemp.Instance.InStorage)
+            if (GameServices.GameTemp.InBattle || GameServices.GameTemp.InStorage)
                 return _form;
 
             var calculatedForm = MultipleForms.GetForm(this);
@@ -330,7 +331,7 @@ public class Pokemon
             if (_shiny.HasValue)
                 return _shiny.Value;
 
-            _shiny = ShinyValue < GameSettings.Instance.ShinyChance;
+            _shiny = ShinyValue < GameServices.GameSettings.ShinyChance;
 
             return _shiny.Value;
         }
@@ -782,7 +783,7 @@ public class Pokemon
         if (PokerusStage == PokerusStage.Cured)
             return;
 
-        GameStats.Instance.PokerusInfections++;
+        GameServices.GameStats.PokerusInfections++;
 
         if (strain is <= 0 or >= 16)
         {
@@ -908,56 +909,62 @@ public class Pokemon
 
     public Name? CheckEvolutionOnLevelUp()
     {
+        var evolutionService = GameServices.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
-                Evolution.Get(method).CallOnLevelUp(pkmn, parameter) ? newSpecies : (Name?)null
+                evolutionService.OnLevelUp(method, pkmn, parameter) ? newSpecies : (Name?)null
         );
     }
 
     public Name? CheckEvolutionOnUseItem(Name itemUsed)
     {
+        var evolutionService = GameServices.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
-                Evolution.Get(method).CallUseItem(pkmn, parameter, itemUsed) ? newSpecies : (Name?)null
+                evolutionService.OnUseItem(method, pkmn, parameter, itemUsed) ? newSpecies : (Name?)null
         );
     }
 
     public Name? CheckEvolutionOnTrade(Pokemon otherPkmn)
     {
+        var evolutionService = GameServices.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
-                Evolution.Get(method).CallOnTrade(pkmn, parameter, otherPkmn) ? newSpecies : (Name?)null
+                evolutionService.OnTrade(method, pkmn, parameter, otherPkmn) ? newSpecies : (Name?)null
         );
     }
 
     public Name? CheckEvolutionAfterBattle(int partyIndex)
     {
+        var evolutionService = GameServices.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
-                Evolution.Get(method).CallAfterBattle(pkmn, partyIndex, parameter) ? newSpecies : (Name?)null
+                evolutionService.AfterBattle(method, pkmn, partyIndex, parameter) ? newSpecies : (Name?)null
         );
     }
 
     public Name? CheckEvolutionByEvent(object? value)
     {
+        var evolutionService = GameServices.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
-                Evolution.Get(method).CallEvent(pkmn, parameter, value) ? newSpecies : (Name?)null
+                evolutionService.OnEvent(method, pkmn, parameter, value) ? newSpecies : (Name?)null
         );
     }
 
     public void ActionAfterEvolution(Name newSpecies)
     {
+        var evolutionService = GameServices.EvolutionService;
         foreach (var (evoSpecies, method, parameter, _) in SpeciesData.GetEvolutions(true))
         {
-            if (Evolution.Get(method).CallAfterEvolution(this, evoSpecies, parameter, newSpecies))
+            if (evolutionService.AfterEvolution(method, this, evoSpecies, parameter, newSpecies))
                 break;
         }
     }
 
     private Name? CheckEvolutionInternal(Func<Pokemon, Name, Name, object?, Name?> selector)
     {
-        if (!EvolutionService.Instance.CanEvolve(this))
+        if (!GameServices.EvolutionService.CanEvolve(this))
             return null;
 
         foreach (var (newSpecies, method, parameter, _) in SpeciesData.GetEvolutions().Where(e => !e.IsPrevious))
@@ -1021,7 +1028,7 @@ public class Pokemon
             return 1;
 
         // ReSharper disable once InvertIf
-        if (GameSettings.Instance.DisableIVsAndEVs)
+        if (GameServices.GameSettings.DisableIVsAndEVs)
         {
             iv = 0;
             ev = 0;
@@ -1033,7 +1040,7 @@ public class Pokemon
     private static int CalcStat(int baseValue, int level, int iv, int ev, int natureChange)
     {
         // ReSharper disable once InvertIf
-        if (GameSettings.Instance.DisableIVsAndEVs)
+        if (GameServices.GameSettings.DisableIVsAndEVs)
         {
             iv = 0;
             ev = 0;
@@ -1061,23 +1068,23 @@ public class Pokemon
         var stats = Stat.AllMain.ToImmutableDictionary(
             s => s.Id,
             s =>
-                s.Id == Stat.HP
+                s.Id == Stat.HP.Id
                     ? CalcHP(baseStats[s.Id], thisLevel, thisIV[s.Id], EV[s.Id])
                     : CalcStat(baseStats[s.Id], thisLevel, thisIV[s.Id], EV[s.Id], natureMod[s.Id])
         );
 
-        var hpDifference = stats[Stat.HP] - MaxHP;
-        MaxHP = stats[Stat.HP];
+        var hpDifference = stats[Stat.HP.Id] - MaxHP;
+        MaxHP = stats[Stat.HP.Id];
         if (HP > 0 || hpDifference > 0)
         {
             HP = Math.Max(HP + hpDifference, 1);
         }
 
-        Attack = stats[Stat.ATTACK];
-        Defense = stats[Stat.DEFENSE];
-        SpecialAttack = stats[Stat.SPECIAL_ATTACK];
-        SpecialDefense = stats[Stat.SPECIAL_DEFENSE];
-        Speed = stats[Stat.SPEED];
+        Attack = stats[Stat.Attack.Id];
+        Defense = stats[Stat.Defense.Id];
+        SpecialAttack = stats[Stat.SpecialAttack.Id];
+        SpecialDefense = stats[Stat.SpecialDefense.Id];
+        Speed = stats[Stat.Speed.Id];
     }
 
     #endregion
@@ -1148,7 +1155,7 @@ public class Pokemon
         }
 
         Owner = owner;
-        ObtainMap = GameMap.Instance.MapId;
+        ObtainMap = GameServices.GameMap.MapId;
         ObtainLevel = level;
         TimeReceived = DateTimeOffset.Now;
 

@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -33,80 +35,109 @@ public readonly partial record struct BodyShape
     /// This property is immutable and thread-safe as it is readonly after initialization.
     /// </threadsafety>
     public required Text Name { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<BodyShape>]
+[RegisterSingleton<IGameDataProvider<BodyShape>>]
+public partial class BodyShapeRegistrations
+{
     private const string LocalizationNamespace = "GameData.BodyShape";
 
-    /// <summary>
-    /// Populates the body shape registry with a predefined set of default values.
-    /// </summary>
-    /// <remarks>
-    /// This method registers a series of body shapes, each represented by a unique identifier
-    /// and a localized name. These shapes define different structural forms for entities
-    /// within the application, such as "Head", "Winged", "Quadruped", and others.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Head = new()
     {
-        Register(new BodyShape { Id = "Head", Name = Text.Localized(LocalizationNamespace, "Head", "Head") });
+        Id = "Head",
+        Name = Text.Localized(LocalizationNamespace, "Head", "Head"),
+    };
 
-        Register(
-            new BodyShape
-            {
-                Id = "Serpentine",
-                Name = Text.Localized(LocalizationNamespace, "Serpentine", "Serpentine"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Serpentine = new()
+    {
+        Id = "Serpentine",
+        Name = Text.Localized(LocalizationNamespace, "Serpentine", "Serpentine"),
+    };
 
-        Register(new BodyShape { Id = "Finned", Name = Text.Localized(LocalizationNamespace, "Finned", "Finned") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Finned = new()
+    {
+        Id = "Finned",
+        Name = Text.Localized(LocalizationNamespace, "Finned", "Finned"),
+    };
 
-        Register(
-            new BodyShape { Id = "HeadArms", Name = Text.Localized(LocalizationNamespace, "HeadArms", "Head and arms") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape HeadArms = new()
+    {
+        Id = "HeadArms",
+        Name = Text.Localized(LocalizationNamespace, "HeadArms", "Head and arms"),
+    };
 
-        Register(
-            new BodyShape { Id = "HeadBase", Name = Text.Localized(LocalizationNamespace, "HeadBase", "Head and base") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape HeadBase = new()
+    {
+        Id = "HeadBase",
+        Name = Text.Localized(LocalizationNamespace, "HeadBase", "Head and base"),
+    };
 
-        Register(
-            new BodyShape
-            {
-                Id = "BipedalTail",
-                Name = Text.Localized(LocalizationNamespace, "BipedalTail", "Bipedal with tail"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape BipedalTail = new()
+    {
+        Id = "BipedalTail",
+        Name = Text.Localized(LocalizationNamespace, "BipedalTail", "Bipedal with tail"),
+    };
 
-        Register(
-            new BodyShape { Id = "HeadLegs", Name = Text.Localized(LocalizationNamespace, "HeadLegs", "Head and legs") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape HeadLegs = new()
+    {
+        Id = "HeadLegs",
+        Name = Text.Localized(LocalizationNamespace, "HeadLegs", "Head and legs"),
+    };
 
-        Register(
-            new BodyShape { Id = "Quadruped", Name = Text.Localized(LocalizationNamespace, "Quadruped", "Quadruped") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Quadruped = new()
+    {
+        Id = "Quadruped",
+        Name = Text.Localized(LocalizationNamespace, "Quadruped", "Quadruped"),
+    };
 
-        Register(new BodyShape { Id = "Winged", Name = Text.Localized(LocalizationNamespace, "Winged", "Winged") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Winged = new()
+    {
+        Id = "Winged",
+        Name = Text.Localized(LocalizationNamespace, "Winged", "Winged"),
+    };
 
-        Register(
-            new BodyShape { Id = "Multiped", Name = Text.Localized(LocalizationNamespace, "Multiped", "Multiped") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Multiped = new()
+    {
+        Id = "Multiped",
+        Name = Text.Localized(LocalizationNamespace, "Multiped", "Multiped"),
+    };
 
-        Register(
-            new BodyShape { Id = "MultiBody", Name = Text.Localized(LocalizationNamespace, "MultiBody", "Multi Body") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape MultiBody = new()
+    {
+        Id = "MultiBody",
+        Name = Text.Localized(LocalizationNamespace, "MultiBody", "Multi Body"),
+    };
 
-        Register(new BodyShape { Id = "Bipedal", Name = Text.Localized(LocalizationNamespace, "Bipedal", "Bipedal") });
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Bipedal = new()
+    {
+        Id = "Bipedal",
+        Name = Text.Localized(LocalizationNamespace, "Bipedal", "Bipedal"),
+    };
 
-        Register(
-            new BodyShape
-            {
-                Id = "MultiWinged",
-                Name = Text.Localized(LocalizationNamespace, "MultiWinged", "Multi Winged"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape MultiWinged = new()
+    {
+        Id = "MultiWinged",
+        Name = Text.Localized(LocalizationNamespace, "MultiWinged", "Multi Winged"),
+    };
 
-        Register(
-            new BodyShape { Id = "Insectoid", Name = Text.Localized(LocalizationNamespace, "Insectoid", "Insectoid") }
-        );
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly BodyShape Insectoid = new()
+    {
+        Id = "Insectoid",
+        Name = Text.Localized(LocalizationNamespace, "Insectoid", "Insectoid"),
+    };
 }

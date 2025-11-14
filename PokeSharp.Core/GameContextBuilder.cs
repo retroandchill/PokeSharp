@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using PokeSharp.Abstractions;
-using Retro.ReadOnlyParams.Annotations;
 
 namespace PokeSharp.Core;
 
@@ -12,7 +10,7 @@ namespace PokeSharp.Core;
 /// <see cref="GameContext"/>. It is designed to simplify the setup of a <see cref="GameContext"/> with dependency
 /// injection and additional initialization steps.
 /// </remarks>
-public sealed class GameContextBuilder([ReadOnly] Name contextId)
+public sealed class GameContextBuilder
 {
     /// <summary>
     /// Gets the <see cref="IServiceCollection"/> used to configure and register dependencies for the game context.
@@ -35,6 +33,6 @@ public sealed class GameContextBuilder([ReadOnly] Name contextId)
     public GameContext Build()
     {
         var serviceProvider = Services.BuildServiceProvider();
-        return new GameContext(serviceProvider, contextId);
+        return new GameContext(serviceProvider);
     }
 }

@@ -1,0 +1,15 @@
+﻿#nullable enable
+using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.Abstractions;
+using PokeSharp.Core;
+
+namespace {{Namespace}};
+
+public static class {{ServiceName}}ServiceShortcut {
+    
+    private static GameContextSingleton<{{ServiceType}}> _instance = new();
+
+    extension(GameServices) {
+        public static {{ServiceType}} {{ServiceName}} => _instance.Instance;
+    }
+}

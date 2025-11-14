@@ -6,7 +6,7 @@ using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Data;
 
-var builder = new GameContextBuilder("test");
+var builder = new GameContextBuilder();
 
 builder
     .Services.AddLogging()
@@ -19,9 +19,7 @@ var context = builder.Build();
 
 try
 {
-    GameContextManager.Initialize(context);
-
-    DefaultData.AddAll();
+    GameContext.Initialize(context);
 
     var compilerService = context.GetService<PbsCompilerService>();
 
@@ -29,5 +27,5 @@ try
 }
 finally
 {
-    GameContextManager.Reset();
+    GameContext.Reset();
 }

@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -23,32 +25,39 @@ public readonly partial record struct BattleTerrain
     /// for the terrain, which may be displayed to the player or used in-game to differentiate terrains.
     /// </remarks>
     public required Text Name { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<BattleTerrain>]
+[RegisterSingleton<IGameDataProvider<BattleTerrain>>]
+public partial class BattleTerrainRegistrations
+{
     private const string LocalizationNamespace = "GameData.BattleTerrain";
 
-    /// <summary>
-    /// Populates the BattleTerrain entity with default terrain values by registering a set of predefined terrains.
-    /// </summary>
-    /// <remarks>
-    /// This method adds the default terrain entries such as Electric, Grassy, Misty, and Psychic,
-    /// each initialized with a specific ID and localized name. The data is intended to provide
-    /// baseline configurations for terrains in the game environment.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly BattleTerrain Electric = new()
     {
-        Register(
-            new BattleTerrain { Id = "Electric", Name = Text.Localized(LocalizationNamespace, "Electric", "Electric") }
-        );
+        Id = "Electric",
+        Name = Text.Localized(LocalizationNamespace, "Electric", "Electric"),
+    };
 
-        Register(new BattleTerrain { Id = "Grassy", Name = Text.Localized(LocalizationNamespace, "Grassy", "Grassy") });
+    [GameDataEntityRegistration]
+    internal static readonly BattleTerrain Grassy = new()
+    {
+        Id = "Grassy",
+        Name = Text.Localized(LocalizationNamespace, "Grassy", "Grassy"),
+    };
 
-        Register(new BattleTerrain { Id = "Misty", Name = Text.Localized(LocalizationNamespace, "Misty", "Misty") });
+    [GameDataEntityRegistration]
+    internal static readonly BattleTerrain Misty = new()
+    {
+        Id = "Misty",
+        Name = Text.Localized(LocalizationNamespace, "Misty", "Misty"),
+    };
 
-        Register(
-            new BattleTerrain { Id = "Psychic", Name = Text.Localized(LocalizationNamespace, "Psychic", "Psychic") }
-        );
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly BattleTerrain Psychic = new()
+    {
+        Id = "Psychic",
+        Name = Text.Localized(LocalizationNamespace, "Psychic", "Psychic"),
+    };
 }

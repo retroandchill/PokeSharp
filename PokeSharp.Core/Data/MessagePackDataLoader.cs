@@ -45,6 +45,5 @@ public partial class MessagePackDataLoader : IDataLoader
         {
             yield return entity;
         }
-        ;
     }
 }

@@ -40,10 +40,10 @@ public class SpeciesInfo
     public List<int> BaseStats { get; set; } = [];
 
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(GenderRatio))]
-    public Name GenderRatio { get; set; } = PokeSharp.Data.Core.GenderRatio.Female50Percent;
+    public Name GenderRatio { get; set; } = PokeSharp.Data.Core.GenderRatio.Female50Percent.Id;
 
     [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(GrowthRate))]
-    public Name GrowthRate { get; set; } = PokeSharp.Data.Core.GrowthRate.Medium;
+    public Name GrowthRate { get; set; } = PokeSharp.Data.Core.GrowthRate.Medium.Id;
 
     [PbsType(PbsFieldType.PositiveInteger)]
     public int BaseExp { get; set; } = 100;
@@ -71,7 +71,7 @@ public class SpeciesInfo
     public List<Name> EggMoves { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(EggGroup))]
-    public List<Name> EggGroups { get; set; } = [EggGroup.Undiscovered];
+    public List<Name> EggGroups { get; set; } = [EggGroup.Undiscovered.Id];
 
     [PbsType(PbsFieldType.PositiveInteger)]
     public int HatchSteps { get; set; } = 1;
@@ -86,10 +86,10 @@ public class SpeciesInfo
     public decimal Weight { get; set; } = 1;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyColor))]
-    public Name Color { get; set; } = BodyColor.Red;
+    public Name Color { get; set; } = BodyColor.Red.Id;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyShape))]
-    public Name Shape { get; set; } = BodyShape.Head;
+    public Name Shape { get; set; } = BodyShape.Head.Id;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Habitat))]
     public Name Habitat { get; set; }

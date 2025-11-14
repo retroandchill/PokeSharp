@@ -82,16 +82,15 @@ public interface IGameDataEntity<TKey, TEntity> : IGameDataEntity<TEntity>
 /// Represents an interface for entities that are registered as part of game data.
 /// Provides functionality for managing the registration of game data entities.
 /// </summary>
+public interface IRegisteredGameDataEntity;
+
+/// <summary>
+/// Represents an interface for entities that are registered as part of game data.
+/// Provides functionality for managing the registration of game data entities.
+/// </summary>
 /// <typeparam name="TEntity">The type of the entity being registered.</typeparam>
-public interface IRegisteredGameDataEntity<TEntity> : IGameDataEntity<TEntity>
-    where TEntity : IGameDataEntity<TEntity>
-{
-    /// <summary>
-    /// Registers the specified game data entity in the data set.
-    /// </summary>
-    /// <param name="entity">The entity to be registered.</param>
-    static abstract void Register(TEntity entity);
-}
+public interface IRegisteredGameDataEntity<out TEntity> : IGameDataEntity<TEntity>, IRegisteredGameDataEntity
+    where TEntity : IGameDataEntity<TEntity>;
 
 /// <summary>
 /// Represents an interface for registered game data entities.

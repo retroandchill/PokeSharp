@@ -1,0 +1,30 @@
+#nullable enable
+using PokeSharp.Core.Data;
+
+namespace {{Namespace}};
+
+partial class {{ClassName}} : IGameDataProvider<{{EntityType}}> {
+    
+    int IGameDataProvider<{{EntityType}}>.Priority => {{Priority}};
+
+    IEnumerable<{{EntityType}}> IGameDataProvider<{{EntityType}}>.GetEntitiesToRegister()
+    {
+        {{#HasRegistrations}}
+        {{#Registrations}}
+        yield return {{Name}};    
+        {{/Registrations}}
+        {{/HasRegistrations}}
+        {{^HasRegistrations}}
+        return [];    
+        {{/HasRegistrations}}
+    }
+}
+
+public static partial class {{ClassName}}Extensions {
+    extension({{EntityType}})
+    {
+        {{#Registrations}}
+        public static {{../EntityType}} {{Name}} => {{../ClassName}}.{{Name}};
+        {{/Registrations}}    
+    }
+}

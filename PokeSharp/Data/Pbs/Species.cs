@@ -135,7 +135,7 @@ public partial record Species
 
     public Name MegaMove { get; init; }
 
-    public int UnmegaForm { get; init; } = 0;
+    public int UnmegaForm { get; init; }
 
     public MegaMessageType MegaMessage { get; init; }
 
@@ -174,140 +174,6 @@ public partial record Species
     /// <c>true</c> if the specified flag is present in the list of flags; otherwise, <c>false</c>.
     /// </returns>
     public bool HasFlag(Name flag) => Flags.Contains(flag);
-
-    public IEnumerable<EvolutionInfo> GetEvolutions(bool excludeInvalid = false)
-    {
-        return Evolutions.Where(evo => !evo.IsPrevious && (!evo.EvolutionMethod.IsNone || !excludeInvalid));
-    }
-
-    public IEnumerable<EvolutionFamily> GetFamilyEvolutions(bool excludeInvalid = true)
-    {
-        return GetEvolutions(excludeInvalid)
-            .OrderBy(e => Keys.Index().Where(i => i.Item == e.Species).Select(i => i.Index).FirstOrDefault())
-            .Select(e => new EvolutionFamily(SpeciesId, e.Species, e.EvolutionMethod, e.Parameter, e.IsPrevious))
-            .SelectMany(e => new[] { e }.Concat(Get(e.Species).GetFamilyEvolutions(excludeInvalid)));
-    }
-
-    [IgnoreMember]
-    [JsonIgnore]
-    public Name PreviousSpecies
-    {
-        get
-        {
-            foreach (var evo in Evolutions.Where(evo => evo.IsPrevious))
-            {
-                return evo.Species;
-            }
-
-            return SpeciesId;
-        }
-    }
-
-    public Name GetBabySpecies(bool checkItems = false, Name item1 = default, Name item2 = default)
-    {
-        if (Evolutions.Length == 0)
-            return SpeciesId;
-
-        var result = SpeciesId;
-        foreach (var evo in Evolutions.Where(evo => !evo.IsPrevious))
-        {
-            if (checkItems)
-            {
-                var incense = Get(PreviousSpecies).Incense;
-                if (incense.IsNone || incense == item1 || incense == item2)
-                {
-                    result = PreviousSpecies;
-                }
-            }
-            else
-            {
-                result = PreviousSpecies;
-            }
-        }
-
-        return result != SpeciesId ? Get(result).GetBabySpecies(checkItems, item1, item2) : result;
-    }
-
-    public IEnumerable<Name> GetFamilySpecies()
-    {
-        var babySpecies = GetBabySpecies();
-        yield return babySpecies;
-
-        foreach (var evo in GetFamilyEvolutions(false))
-        {
-            yield return evo.Species;
-        }
-    }
-
-    public bool BreedingCanProduce(Name otherSpecies)
-    {
-        var otherFamily = Get(otherSpecies).GetFamilySpecies();
-        return Offspring.Length > 0 ? otherFamily.Intersect(Offspring).Any() : otherFamily.Contains(SpeciesId);
-    }
-
-    public ImmutableArray<Name> GetEggMoves()
-    {
-        if (EggMoves.Length > 0)
-            return EggMoves;
-
-        var previousSpecies = PreviousSpecies;
-        return previousSpecies != SpeciesId ? GetSpeciesForm(previousSpecies, Form).GetEggMoves() : EggMoves;
-    }
-
-    public bool FamilyEvolutionsHaveMethod(Name method, object? parameter = null)
-    {
-        foreach (var evo in Get(GetBabySpecies()).GetFamilyEvolutions())
-        {
-            if (evo.EvolutionMethod != method)
-                continue;
-
-            if (parameter is not null && parameter.Equals(evo.Parameter))
-                return true;
-        }
-
-        return false;
-    }
-
-    public bool FamilyItemEvolutionsUseItem(Name item = default)
-    {
-        foreach (var evo in Get(GetBabySpecies()).GetFamilyEvolutions())
-        {
-            if (Evolution.Get(evo.EvolutionMethod).UseItemProc is null)
-                continue;
-
-            if (item.IsValid && item.Equals(evo.Parameter))
-                return true;
-        }
-
-        return false;
-    }
-
-    [IgnoreMember]
-    [JsonIgnore]
-    public int MinimumLevel
-    {
-        get
-        {
-            if (Evolutions.Length == 0)
-                return 1;
-
-            var evo = Evolutions.FirstOrDefault(e => !e.IsPrevious);
-            if (evo is null)
-                return 1;
-
-            var previousData = GetSpeciesForm(evo.Species, BaseForm);
-            var previousMinLevel = previousData.MinimumLevel;
-
-            if (previousData.Incense.IsValid)
-                return 1;
-
-            var evolutionMethodData = Evolution.Get(evo.EvolutionMethod);
-            if (evolutionMethodData.LevelUpProc is null && evolutionMethodData.Id != Evolution.Shedinja)
-                return previousMinLevel;
-
-            return evolutionMethodData.AnyLevelUp ? previousMinLevel + 1 : (int)evo.Parameter!;
-        }
-    }
 
     [GeneratedRegex("DefaultForm_(\\d+)")]
     private static partial Regex DefaultFormPattern { get; }

@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -28,89 +30,75 @@ public partial record Weather
     /// The category of the weather condition.
     /// </summary>
     public required Name Category { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<Weather>]
+[RegisterSingleton<IGameDataProvider<Weather>>]
+public partial class WeatherRegistrations
+{
     private const string LocalizationNamespace = "GameData.Weather";
 
-    /// <summary>
-    /// Populates the default values for the <see cref="Weather"/> data entity.
-    /// This method initializes and registers a predefined set of weather entities,
-    /// each with their unique identifiers and localized names.
-    /// </summary>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly Weather Rain = new()
     {
-        Register(
-            new Weather
-            {
-                Id = "Rain",
-                Name = Text.Localized(LocalizationNamespace, "Rain", "Rain"),
-                Category = BattleWeather.Rain,
-            }
-        );
+        Id = "Rain",
+        Name = Text.Localized(LocalizationNamespace, "Rain", "Rain"),
+        Category = BattleWeather.Rain.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "Storm",
-                Name = Text.Localized(LocalizationNamespace, "Storm", "Storm"),
-                Category = BattleWeather.Rain,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Weather Storm = new()
+    {
+        Id = "Storm",
+        Name = Text.Localized(LocalizationNamespace, "Storm", "Storm"),
+        Category = BattleWeather.Rain.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "Snow",
-                Name = Text.Localized(LocalizationNamespace, "Snow", "Snow"),
-                Category = BattleWeather.Hail,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Weather Snow = new()
+    {
+        Id = "Snow",
+        Name = Text.Localized(LocalizationNamespace, "Snow", "Snow"),
+        Category = BattleWeather.Hail.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "Blizzard",
-                Name = Text.Localized(LocalizationNamespace, "Blizzard", "Blizzard"),
-                Category = BattleWeather.Hail,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Weather Blizzard = new()
+    {
+        Id = "Blizzard",
+        Name = Text.Localized(LocalizationNamespace, "Blizzard", "Blizzard"),
+        Category = BattleWeather.Hail.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "Sandstorm",
-                Name = Text.Localized(LocalizationNamespace, "Sandstorm", "Sandstorm"),
-                Category = BattleWeather.Sandstorm,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Weather Sandstorm = new()
+    {
+        Id = "Sandstorm",
+        Name = Text.Localized(LocalizationNamespace, "Sandstorm", "Sandstorm"),
+        Category = BattleWeather.Sandstorm.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "HeavyRain",
-                Name = Text.Localized(LocalizationNamespace, "HeavyRain", "HeavyRain"),
-                Category = BattleWeather.Rain,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Weather HeavyRain = new()
+    {
+        Id = "HeavyRain",
+        Name = Text.Localized(LocalizationNamespace, "HeavyRain", "HeavyRain"),
+        Category = BattleWeather.Rain.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "Sun",
-                Name = Text.Localized(LocalizationNamespace, "Sun", "Sun"),
-                Category = BattleWeather.Sun,
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Weather Sun = new()
+    {
+        Id = "Sun",
+        Name = Text.Localized(LocalizationNamespace, "Sun", "Sun"),
+        Category = BattleWeather.Sun.Id,
+    };
 
-        Register(
-            new Weather
-            {
-                Id = "Fog",
-                Name = Text.Localized(LocalizationNamespace, "Fog", "Fog"),
-                Category = BattleWeather.Fog,
-            }
-        );
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly Weather Fog = new()
+    {
+        Id = "Fog",
+        Name = Text.Localized(LocalizationNamespace, "Fog", "Fog"),
+        Category = BattleWeather.Fog.Id,
+    };
 }

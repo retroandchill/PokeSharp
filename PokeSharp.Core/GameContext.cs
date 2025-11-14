@@ -7,34 +7,69 @@ using Retro.ReadOnlyParams.Annotations;
 namespace PokeSharp.Core;
 
 /// <summary>
+/// Marker class used for the creation of static extension methods to retrieve services from the game context, by name
+/// without using reflection every time.
+/// </summary>
+public static class GameServices;
+
+/// <summary>
 /// Represents the execution context of a game, managing services and resources for the game lifecycle.
 /// This class is sealed to prevent inheritance and ensure proper handling of its resources.
 /// </summary>
-/// <param name="services">The service provider used to resolve services for the game context.</param>
-/// <param name="contextId">The unique identifier for the game context.</param>
-public sealed class GameContext([ReadOnly] IServiceProvider services, Name contextId) : IDisposable
+public sealed class GameContext : IDisposable
 {
+    private static GameContext? _instance;
+    
     /// <summary>
-    /// Gets the unique identifier for the game context.
-    /// This identifier is used to distinguish between different instances of game contexts
-    /// within the application, ensuring proper resource and service management.
+    /// Gets the currently active <see cref="GameContext"/> instance.
     /// </summary>
-    public Name ContextId { get; } = contextId;
-    private bool _disposed;
+    /// <exception cref="InvalidOperationException">If no <see cref="GameContext"/> exists.</exception>
+    public static GameContext Instance =>
+        _instance ?? throw new InvalidOperationException("No GameContext available. Call Initialize() first.");
 
     /// <summary>
-    /// Gets the data loader responsible for handling the loading and saving of game data.
-    /// This property is used to interact with the data management layer of the application,
-    /// enabling operations such as retrieving and persisting game-related entities.
+    /// Gets a value indicating whether a <see cref="GameContext"/> is currently active.
+    /// This property evaluates to true if there is either a globally initialized
+    /// <see cref="GameContext"/> or at least one scoped context exists in the stack.
     /// </summary>
-    [field: AllowNull]
-    public IDataLoader DataLoader
+    public static bool Exists => _instance is not null;
+
+    /// <summary>
+    /// The current generation of the game context. The generation is increased every time the global context is reset.
+    /// </summary>
+    public static int Generation { get; private set; }
+
+    private readonly IServiceProvider _services;
+    private bool _disposed;
+
+    internal GameContext(IServiceProvider services)
     {
-        get
-        {
-            field ??= GetService<IDataLoader>();
-            return field;
-        }
+        _services = services;
+    }
+
+    /// <summary>
+    /// Initializes the global game context with the specified <see cref="GameContext"/>.
+    /// </summary>
+    /// <param name="context">The <see cref="GameContext"/> instance to initialize as the global context.</param>
+    /// <exception cref="InvalidOperationException">Thrown when a global game context has already been initialized.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when the provided context is <c>null</c>.</exception>
+    public static void Initialize(GameContext context)
+    {
+        if (_instance is not null)
+            throw new InvalidOperationException("GameContext already initialized.");
+
+        Generation++;
+        _instance = context ?? throw new ArgumentNullException(nameof(context));
+    }
+
+    /// <summary>
+    /// Resets the state of the <see cref="GameContext"/> instance by disposing and clearing the context.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if an operation fails during the disposal of contexts.</exception>
+    public static void Reset()
+    {
+        _instance?.Dispose();
+        _instance = null;
     }
 
     /// <summary>
@@ -47,7 +82,7 @@ public sealed class GameContext([ReadOnly] IServiceProvider services, Name conte
         where T : class
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return services.GetRequiredService<T>();
+        return _services.GetRequiredService<T>();
     }
 
     /// <summary>
@@ -61,7 +96,7 @@ public sealed class GameContext([ReadOnly] IServiceProvider services, Name conte
         where T : class
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        service = services.GetService<T>();
+        service = _services.GetService<T>();
         return service is not null;
     }
 
@@ -71,7 +106,7 @@ public sealed class GameContext([ReadOnly] IServiceProvider services, Name conte
         if (_disposed)
             return;
 
-        if (services is IDisposable disposable)
+        if (_services is IDisposable disposable)
             disposable.Dispose();
 
         _disposed = true;

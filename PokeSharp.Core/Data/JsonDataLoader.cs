@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Core.Data;
@@ -47,6 +46,5 @@ public partial class JsonDataLoader : IDataLoader
         {
             yield return entity;
         }
-        ;
     }
 }

@@ -1,10 +1,10 @@
-﻿namespace PokeSharp.Core.State;
+﻿using PokeSharp.SourceGenerator.Attributes;
 
+namespace PokeSharp.Core.State;
+
+[AutoServiceShortcut]
 public class GameTemp
 {
-    // TODO: Implement this
-    public static GameTemp Instance { get; } = new();
-
     public bool InStorage { get; }
 
     public bool InBattle { get; }

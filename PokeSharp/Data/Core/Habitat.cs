@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -21,51 +23,74 @@ public readonly partial record struct Habitat
     /// Represents the localized name of the habitat, allowing for translations and multi-language support.
     /// </summary>
     public required Text Name { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<Habitat>]
+[RegisterSingleton<IGameDataProvider<Habitat>>]
+public partial class HabitatRegistrations
+{
     private const string LocalizationNamespace = "GameData.Habitat";
 
-    /// <summary>
-    /// Populates the Habitat entity with a predefined set of default values.
-    /// </summary>
-    /// <remarks>
-    /// This method registers a collection of default habitats, each represented by a unique identifier and corresponding name.
-    /// It is utilized to ensure that the Habitat data includes commonly used predefined entries such as Grassland, Forest, Sea, and others.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Grassland = new()
     {
-        Register(
-            new Habitat { Id = "Grassland", Name = Text.Localized(LocalizationNamespace, "Grassland", "Grassland") }
-        );
+        Id = "Grassland",
+        Name = Text.Localized(LocalizationNamespace, "Grassland", "Grassland"),
+    };
 
-        Register(new Habitat { Id = "Forest", Name = Text.Localized(LocalizationNamespace, "Forest", "Forest") });
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Forest = new()
+    {
+        Id = "Forest",
+        Name = Text.Localized(LocalizationNamespace, "Forest", "Forest"),
+    };
 
-        Register(
-            new Habitat
-            {
-                Id = "WatersEdge",
-                Name = Text.Localized(LocalizationNamespace, "WatersEdge", "Water's Edge"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Habitat WatersEdge = new()
+    {
+        Id = "WatersEdge",
+        Name = Text.Localized(LocalizationNamespace, "WatersEdge", "Water's Edge"),
+    };
 
-        Register(new Habitat { Id = "Sea", Name = Text.Localized(LocalizationNamespace, "Sea", "Sea") });
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Sea = new()
+    {
+        Id = "Sea",
+        Name = Text.Localized(LocalizationNamespace, "Sea", "Sea"),
+    };
 
-        Register(new Habitat { Id = "Cave", Name = Text.Localized(LocalizationNamespace, "Cave", "Cave") });
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Cave = new()
+    {
+        Id = "Cave",
+        Name = Text.Localized(LocalizationNamespace, "Cave", "Cave"),
+    };
 
-        Register(new Habitat { Id = "Mountain", Name = Text.Localized(LocalizationNamespace, "Mountain", "Mountain") });
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Mountain = new()
+    {
+        Id = "Mountain",
+        Name = Text.Localized(LocalizationNamespace, "Mountain", "Mountain"),
+    };
 
-        Register(
-            new Habitat
-            {
-                Id = "RoughTerrain",
-                Name = Text.Localized(LocalizationNamespace, "RoughTerrain", "Rough Terrain"),
-            }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Habitat RoughTerrain = new()
+    {
+        Id = "RoughTerrain",
+        Name = Text.Localized(LocalizationNamespace, "RoughTerrain", "Rough Terrain"),
+    };
 
-        Register(new Habitat { Id = "Urban", Name = Text.Localized(LocalizationNamespace, "Urban", "Urban") });
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Urban = new()
+    {
+        Id = "Urban",
+        Name = Text.Localized(LocalizationNamespace, "Urban", "Urban"),
+    };
 
-        Register(new Habitat { Id = "Rare", Name = Text.Localized(LocalizationNamespace, "Rare", "Rare") });
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly Habitat Rare = new()
+    {
+        Id = "Rare",
+        Name = Text.Localized(LocalizationNamespace, "Rare", "Rare"),
+    };
 }

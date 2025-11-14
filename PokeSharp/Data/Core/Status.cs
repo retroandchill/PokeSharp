@@ -1,4 +1,6 @@
-﻿using PokeSharp.Abstractions;
+﻿using Injectio.Attributes;
+using PokeSharp.Abstractions;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;
@@ -26,32 +28,46 @@ public readonly partial record struct Status
     /// is necessary.
     /// </remarks>
     public required Text Name { get; init; }
+}
 
-    #region Defaults
-
+[GameDataRegistration<Status>]
+[RegisterSingleton<IGameDataProvider<Status>>]
+public partial class StatusRegistrations
+{
     private const string LocalizationNamespace = "GameData.Status";
 
-    /// <summary>
-    /// Adds default values for status effects to the relevant collection or registry.
-    /// </summary>
-    /// <remarks>
-    /// This method predefines a set of commonly used status effects with their associated localized names
-    /// and identifiers, such as "SLEEP," "POISON," "BURN," "PARALYSIS," and "FROZEN."
-    /// These status effects are registered for use within the game's data model.
-    /// </remarks>
-    public static void AddDefaultValues()
+    [GameDataEntityRegistration]
+    internal static readonly Status SLEEP = new()
     {
-        Register(new Status { Id = "SLEEP", Name = Text.Localized(LocalizationNamespace, "SLEEP", "Sleep") });
+        Id = "SLEEP",
+        Name = Text.Localized(LocalizationNamespace, "SLEEP", "Sleep"),
+    };
 
-        Register(new Status { Id = "POISON", Name = Text.Localized(LocalizationNamespace, "POISON", "Poison") });
+    [GameDataEntityRegistration]
+    internal static readonly Status POISON = new()
+    {
+        Id = "POISON",
+        Name = Text.Localized(LocalizationNamespace, "POISON", "Poison"),
+    };
 
-        Register(new Status { Id = "BURN", Name = Text.Localized(LocalizationNamespace, "BURN", "Burn") });
+    [GameDataEntityRegistration]
+    internal static readonly Status BURN = new()
+    {
+        Id = "BURN",
+        Name = Text.Localized(LocalizationNamespace, "BURN", "Burn"),
+    };
 
-        Register(
-            new Status { Id = "PARALYSIS", Name = Text.Localized(LocalizationNamespace, "PARALYSIS", "Paralysis") }
-        );
+    [GameDataEntityRegistration]
+    internal static readonly Status PARALYSIS = new()
+    {
+        Id = "PARALYSIS",
+        Name = Text.Localized(LocalizationNamespace, "PARALYSIS", "Paralysis"),
+    };
 
-        Register(new Status { Id = "FROZEN", Name = Text.Localized(LocalizationNamespace, "FROZEN", "Frozen") });
-    }
-    #endregion
+    [GameDataEntityRegistration]
+    internal static readonly Status FROZEN = new()
+    {
+        Id = "FROZEN",
+        Name = Text.Localized(LocalizationNamespace, "FROZEN", "Frozen"),
+    };
 }

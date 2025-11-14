@@ -6,6 +6,7 @@ using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Evolution;
 

@@ -1,8 +1,10 @@
 ﻿using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Abstractions;
 using PokeSharp.Core.Settings;
 using PokeSharp.Core.State;
 using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Happiness;
 
@@ -59,13 +61,17 @@ public class SootheBellHappinessChangeAdjuster : IHappinessChangeAdjuster
 }
 
 [RegisterSingleton]
-public class SoftCapHappinessChangeAdjuster(GameSettings gameSettings) : IHappinessChangeAdjuster
+public class SoftCapHappinessChangeAdjuster(IOptionsMonitor<GameSettings> gameSettings) : IHappinessChangeAdjuster
 {
     public int Priority => 1000;
 
     public int AdjustHappinessChange(Pokemon pokemon, HappinessChangeMethod method, int change)
     {
-        if (change > 0 && gameSettings.ApplyHappinessSoftCap && method.Id != HappinessChangeMethod.EVBerry.Id)
+        if (
+            change > 0
+            && gameSettings.CurrentValue.ApplyHappinessSoftCap
+            && method.Id != HappinessChangeMethod.EVBerry.Id
+        )
         {
             return change * 3 / 2;
         }

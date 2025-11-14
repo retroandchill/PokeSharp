@@ -1,4 +1,6 @@
-﻿namespace PokeSharp.Game;
+﻿using PokeSharp.PokemonModel;
+
+namespace PokeSharp.Game;
 
 public static class MultipleForms
 {

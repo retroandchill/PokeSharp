@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using MessagePack;
 using PokeSharp.Abstractions;
@@ -20,6 +21,14 @@ public partial record ShadowPokemon
     /// <param name="form">The specific form to search for.</param>
     /// <returns></returns>
     public static ShadowPokemon GetSpeciesForm(Name species, int form) => Get(new SpeciesForm(species, form));
+
+    public static bool TryGetSpeciesForm(
+        Name species,
+        int form,
+        [NotNullWhen(true)] out ShadowPokemon? shadowPokemon
+    ) => TryGet(new SpeciesForm(species, form), out shadowPokemon);
+
+    public const int MaxGaugeSize = 4000;
 
     /// <inheritdoc />
     public required SpeciesForm Id { get; init; }

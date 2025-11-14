@@ -1,7 +1,8 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.Data.Pbs;
+using PokeSharp.Game;
 
-namespace PokeSharp.Game;
+namespace PokeSharp.PokemonModel;
 
 public record PokemonOwner(int Id, Text Name, TrainerGender Gender, Name Language)
 {

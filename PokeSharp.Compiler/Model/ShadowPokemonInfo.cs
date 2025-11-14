@@ -19,7 +19,7 @@ public class ShadowPokemonInfo
     [PbsSectionName]
     public required ShadowPokemonKey Id { get; init; }
 
-    public int GaugeSize { get; set; } = 4000;
+    public int GaugeSize { get; set; } = ShadowPokemon.MaxGaugeSize;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(PokemonType))]
     public List<Name> Moves { get; set; } = [];

@@ -1,5 +1,6 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Utilities;
 

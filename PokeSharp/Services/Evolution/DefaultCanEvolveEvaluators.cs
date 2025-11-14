@@ -1,6 +1,6 @@
 ﻿using Injectio.Attributes;
 using PokeSharp.Abstractions;
-using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Evolution;
 
@@ -12,17 +12,6 @@ public class IsEggCanEvolveEvaluator : ICanEvolveEvaluator
     public bool CanEvolve(Pokemon pokemon)
     {
         return !pokemon.IsEgg;
-    }
-}
-
-[RegisterSingleton]
-public class IsShadowCanEvolveEvaluator : ICanEvolveEvaluator
-{
-    public int Priority => 10;
-
-    public bool CanEvolve(Pokemon pokemon)
-    {
-        return !pokemon.IsShadow;
     }
 }
 

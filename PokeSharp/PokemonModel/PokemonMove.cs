@@ -2,7 +2,7 @@
 using PokeSharp.Abstractions;
 using PokeSharp.Data.Pbs;
 
-namespace PokeSharp.Game;
+namespace PokeSharp.PokemonModel;
 
 public class PokemonMove
 {

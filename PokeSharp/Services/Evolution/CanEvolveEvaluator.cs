@@ -1,4 +1,5 @@
 ﻿using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Evolution;
 

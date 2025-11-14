@@ -3,6 +3,7 @@ using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Services.Happiness;
@@ -26,7 +27,10 @@ public record HappinessChangeMethod(Name Id, int Change1, int Change2, int Chang
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public class HappinessChangeService(IEnumerable<IHappinessChangeAdjuster> changeAdjusters)
+public class HappinessChangeService(
+    IEnumerable<IHappinessChangeAdjuster> changeAdjusters,
+    IEnumerable<IHappinessChangeBlocker> changeBlockers
+)
 {
     private static readonly CachedService<HappinessChangeService> InstanceSingleton = new();
 
@@ -37,8 +41,16 @@ public class HappinessChangeService(IEnumerable<IHappinessChangeAdjuster> change
         .. changeAdjusters.OrderBy(a => a.Priority),
     ];
 
+    private readonly ImmutableArray<IHappinessChangeBlocker> _changeBlockers =
+    [
+        .. changeBlockers.OrderBy(b => b.Priority),
+    ];
+
     public void ApplyHappinessChange(Pokemon pokemon, HappinessChangeMethod method)
     {
+        if (_changeBlockers.Any(b => b.ShouldBlockHappinessChange(pokemon)))
+            return;
+
         var happinessRange = pokemon.Happiness / 100;
         var change = happinessRange switch
         {

@@ -1,9 +1,8 @@
-﻿using PokeSharp.SourceGenerator.Attributes;
+﻿using Microsoft.Extensions.Options;
 
 namespace PokeSharp.Core.Settings;
 
-[AutoServiceShortcut]
-public class GameSettings
+public record GameSettings
 {
     public int MaxLevel { get; init; } = 100;
 
@@ -12,4 +11,14 @@ public class GameSettings
     public bool ApplyHappinessSoftCap { get; init; } = true;
 
     public bool DisableIVsAndEVs { get; init; } = false;
+}
+
+public static class GameSettingsServiceShortcut
+{
+    private static CachedService<IOptionsMonitor<GameSettings>> _cachedService;
+
+    extension(GameServices)
+    {
+        public static GameSettings GameSettings => _cachedService.Instance.CurrentValue;
+    }
 }

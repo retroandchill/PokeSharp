@@ -8,13 +8,16 @@ using PokeSharp.Core.State;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
+using PokeSharp.Game;
 using PokeSharp.Game.Items;
 using PokeSharp.Services.Evolution;
 using PokeSharp.Services.Happiness;
+using PokeSharp.Services.Healing;
+using PokeSharp.Services.Moves;
 using PokeSharp.Services.Screens;
 using ZLinq;
 
-namespace PokeSharp.Game;
+namespace PokeSharp.PokemonModel;
 
 public enum ObtainMethod : byte
 {
@@ -145,7 +148,9 @@ public class Pokemon
         set
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, Data.Core.GrowthRate.MaxLevel);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, GrowthRate.MaxLevel);
+            _exp = GrowthRate.GetMinimumExpForLevel(value);
+            _level = value;
         }
     }
 
@@ -164,7 +169,7 @@ public class Pokemon
 
     public int StepsToHatch { get; set; }
 
-    public GrowthRate GrowthRate => Data.Core.GrowthRate.Get(SpeciesData.GrowthRate);
+    public GrowthRate GrowthRate => GrowthRate.Get(SpeciesData.GrowthRate);
 
     public int BaseExp => SpeciesData.BaseExp;
 
@@ -173,7 +178,7 @@ public class Pokemon
         get
         {
             var level = Level;
-            if (Level >= Data.Core.GrowthRate.MaxLevel)
+            if (Level >= GrowthRate.MaxLevel)
                 return 0.0f;
 
             var growthRate = GrowthRate;
@@ -193,11 +198,10 @@ public class Pokemon
         set
         {
             field = Math.Clamp(value, 0, MaxHP);
-            if (field == 0)
-            {
-                HealStatus();
-                ReadyToEvolve = false;
-            }
+            if (field != 0)
+                return;
+            HealStatus();
+            GameServices.PokemonStatusService.OnFainted(this);
         }
     }
 
@@ -266,7 +270,7 @@ public class Pokemon
         HealStatus();
         HealPP();
 
-        ReadyToEvolve = false;
+        GameServices.PokemonStatusService.OnFullyHealed(this);
     }
 
     #endregion
@@ -281,7 +285,7 @@ public class Pokemon
 
     #region Gender
 
-    public PokemonGender? _gender;
+    private PokemonGender? _gender;
 
     public PokemonGender Gender
     {
@@ -403,7 +407,7 @@ public class Pokemon
         _ability = null;
     }
 
-    public Ability? Ability => Data.Pbs.Ability.TryGet(AbilityId, out var ability) ? ability : null;
+    public Ability? Ability => Ability.TryGet(AbilityId, out var ability) ? ability : null;
 
     private Name? _ability;
 
@@ -453,7 +457,7 @@ public class Pokemon
 
     public void SetAbility(Name? ability)
     {
-        if (ability.HasValue && !Data.Pbs.Ability.Exists(ability.Value))
+        if (ability.HasValue && !Ability.Exists(ability.Value))
             return;
         _ability = ability;
     }
@@ -699,21 +703,7 @@ public class Pokemon
             .Contains(moveId);
     }
 
-    public bool CanRelearnMove
-    {
-        get
-        {
-            if (IsEgg || IsShadow)
-                return false;
-
-            var thisLevel = Level;
-            return MoveList
-                .Where(m => m.Level <= thisLevel)
-                .Select(m => m.Move)
-                .Concat(FirstMoves)
-                .Any(m => !HasMove(m));
-        }
-    }
+    public bool CanRelearnMove => GameServices.MoveService.CanRelearnMoves(this);
 
     #endregion
 
@@ -983,7 +973,7 @@ public class Pokemon
         if (!newSpecies.HasValue)
             return false;
 
-        await IEngineInteropService.Instance.FadeOutInWithMusic(async () =>
+        await GameServices.EngineInteropService.FadeOutInWithMusic(async () =>
             await IScreenActionService.Instance.EvolvePokemonScreen(this, newSpecies.Value)
         );
 
@@ -1105,19 +1095,61 @@ public class Pokemon
 
     public Name PokeBall { get; set; }
 
-    public List<int> Markings { get; set; }
+    public List<int> Markings { get; set; } = [];
 
     public Pokemon? Fused { get; set; }
 
     public uint PersonalityValue { get; set; }
 
-    public bool ReadyToEvolve { get; set; }
+    #endregion
 
-    public bool CannotStore { get; set; }
+    #region Tags
 
-    public bool CannotTrade { get; set; }
+    private readonly HashSet<Name> _tags = [];
 
-    public bool IsShadow { get; set; }
+    public void AddTag(Name tag)
+    {
+        _tags.Add(tag);
+    }
+
+    public void RemoveTag(Name tag)
+    {
+        _tags.Remove(tag);
+    }
+
+    public bool HasTag(Name tag)
+    {
+        return _tags.Contains(tag);
+    }
+
+    public bool HasAnyTag(params ReadOnlySpan<Name> tags)
+    {
+        return tags.AsValueEnumerable().Any(HasTag);
+    }
+
+    public bool HasAllTags(params ReadOnlySpan<Name> tags)
+    {
+        return tags.AsValueEnumerable().All(HasTag);
+    }
+
+    #endregion
+
+    #region Components
+
+    private Dictionary<Name, IPokemonComponent> _components;
+
+    public IEnumerable<IPokemonComponent> Components => _components.Values;
+
+    public IPokemonComponent? GetComponent(Name componentId)
+    {
+        return _components.GetValueOrDefault(componentId);
+    }
+
+    public T? GetComponent<T>()
+        where T : class, IPokemonComponent<T>
+    {
+        return _components.GetValueOrDefault(T.ComponentId) as T;
+    }
 
     #endregion
 
@@ -1132,6 +1164,7 @@ public class Pokemon
         result.Moves = new List<PokemonMove>(Moves.Select(m => m.Clone()));
         result.FirstMoves = new List<Name>(FirstMoves);
         result.Ribbons = new List<Name>(Ribbons);
+        result._components = _components.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone(result));
         return result;
     }
 
@@ -1164,14 +1197,18 @@ public class Pokemon
         MaxHP = 1;
         CalcStats();
 
-        if (_form != 0 || !recheckForm)
-            return;
-        var form = MultipleForms.GetFormOnCreation(this);
-        if (!form.HasValue)
-            return;
-        Form = form.Value;
-        if (withMoves)
-            ResetMoves();
+        if (_form == 0 && recheckForm)
+        {
+            var form = MultipleForms.GetFormOnCreation(this);
+            if (form.HasValue)
+            {
+                Form = form.Value;
+                if (withMoves)
+                    ResetMoves();
+            }
+        }
+
+        _components = GameServices.PokemonComponentService.CreateComponents(this).ToDictionary(c => c.Id);
     }
 
     #endregion

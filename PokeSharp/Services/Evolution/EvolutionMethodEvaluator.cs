@@ -2,6 +2,7 @@
 using PokeSharp.Abstractions;
 using PokeSharp.Core.Data;
 using PokeSharp.Game;
+using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Evolution;
 

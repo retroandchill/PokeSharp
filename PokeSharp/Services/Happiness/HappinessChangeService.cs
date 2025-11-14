@@ -28,7 +28,7 @@ public record HappinessChangeMethod(Name Id, int Change1, int Change2, int Chang
 [AutoServiceShortcut]
 public class HappinessChangeService(IEnumerable<IHappinessChangeAdjuster> changeAdjusters)
 {
-    private static readonly GameServiceCache<HappinessChangeService> InstanceSingleton = new();
+    private static readonly CachedService<HappinessChangeService> InstanceSingleton = new();
 
     public static HappinessChangeService Instance => InstanceSingleton.Instance;
 

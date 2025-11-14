@@ -5,11 +5,12 @@ using PokeSharp.Core;
 
 namespace {{Namespace}};
 
-public static class {{ServiceName}}ServiceShortcut {
-    
-    private static GameContextSingleton<{{ServiceType}}> _instance = new();
+public static class {{ServiceName}}ServiceShortcut 
+{
+    private static CachedService<{{ServiceType}}> _instance = new();
 
-    extension(GameServices) {
+    extension(GameServices) 
+    {
         public static {{ServiceType}} {{ServiceName}} => _instance.Instance;
     }
 }

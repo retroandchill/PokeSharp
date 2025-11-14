@@ -19,7 +19,7 @@ public static class GameServices;
 public sealed class GameContext : IDisposable
 {
     private static GameContext? _instance;
-    
+
     /// <summary>
     /// Gets the currently active <see cref="GameContext"/> instance.
     /// </summary>

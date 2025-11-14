@@ -4,7 +4,7 @@
 /// Contains a cached instance of a service for the current generation.
 /// </summary>
 /// <typeparam name="T">The registered type of the service.</typeparam>
-public struct GameServiceCache<T>
+public struct CachedService<T>
     where T : class
 {
     private WeakReference<T>? _instance;

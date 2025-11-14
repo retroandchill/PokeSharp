@@ -7,9 +7,9 @@ using PokeSharp.Core.Data;
 
 namespace {{Namespace}};
 
-partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}> {
-    
-    private static GameContextSingleton<{{EntityType}}GameDataSet<{{ClassName}}, {{Key}}>> _data = new();
+partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}> 
+{
+    private static CachedService<{{EntityType}}GameDataSet<{{ClassName}}, {{Key}}>> _data = new();
 
     private static {{EntityType}}GameDataSet<{{ClassName}}, {{Key}}> Data => _data.Instance;
 

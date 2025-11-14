@@ -10,6 +10,7 @@ using PokeSharp.Game.Items;
 using PokeSharp.Services.DayNightCycle;
 using PokeSharp.Services.Overworld;
 using PokeSharp.Utilities;
+using Retro.ReadOnlyParams.Annotations;
 
 namespace PokeSharp.Services.Evolution;
 
@@ -47,160 +48,169 @@ public sealed class LevelFemaleEvolutionEvaluator : EvolutionMethodEvaluator<int
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelDayEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelDayEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelDay.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.DayNightService.IsDay;
+        return pokemon.Level >= parameter && dayNightService.IsDay;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelNightEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelNightEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelNight.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.DayNightService.IsNight;
+        return pokemon.Level >= parameter && dayNightService.IsNight;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelMorningEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelMorningEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelMorning.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.DayNightService.IsMorning;
+        return pokemon.Level >= parameter && dayNightService.IsMorning;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelAfternoonEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelAfternoonEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelAfternoon.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.DayNightService.IsAfternoon;
+        return pokemon.Level >= parameter && dayNightService.IsAfternoon;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelEveningEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelEveningEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelEvening.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.DayNightService.IsEvening;
+        return pokemon.Level >= parameter && dayNightService.IsEvening;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelNoWeatherEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelNoWeatherEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelNoWeather.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.OverworldWeatherService.WeatherType.IsNone;
+        return pokemon.Level >= parameter && overworldWeatherService.WeatherType.IsNone;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelSunEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelSunEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelSun.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter
-            && GameServices.OverworldWeatherService.Weather?.Category == BattleWeather.Sun.Id;
+        return pokemon.Level >= parameter && overworldWeatherService.Weather?.Category == BattleWeather.Sun.Id;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelRainEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelRainEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelRain.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter
-            && GameServices.OverworldWeatherService.Weather?.Category == BattleWeather.Rain.Id;
+        return pokemon.Level >= parameter && overworldWeatherService.Weather?.Category == BattleWeather.Rain.Id;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelSnowEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelSnowEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelSnow.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter
-            && GameServices.OverworldWeatherService.Weather?.Category == BattleWeather.Hail.Id;
+        return pokemon.Level >= parameter && overworldWeatherService.Weather?.Category == BattleWeather.Hail.Id;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelSandstormEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelSandstormEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelSandstorm.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter
-            && GameServices.OverworldWeatherService.Weather?.Category == BattleWeather.Sandstorm.Id;
+        return pokemon.Level >= parameter && overworldWeatherService.Weather?.Category == BattleWeather.Sandstorm.Id;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelCyclingEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelCyclingEvolutionEvaluator([ReadOnly] PokemonGlobal pokemonGlobal)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelCycling.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.PokemonGlobal.IsCycling;
+        return pokemon.Level >= parameter && pokemonGlobal.IsCycling;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelSurfingEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelSurfingEvolutionEvaluator([ReadOnly] PokemonGlobal pokemonGlobal)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelSurfing.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.PokemonGlobal.IsSurfing;
+        return pokemon.Level >= parameter && pokemonGlobal.IsSurfing;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelDivingEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelDivingEvolutionEvaluator([ReadOnly] PokemonGlobal pokemonGlobal)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelDiving.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.PokemonGlobal.IsDiving;
+        return pokemon.Level >= parameter && pokemonGlobal.IsDiving;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LevelDarknessEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelDarknessEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelDarkness.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && GameServices.GameMap.HasMetadataTag(MapMetadataTags.DarkMap);
+        return pokemon.Level >= parameter && gameMap.HasMetadataTag(MapMetadataTags.DarkMap);
     }
 }
 
@@ -301,94 +311,101 @@ public sealed class ShedinjaEvolutionEvaluator : EvolutionMethodEvaluator<int>
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class HappinessEvolutionEvaluator([ReadOnly] GameSettings gameSettings) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Happiness.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220);
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220);
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessMaleEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class HappinessMaleEvolutionEvaluator([ReadOnly] GameSettings gameSettings) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessMale.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220) && pokemon.IsMale;
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220) && pokemon.IsMale;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessFemaleEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class HappinessFemaleEvolutionEvaluator([ReadOnly] GameSettings gameSettings) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessFemale.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220) && pokemon.IsFemale;
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220) && pokemon.IsFemale;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessDayEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class HappinessDayEvolutionEvaluator(
+    [ReadOnly] GameSettings gameSettings,
+    [ReadOnly] DayNightService dayNightService
+) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessDay.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220)
-            && GameServices.DayNightService.IsDay;
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220) && dayNightService.IsDay;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessNightEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class HappinessNightEvolutionEvaluator(
+    [ReadOnly] GameSettings gameSettings,
+    [ReadOnly] DayNightService dayNightService
+) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessNight.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220)
-            && GameServices.DayNightService.IsNight;
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220) && dayNightService.IsNight;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessMoveEvolutionEvaluator : EvolutionMethodEvaluator<Name, Move>
+public sealed class HappinessMoveEvolutionEvaluator([ReadOnly] GameSettings gameSettings)
+    : EvolutionMethodEvaluator<Name, Move>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessMove.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220)
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220)
             && pokemon.Moves.Any(m => m.Id == parameter);
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessMoveTypeEvolutionEvaluator : EvolutionMethodEvaluator<Name, PokemonType>
+public sealed class HappinessMoveTypeEvolutionEvaluator([ReadOnly] GameSettings gameSettings)
+    : EvolutionMethodEvaluator<Name, PokemonType>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessMoveType.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220)
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220)
             && pokemon.Moves.Any(m => m.Type == parameter);
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HappinessHoldItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class HappinessHoldItemEvolutionEvaluator([ReadOnly] GameSettings gameSettings)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HappinessHoldItem.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220)
+        return pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220)
             && pokemon.HasSpecificItem(parameter);
     }
 
@@ -469,13 +486,14 @@ public sealed class HoldItemFemaleEvolutionEvaluator : EvolutionMethodEvaluator<
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class DayHoldItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class DayHoldItemEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.DayHoldItem.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return pokemon.HasSpecificItem(parameter) && GameServices.DayNightService.IsDay;
+        return pokemon.HasSpecificItem(parameter) && dayNightService.IsDay;
     }
 
     protected override bool AfterEvolution(Pokemon pokemon, Name evoSpecies, Name parameter, Name newSpecies)
@@ -485,13 +503,14 @@ public sealed class DayHoldItemEvolutionEvaluator : EvolutionMethodEvaluator<Nam
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class NightHoldItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class NightHoldItemEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.NightHoldItem.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return pokemon.HasSpecificItem(parameter) && GameServices.DayNightService.IsNight;
+        return pokemon.HasSpecificItem(parameter) && dayNightService.IsNight;
     }
 
     protected override bool AfterEvolution(Pokemon pokemon, Name evoSpecies, Name parameter, Name newSpecies)
@@ -501,14 +520,15 @@ public sealed class NightHoldItemEvolutionEvaluator : EvolutionMethodEvaluator<N
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class HoldItemHappinessEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class HoldItemHappinessEvolutionEvaluator([ReadOnly] GameSettings gameSettings)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HoldItemHappiness.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
         return pokemon.HasSpecificItem(parameter)
-            && pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220);
+            && pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220);
     }
 
     protected override bool AfterEvolution(Pokemon pokemon, Name evoSpecies, Name parameter, Name newSpecies)
@@ -551,35 +571,35 @@ public sealed class HasInPartyEvolutionEvaluator : EvolutionMethodEvaluator<Spec
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LocationEvolutionEvaluator : EvolutionMethodEvaluator<Name>
+public sealed class LocationEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<Name>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Location.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return GameServices.GameMap.MapId == parameter;
+        return gameMap.MapId == parameter;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class LocationFlagEvolutionEvaluator : EvolutionMethodEvaluator<Name>
+public sealed class LocationFlagEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<Name>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LocationFlag.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
     {
-        return GameServices.GameMap.HasMetadataTag(parameter);
+        return gameMap.HasMetadataTag(parameter);
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class RegionEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class RegionEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Region.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return GameServices.GameMap.RegionId == parameter;
+        return gameMap.RegionId == parameter;
     }
 }
 
@@ -617,36 +637,38 @@ public sealed class ItemFemaleEvolutionEvaluator : EvolutionMethodEvaluator<Name
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class ItemDayEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class ItemDayEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.ItemDay.Id;
 
     protected override bool OnUseItem(Pokemon pokemon, Name parameter, Name itemUsed)
     {
-        return itemUsed == parameter && GameServices.DayNightService.IsDay;
+        return itemUsed == parameter && dayNightService.IsDay;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class ItemNightEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class ItemNightEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.ItemNight.Id;
 
     protected override bool OnUseItem(Pokemon pokemon, Name parameter, Name itemUsed)
     {
-        return itemUsed == parameter && GameServices.DayNightService.IsNight;
+        return itemUsed == parameter && dayNightService.IsNight;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class ItemHappinessEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
+public sealed class ItemHappinessEvolutionEvaluator([ReadOnly] GameSettings gameSettings)
+    : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.ItemHappiness.Id;
 
     protected override bool OnUseItem(Pokemon pokemon, Name parameter, Name itemUsed)
     {
-        return itemUsed == parameter
-            && pokemon.Happiness >= (GameServices.GameSettings.ApplyHappinessSoftCap ? 160 : 220);
+        return itemUsed == parameter && pokemon.Happiness >= (gameSettings.ApplyHappinessSoftCap ? 160 : 220);
     }
 }
 
@@ -684,24 +706,24 @@ public sealed class TradeFemaleEvolutionEvaluator : EvolutionMethodEvaluator
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class TradeDayEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class TradeDayEvolutionEvaluator([ReadOnly] DayNightService dayNightService) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeDay.Id;
 
     protected override bool OnTrade(Pokemon pokemon, Pokemon otherPokemon)
     {
-        return GameServices.DayNightService.IsDay;
+        return dayNightService.IsDay;
     }
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class TradeNightEvolutionEvaluator : EvolutionMethodEvaluator
+public sealed class TradeNightEvolutionEvaluator([ReadOnly] DayNightService dayNightService) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeNight.Id;
 
     protected override bool OnTrade(Pokemon pokemon, Pokemon otherPokemon)
     {
-        return GameServices.DayNightService.IsNight;
+        return dayNightService.IsNight;
     }
 }
 
@@ -734,14 +756,15 @@ public sealed class TradeSpeciesEvolutionEvaluator : EvolutionMethodEvaluator<Sp
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class BattleDealCriticalHitEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class BattleDealCriticalHitEvolutionEvaluator([ReadOnly] GameTemp gameTemp)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.BattleDealCriticalHit.Id;
 
     protected override bool AfterBattle(Pokemon pokemon, int partyIndex, int parameter)
     {
-        return GameServices.GameTemp.PartyCriticalHitsDealt.Count > partyIndex
-            && GameServices.GameTemp.PartyCriticalHitsDealt[partyIndex] >= parameter;
+        return gameTemp.PartyCriticalHitsDealt.Count > partyIndex
+            && gameTemp.PartyCriticalHitsDealt[partyIndex] >= parameter;
     }
 }
 
@@ -757,16 +780,14 @@ public sealed class EventEvolutionEvaluator : EvolutionMethodEvaluator<Name>
 }
 
 [RegisterSingleton<IEvolutionMethodEvaluator>]
-public sealed class EventAfterDamageTakenEvolutionEvaluator : EvolutionMethodEvaluator<Name>
+public sealed class EventAfterDamageTakenEvolutionEvaluator([ReadOnly] GameTemp gameTemp)
+    : EvolutionMethodEvaluator<Name>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.EventAfterDamageTaken.Id;
 
     protected override bool AfterBattle(Pokemon pokemon, int partyIndex, Name parameter)
     {
-        if (
-            GameServices.GameTemp.PartyCriticalHitsDealt.Count > partyIndex
-            && GameServices.GameTemp.PartyCriticalHitsDealt[partyIndex] >= 49
-        )
+        if (gameTemp.PartyCriticalHitsDealt.Count > partyIndex && gameTemp.PartyCriticalHitsDealt[partyIndex] >= 49)
         {
             pokemon.ReadyToEvolve = true;
         }

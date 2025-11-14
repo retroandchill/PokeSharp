@@ -3,8 +3,8 @@ using PokeSharp.Core.Data;
 
 namespace {{Namespace}};
 
-partial class {{ClassName}} : IGameDataProvider<{{EntityType}}> {
-    
+partial class {{ClassName}} : IGameDataProvider<{{EntityType}}> 
+{
     int IGameDataProvider<{{EntityType}}>.Priority => {{Priority}};
 
     IEnumerable<{{EntityType}}> IGameDataProvider<{{EntityType}}>.GetEntitiesToRegister()

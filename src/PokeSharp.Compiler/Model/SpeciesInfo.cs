@@ -24,7 +24,7 @@ public readonly record struct EvolutionMethodInfo(
 );
 
 [PbsData("pokemon")]
-public class SpeciesInfo
+public partial class SpeciesInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }
@@ -132,7 +132,7 @@ public readonly record struct FormEvolutionMethodInfo(
 );
 
 [PbsData("pokemon_forms")]
-public class SpeciesFormInfo
+public partial class SpeciesFormInfo
 {
     [PbsSectionName]
     public required SpeciesFormIdentifierInfo Id { get; init; }

@@ -8,7 +8,7 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("moves")]
-public class MoveInfo
+public partial class MoveInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }

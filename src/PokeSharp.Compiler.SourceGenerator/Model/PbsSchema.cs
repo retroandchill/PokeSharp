@@ -127,6 +127,8 @@ internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, Immutab
 
     public bool IsRequired => IsSectionName || Property.IsRequired;
 
+    public bool IsInitOnly => Property.SetMethod is { IsInitOnly: true };
+
     public PbsFieldStructure FieldStructure { get; init; } = PbsFieldStructure.Single;
 
     public bool AppearsOnce => FieldStructure != PbsFieldStructure.Repeating;
@@ -156,9 +158,42 @@ internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, Immutab
     public bool NoOptionalParameters => TypeEntries.All(e => !e.IsOptional);
 }
 
-internal readonly record struct PbsSchema(ITypeSymbol ModelType, ImmutableArray<PbsSchemaEntry> Properties)
+internal record PbsSchema(
+    ITypeSymbol ModelType,
+    ImmutableArray<PbsSchemaEntry> Properties,
+    string FilePath,
+    bool IsOptional
+)
 {
     public string Namespace => ModelType.ContainingNamespace.ToDisplayString();
 
     public string ClassName => ModelType.Name;
+
+    public string IsOptionalString => IsOptional ? "true" : "false";
+
+    public string DeclaredAccessibility =>
+        ModelType.DeclaredAccessibility switch
+        {
+            Accessibility.NotApplicable => "",
+            Accessibility.Private => "private ",
+            Accessibility.ProtectedAndInternal => "private protected ",
+            Accessibility.Protected => "protected ",
+            Accessibility.Internal => "internal ",
+            Accessibility.ProtectedOrInternal => "protected internal ",
+            Accessibility.Public => "public ",
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+    public string ObjectType
+    {
+        get
+        {
+            if (ModelType.IsRecord)
+            {
+                return ModelType.IsValueType ? "record struct" : "record";
+            }
+
+            return ModelType.IsValueType ? "struct" : "class";
+        }
+    }
 }

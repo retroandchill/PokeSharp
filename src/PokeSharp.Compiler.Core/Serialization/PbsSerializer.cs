@@ -153,132 +153,44 @@ public partial class PbsSerializer
     public static partial Regex KeyValuePair { get; }
 
     [CreateSyncVersion]
-    public IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
+    public static async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
         string path,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return ReadFromFileAsync(path, _ => Activator.CreateInstance<T>(), cancellationToken);
-    }
-
-    [CreateSyncVersion]
-    public IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
-        string path,
-        Func<string, T> modelFactory,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
+        where T : IPbsDataModel<T>
     {
-        throw new NotImplementedException();
-        /*
-        var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
-
-        if (attribute.IsOptional && !File.Exists(path))
+        if (T.IsOptional && !File.Exists(path))
             yield break;
 
-        var schema = _schemaBuilder.BuildSchema(typeof(T));
         using var fileStream = new StreamReader(path);
 
         var initialLineData = new FileLineData(path);
 
-        await foreach (
-            var (contents, sectionName, lineData) in ParseFileSectionsAsync(
-                fileStream,
-                initialLineData,
-                schema,
-                cancellationToken
-            )
-        )
+        await foreach (var section in ParseFileSectionsAsync(fileStream, initialLineData, cancellationToken))
         {
-            var result = modelFactory(sectionName);
-            var mappedProperties = new HashSet<string>();
-            foreach (var (key, schemaEntry) in schema)
-            {
-                var property = typeof(T).GetProperty(schemaEntry.PropertyName);
-                if (property is null)
-                    throw new InvalidOperationException(
-                        $"Property '{schemaEntry.PropertyName}' not found on type '{typeof(T).Name}'."
-                    );
-
-                if (key == "SectionName")
-                {
-                    try
-                    {
-                        ConversionUtils.SetValueToProperty(
-                            "SectionName",
-                            result,
-                            property,
-                            CsvParser.GetCsvRecord(sectionName, schemaEntry),
-                            Converters
-                        );
-                    }
-                    catch (Exception e)
-                    {
-                        throw PbsParseException.Create(e, lineData);
-                    }
-
-                    mappedProperties.Add(schemaEntry.PropertyName);
-                    continue;
-                }
-
-                if (!contents.TryGetValue(key, out var value))
-                    continue;
-
-                try
-                {
-                    value.Match(
-                        stringValue =>
-                            ConversionUtils.SetValueToProperty(
-                                sectionName,
-                                result,
-                                property,
-                                CsvParser.GetCsvRecord(stringValue, schemaEntry),
-                                Converters
-                            ),
-                        list =>
-                        {
-                            var propertyOutput = list.Select(item => CsvParser.GetCsvRecord(item, schemaEntry))
-                                .ToList();
-                            ConversionUtils.SetValueToProperty(
-                                sectionName,
-                                result,
-                                property,
-                                propertyOutput,
-                                Converters
-                            );
-                        },
-                        () => throw new InvalidOperationException($"Property '{property.Name}' is null.")
-                    );
-                }
-                catch (Exception e)
-                {
-                    throw PbsParseException.Create(e, value.LineData);
-                }
-
-                mappedProperties.Add(schemaEntry.PropertyName);
-            }
-
-            var missingProperties = new List<string>();
-            foreach (var property in typeof(T).GetProperties())
-            {
-                if (
-                    property.GetCustomAttribute<RequiredMemberAttribute>() is not null
-                    && !mappedProperties.Contains(property.Name)
-                )
-                {
-                    missingProperties.Add(property.Name);
-                }
-            }
-
-            if (missingProperties.Count > 0)
-            {
-                throw new PbsSchemaException(
-                    $"The following properties are required but were not found in the file: {string.Join(", ", missingProperties)}\n{lineData.LineReport}"
-                );
-            }
-
-            yield return new ModelWithLine<T>(result, lineData);
+            yield return new ModelWithLine<T>(T.ParsePbsData(section), section.HeaderLine);
         }
-        */
+    }
+
+    [CreateSyncVersion]
+    public static async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
+        string path,
+        Func<string, T> factory,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
+        where T : IPbsDataModel<T>
+    {
+        if (T.IsOptional && !File.Exists(path))
+            yield break;
+
+        using var fileStream = new StreamReader(path);
+
+        var initialLineData = new FileLineData(path);
+
+        await foreach (var section in ParseFileSectionsAsync(fileStream, initialLineData, cancellationToken))
+        {
+            yield return new ModelWithLine<T>(T.ParsePbsData(section, factory), section.HeaderLine);
+        }
     }
 
     [CreateSyncVersion]

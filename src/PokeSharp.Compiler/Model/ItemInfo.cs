@@ -7,7 +7,7 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("items")]
-public class ItemInfo
+public partial class ItemInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }

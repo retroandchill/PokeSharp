@@ -14,7 +14,7 @@ public readonly record struct ShadowPokemonKey(
 }
 
 [PbsData("shadow_pokemon", IsOptional = true)]
-public class ShadowPokemonInfo
+public partial class ShadowPokemonInfo
 {
     [PbsSectionName]
     public required ShadowPokemonKey Id { get; init; }

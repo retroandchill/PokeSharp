@@ -6,7 +6,7 @@ using PokeSharp.Data;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("ribbons")]
-public class RibbonInfo
+public partial class RibbonInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }

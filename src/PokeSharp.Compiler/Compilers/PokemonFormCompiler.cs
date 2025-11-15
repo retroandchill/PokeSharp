@@ -28,8 +28,8 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
     [CreateSyncVersion]
     public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        var entities = await serializer
-            .ReadFromFileAsync(
+        var entities = await PbsSerializer
+            .ReadFromFileAsync<SpeciesFormInfo>(
                 FileName,
                 name =>
                 {
@@ -41,8 +41,11 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
                 },
                 cancellationToken
             )
-            .Select(x => ValidateCompiledModel(x.Model, x.LineData))
-            .Select(ConvertToEntity)
+            .Select(x =>
+            {
+                ValidateCompiledModel(x.Model, x.LineData);
+                return ConvertToEntity(x.Model);
+            })
             .ToArrayAsync(cancellationToken: cancellationToken);
 
         await Species.ImportAsync(ValidateAllCompiledForms(entities), cancellationToken);
@@ -66,7 +69,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
 
     private static SpeciesFormInfo ConvertToModel(Species entity) => entity.ToSpeciesFormInfo();
 
-    private static SpeciesFormInfo ValidateCompiledModel(SpeciesFormInfo model, FileLineData fileLineData)
+    private static void ValidateCompiledModel(SpeciesFormInfo model, FileLineData fileLineData)
     {
         if (model.Evolutions is not null)
         {
@@ -98,8 +101,6 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         }
 
         model.Types?.DistinctInPlace();
-
-        return model;
     }
 
     private List<Species> ValidateAllCompiledForms(Species[] entities)

@@ -22,20 +22,11 @@ public interface IPbsCompiler
 }
 
 public abstract class PbsCompilerBase<TModel> : IPbsCompiler
+    where TModel : IPbsDataModel<TModel>
 {
     public abstract int Order { get; }
-    protected string FileName { get; }
+    protected string FileName { get; } = Path.Join("PBS", $"{TModel.BasePath}.txt");
     private readonly Dictionary<string, PropertyInfo> _propertyMap = new();
-
-    protected PbsCompilerBase()
-    {
-        var attribute = typeof(TModel).GetCustomAttribute<PbsDataAttribute>();
-        if (attribute is null)
-            throw new InvalidOperationException(
-                $"Type {typeof(TModel).FullName} does not have a {nameof(PbsDataAttribute)}"
-            );
-        FileName = Path.Join("PBS", $"{attribute.BaseFilename}.txt");
-    }
 
     public abstract void Compile(PbsSerializer serializer);
 
@@ -68,11 +59,12 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
 
 public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TModel>
     where TEntity : ILoadedGameDataEntity<TEntity>
+    where TModel : IPbsDataModel<TModel>
 {
     [CreateSyncVersion]
     public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        var entities = await serializer
+        var entities = await PbsSerializer
             .ReadFromFileAsync<TModel>(FileName, cancellationToken)
             .Select(x =>
             {

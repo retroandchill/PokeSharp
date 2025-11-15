@@ -6,7 +6,7 @@ using PokeSharp.Data;
 namespace PokeSharp.Compiler.Model;
 
 [PbsData("types")]
-public class PokemonTypeInfo
+public partial class PokemonTypeInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }

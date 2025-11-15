@@ -158,7 +158,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             );
 
             context.AddSource(
-                $"{schema.ClassName}Serializer.g.cs",
+                $"{schema.ClassName}.g.cs",
                 handlebars.Compile(SourceTemplates.PbsSerializerTemplate)(schema)
             );
         }
@@ -177,8 +177,9 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         }
     }
 
-    private static PbsSchema BuildSchema(ITypeSymbol targetType)
+    private static PbsSchema BuildSchema(INamedTypeSymbol targetType)
     {
+        var info = targetType.GetPbsDataInfo();
         if (targetType is not { TypeKind: TypeKind.Class or TypeKind.Struct })
         {
             throw new PbsSchemaException(
@@ -239,7 +240,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         }
 
         if (sectionName is not null && errors.Count == 0)
-            return new PbsSchema(targetType, keyValuePairs.ToImmutable());
+            return new PbsSchema(targetType, keyValuePairs.ToImmutable(), info.BaseFilename, info.IsOptional);
 
         if (sectionName is null)
         {

@@ -17,7 +17,7 @@ public readonly record struct TrainerKey(
 }
 
 [PbsData("trainers")]
-public class EnemyTrainerInfo
+public partial class EnemyTrainerInfo
 {
     [PbsSectionName]
     public required TrainerKey Id { get; init; }

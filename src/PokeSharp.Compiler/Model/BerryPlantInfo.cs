@@ -10,7 +10,7 @@ public readonly record struct YieldRangeInfo(
 );
 
 [PbsData("berry_plants")]
-public class BerryPlantInfo
+public partial class BerryPlantInfo
 {
     [PbsSectionName]
     public required Name Id { get; init; }

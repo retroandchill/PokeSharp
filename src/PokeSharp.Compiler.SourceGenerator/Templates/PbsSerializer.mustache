@@ -5,9 +5,12 @@ using PokeSharp.Compiler.Core.Serialization;
 
 namespace {{Namespace}};
 
-public static class {{ClassName}}Serializer
+{{DeclaredAccessiblity}}partial {{ObjectType}} {{ClassName}} : IPbsDataModel<{{ClassName}}>
 {
-    public static {{ClassName}} ParsePbsData(PbsSection section)
+    public static string BasePath => "{{FileName}}";
+    public static bool IsOptional => {{IsOptionalString}};
+
+    public static {{ClassName}} ParsePbsData(PbsSection section, Func<string, {{ClassName}}> modelFactory = null)
     {
         {{#Properties}}
         {{#IsSectionName}}
@@ -64,14 +67,29 @@ public static class {{ClassName}}Serializer
         {{/IsSectionName}}    
         {{/Properties}}
         
-        var result = new {{ClassName}} 
+        {{ClassName}} result;
+        if (modelFactory is not null) 
         {
+            result = modelFactory(section.SectionName);
             {{#Properties}}
-            {{#IsRequired}} 
-            {{Name}} = prop_{{Name}}
+            {{#IsRequired}}
+            {{^IsInitOnly}}
+            result.{{Name}} = prop_{{Name}};
+            {{/IsInitOnly}}
             {{/IsRequired}}
             {{/Properties}}
-        };
+        }
+        else
+        {
+            result = new {{ClassName}} 
+            {
+                {{#Properties}}
+                {{#IsRequired}}
+                {{Name}} = prop_{{Name}},
+                {{/IsRequired}}
+                {{/Properties}}
+            };
+        }
         {{#Properties}}
         {{^IsRequired}}
         {{#AppearsOnce}}

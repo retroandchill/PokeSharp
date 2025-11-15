@@ -12,7 +12,7 @@ public readonly record struct HomeLocationInfo(
 );
 
 [PbsData("metadata")]
-public class MetadataInfo
+public partial class MetadataInfo
 {
     [PbsSectionName]
     [PbsType(PbsFieldType.UnsignedInteger)]

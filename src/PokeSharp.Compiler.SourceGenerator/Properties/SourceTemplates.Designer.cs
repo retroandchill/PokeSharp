@@ -58,5 +58,69 @@ namespace PokeSharp.Compiler.SourceGenerator.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to if ({{Entries}}.Length != {{TypeEntries.Length}})
+        ///    throw new SerializationException($&quot;Unexpected number of elements in {value}! Expecting {{#MultipleOf}}a multiple of{{/MultipleOf}}{{TypeEntries.Length}}, got { {{Entries}}.Length}.&quot;);
+        ///
+        ///{{ResultLineStart}}new {{ParsedType}}(
+        ///{{#TypeEntries}}
+        ///    {{#Indexed}}{{&gt;ParseLogic OutputOperation=&apos;&apos; Parameter=&apos;splitLine[{{Index}}]&apos;}}{{~^IsLast~}},{{~/IsLast~}}{{/Indexed}}
+        ///{{/TypeEntries}}
+        ///){{ResultLineEnd}}.
+        /// </summary>
+        internal static string EvaluateComplexTypeTemplate {
+            get {
+                return ResourceManager.GetString("EvaluateComplexTypeTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{~#NeedsConversion~}}
+        ///Text.Localized(&quot;{{../../../Namespace}}.{{../../../ClassName}}&quot;, $&quot;{sectionName}.{{../../Name}}&quot;, {{&gt;ParseMethodCall}})
+        ///{{~/NeedsConversion~}}    
+        ///{{~^NeedsConversion~}}
+        ///{{&gt;ParseMethodCall}}
+        ///{{~/NeedsConversion~}}.
+        /// </summary>
+        internal static string ParseLogicTemplate {
+            get {
+                return ResourceManager.GetString("ParseLogicTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{~#NeedsParsing~}}{{ParseMethod}}({{Parameter}}{{#AllowNone}}, true{{/AllowNone}}){{~/NeedsParsing~}}
+        ///{{~^NeedsParsing~}}{{Parameter}}{{~/NeedsParsing~}}.
+        /// </summary>
+        internal static string ParseMethodCallTemplate {
+            get {
+                return ResourceManager.GetString("ParseMethodCallTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using System.Runtime.Serialization;
+        ///using System.Collections.Immutable;
+        ///using PokeSharp.Abstractions;
+        ///using PokeSharp.Compiler.Core.Serialization;
+        ///
+        ///namespace {{Namespace}};
+        ///
+        ///public static class {{ClassName}}Serializer
+        ///{
+        ///    public static {{ClassName}} ParsePbsData(PbsSection section)
+        ///    {
+        ///        {{#Properties}}
+        ///        {{#IsSectionName}}
+        ///        var prop_{{Name}} = Parse_{{Name}}({{#NeedsSectionName}}section.SectionName, {{/NeedsSectionName}}section.SectionName);
+        ///        {{/IsSectionName}}
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string PbsSerializerTemplate {
+            get {
+                return ResourceManager.GetString("PbsSerializerTemplate", resourceCulture);
+            }
+        }
     }
 }

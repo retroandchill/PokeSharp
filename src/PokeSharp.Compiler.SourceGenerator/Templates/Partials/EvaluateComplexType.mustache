@@ -1,0 +1,24 @@
+﻿{{#NoOptionalParameters}}
+if (splitLine.Length != {{TypeEntries.Length}})
+    throw new SerializationException($"Unexpected number of elements in {value}! Expecting {{#MultipleOf}}a multiple of {{/MultipleOf}}{{TypeEntries.Length}}, got {splitLine.Length}.");
+{{/NoOptionalParameters}}
+{{^NoOptionalParameters}}
+if (splitLine.Length < {{RequiredLength}})
+    throw new SerializationException($"Unexpected number of elements in {value}! Got {splitLine.Length}, expected at least {{RequiredLength}}");
+
+if (splitLine.Length > {{MaxLength}})
+    throw new SerializationException($"Too many elements in {value}! Got {splitLine.Length}, expected at most {{MaxLength}}");
+{{/NoOptionalParameters}}
+
+{{#IsFixedSize}}
+{{#TypeEntries}}
+{{#IsOptional}}if (splitLine.Length > {{Index}}) {{/IsOptional}}{{../ResultLineStart}}{{#Indexed}}{{>ParseLogic OutputOperation='' Parameter='splitLine[{{Index}}]'}}{{/Indexed}}{{../ResultLineEnd}}
+{{/TypeEntries}}
+{{/IsFixedSize}}
+{{^IsFixedSize}}
+{{ResultLineStart}}new {{ElementType}}(
+{{#TypeEntries}}
+    {{#Indexed}}{{#IsOptional}}splitLine.Length > {{Index}} ? {{/IsOptional}}{{>ParseLogic OutputOperation='' Parameter='splitLine[{{Index}}]'}}{{#IsOptional}} : {{DefaultValue}}{{/IsOptional}}{{~^IsLast~}},{{~/IsLast~}}{{/Indexed}}
+{{/TypeEntries}}
+){{ResultLineEnd}}
+{{/IsFixedSize}}

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Compiler.SourceGenerator.Utilities;
 
 namespace PokeSharp.Compiler.SourceGenerator.Model;
 
@@ -22,18 +23,142 @@ internal enum PbsFieldStructure
 internal readonly record struct PbsSchemaTypeData(
     PbsFieldType Type,
     ITypeSymbol TargetType,
-    bool IsOptional = false,
+    int Index,
+    string? DefaultValue = null,
     ITypeSymbol? EnumType = null,
     bool AllowNone = false
-);
-
-internal record PbsSchemaEntry(IPropertySymbol Property, ImmutableArray<PbsSchemaTypeData> TypeEntries)
+)
 {
-    public string PropertyName => Property.Name;
+    public string? ParseMethod
+    {
+        get
+        {
+            var targetTypeStr = GetTargetTypeString(TargetType);
+            var enumTypeStr = EnumType?.ToDisplayString(NullableFlowState.NotNull) ?? targetTypeStr;
+            return Type switch
+            {
+                PbsFieldType.Integer => $"CsvParser.ParseInt<{targetTypeStr}>",
+                PbsFieldType.UnsignedInteger => $"CsvParser.ParseUnsigned<{targetTypeStr}>",
+                PbsFieldType.PositiveInteger => $"CsvParser.ParsePositive<{targetTypeStr}>",
+                PbsFieldType.Hexadecimal => $"CsvParser.ParseHex<{targetTypeStr}>",
+                PbsFieldType.Float => $"CsvParser.ParseFloat<{targetTypeStr}>",
+                PbsFieldType.Boolean => "CsvParser.ParseBoolean",
+                PbsFieldType.Name => "CsvParser.ParseName",
+                PbsFieldType.String or PbsFieldType.UnformattedText => null,
+                PbsFieldType.Symbol => "CsvParser.ParseSymbol",
+                PbsFieldType.Enumerable => TargetType.TypeKind == TypeKind.Enum
+                    ? $"CsvParser.ParseEnumField<{targetTypeStr}>"
+                    : $"CsvParser.ParseDataEnum<{enumTypeStr}, {targetTypeStr}>",
+                PbsFieldType.EnumerableOrInteger => TargetType.TypeKind == TypeKind.Enum
+                    ? $"CsvParser.ParseEnumOrInt<{targetTypeStr}>"
+                    : null,
+                _ => throw new ArgumentOutOfRangeException(),
+            };
+        }
+    }
 
-    public PbsFieldStructure FieldStructure { get; init; } = PbsFieldStructure.Single;
+    public static string GetTargetTypeString(ITypeSymbol type)
+    {
+        if (
+            type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol
+            && namedTypeSymbol.ConstructUnboundGenericType().ToDisplayString() == "T?"
+        )
+        {
+            return GetTargetTypeString(namedTypeSymbol.TypeArguments[0]);
+        }
+
+        return type.ToDisplayString(NullableFlowState.NotNull);
+    }
+
+    public bool NeedsParsing => ParseMethod is not null;
+
+    public bool IsOptional => DefaultValue is not null;
+
+    public bool NeedsConversion => TargetType.ToDisplayString(NullableFlowState.NotNull) == GeneratorConstants.Text;
+
+    public bool IsLast { get; init; } = true;
 }
 
-internal readonly record struct PbsSchemaKey(string KeyName, PbsSchemaEntry Entry);
+internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, ImmutableArray<PbsSchemaTypeData> TypeEntries)
+{
+    public string Type => PbsSchemaTypeData.GetTargetTypeString(Property.Type);
 
-internal readonly record struct PbsSchema(PbsSchemaEntry SectionName, ImmutableArray<PbsSchemaKey> Keys);
+    public string Name => Property.Name;
+
+    public string ConcreteType
+    {
+        get
+        {
+            var elementType = ElementType;
+            return elementType is not null ? $"List<{elementType}>" : Type;
+        }
+    }
+
+    public string? ElementType
+    {
+        get
+        {
+            if (
+                Property.Type is INamedTypeSymbol
+                {
+                    IsGenericType: true,
+                    TypeParameters.Length: 1,
+                    Name: "IReadOnlyCollection"
+                        or "ICollection"
+                        or "IEnumerable"
+                        or "IReadOnlyList"
+                        or "IList"
+                        or "List"
+                } genericType
+            )
+            {
+                return genericType.TypeArguments[0].ToDisplayString(NullableFlowState.NotNull);
+            }
+
+            return null;
+        }
+    }
+
+    public string ParsedType => AppearsOnce ? Type : ElementType ?? Type;
+
+    public bool IsSectionName { get; init; }
+
+    public bool IsFixedSize { get; init; }
+
+    public bool IsRequired => IsSectionName || Property.IsRequired;
+
+    public PbsFieldStructure FieldStructure { get; init; } = PbsFieldStructure.Single;
+
+    public bool AppearsOnce => FieldStructure != PbsFieldStructure.Repeating;
+
+    public bool IsSimpleType => TypeEntries.Length == 1 && FieldStructure == PbsFieldStructure.Single;
+
+    public bool IsCollection => FieldStructure == PbsFieldStructure.Array || IsFixedSize;
+
+    public bool NeedsSubsections => TypeEntries.Length > 1;
+
+    private bool? _needsSectionName;
+    public bool NeedsSectionName
+    {
+        get
+        {
+            if (_needsSectionName.HasValue)
+                return _needsSectionName.Value;
+
+            _needsSectionName = TypeEntries.Any(t => t.NeedsConversion);
+            return _needsSectionName.Value;
+        }
+    }
+
+    public int RequiredLength => TypeEntries.Count(e => !e.IsOptional);
+    public int MaxLength => TypeEntries.Length;
+
+    public bool NoOptionalParameters => TypeEntries.All(e => !e.IsOptional);
+}
+
+internal readonly record struct PbsSchema(ITypeSymbol ModelType, ImmutableArray<PbsSchemaEntry> Properties)
+{
+    public string Namespace => ModelType.ContainingNamespace.ToDisplayString();
+
+    public string ClassName => ModelType.Name;
+}

@@ -1,18 +1,23 @@
 ﻿using System.Collections.Immutable;
+using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.SourceGenerator.Exceptions;
 using PokeSharp.Compiler.SourceGenerator.Model;
+using PokeSharp.Compiler.SourceGenerator.Properties;
+using PokeSharp.Compiler.SourceGenerator.Properties;
+using PokeSharp.Compiler.SourceGenerator.Properties;
 using PokeSharp.Compiler.SourceGenerator.Utilities;
 using Retro.SourceGeneratorUtilities.Utilities.Attributes;
+using Retro.SourceGeneratorUtilities.Utilities.Members;
 
 namespace PokeSharp.Compiler.SourceGenerator;
 
 [Generator]
 public class PbsCompilerGenerator : IIncrementalGenerator
 {
-    public static readonly DiagnosticDescriptor InvalidPbsType = new(
+    private static readonly DiagnosticDescriptor InvalidPbsType = new(
         "PBS0001",
         "Invalid PBS model type",
         "{0} must be either a class or a struct, and cannot be marked abstract",
@@ -21,7 +26,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor MissingSectionName = new(
+    private static readonly DiagnosticDescriptor MissingSectionName = new(
         "PBS0002",
         "Missing section name property",
         "{0} does not have a property marked with [PbsSectionName], exactly one property must be marked with this attribute",
@@ -30,7 +35,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor CannotUseKeyNameOnSectionName = new(
+    private static readonly DiagnosticDescriptor CannotUseKeyNameOnSectionName = new(
         "PBS0003",
         "Cannot use [PbsKeyName] on section name property",
         "{0} cannot be markeed with [PbsKeyName] because it is also marked with [PbsSectionName]",
@@ -39,7 +44,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor InvalidType = new(
+    private static readonly DiagnosticDescriptor InvalidType = new(
         "PBS0004",
         "Property type cannot be deserialized",
         "Type {0} cannot be deserialized",
@@ -48,7 +53,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor PropertyTypeMismatch = new(
+    private static readonly DiagnosticDescriptor PropertyTypeMismatch = new(
         "PBS0005",
         "Property type specified not valid",
         "Type {0} has been specified as {1}, which is not valid for type {2}",
@@ -57,7 +62,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor CannotDeduceEnumerableType = new(
+    private static readonly DiagnosticDescriptor CannotDeduceEnumerableType = new(
         "PBS0006",
         "Cannot deduce enumerable type for property",
         "Property {0} has been specified as enumerable, but no enum type was specified, and it is not of type enum",
@@ -66,7 +71,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor CannotConstructAndDeconstructType = new(
+    private static readonly DiagnosticDescriptor CannotConstructAndDeconstructType = new(
         "PBS0007",
         "Type requires exactly one constructor and one Deconstruct method with the same parameters",
         "Type {0} requires exactly one constructor and one Deconstruct method with the same parameters",
@@ -75,7 +80,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor MultipleSectionNames = new(
+    private static readonly DiagnosticDescriptor MultipleSectionNames = new(
         "PBS0008",
         "Type requires exactly one section name property",
         "Specified property {0} as [PbsSectionName], but there are multiple properties marked with this attribute",
@@ -84,7 +89,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         true
     );
 
-    public static readonly DiagnosticDescriptor UnknownSourceGenerationError = new(
+    private static readonly DiagnosticDescriptor UnknownSourceGenerationError = new(
         "PBS0009",
         "An unknown error occurred during source generation",
         "An unknown error occurred during source generation: {0}",
@@ -115,6 +120,47 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         try
         {
             var schema = BuildSchema(targetType);
+
+            var handlebars = Handlebars.Create();
+            handlebars.Configuration.TextEncoder = null;
+            handlebars.RegisterTemplate("ParseLogic", SourceTemplates.ParseLogicTemplate);
+            handlebars.RegisterTemplate("ParseMethodCall", SourceTemplates.ParseMethodCallTemplate);
+            handlebars.RegisterTemplate("EvaluateComplexType", SourceTemplates.EvaluateComplexTypeTemplate);
+
+            handlebars.RegisterHelper(
+                "WithIndent",
+                (writer, options, _, parameters) =>
+                {
+                    var indent = parameters[0] as string ?? "";
+
+                    // Capture the block content
+                    var content = options.Template();
+
+                    // Split the content into lines
+                    var lines = content.Split('\n');
+
+                    // Add indentation to each line except empty lines
+                    var indentedLines = lines.Select(line => string.IsNullOrWhiteSpace(line) ? line : indent + line);
+
+                    // Join the lines back together
+                    writer.WriteSafeString(string.Join("\n", indentedLines));
+                }
+            );
+
+            handlebars.RegisterHelper(
+                "Indexed",
+                (writer, options, ctx, parameters) =>
+                {
+                    var data = (PbsSchemaTypeData)ctx.Value;
+                    var content = options.Template();
+                    writer.WriteSafeString(content.Replace("{{Index}}", data.Index.ToString()));
+                }
+            );
+
+            context.AddSource(
+                $"{schema.ClassName}Serializer.g.cs",
+                handlebars.Compile(SourceTemplates.PbsSerializerTemplate)(schema)
+            );
         }
         catch (PbsSchemaException ex)
         {
@@ -152,7 +198,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
 
         var errors = ImmutableArray.CreateBuilder<Diagnostic>();
         PbsSchemaEntry? sectionName = null;
-        var keyValuePairs = ImmutableArray.CreateBuilder<PbsSchemaKey>();
+        var keyValuePairs = ImmutableArray.CreateBuilder<PbsSchemaEntry>();
 
         foreach (
             var property in targetType
@@ -172,21 +218,18 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         {
             try
             {
-                var (isSectionName, keyName, entry) = GetSchemaEntryInfo(property);
-                if (isSectionName)
+                var entry = GetSchemaEntryInfo(property);
+                keyValuePairs.Add(entry);
+                if (!entry.IsSectionName)
+                    continue;
+
+                if (sectionName is null)
                 {
-                    if (sectionName is null)
-                    {
-                        sectionName = entry;
-                    }
-                    else
-                    {
-                        Diagnostic.Create(MultipleSectionNames, property.Locations[0], property.Name);
-                    }
+                    sectionName = entry;
                 }
                 else
                 {
-                    keyValuePairs.Add(new PbsSchemaKey(keyName, entry));
+                    Diagnostic.Create(MultipleSectionNames, property.Locations[0], property.Name);
                 }
             }
             catch (PbsSchemaException ex)
@@ -196,7 +239,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         }
 
         if (sectionName is not null && errors.Count == 0)
-            return new PbsSchema(sectionName, keyValuePairs.ToImmutable());
+            return new PbsSchema(targetType, keyValuePairs.ToImmutable());
 
         if (sectionName is null)
         {
@@ -209,9 +252,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         );
     }
 
-    private static (bool IsSectionName, string KeyName, PbsSchemaEntry Entry) GetSchemaEntryInfo(
-        IPropertySymbol propertySymbol
-    )
+    private static PbsSchemaEntry GetSchemaEntryInfo(IPropertySymbol propertySymbol)
     {
         var errors = ImmutableArray.CreateBuilder<Diagnostic>();
 
@@ -228,7 +269,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         PbsSchemaEntry? entry = null;
         try
         {
-            entry = GetSchemaEntry(propertySymbol);
+            entry = GetSchemaEntry(keyName, propertySymbol, isSectionName);
         }
         catch (PbsSchemaException ex)
         {
@@ -236,11 +277,11 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         }
 
         return errors.Count == 0
-            ? (isSectionName, keyName, entry!)
+            ? entry!
             : throw new PbsSchemaException($"Found errors when processing {propertySymbol}", errors.ToImmutable());
     }
 
-    private static PbsSchemaEntry GetSchemaEntry(IPropertySymbol propertySymbol)
+    private static PbsSchemaEntry GetSchemaEntry(string keyName, IPropertySymbol propertySymbol, bool isSectionName)
     {
         var underlyingType = GetUnderlyingType(propertySymbol.Type);
         propertySymbol.TryGetPbsTypeInfo(out var typeInfo);
@@ -249,8 +290,10 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             ? GetComplexFieldType(underlyingType)
             : GetSimpleFieldType(propertySymbol, underlyingType, typeInfo);
 
-        return new PbsSchemaEntry(propertySymbol, fieldTypes)
+        return new PbsSchemaEntry(keyName, propertySymbol, fieldTypes)
         {
+            IsSectionName = isSectionName,
+            IsFixedSize = typeInfo?.FixedSize > 0,
             FieldStructure = GetFieldStructure(propertySymbol, typeInfo),
         };
     }
@@ -346,24 +389,33 @@ public class PbsCompilerGenerator : IIncrementalGenerator
                 .. Enumerable
                     .Range(0, typeAttribute.FixedSize)
                     .Select(i =>
-                        GetFieldType(property, propType, typeAttribute, typeAttribute.FixedSizeIsMax && i > 0)
+                        GetFieldType(
+                            property,
+                            propType,
+                            typeAttribute,
+                            i,
+                            typeAttribute.FixedSizeIsMax && i > 0 ? "0" : null
+                        ) with
+                        {
+                            IsLast = i == typeAttribute.FixedSize - 1,
+                        }
                     ),
             ];
         }
 
-        return [GetFieldType(property, propType, typeAttribute)];
+        return [GetFieldType(property, propType, typeAttribute, 0)];
     }
 
     private static PbsSchemaTypeData GetFieldType(
         ISymbol property,
         ITypeSymbol propType,
         PbsTypeInfo? typeAttribute,
-        bool isOptional = false
+        int index,
+        string? defaultValue = null
     )
     {
-        var propertyType = GetPropertyType(property);
         if (typeAttribute is null)
-            return InferFieldType(property, propType, isOptional);
+            return InferFieldType(property, propType, index, defaultValue);
 
         if (!IsValidFieldType(propType, typeAttribute.FieldType, typeAttribute.EnumType))
         {
@@ -375,14 +427,14 @@ public class PbsCompilerGenerator : IIncrementalGenerator
                         property.Locations[0],
                         propType,
                         typeAttribute.FieldType,
-                        propertyType
+                        propType
                     ),
                 ]
             );
         }
 
         if (typeAttribute.FieldType is not (PbsFieldType.Enumerable or PbsFieldType.EnumerableOrInteger))
-            return new PbsSchemaTypeData(typeAttribute.FieldType, propertyType, isOptional);
+            return new PbsSchemaTypeData(typeAttribute.FieldType, propType, index, defaultValue);
 
         if (typeAttribute.EnumType is null && propType.TypeKind != TypeKind.Enum)
         {
@@ -394,8 +446,9 @@ public class PbsCompilerGenerator : IIncrementalGenerator
 
         return new PbsSchemaTypeData(
             typeAttribute.FieldType,
-            propertyType,
-            isOptional,
+            propType,
+            index,
+            defaultValue,
             typeAttribute.EnumType ?? propType,
             typeAttribute.AllowNone
         );
@@ -456,14 +509,16 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             constructor
                 .Parameters.Select(constructorParameter => new
                 {
-                    constructorParameter,
-                    parameterType = constructorParameter.Type,
+                    ConstructorParameter = constructorParameter,
+                    ParameterType = constructorParameter.Type,
                 })
-                .Select(t =>
-                    GetFieldType(@t.constructorParameter, @t.parameterType, typeAttribute) with
-                    {
-                        IsOptional = t.constructorParameter.HasExplicitDefaultValue,
-                    }
+                .Select(
+                    (t, i) =>
+                        GetFieldType(t.ConstructorParameter, t.ParameterType, typeAttribute, i) with
+                        {
+                            DefaultValue = t.ConstructorParameter.GetDefaultValueString(),
+                            IsLast = i == constructor.Parameters.Length - 1,
+                        }
                 )
         );
 
@@ -546,12 +601,17 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             );
     }
 
-    private static PbsSchemaTypeData InferFieldType(ISymbol property, ITypeSymbol propType, bool isOptional)
+    private static PbsSchemaTypeData InferFieldType(
+        ISymbol property,
+        ITypeSymbol propType,
+        int index,
+        string? defaultValue
+    )
     {
         var propertyType = GetPropertyType(property);
 
         if (propType.TypeKind == TypeKind.Enum)
-            return new PbsSchemaTypeData(PbsFieldType.Enumerable, propertyType, isOptional, propType);
+            return new PbsSchemaTypeData(PbsFieldType.Enumerable, propertyType, index, defaultValue, propType);
 
         switch (propType.SpecialType)
         {
@@ -559,24 +619,24 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             or SpecialType.System_Int16
             or SpecialType.System_Int64
             or SpecialType.System_SByte:
-                return new PbsSchemaTypeData(PbsFieldType.Integer, propertyType, isOptional);
+                return new PbsSchemaTypeData(PbsFieldType.Integer, propertyType, index, defaultValue);
             case SpecialType.System_UInt32
             or SpecialType.System_UInt16
             or SpecialType.System_UInt64
             or SpecialType.System_Byte:
-                return new PbsSchemaTypeData(PbsFieldType.UnsignedInteger, propertyType, isOptional);
+                return new PbsSchemaTypeData(PbsFieldType.UnsignedInteger, propertyType, index, defaultValue);
             case SpecialType.System_Single or SpecialType.System_Double or SpecialType.System_Decimal:
-                return new PbsSchemaTypeData(PbsFieldType.Float, propertyType, isOptional);
+                return new PbsSchemaTypeData(PbsFieldType.Float, propertyType, index, defaultValue);
             case SpecialType.System_Boolean:
-                return new PbsSchemaTypeData(PbsFieldType.Boolean, propertyType, isOptional);
+                return new PbsSchemaTypeData(PbsFieldType.Boolean, propertyType, index, defaultValue);
         }
 
         var displayString = propType.ToDisplayString();
         if (propType.SpecialType == SpecialType.System_String || displayString == GeneratorConstants.Text)
-            return new PbsSchemaTypeData(PbsFieldType.String, propertyType, isOptional);
+            return new PbsSchemaTypeData(PbsFieldType.String, propertyType, index, defaultValue);
 
         return displayString == GeneratorConstants.Name
-            ? new PbsSchemaTypeData(PbsFieldType.Symbol, propertyType, isOptional)
+            ? new PbsSchemaTypeData(PbsFieldType.Symbol, propertyType, index, defaultValue)
             : throw new PbsSchemaException(
                 $"Property '{property.Name}' has an invalid type '{propertyType}'.",
                 [Diagnostic.Create(InvalidType, property.Locations[0], propertyType)]

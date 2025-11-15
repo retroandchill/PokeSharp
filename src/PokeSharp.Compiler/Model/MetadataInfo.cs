@@ -16,29 +16,29 @@ public class MetadataInfo
 {
     [PbsSectionName]
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public required int Id { get; init; }
+    public required int Id { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
-    public int StartMoney { get; init; } = 3000;
+    public int StartMoney { get; set; } = 3000;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public List<Name> StartItemStorage { get; init; } = [];
+    public List<Name> StartItemStorage { get; set; } = [];
 
-    public HomeLocationInfo? Home { get; init; }
+    public HomeLocationInfo? Home { get; set; }
 
-    public Text? StorageCreator { get; init; }
+    public Text? StorageCreator { get; set; }
 
-    public string? WildBattleBGM { get; init; }
+    public string? WildBattleBGM { get; set; }
 
-    public string? TrainerBattleBGM { get; init; }
+    public string? TrainerBattleBGM { get; set; }
 
-    public string? WildVictoryBGM { get; init; }
+    public string? WildVictoryBGM { get; set; }
 
-    public string? TrainerVictoryBGM { get; init; }
+    public string? TrainerVictoryBGM { get; set; }
 
-    public string? WildCaptureME { get; init; }
+    public string? WildCaptureME { get; set; }
 
-    public string? SurfBGM { get; init; }
+    public string? SurfBGM { get; set; }
 
-    public string? BicycleBGM { get; init; }
+    public string? BicycleBGM { get; set; }
 }

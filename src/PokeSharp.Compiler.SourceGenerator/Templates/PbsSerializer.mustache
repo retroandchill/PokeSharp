@@ -1,0 +1,140 @@
+using System.Runtime.Serialization;
+using System.Collections.Immutable;
+using PokeSharp.Abstractions;
+using PokeSharp.Compiler.Core.Serialization;
+
+namespace {{Namespace}};
+
+public static class {{ClassName}}Serializer
+{
+    public static {{ClassName}} ParsePbsData(PbsSection section)
+    {
+        {{#Properties}}
+        {{#IsSectionName}}
+        var prop_{{Name}} = Parse_{{Name}}({{#NeedsSectionName}}section.SectionName, {{/NeedsSectionName}}section.SectionName);
+        {{/IsSectionName}}
+        {{^IsSectionName}}
+        {{#AppearsOnce}}
+        var found_{{Name}} = false;
+        {{Type}} prop_{{Name}} = default;
+        {{/AppearsOnce}}
+        {{^AppearsOnce}}
+        var prop_{{Name}} = new {{ConcreteType}}();
+        {{/AppearsOnce}}    
+        {{/IsSectionName}}
+    
+        {{/Properties}}
+        foreach (var (key, rawValue, lineData) in section.Lines)
+        {
+            try
+            {
+                switch (key)
+                {
+                    {{#Properties}}
+                    {{^IsSectionName}}
+                    case "{{KeyName}}":
+                        {{#AppearsOnce}}
+                        found_{{Name}} = true;
+                        prop_{{Name}} = Parse_{{Name}}({{#NeedsSectionName}}section.SectionName, {{/NeedsSectionName}}rawValue);
+                        {{/AppearsOnce}}
+                        {{^AppearsOnce}}
+                        prop_{{Name}}.Add(Parse_{{Name}}({{#NeedsSectionName}}section.SectionName, {{/NeedsSectionName}}rawValue));    
+                        {{/AppearsOnce}}   
+                        break;
+                    {{/IsSectionName}}
+                    {{/Properties}}
+                }
+            }
+            catch (SerializationException ex)
+            {
+                throw new PbsParseException($"{ex.Message}\n{lineData.LineReport}", ex);
+            }
+        }
+        {{#Properties}}
+        {{^IsSectionName}}
+        {{#IsRequired}}
+        {{#AppearsOnce}}
+        
+        if (!found_{{Name}})
+        {
+            throw new PbsParseException($"Missing required property '{{Name}}'\n{lineData.LineReport}");
+        }    
+        {{/AppearsOnce}}
+        {{/IsRequired}}
+        {{/IsSectionName}}    
+        {{/Properties}}
+        
+        var result = new {{ClassName}} 
+        {
+            {{#Properties}}
+            {{#IsRequired}} 
+            {{Name}} = prop_{{Name}}
+            {{/IsRequired}}
+            {{/Properties}}
+        };
+        {{#Properties}}
+        {{^IsRequired}}
+        {{#AppearsOnce}}
+        
+        if (found_{{Name}})
+        {
+            result.{{Name}} = prop_{{Name}};
+        }    
+        {{/AppearsOnce}}
+        {{^AppearsOnce}}
+            
+        result.{{Name}} = prop_{{Name}};    
+        {{/AppearsOnce}}    
+        {{/IsRequired}}
+        {{/Properties}}
+
+        return result;
+    }
+    {{#Properties}}
+    
+    private static {{ParsedType}} Parse_{{Name}}({{#NeedsSectionName}}string sectionName, {{/NeedsSectionName}}string value)
+    {
+        {{#IsSimpleType}}
+        {{#TypeEntries}}
+        return {{>ParseLogic Parameter='value'}};  
+        {{/TypeEntries}}
+        {{/IsSimpleType}}
+        {{^IsSimpleType}}
+        {{#IsCollection}}
+        var result = new {{ConcreteType}}();
+        {{#IsFixedSize}}
+        var splitLine = CsvParser.SplitCsvLine(value).ToImmutableArray(); 
+        {{#WithIndent '        '}}
+        {{>EvaluateComplexType ResultLineStart='result.Add(' ResultLineEnd=');'}}
+        {{/WithIndent}}
+        {{/IsFixedSize}}
+        {{^IsFixedSize}}
+        
+        {{#NeedsSubsections}}
+        foreach (var splitLine in CsvParser.SplitCsvLine(value).Chunk({{TypeEntries.Length}}).Select(b => b.ToImmutableArray()))
+        {
+            {{~#WithIndent '            '~}}
+            {{>EvaluateComplexType ResultLineStart='result.Add(' ResultLineEnd=');' MultipleOf=true}}
+            {{~/WithIndent~}}
+        }
+        {{/NeedsSubsections}}
+        {{^NeedsSubsections}}
+        foreach (var entry in CsvParser.SplitCsvLine(value))
+        {
+            result.Add({{>ParseLogic Parameter='entry'}});
+        }
+        {{/NeedsSubsections}}
+              
+        {{/IsFixedSize}}
+        return result;  
+        {{/IsCollection}}
+        {{^IsCollection}}
+        var splitLine = CsvParser.SplitCsvLine(value).ToImmutableArray();    
+        {{#WithIndent '        '}}
+        {{>EvaluateComplexType ResultLineStart='return ' ResultLineEnd=';'}}
+        {{/WithIndent}}
+        {{/IsCollection}}
+        {{/IsSimpleType}}
+    }
+    {{/Properties}}
+}

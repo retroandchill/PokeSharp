@@ -1,8 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.Operations;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Core.Data;
@@ -81,9 +84,28 @@ public static partial class CsvParser
             : throw new SerializationException($"Field '{value}' is not an integer.");
     }
 
+    public static T ParseInt<T>(string value)
+        where T : struct, INumber<T>
+    {
+        return T.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result)
+            ? result
+            : throw new SerializationException($"Field '{value}' is not an integer.");
+    }
+
     public static ulong ParseUnsigned(string value)
     {
         if (!ulong.TryParse(value, out var result))
+        {
+            throw new SerializationException($"Field '{value}' is not a positive integer or 0.");
+        }
+
+        return result;
+    }
+
+    public static T ParseUnsigned<T>(string value)
+        where T : struct, INumber<T>, IComparisonOperators<T, int, bool>
+    {
+        if (!T.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) || result < 0)
         {
             throw new SerializationException($"Field '{value}' is not a positive integer or 0.");
         }
@@ -101,11 +123,33 @@ public static partial class CsvParser
         return result;
     }
 
+    public static T ParsePositive<T>(string value)
+        where T : struct, INumber<T>, IComparisonOperators<T, int, bool>
+    {
+        if (!T.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) || result <= 0)
+        {
+            throw new SerializationException($"Field '{value}' is not a positive integer or 0.");
+        }
+
+        return result;
+    }
+
     public static ulong ParseHex(string value)
     {
-        if (!ulong.TryParse(value, NumberStyles.HexNumber, null, out var result))
+        if (!ulong.TryParse(value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
         {
             throw new SerializationException($"Field '{value}' is not a hexadecimal number.");
+        }
+
+        return result;
+    }
+
+    public static T ParseHex<T>(string value)
+        where T : struct, INumber<T>, IComparisonOperators<T, int, bool>
+    {
+        if (!T.TryParse(value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result) || result < 0)
+        {
+            throw new SerializationException($"Field '{value}' is not a positive integer or 0.");
         }
 
         return result;
@@ -114,6 +158,14 @@ public static partial class CsvParser
     public static decimal ParseFloat(string value)
     {
         return decimal.TryParse(value, out var result)
+            ? result
+            : throw new SerializationException($"Field '{value}' is not a number.");
+    }
+
+    public static T ParseFloat<T>(string value)
+        where T : struct, INumber<T>
+    {
+        return T.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)
             ? result
             : throw new SerializationException($"Field '{value}' is not a number.");
     }
@@ -175,12 +227,22 @@ public static partial class CsvParser
         return instantiatedMethod.Invoke(null, [value, allowNone]);
     }
 
+    public static TEnum ParseEnumField<TEnum>(string value)
+        where TEnum : struct, Enum
+    {
+        return Enum.TryParse<TEnum>(value, true, out var result)
+            ? result
+            : throw new SerializationException(
+                $"Field '{value}' is not a valid value for enumeration '{typeof(TEnum)}'."
+            );
+    }
+
     private static readonly MethodInfo ParseDataEnumMethod = typeof(CsvParser).GetMethod(
         nameof(ParseDataEnum),
         BindingFlags.NonPublic | BindingFlags.Static
     )!;
 
-    private static TKey ParseDataEnum<TEntity, TKey>(string value, bool allowNone)
+    public static TKey ParseDataEnum<TEntity, TKey>(string value, bool allowNone = false)
         where TEntity : IGameDataEntity<TKey, TEntity>
         where TKey : notnull
     {
@@ -199,7 +261,7 @@ public static partial class CsvParser
         if (typeof(TKey) != typeof(Name))
             return false;
 
-        var asName = (Name)(object)key;
+        var asName = Unsafe.As<TKey, Name>(ref key);
         return asName.IsNone;
     }
 
@@ -253,6 +315,19 @@ public static partial class CsvParser
             : ParseEnumField(value, enumeration, allowNone);
     }
 
+    public static TEnum ParseEnumOrInt<TEnum>(string value)
+        where TEnum : struct, Enum
+    {
+        if (ulong.TryParse(value, out var asUnsigned))
+        {
+            return ConvertToEnumType<TEnum>(asUnsigned);
+        }
+
+        return long.TryParse(value, out var asSigned)
+            ? ConvertToEnumType<TEnum>((ulong)asSigned)
+            : ParseEnumField<TEnum>(value);
+    }
+
     private static object? ConvertToEnumType(int value, Type? enumType)
     {
         if (enumType is null)
@@ -261,6 +336,20 @@ public static partial class CsvParser
         return Enum.IsDefined(enumType, value)
             ? Enum.ToObject(enumType, value)
             : throw new SerializationException($"Value {value} is not a valid value for {enumType}.");
+    }
+
+    private static TEnum ConvertToEnumType<TEnum>(ulong value)
+        where TEnum : struct, Enum
+    {
+        var enumSize = Unsafe.SizeOf<TEnum>();
+        return enumSize switch
+        {
+            sizeof(ulong) => Unsafe.As<ulong, TEnum>(ref value),
+            sizeof(int) => Unsafe.As<int, TEnum>(ref Unsafe.As<ulong, int>(ref value)),
+            sizeof(short) => Unsafe.As<short, TEnum>(ref Unsafe.As<ulong, short>(ref value)),
+            sizeof(byte) => Unsafe.As<byte, TEnum>(ref Unsafe.As<ulong, byte>(ref value)),
+            _ => throw new SerializationException($"Enum type {typeof(TEnum)} is not supported."),
+        };
     }
 
     public static object? GetCsvRecord(string record, SchemaEntry schema)

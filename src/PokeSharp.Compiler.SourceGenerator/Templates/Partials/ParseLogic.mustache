@@ -1,0 +1,6 @@
+{{~#NeedsConversion~}}
+Text.Localized("{{../../../Namespace}}.{{../../../ClassName}}", $"{sectionName}.{{../../Name}}", {{>ParseMethodCall}})
+{{~/NeedsConversion~}}    
+{{~^NeedsConversion~}}
+{{>ParseMethodCall}}
+{{~/NeedsConversion~}}

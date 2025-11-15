@@ -1,18 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Core", "PokeSharp.Core\PokeSharp.Core.csproj", "{D772A491-9BC6-43DF-AA79-57E2E2E66BC0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Core", "src\PokeSharp.Core\PokeSharp.Core.csproj", "{D772A491-9BC6-43DF-AA79-57E2E2E66BC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Abstractions", "PokeSharp.Abstractions\PokeSharp.Abstractions.csproj", "{CB9B8467-689C-483D-B230-1779BE6B4788}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Abstractions", "src\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj", "{CB9B8467-689C-483D-B230-1779BE6B4788}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp", "PokeSharp\PokeSharp.csproj", "{026AC067-340B-476C-A825-FF9C5B31EF1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp", "src\PokeSharp\PokeSharp.csproj", "{026AC067-340B-476C-A825-FF9C5B31EF1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.SourceGenerator", "PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj", "{222957C2-02BB-48B3-81F2-484B22C00E76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.SourceGenerator", "src\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj", "{222957C2-02BB-48B3-81F2-484B22C00E76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler.Core", "PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj", "{1D26B276-BFD7-4404-AD7A-60C4E726A8B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler.Core", "src\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj", "{1D26B276-BFD7-4404-AD7A-60C4E726A8B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler.Sample", "PokeSharp.Compiler.Sample\PokeSharp.Compiler.Sample.csproj", "{53B59A64-AC3C-416A-BABF-C549A827157E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler.Sample", "samples\PokeSharp.Compiler.Sample\PokeSharp.Compiler.Sample.csproj", "{53B59A64-AC3C-416A-BABF-C549A827157E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler", "PokeSharp.Compiler\PokeSharp.Compiler.csproj", "{02A01EA5-B176-4516-B30A-177EA2FFEB21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Compiler", "src\PokeSharp.Compiler\PokeSharp.Compiler.csproj", "{02A01EA5-B176-4516-B30A-177EA2FFEB21}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{98A5C631-0128-4380-8CA2-0B1F65F5D686}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E7F3E9D9-A6C7-473B-B369-6BCC89C1D126}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{9F28A468-914C-41E6-AFC5-6811DA7DA245}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D796AE81-3B88-4181-B132-8B12BAF35401}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,5 +56,14 @@ Global
 		{02A01EA5-B176-4516-B30A-177EA2FFEB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02A01EA5-B176-4516-B30A-177EA2FFEB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02A01EA5-B176-4516-B30A-177EA2FFEB21}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{53B59A64-AC3C-416A-BABF-C549A827157E} = {9F28A468-914C-41E6-AFC5-6811DA7DA245}
+		{D772A491-9BC6-43DF-AA79-57E2E2E66BC0} = {98A5C631-0128-4380-8CA2-0B1F65F5D686}
+		{1D26B276-BFD7-4404-AD7A-60C4E726A8B8} = {98A5C631-0128-4380-8CA2-0B1F65F5D686}
+		{CB9B8467-689C-483D-B230-1779BE6B4788} = {98A5C631-0128-4380-8CA2-0B1F65F5D686}
+		{026AC067-340B-476C-A825-FF9C5B31EF1D} = {98A5C631-0128-4380-8CA2-0B1F65F5D686}
+		{02A01EA5-B176-4516-B30A-177EA2FFEB21} = {98A5C631-0128-4380-8CA2-0B1F65F5D686}
+		{222957C2-02BB-48B3-81F2-484B22C00E76} = {98A5C631-0128-4380-8CA2-0B1F65F5D686}
 	EndGlobalSection
 EndGlobal

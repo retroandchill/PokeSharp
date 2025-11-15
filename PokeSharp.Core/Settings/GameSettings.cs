@@ -10,6 +10,8 @@ public record GameSettings
 
     public int ShinyChance { get; init; } = 16;
 
+    public int StartMoney { get; init; } = 3000;
+
     public int MaxMoney { get; init; }
 
     public int MaxCoins { get; init; }
@@ -21,6 +23,8 @@ public record GameSettings
     public bool ApplyHappinessSoftCap { get; init; } = true;
 
     public bool DisableIVsAndEVs { get; init; } = false;
+
+    public bool UseCurrentRegionDex { get; init; } = true;
 }
 
 public static class GameSettingsServiceShortcut

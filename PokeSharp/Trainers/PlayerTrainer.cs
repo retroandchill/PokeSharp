@@ -2,8 +2,6 @@
 using PokeSharp.Core;
 using PokeSharp.Core.Settings;
 using PokeSharp.Core.State;
-using PokeSharp.Data.Pbs;
-using PokeSharp.Game;
 
 namespace PokeSharp.Trainers;
 
@@ -48,7 +46,7 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
     {
         get;
         set => field = Math.Clamp(value, 0, GameServices.GameSettings.MaxMoney);
-    } = Metadata.Instance.StartMoney;
+    } = GameServices.GameSettings.StartMoney;
 
     public int Coins
     {
@@ -84,5 +82,10 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
 
     public bool MysteryGiftUnlocked { get; set; }
 
+    // TODO: We need to figure out the actual type for this
     public List<object> MysteryGifts { get; set; } = [];
+
+    public bool HasSeen(Name species) => Pokedex.HasSeen(species);
+
+    public bool Owns(Name species) => Pokedex.Owns(species);
 }

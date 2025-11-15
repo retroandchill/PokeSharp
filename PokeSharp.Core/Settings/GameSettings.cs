@@ -6,7 +6,17 @@ public record GameSettings
 {
     public int MaxLevel { get; init; } = 100;
 
+    public int MaxPartySize { get; init; } = 6;
+
     public int ShinyChance { get; init; } = 16;
+
+    public int MaxMoney { get; init; }
+
+    public int MaxCoins { get; init; }
+
+    public int MaxBattlePoints { get; init; }
+
+    public int MaxSoot { get; init; }
 
     public bool ApplyHappinessSoftCap { get; init; } = true;
 

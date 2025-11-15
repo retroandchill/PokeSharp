@@ -10,6 +10,7 @@ using PokeSharp.Game.Items;
 using PokeSharp.PokemonModel;
 using PokeSharp.Services.DayNightCycle;
 using PokeSharp.Services.Overworld;
+using PokeSharp.Trainers;
 using PokeSharp.Utilities;
 using Retro.ReadOnlyParams.Annotations;
 

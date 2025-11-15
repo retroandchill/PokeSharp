@@ -16,6 +16,7 @@ using PokeSharp.Services.Happiness;
 using PokeSharp.Services.Healing;
 using PokeSharp.Services.Moves;
 using PokeSharp.Services.Screens;
+using PokeSharp.Trainers;
 using ZLinq;
 
 namespace PokeSharp.PokemonModel;

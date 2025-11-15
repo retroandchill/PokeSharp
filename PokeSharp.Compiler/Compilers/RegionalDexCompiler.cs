@@ -35,9 +35,10 @@ public partial class RegionalDexCompiler(IDataLoader dataLoader) : IPbsCompiler
                 if (dexLists.ContainsKey(section.Value))
                 {
                     throw new PbsParseException(
-                        $"Dex list number {section.Value} is defined at least twice.\n{fileLineData.LineReport}");
+                        $"Dex list number {section.Value} is defined at least twice.\n{fileLineData.LineReport}"
+                    );
                 }
-                
+
                 dexLists.Add(section.Value, []);
             }
             else
@@ -45,28 +46,39 @@ public partial class RegionalDexCompiler(IDataLoader dataLoader) : IPbsCompiler
                 if (!section.HasValue)
                 {
                     throw new PbsParseException(
-                        $"Expected a section at the beginning of the file.\n{fileLineData.LineReport}");
+                        $"Expected a section at the beginning of the file.\n{fileLineData.LineReport}"
+                    );
                 }
 
                 var speciesList = dexLists[section.Value];
-                speciesList.AddRange(line.Split(',').Where(s => !string.IsNullOrWhiteSpace(s)).Select(species => ParseSpecies(species, fileLineData)));
+                speciesList.AddRange(
+                    line.Split(',')
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Select(species => ParseSpecies(species, fileLineData))
+                );
             }
         }
 
         foreach (var (index, list) in dexLists)
         {
             var uniqueList = list.Distinct().ToList();
-            if (list.Count == uniqueList.Count) continue;
+            if (list.Count == uniqueList.Count)
+                continue;
 
             foreach (var (i, species) in list.Index())
             {
-                if (uniqueList.Count > i && uniqueList[i] == species) continue;
+                if (uniqueList.Count > i && uniqueList[i] == species)
+                    continue;
 
                 throw new ValidationException($"Dex list number {index} has species {species} listed twice.");
             }
         }
 
-        await dataLoader.SaveEntitiesAsync(dexLists.Select(x => new RegionalDex(x.Key, [..x.Value.Select(y => y.Species)])), "regional_dexes", cancellationToken);
+        await dataLoader.SaveEntitiesAsync(
+            dexLists.Select(x => new RegionalDex(x.Key, [.. x.Value.Select(y => y.Species)])),
+            "regional_dexes",
+            cancellationToken
+        );
     }
 
     private static SpeciesForm ParseSpecies(string species, FileLineData fileLineData)
@@ -78,7 +90,8 @@ public partial class RegionalDexCompiler(IDataLoader dataLoader) : IPbsCompiler
         }
 
         throw new PbsParseException(
-            $"Undefined species constant name: {species}.\nMake sure the species is defined in PBS/pokemon.txt.\n{fileLineData.LineReport}");
+            $"Undefined species constant name: {species}.\nMake sure the species is defined in PBS/pokemon.txt.\n{fileLineData.LineReport}"
+        );
     }
 
     [CreateSyncVersion]

@@ -6,7 +6,7 @@ namespace PokeSharp.Core.State;
 [AutoServiceShortcut]
 public class GameMap
 {
-    public Name MapId { get; }
+    public int MapId { get; }
 
     public bool HasMetadataTag(Name tagName) => false;
 

@@ -408,7 +408,7 @@ public partial class EvolutionRegistrations
         Id = "Location",
         Name = Text.Localized(LocalizationNamespace, "Location", "Location"),
         AnyLevelUp = true,
-        Parameter = typeof(Name),
+        Parameter = typeof(int),
     };
 
     [GameDataEntityRegistration]

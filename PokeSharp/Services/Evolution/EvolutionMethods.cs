@@ -578,11 +578,11 @@ public sealed class HasInPartyEvolutionEvaluator : EvolutionMethodEvaluator<Spec
 }
 
 [RegisterSingleton]
-public sealed class LocationEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<Name>
+public sealed class LocationEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Location.Id;
 
-    protected override bool OnLevelUp(Pokemon pokemon, Name parameter)
+    protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
         return gameMap.MapId == parameter;
     }

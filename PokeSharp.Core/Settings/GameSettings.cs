@@ -8,6 +8,8 @@ public record GameSettings
 
     public int MaxPartySize { get; init; } = 6;
 
+    public int NumStorageBoxes { get; init; } = 40;
+
     public int ShinyChance { get; init; } = 16;
 
     public int StartMoney { get; init; } = 3000;
@@ -25,6 +27,8 @@ public record GameSettings
     public bool DisableIVsAndEVs { get; init; } = false;
 
     public bool UseCurrentRegionDex { get; init; } = true;
+
+    public bool HealStoredPokemon { get; init; } = true;
 }
 
 public static class GameSettingsServiceShortcut

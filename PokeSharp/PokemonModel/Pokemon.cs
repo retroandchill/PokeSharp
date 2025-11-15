@@ -828,7 +828,7 @@ public class Pokemon
 
     public ObtainMethod ObtainMethod { get; set; }
 
-    public Name ObtainMap { get; set; }
+    public int ObtainMap { get; set; }
 
     public DateTimeOffset TimeReceived { get; set; }
 

@@ -6,8 +6,8 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 public readonly record struct ShadowPokemonKey(
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
-    [property: PbsType(PbsFieldType.PositiveInteger)] int Form = 0
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
+    [PbsType(PbsFieldType.PositiveInteger)] int Form = 0
 )
 {
     public override string ToString() => Form > 0 ? $"{Species},{Form}" : Species.ToString();

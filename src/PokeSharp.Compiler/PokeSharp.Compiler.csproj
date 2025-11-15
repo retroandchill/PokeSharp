@@ -7,6 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj" />
+    <ProjectReference
+      Include="..\PokeSharp.Compiler.SourceGenerator\PokeSharp.Compiler.SourceGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
     <ProjectReference Include="..\PokeSharp\PokeSharp.csproj" />
   </ItemGroup>
   <ItemGroup>

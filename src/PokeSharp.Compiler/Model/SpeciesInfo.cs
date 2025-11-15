@@ -8,18 +8,18 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 public readonly record struct EVYieldInfo(
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Stat))] Name Stat,
-    [property: PbsType(PbsFieldType.PositiveInteger)] int Amount
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Stat))] Name Stat,
+    [PbsType(PbsFieldType.PositiveInteger)] int Amount
 );
 
 public readonly record struct LevelUpMoveInfo(
-    [property: PbsType(PbsFieldType.UnsignedInteger)] int Level,
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))] Name Move
+    [PbsType(PbsFieldType.UnsignedInteger)] int Level,
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))] Name Move
 );
 
 public readonly record struct EvolutionMethodInfo(
     Name Species,
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)] Name Method,
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)] Name Method,
     string? Parameter = null
 );
 
@@ -39,10 +39,10 @@ public class SpeciesInfo
     [PbsType(PbsFieldType.PositiveInteger, FixedSize = 6)]
     public List<int> BaseStats { get; set; } = [];
 
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(GenderRatio))]
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(GenderRatio))]
     public Name GenderRatio { get; set; } = PokeSharp.Data.Core.GenderRatio.Female50Percent.Id;
 
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(GrowthRate))]
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(GrowthRate))]
     public Name GrowthRate { get; set; } = PokeSharp.Data.Core.GrowthRate.Medium.Id;
 
     [PbsType(PbsFieldType.PositiveInteger)]
@@ -118,16 +118,16 @@ public class SpeciesInfo
 }
 
 public readonly record struct SpeciesFormIdentifierInfo(
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
-    [property: PbsType(PbsFieldType.PositiveInteger)] int Form
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
+    [PbsType(PbsFieldType.PositiveInteger)] int Form
 )
 {
     public override string ToString() => $"{Species},{Form}";
 }
 
 public readonly record struct FormEvolutionMethodInfo(
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)] Name Method,
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Evolution), AllowNone = true)] Name Method,
     string? Parameter = null
 );
 

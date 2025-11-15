@@ -8,7 +8,7 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 public readonly record struct TrainerKey(
-    [property: PbsType(PbsFieldType.Enumerable, EnumType = typeof(TrainerType))] Name TrainerType,
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(TrainerType))] Name TrainerType,
     Text Name,
     int Version = 0
 )

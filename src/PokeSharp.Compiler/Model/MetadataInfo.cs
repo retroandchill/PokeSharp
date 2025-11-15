@@ -5,10 +5,10 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 public readonly record struct HomeLocationInfo(
-    [property: PbsType(PbsFieldType.PositiveInteger)] int MapId,
-    [property: PbsType(PbsFieldType.UnsignedInteger)] int X,
-    [property: PbsType(PbsFieldType.UnsignedInteger)] int Y,
-    [property: PbsType(PbsFieldType.UnsignedInteger)] int Direction
+    [PbsType(PbsFieldType.PositiveInteger)] int MapId,
+    [PbsType(PbsFieldType.UnsignedInteger)] int X,
+    [PbsType(PbsFieldType.UnsignedInteger)] int Y,
+    [PbsType(PbsFieldType.UnsignedInteger)] int Direction
 );
 
 [PbsData("metadata")]

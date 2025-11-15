@@ -5,8 +5,8 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Model;
 
 public readonly record struct YieldRangeInfo(
-    [property: PbsType(PbsFieldType.UnsignedInteger)] int Min,
-    [property: PbsType(PbsFieldType.PositiveInteger)] int Max
+    [PbsType(PbsFieldType.UnsignedInteger)] int Min,
+    [PbsType(PbsFieldType.PositiveInteger)] int Max
 );
 
 [PbsData("berry_plants")]

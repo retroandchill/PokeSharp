@@ -27,8 +27,8 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
     private static readonly SchemaEntry PokemonSchemaEntry = new(
         typeof(EnemyTrainerInfo).GetProperty(nameof(EnemyTrainerInfo.Pokemon))!,
         [
-            new SchemaTypeData(PbsFieldType.Enumerable, false, typeof(Species)),
-            new SchemaTypeData(PbsFieldType.PositiveInteger),
+            //new SchemaTypeData(PbsFieldType.Enumerable, false, typeof(Species)),
+            //new SchemaTypeData(PbsFieldType.PositiveInteger),
         ]
     );
 

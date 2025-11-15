@@ -1,11 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization.Converters;
 using PokeSharp.Compiler.Core.Utils;
@@ -13,80 +10,13 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 
-public readonly struct ParsedData
-{
-    private readonly object? _data;
+public readonly record struct PbsKeyValueLine(string Key, string RawValue, FileLineData LineData);
 
-    public FileLineData LineData { get; }
-
-    public ParsedData(FileLineData lineData)
-    {
-        _data = null;
-        LineData = lineData;
-    }
-
-    public ParsedData(string data, FileLineData lineData)
-    {
-        _data = data;
-        LineData = lineData;
-    }
-
-    public ParsedData(List<string> data, FileLineData lineData)
-    {
-        _data = data;
-        LineData = lineData;
-    }
-
-    public bool TryGetString([NotNullWhen(true)] out string? value)
-    {
-        if (_data is string stringValue)
-        {
-            value = stringValue;
-            return true;
-        }
-
-        value = null;
-        return false;
-    }
-
-    public bool TryGetList([NotNullWhen(true)] out List<string>? value)
-    {
-        if (_data is List<string> list)
-        {
-            value = list;
-            return true;
-        }
-
-        value = null;
-        return false;
-    }
-
-    public void Match(Action<string> whenString, Action<List<string>> whenList, Action whenNull)
-    {
-        switch (_data)
-        {
-            case string stringValue:
-                whenString(stringValue);
-                break;
-            case List<string> list:
-                whenList(list);
-                break;
-            case null:
-                whenNull();
-                break;
-            default:
-                throw new InvalidOperationException($"Unexpected type '{_data.GetType().Name}'");
-        }
-    }
-}
-
-public readonly record struct PbsParseResult(
-    Dictionary<string, ParsedData> LastSection,
+public readonly record struct PbsSection(
     string SectionName,
-    FileLineData LineData
+    ImmutableArray<PbsKeyValueLine> Lines,
+    FileLineData HeaderLine
 );
-
-public readonly record struct Section<T>(Dictionary<string, ParsedData> Data, T Id, FileLineData LineData);
 
 public readonly record struct LineWithNumber(string Line, int LineNumber);
 
@@ -102,16 +32,15 @@ public partial class PbsSerializer
     public IReadOnlyDictionary<string, SchemaEntry> GetSchema(Type type) => _schemaBuilder.BuildSchema(type);
 
     [CreateSyncVersion]
-    public static async IAsyncEnumerable<PbsParseResult> ParseFileSectionsExAsync(
+    public static async IAsyncEnumerable<PbsSection> ParseFileSectionsAsync(
         StreamReader fileReader,
         FileLineData lineData,
-        IReadOnlyDictionary<string, SchemaEntry>? schema = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         var lineNumber = 1;
         string? sectionName = null;
-        var lastSection = new Dictionary<string, ParsedData>();
+        var lastSection = ImmutableArray.CreateBuilder<PbsKeyValueLine>();
         string? sectionHeaderLine = null;
         var sectionHeaderLineNumber = 0;
         while (await fileReader.ReadLineAsync(cancellationToken) is { } line)
@@ -125,9 +54,9 @@ public partial class PbsSerializer
                 {
                     if (sectionName is not null)
                     {
-                        yield return new PbsParseResult(
-                            lastSection,
+                        yield return new PbsSection(
                             sectionName,
+                            lastSection.ToImmutable(),
                             lineData.WithLine(sectionHeaderLine ?? "", sectionHeaderLineNumber)
                         );
                     }
@@ -135,7 +64,7 @@ public partial class PbsSerializer
                     sectionHeaderLine = line;
                     sectionHeaderLineNumber = lineNumber;
                     sectionName = match.Groups[1].Value;
-                    lastSection = new Dictionary<string, ParsedData>();
+                    lastSection = ImmutableArray.CreateBuilder<PbsKeyValueLine>();
                 }
                 else
                 {
@@ -160,27 +89,7 @@ public partial class PbsSerializer
                     var value = match.Groups[2].Value;
                     lineData = lineData.WithSection(sectionName, key, line);
 
-                    if (
-                        schema is not null
-                        && schema.TryGetValue(key, out var entry)
-                        && entry.FieldStructure == PbsFieldStructure.Repeating
-                    )
-                    {
-                        if (
-                            !lastSection.TryGetValue(key, out var existingValue)
-                            || !existingValue.TryGetList(out var list)
-                        )
-                        {
-                            list = [];
-                            lastSection[key] = new ParsedData(list, lineData);
-                        }
-
-                        list.Add(value.TrimEnd());
-                    }
-                    else
-                    {
-                        lastSection[key] = new ParsedData(value.TrimEnd(), lineData);
-                    }
+                    lastSection.Add(new PbsKeyValueLine(key, value, lineData));
                 }
             }
 
@@ -190,32 +99,11 @@ public partial class PbsSerializer
         if (sectionName is null)
             yield break;
 
-        yield return new PbsParseResult(
-            lastSection,
+        yield return new PbsSection(
             sectionName,
+            lastSection.ToImmutable(),
             lineData.WithLine(sectionHeaderLine ?? "", sectionHeaderLineNumber)
         );
-    }
-
-    [CreateSyncVersion]
-    private async IAsyncEnumerable<Section<string>> ParseFileSectionsAsync(
-        StreamReader fileReader,
-        FileLineData lineData,
-        IReadOnlyDictionary<string, SchemaEntry>? schema = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default
-    )
-    {
-        await foreach (
-            var (section, name, currentLine) in ParseFileSectionsExAsync(
-                fileReader,
-                lineData,
-                schema,
-                cancellationToken
-            )
-        )
-        {
-            yield return new Section<string>(section, name, currentLine);
-        }
     }
 
     [CreateSyncVersion]
@@ -274,12 +162,14 @@ public partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
+    public IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
         string path,
         Func<string, T> modelFactory,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
+        throw new NotImplementedException();
+        /*
         var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
 
         if (attribute.IsOptional && !File.Exists(path))
@@ -388,6 +278,7 @@ public partial class PbsSerializer
 
             yield return new ModelWithLine<T>(result, lineData);
         }
+        */
     }
 
     [CreateSyncVersion]

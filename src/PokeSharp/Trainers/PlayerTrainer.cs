@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.Core;
-using PokeSharp.Core.Settings;
-using PokeSharp.Core.State;
+using PokeSharp.Settings;
+using PokeSharp.State;
 
 namespace PokeSharp.Trainers;
 

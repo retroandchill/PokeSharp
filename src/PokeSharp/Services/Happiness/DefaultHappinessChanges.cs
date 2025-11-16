@@ -1,10 +1,9 @@
 ﻿using Injectio.Attributes;
 using Microsoft.Extensions.Options;
 using PokeSharp.Abstractions;
-using PokeSharp.Core.Settings;
-using PokeSharp.Core.State;
-using PokeSharp.Game;
+using PokeSharp.State;
 using PokeSharp.PokemonModel;
+using PokeSharp.Settings;
 
 namespace PokeSharp.Services.Happiness;
 

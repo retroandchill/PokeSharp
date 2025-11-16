@@ -1,9 +1,9 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.Core;
-using PokeSharp.Core.Settings;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.PokemonModel;
+using PokeSharp.Settings;
 using PokeSharp.Utilities;
 
 namespace PokeSharp.Trainers;

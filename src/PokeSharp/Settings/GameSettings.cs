@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using PokeSharp.Core;
 
-namespace PokeSharp.Core.Settings;
+namespace PokeSharp.Settings;
 
 public record GameSettings
 {

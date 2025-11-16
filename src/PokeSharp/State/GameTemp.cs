@@ -1,6 +1,6 @@
 ﻿using PokeSharp.SourceGenerator.Attributes;
 
-namespace PokeSharp.Core.State;
+namespace PokeSharp.State;
 
 [AutoServiceShortcut]
 public class GameTemp

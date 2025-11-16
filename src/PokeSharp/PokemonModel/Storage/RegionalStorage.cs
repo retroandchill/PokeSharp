@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
-using PokeSharp.Core.State;
+using PokeSharp.State;
 using PokeSharp.Utilities;
 
 namespace PokeSharp.PokemonModel.Storage;

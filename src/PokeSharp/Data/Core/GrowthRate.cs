@@ -3,7 +3,7 @@ using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
-using PokeSharp.Core.Settings;
+using PokeSharp.Settings;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Core;

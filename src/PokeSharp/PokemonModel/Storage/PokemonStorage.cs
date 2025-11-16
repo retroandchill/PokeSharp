@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
-using PokeSharp.Core.Settings;
+using PokeSharp.Settings;
 using PokeSharp.SourceGenerator.Attributes;
 using PokeSharp.Trainers;
 

@@ -3,8 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Core.Engine;
-using PokeSharp.Core.Settings;
-using PokeSharp.Core.State;
+using PokeSharp.State;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -16,6 +15,7 @@ using PokeSharp.Services.Happiness;
 using PokeSharp.Services.Healing;
 using PokeSharp.Services.Moves;
 using PokeSharp.Services.Screens;
+using PokeSharp.Settings;
 using PokeSharp.Trainers;
 using ZLinq;
 

@@ -449,7 +449,11 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         }
 
         if (typeAttribute.FieldType is not (PbsFieldType.Enumerable or PbsFieldType.EnumerableOrInteger))
-            return new PbsSchemaTypeData(typeAttribute.FieldType, propType, index, defaultValue);
+            return new PbsSchemaTypeData(typeAttribute.FieldType, propType)
+            {
+                Index = index,
+                DefaultValue = defaultValue,
+            };
 
         if (typeAttribute.EnumType is null && propType.TypeKind != TypeKind.Enum)
         {
@@ -459,14 +463,12 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             );
         }
 
-        return new PbsSchemaTypeData(
-            typeAttribute.FieldType,
-            propType,
-            index,
-            defaultValue,
-            typeAttribute.EnumType ?? propType,
-            typeAttribute.AllowNone
-        );
+        return new PbsSchemaTypeData(typeAttribute.FieldType, propType, typeAttribute.EnumType ?? propType)
+        {
+            Index = index,
+            DefaultValue = defaultValue,
+            AllowNone = typeAttribute.AllowNone,
+        };
     }
 
     private static ImmutableArray<PbsSchemaTypeData> GetComplexFieldType(
@@ -626,7 +628,11 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         var propertyType = GetPropertyType(property);
 
         if (propType.TypeKind == TypeKind.Enum)
-            return new PbsSchemaTypeData(PbsFieldType.Enumerable, propertyType, index, defaultValue, propType);
+            return new PbsSchemaTypeData(PbsFieldType.Enumerable, propertyType, propType)
+            {
+                Index = index,
+                DefaultValue = defaultValue,
+            };
 
         switch (propType.SpecialType)
         {
@@ -634,24 +640,44 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             or SpecialType.System_Int16
             or SpecialType.System_Int64
             or SpecialType.System_SByte:
-                return new PbsSchemaTypeData(PbsFieldType.Integer, propertyType, index, defaultValue);
+                return new PbsSchemaTypeData(PbsFieldType.Integer, propertyType)
+                {
+                    Index = index,
+                    DefaultValue = defaultValue,
+                };
             case SpecialType.System_UInt32
             or SpecialType.System_UInt16
             or SpecialType.System_UInt64
             or SpecialType.System_Byte:
-                return new PbsSchemaTypeData(PbsFieldType.UnsignedInteger, propertyType, index, defaultValue);
+                return new PbsSchemaTypeData(PbsFieldType.UnsignedInteger, propertyType)
+                {
+                    Index = index,
+                    DefaultValue = defaultValue,
+                };
             case SpecialType.System_Single or SpecialType.System_Double or SpecialType.System_Decimal:
-                return new PbsSchemaTypeData(PbsFieldType.Float, propertyType, index, defaultValue);
+                return new PbsSchemaTypeData(PbsFieldType.Float, propertyType)
+                {
+                    Index = index,
+                    DefaultValue = defaultValue,
+                };
             case SpecialType.System_Boolean:
-                return new PbsSchemaTypeData(PbsFieldType.Boolean, propertyType, index, defaultValue);
+                return new PbsSchemaTypeData(PbsFieldType.Boolean, propertyType)
+                {
+                    Index = index,
+                    DefaultValue = defaultValue,
+                };
         }
 
         var displayString = propType.ToDisplayString();
         if (propType.SpecialType == SpecialType.System_String || displayString == GeneratorConstants.Text)
-            return new PbsSchemaTypeData(PbsFieldType.String, propertyType, index, defaultValue);
+            return new PbsSchemaTypeData(PbsFieldType.String, propertyType)
+            {
+                Index = index,
+                DefaultValue = defaultValue,
+            };
 
         return displayString == GeneratorConstants.Name
-            ? new PbsSchemaTypeData(PbsFieldType.Symbol, propertyType, index, defaultValue)
+            ? new PbsSchemaTypeData(PbsFieldType.Symbol, propertyType) { Index = index, DefaultValue = defaultValue }
             : throw new PbsSchemaException(
                 $"Property '{property.Name}' has an invalid type '{propertyType}'.",
                 [Diagnostic.Create(InvalidType, property.Locations[0], propertyType)]

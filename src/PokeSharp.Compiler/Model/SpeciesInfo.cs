@@ -144,7 +144,7 @@ public readonly record struct FormEvolutionMethodInfo(
 public partial class SpeciesFormInfo
 {
     [PbsSectionName]
-    public required SpeciesFormIdentifierInfo Id { get; init; }
+    public required SpeciesFormIdentifierInfo Id { get; set; }
 
     public Text? FormName { get; set; }
 

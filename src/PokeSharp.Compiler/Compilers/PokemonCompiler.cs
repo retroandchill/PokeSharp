@@ -81,7 +81,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
                 {
                     try
                     {
-                        evolutionList.Add(evolution with { Parameter = (int)CsvParser.ParseUnsigned(paramValue) });
+                        evolutionList.Add(evolution with { Parameter = CsvParser.ParseUnsigned<int>(paramValue) });
                     }
                     catch (SerializationException e)
                     {

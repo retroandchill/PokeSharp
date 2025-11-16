@@ -7,7 +7,7 @@ namespace {{Namespace}};
 
 {{DeclaredAccessiblity}}partial {{ObjectType}} {{ClassName}} : IPbsDataModel<{{ClassName}}>
 {
-    public static string BasePath => "{{FileName}}";
+    public static string BasePath => "{{FilePath}}";
     public static bool IsOptional => {{IsOptionalString}};
 
     public static {{ClassName}} ParsePbsData(PbsSection section, Func<string, {{ClassName}}> modelFactory = null)
@@ -113,9 +113,14 @@ namespace {{Namespace}};
     private static {{ParsedType}} Parse_{{Name}}({{#NeedsSectionName}}string sectionName, {{/NeedsSectionName}}string value)
     {
         {{#IsSimpleType}}
-        var soleEntry = CsvParser.SplitCsvLine(value).Single();
         {{#TypeEntries}}
+        {{#IsUnformatted}}
+        return {{>ParseLogic Parameter='value'}};  
+        {{/IsUnformatted}}
+        {{^IsUnformatted}}
+        var soleEntry = CsvParser.SplitCsvLine(value).Single();
         return {{>ParseLogic Parameter='soleEntry'}};  
+        {{/IsUnformatted}}
         {{/TypeEntries}}
         {{/IsSimpleType}}
         {{^IsSimpleType}}

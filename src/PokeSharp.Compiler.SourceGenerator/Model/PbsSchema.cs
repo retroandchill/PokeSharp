@@ -108,6 +108,8 @@ internal readonly record struct PbsSchemaTypeData(
     public bool NeedsConversion => TargetType.ToDisplayString(NullableFlowState.NotNull) == GeneratorConstants.Text;
 
     public bool IsLast { get; init; } = true;
+
+    public bool IsUnformatted => Type == PbsFieldType.UnformattedText;
 }
 
 internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, ImmutableArray<PbsSchemaTypeData> TypeEntries)

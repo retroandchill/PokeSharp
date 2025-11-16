@@ -24,6 +24,8 @@ try
     var compilerService = context.GetService<PbsCompilerService>();
 
     await compilerService.CompilePbsFilesAsync();
+
+    await compilerService.WritePbsFilesAsync();
 }
 finally
 {

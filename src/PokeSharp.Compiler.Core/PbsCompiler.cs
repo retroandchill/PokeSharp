@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Reflection;
+﻿using System.Reflection;
 using PokeSharp.Compiler.Core.Serialization;
-using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core.Data;
 using Zomp.SyncMethodGenerator;
 
@@ -25,7 +23,6 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
 {
     public abstract int Order { get; }
     protected string FileName { get; } = Path.Join("PBS", $"{TModel.BasePath}.txt");
-    private readonly Dictionary<string, PropertyInfo> _propertyMap = new();
 
     public abstract void Compile(PbsSerializer serializer);
 
@@ -34,26 +31,6 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
     public abstract void WriteToFile(PbsSerializer serializer);
 
     public abstract Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
-
-    protected virtual object? GetPropertyForPbs(TModel model, string key)
-    {
-        if (!_propertyMap.TryGetValue(key, out var property))
-        {
-            property = typeof(TModel).GetProperty(key);
-            ArgumentNullException.ThrowIfNull(property);
-            _propertyMap.Add(key, property);
-        }
-
-        var elementValue = property.GetValue(model);
-        switch (elementValue)
-        {
-            case IEnumerable enumerable when CollectionUtils.IsEmptyEnumerable(enumerable):
-            case false:
-                return null;
-            default:
-                return elementValue;
-        }
-    }
 }
 
 public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TModel>

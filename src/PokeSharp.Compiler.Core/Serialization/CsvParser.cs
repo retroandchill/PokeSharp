@@ -63,16 +63,6 @@ public static partial class CsvParser
             : throw new SerializationException($"Field '{value}' is not an integer.");
     }
 
-    public static ulong ParseUnsigned(string value)
-    {
-        if (!ulong.TryParse(value, out var result))
-        {
-            throw new SerializationException($"Field '{value}' is not a positive integer or 0.");
-        }
-
-        return result;
-    }
-
     public static T ParseUnsigned<T>(string value)
         where T : struct, INumber<T>, IComparisonOperators<T, int, bool>
     {
@@ -183,7 +173,7 @@ public static partial class CsvParser
 
     private static readonly MethodInfo ParseDataEnumMethod = typeof(CsvParser).GetMethod(
         nameof(ParseDataEnum),
-        BindingFlags.NonPublic | BindingFlags.Static
+        BindingFlags.Public | BindingFlags.Static
     )!;
 
     public static TKey ParseDataEnum<TEntity, TKey>(string value, bool allowNone = false)

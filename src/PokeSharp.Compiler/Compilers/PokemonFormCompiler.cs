@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Reflection;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
-using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Core.Data;
@@ -21,10 +18,6 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
 {
     public override int Order => 9;
 
-    private static readonly Dictionary<string, PropertyInfo> PropertyMap = typeof(SpeciesFormInfo)
-        .GetProperties()
-        .ToDictionary(x => x.Name);
-
     [CreateSyncVersion]
     public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
@@ -34,9 +27,9 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
                 name =>
                 {
                     var formInfo = Species.Get(name.Split(",")[0]).ToSpeciesFormInfo();
-                    formInfo.WildItemCommon = null;
-                    formInfo.WildItemUncommon = null;
-                    formInfo.WildItemRare = null;
+                    formInfo.WildItemCommon = [];
+                    formInfo.WildItemUncommon = [];
+                    formInfo.WildItemRare = [];
                     return formInfo;
                 },
                 cancellationToken
@@ -68,51 +61,42 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         var model = entity.ToSpeciesFormInfo();
         var baseForm = Species.GetSpeciesForm(model.Id.Species, 0).ToSpeciesFormInfo();
         if (
-            SequenceEqual(baseForm.WildItemCommon, model.WildItemCommon)
-            && SequenceEqual(baseForm.WildItemUncommon, model.WildItemUncommon)
-            && SequenceEqual(baseForm.WildItemRare, model.WildItemRare)
+            !SequenceEqual(baseForm.WildItemCommon, model.WildItemCommon)
+            || !SequenceEqual(baseForm.WildItemUncommon, model.WildItemUncommon)
+            || !SequenceEqual(baseForm.WildItemRare, model.WildItemRare)
         )
-        {
-            model.WildItemCommon = null;
-            model.WildItemUncommon = null;
-            model.WildItemRare = null;
-        }
+            return model;
+
+        model.WildItemCommon = [];
+        model.WildItemUncommon = [];
+        model.WildItemRare = [];
 
         return model;
     }
 
     private static void ValidateCompiledModel(SpeciesFormInfo model, FileLineData fileLineData)
     {
-        if (model.Evolutions is not null)
+        foreach (var evolution in model.Evolutions.Where(evo => evo.Method.IsValid))
         {
-            foreach (var evolution in model.Evolutions.Where(evo => evo.Method.IsValid))
-            {
-                var evolutionData = Evolution.Get(evolution.Method);
-                if (evolution.Parameter is not null || evolutionData.Parameter is null)
-                    continue;
+            var evolutionData = Evolution.Get(evolution.Method);
+            if (evolution.Parameter is not null || evolutionData.Parameter is null)
+                continue;
 
-                throw new PbsParseException(
-                    $"Evolution method {evolutionData.Name} requires a parameter, but none was given.\n{fileLineData}"
-                );
-            }
+            throw new PbsParseException(
+                $"Evolution method {evolutionData.Name} requires a parameter, but none was given.\n{fileLineData}"
+            );
         }
 
         var baseData = Species.GetSpeciesForm(model.Id.Species, 0);
 
-        if (model.WildItemCommon is null && model.WildItemUncommon is null && model.WildItemRare is null)
+        if (model.WildItemCommon.Count == 0 && model.WildItemUncommon.Count == 0 && model.WildItemRare.Count == 0)
         {
             model.WildItemCommon = baseData.WildItemCommon.ToList();
             model.WildItemUncommon = baseData.WildItemUncommon.ToList();
             model.WildItemRare = baseData.WildItemRare.ToList();
         }
-        else
-        {
-            model.WildItemCommon ??= [];
-            model.WildItemUncommon ??= [];
-            model.WildItemRare ??= [];
-        }
 
-        model.Types?.DistinctInPlace();
+        model.Types.DistinctInPlace();
     }
 
     private List<Species> ValidateAllCompiledForms(Species[] entities)
@@ -138,7 +122,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
                 {
                     try
                     {
-                        evolutionList.Add(evolution with { Parameter = (int)CsvParser.ParseUnsigned(paramValue) });
+                        evolutionList.Add(evolution with { Parameter = CsvParser.ParseUnsigned<int>(paramValue) });
                     }
                     catch (SerializationException e)
                     {
@@ -222,33 +206,5 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         if (enumerable1 is null || enumerable2 is null)
             return false;
         return enumerable1.SequenceEqual(enumerable2);
-    }
-
-    private static bool CompareEqual(object? object1, object? object2)
-    {
-        if (Equals(object1, object2))
-            return true;
-
-        if (object1 is IList collection1 && object2 is IList collection2)
-        {
-            if (collection1.Count != collection2.Count)
-                return false;
-
-            for (var i = 0; i < collection1.Count; i++)
-            {
-                var item1 = collection1[i];
-                var item2 = collection2[i];
-                if (!CompareEqual(item1, item2))
-                    return false;
-            }
-        }
-
-        if (object1 is not IEnumerable enumerable1 || object2 is not IEnumerable enumerable2)
-            return false;
-
-        var enumerable1Options = enumerable1.Cast<object>().ToHashSet();
-        var enumerable2Options = enumerable2.Cast<object>().ToHashSet();
-
-        return enumerable1Options.SetEquals(enumerable2Options);
     }
 }

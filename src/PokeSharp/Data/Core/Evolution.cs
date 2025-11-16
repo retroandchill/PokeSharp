@@ -541,7 +541,7 @@ public partial class EvolutionRegistrations
     {
         Id = "Event",
         Name = Text.Localized(LocalizationNamespace, "Event", "Event"),
-        Parameter = typeof(Name),
+        Parameter = typeof(int),
     };
 
     [GameDataEntityRegistration]
@@ -549,6 +549,6 @@ public partial class EvolutionRegistrations
     {
         Id = "EventAfterDamageTaken",
         Name = Text.Localized(LocalizationNamespace, "EventAfterDamageTaken", "EventAfterDamageTaken"),
-        Parameter = typeof(Name),
+        Parameter = typeof(int),
     };
 }

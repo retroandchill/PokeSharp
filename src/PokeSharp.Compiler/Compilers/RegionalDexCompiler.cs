@@ -10,7 +10,7 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public partial class RegionalDexCompiler(IDataLoader dataLoader) : IPbsCompiler
 {
     public int Order => 14;
@@ -97,7 +97,7 @@ public partial class RegionalDexCompiler(IDataLoader dataLoader) : IPbsCompiler
     [CreateSyncVersion]
     public Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     [GeneratedRegex(@"^\s*\[\s*(\d+)\s*\]\s*$")]

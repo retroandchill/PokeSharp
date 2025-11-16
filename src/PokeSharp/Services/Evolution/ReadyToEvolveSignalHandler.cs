@@ -5,7 +5,7 @@ using PokeSharp.Services.Healing;
 
 namespace PokeSharp.Services.Evolution;
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class ReadyToEvolveSignalHandler : IPokemonHealHandler, IPokemonFaintHandler
 {
     public int Priority => 10;

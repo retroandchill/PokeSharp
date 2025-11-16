@@ -211,7 +211,9 @@ namespace {{Namespace}};
         {{/HasCustomWriteMethod}}
         {{^HasCustomWriteMethod}}
         {{#IsSimpleType}}
+        {{#TypeEntries}}
         return {{>WriteMethodCall Value='value'}};
+        {{/TypeEntries}}
         {{/IsSimpleType}}
         {{^IsSimpleType}}
         {{#IsCollection}}

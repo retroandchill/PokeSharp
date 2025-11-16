@@ -16,7 +16,7 @@ using Retro.ReadOnlyParams.Annotations;
 
 namespace PokeSharp.Services.Evolution;
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Level.Id;
@@ -27,7 +27,7 @@ public sealed class LevelEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelMaleEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelMale.Id;
@@ -38,7 +38,7 @@ public sealed class LevelMaleEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelFemaleEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelFemale.Id;
@@ -49,7 +49,7 @@ public sealed class LevelFemaleEvolutionEvaluator : EvolutionMethodEvaluator<int
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelDayEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<int>
 {
@@ -61,7 +61,7 @@ public sealed class LevelDayEvolutionEvaluator([ReadOnly] DayNightService dayNig
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelNightEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<int>
 {
@@ -73,7 +73,7 @@ public sealed class LevelNightEvolutionEvaluator([ReadOnly] DayNightService dayN
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelMorningEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<int>
 {
@@ -85,7 +85,7 @@ public sealed class LevelMorningEvolutionEvaluator([ReadOnly] DayNightService da
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelAfternoonEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<int>
 {
@@ -97,7 +97,7 @@ public sealed class LevelAfternoonEvolutionEvaluator([ReadOnly] DayNightService 
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelEveningEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<int>
 {
@@ -109,7 +109,7 @@ public sealed class LevelEveningEvolutionEvaluator([ReadOnly] DayNightService da
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelNoWeatherEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
     : EvolutionMethodEvaluator<int>
 {
@@ -121,7 +121,7 @@ public sealed class LevelNoWeatherEvolutionEvaluator([ReadOnly] OverworldWeather
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelSunEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
     : EvolutionMethodEvaluator<int>
 {
@@ -133,7 +133,7 @@ public sealed class LevelSunEvolutionEvaluator([ReadOnly] OverworldWeatherServic
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelRainEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
     : EvolutionMethodEvaluator<int>
 {
@@ -145,7 +145,7 @@ public sealed class LevelRainEvolutionEvaluator([ReadOnly] OverworldWeatherServi
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelSnowEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
     : EvolutionMethodEvaluator<int>
 {
@@ -157,7 +157,7 @@ public sealed class LevelSnowEvolutionEvaluator([ReadOnly] OverworldWeatherServi
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelSandstormEvolutionEvaluator([ReadOnly] OverworldWeatherService overworldWeatherService)
     : EvolutionMethodEvaluator<int>
 {
@@ -169,7 +169,7 @@ public sealed class LevelSandstormEvolutionEvaluator([ReadOnly] OverworldWeather
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelCyclingEvolutionEvaluator([ReadOnly] PokemonGlobal pokemonGlobal)
     : EvolutionMethodEvaluator<int>
 {
@@ -181,7 +181,7 @@ public sealed class LevelCyclingEvolutionEvaluator([ReadOnly] PokemonGlobal poke
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelSurfingEvolutionEvaluator([ReadOnly] PokemonGlobal pokemonGlobal)
     : EvolutionMethodEvaluator<int>
 {
@@ -193,7 +193,7 @@ public sealed class LevelSurfingEvolutionEvaluator([ReadOnly] PokemonGlobal poke
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelDivingEvolutionEvaluator([ReadOnly] PokemonGlobal pokemonGlobal)
     : EvolutionMethodEvaluator<int>
 {
@@ -205,7 +205,7 @@ public sealed class LevelDivingEvolutionEvaluator([ReadOnly] PokemonGlobal pokem
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelDarknessEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelDarkness.Id;
@@ -216,7 +216,7 @@ public sealed class LevelDarknessEvolutionEvaluator([ReadOnly] GameMap gameMap) 
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LevelDarkInPartyEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelDarkInParty.Id;
@@ -228,7 +228,7 @@ public sealed class LevelDarkInPartyEvolutionEvaluator : EvolutionMethodEvaluato
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class AttackGreaterEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.AttackGreater.Id;
@@ -239,7 +239,7 @@ public sealed class AttackGreaterEvolutionEvaluator : EvolutionMethodEvaluator<i
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class AtkDefEqualEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.AtkDefEqual.Id;
@@ -250,7 +250,7 @@ public sealed class AtkDefEqualEvolutionEvaluator : EvolutionMethodEvaluator<int
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class DefenseGreaterEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.DefenseGreater.Id;
@@ -261,7 +261,7 @@ public sealed class DefenseGreaterEvolutionEvaluator : EvolutionMethodEvaluator<
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class SilcoonEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Silcoon.Id;
@@ -272,7 +272,7 @@ public sealed class SilcoonEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class CascoonEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Cascoon.Id;
@@ -283,7 +283,7 @@ public sealed class CascoonEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class NinjaskEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Ninjask.Id;
@@ -294,7 +294,7 @@ public sealed class NinjaskEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ShedinjaEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Shedinja.Id;
@@ -312,7 +312,7 @@ public sealed class ShedinjaEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator
 {
@@ -324,7 +324,7 @@ public sealed class HappinessEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameS
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessMaleEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator
 {
@@ -336,7 +336,7 @@ public sealed class HappinessMaleEvolutionEvaluator([ReadOnly] IOptionsMonitor<G
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessFemaleEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator
 {
@@ -348,7 +348,7 @@ public sealed class HappinessFemaleEvolutionEvaluator([ReadOnly] IOptionsMonitor
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessDayEvolutionEvaluator(
     [ReadOnly] IOptionsMonitor<GameSettings> gameSettings,
     [ReadOnly] DayNightService dayNightService
@@ -363,7 +363,7 @@ public sealed class HappinessDayEvolutionEvaluator(
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessNightEvolutionEvaluator(
     [ReadOnly] IOptionsMonitor<GameSettings> gameSettings,
     [ReadOnly] DayNightService dayNightService
@@ -378,7 +378,7 @@ public sealed class HappinessNightEvolutionEvaluator(
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessMoveEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator<Name, Move>
 {
@@ -391,7 +391,7 @@ public sealed class HappinessMoveEvolutionEvaluator([ReadOnly] IOptionsMonitor<G
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessMoveTypeEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator<Name, PokemonType>
 {
@@ -404,7 +404,7 @@ public sealed class HappinessMoveTypeEvolutionEvaluator([ReadOnly] IOptionsMonit
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HappinessHoldItemEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -422,7 +422,7 @@ public sealed class HappinessHoldItemEvolutionEvaluator([ReadOnly] IOptionsMonit
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class MaxHappinessEvolutionEvaluator : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.MaxHappiness.Id;
@@ -433,7 +433,7 @@ public sealed class MaxHappinessEvolutionEvaluator : EvolutionMethodEvaluator
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class BeautyEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Beauty.Id;
@@ -444,7 +444,7 @@ public sealed class BeautyEvolutionEvaluator : EvolutionMethodEvaluator<int>
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HoldItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HoldItem.Id;
@@ -460,7 +460,7 @@ public sealed class HoldItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, 
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HoldItemMaleEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HoldItemMale.Id;
@@ -476,7 +476,7 @@ public sealed class HoldItemMaleEvolutionEvaluator : EvolutionMethodEvaluator<Na
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HoldItemFemaleEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HoldItemFemale.Id;
@@ -492,7 +492,7 @@ public sealed class HoldItemFemaleEvolutionEvaluator : EvolutionMethodEvaluator<
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class DayHoldItemEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -509,7 +509,7 @@ public sealed class DayHoldItemEvolutionEvaluator([ReadOnly] DayNightService day
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class NightHoldItemEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -526,7 +526,7 @@ public sealed class NightHoldItemEvolutionEvaluator([ReadOnly] DayNightService d
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HoldItemHappinessEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -544,7 +544,7 @@ public sealed class HoldItemHappinessEvolutionEvaluator([ReadOnly] IOptionsMonit
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HasMoveEvolutionEvaluator : EvolutionMethodEvaluator<Name, Move>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HasMove.Id;
@@ -555,7 +555,7 @@ public sealed class HasMoveEvolutionEvaluator : EvolutionMethodEvaluator<Name, M
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HasMoveTypeEvolutionEvaluator : EvolutionMethodEvaluator<Name, PokemonType>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HasMoveType.Id;
@@ -566,7 +566,7 @@ public sealed class HasMoveTypeEvolutionEvaluator : EvolutionMethodEvaluator<Nam
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class HasInPartyEvolutionEvaluator : EvolutionMethodEvaluator<SpeciesForm, Species>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HasInParty.Id;
@@ -577,7 +577,7 @@ public sealed class HasInPartyEvolutionEvaluator : EvolutionMethodEvaluator<Spec
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LocationEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Location.Id;
@@ -588,7 +588,7 @@ public sealed class LocationEvolutionEvaluator([ReadOnly] GameMap gameMap) : Evo
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class LocationFlagEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<Name>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LocationFlag.Id;
@@ -599,7 +599,7 @@ public sealed class LocationFlagEvolutionEvaluator([ReadOnly] GameMap gameMap) :
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class RegionEvolutionEvaluator([ReadOnly] GameMap gameMap) : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Region.Id;
@@ -610,7 +610,7 @@ public sealed class RegionEvolutionEvaluator([ReadOnly] GameMap gameMap) : Evolu
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Item.Id;
@@ -621,7 +621,7 @@ public sealed class ItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ItemMaleEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.ItemMale.Id;
@@ -632,7 +632,7 @@ public sealed class ItemMaleEvolutionEvaluator : EvolutionMethodEvaluator<Name, 
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ItemFemaleEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.ItemFemale.Id;
@@ -643,7 +643,7 @@ public sealed class ItemFemaleEvolutionEvaluator : EvolutionMethodEvaluator<Name
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ItemDayEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -655,7 +655,7 @@ public sealed class ItemDayEvolutionEvaluator([ReadOnly] DayNightService dayNigh
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ItemNightEvolutionEvaluator([ReadOnly] DayNightService dayNightService)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -667,7 +667,7 @@ public sealed class ItemNightEvolutionEvaluator([ReadOnly] DayNightService dayNi
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class ItemHappinessEvolutionEvaluator([ReadOnly] IOptionsMonitor<GameSettings> gameSettings)
     : EvolutionMethodEvaluator<Name, Item>
 {
@@ -680,7 +680,7 @@ public sealed class ItemHappinessEvolutionEvaluator([ReadOnly] IOptionsMonitor<G
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeEvolutionEvaluator : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Trade.Id;
@@ -691,7 +691,7 @@ public sealed class TradeEvolutionEvaluator : EvolutionMethodEvaluator
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeMaleEvolutionEvaluator : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeMale.Id;
@@ -702,7 +702,7 @@ public sealed class TradeMaleEvolutionEvaluator : EvolutionMethodEvaluator
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeFemaleEvolutionEvaluator : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeFemale.Id;
@@ -713,7 +713,7 @@ public sealed class TradeFemaleEvolutionEvaluator : EvolutionMethodEvaluator
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeDayEvolutionEvaluator([ReadOnly] DayNightService dayNightService) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeDay.Id;
@@ -724,7 +724,7 @@ public sealed class TradeDayEvolutionEvaluator([ReadOnly] DayNightService dayNig
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeNightEvolutionEvaluator([ReadOnly] DayNightService dayNightService) : EvolutionMethodEvaluator
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeNight.Id;
@@ -735,7 +735,7 @@ public sealed class TradeNightEvolutionEvaluator([ReadOnly] DayNightService dayN
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeItemEvolutionEvaluator : EvolutionMethodEvaluator<Name, Item>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeItem.Id;
@@ -751,7 +751,7 @@ public sealed class TradeItemEvolutionEvaluator : EvolutionMethodEvaluator<Name,
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TradeSpeciesEvolutionEvaluator : EvolutionMethodEvaluator<SpeciesForm, Species>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.TradeSpecies.Id;
@@ -763,7 +763,7 @@ public sealed class TradeSpeciesEvolutionEvaluator : EvolutionMethodEvaluator<Sp
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class BattleDealCriticalHitEvolutionEvaluator([ReadOnly] GameTemp gameTemp)
     : EvolutionMethodEvaluator<int>
 {
@@ -776,24 +776,24 @@ public sealed class BattleDealCriticalHitEvolutionEvaluator([ReadOnly] GameTemp 
     }
 }
 
-[RegisterSingleton]
-public sealed class EventEvolutionEvaluator : EvolutionMethodEvaluator<Name>
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
+public sealed class EventEvolutionEvaluator : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Event.Id;
 
-    protected override bool OnEvent(Pokemon pokemon, Name parameter, Name value)
+    protected override bool OnEvent(Pokemon pokemon, int parameter, int value)
     {
         return parameter == value;
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class EventAfterDamageTakenEvolutionEvaluator([ReadOnly] GameTemp gameTemp)
-    : EvolutionMethodEvaluator<Name>
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.EventAfterDamageTaken.Id;
 
-    protected override bool AfterBattle(Pokemon pokemon, int partyIndex, Name parameter)
+    protected override bool AfterBattle(Pokemon pokemon, int partyIndex, int parameter)
     {
         if (gameTemp.PartyCriticalHitsDealt.Count > partyIndex && gameTemp.PartyCriticalHitsDealt[partyIndex] >= 49)
         {
@@ -803,7 +803,7 @@ public sealed class EventAfterDamageTakenEvolutionEvaluator([ReadOnly] GameTemp 
         return false;
     }
 
-    protected override bool OnEvent(Pokemon pokemon, Name parameter, Name value)
+    protected override bool OnEvent(Pokemon pokemon, int parameter, int value)
     {
         return parameter == value && pokemon.HasTag(PokemonTags.ReadyToEvolve);
     }

@@ -4,7 +4,7 @@ using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Evolution;
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class IsEggCanEvolveEvaluator : ICanEvolveEvaluator
 {
     public int Priority => 0;
@@ -15,7 +15,7 @@ public class IsEggCanEvolveEvaluator : ICanEvolveEvaluator
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class EverstoneCanEvolveEvaluator : ICanEvolveEvaluator
 {
     private static readonly Name Everstone = "EVERSTONE";
@@ -28,7 +28,7 @@ public class EverstoneCanEvolveEvaluator : ICanEvolveEvaluator
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class BattleBondCanEvolveEvaluator : ICanEvolveEvaluator
 {
     private static readonly Name BattleBond = "BATTLEBOND";

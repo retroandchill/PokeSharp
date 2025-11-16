@@ -8,7 +8,7 @@ using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Happiness;
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class ObtainMapHappinessChangeAdjuster(GameMap gameMap) : IHappinessChangeAdjuster
 {
     public int Priority => 0;
@@ -24,7 +24,7 @@ public class ObtainMapHappinessChangeAdjuster(GameMap gameMap) : IHappinessChang
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class LuxuryBallHappinessChangeAdjuster : IHappinessChangeAdjuster
 {
     private static readonly Name LuxuryBall = "LUXURYBALL";
@@ -42,7 +42,7 @@ public class LuxuryBallHappinessChangeAdjuster : IHappinessChangeAdjuster
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class SootheBellHappinessChangeAdjuster : IHappinessChangeAdjuster
 {
     private static readonly Name SootheBell = "SOOTHEBELL";
@@ -60,7 +60,7 @@ public class SootheBellHappinessChangeAdjuster : IHappinessChangeAdjuster
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class SoftCapHappinessChangeAdjuster(IOptionsMonitor<GameSettings> gameSettings) : IHappinessChangeAdjuster
 {
     public int Priority => 1000;

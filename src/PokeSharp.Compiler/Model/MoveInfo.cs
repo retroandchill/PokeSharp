@@ -47,5 +47,5 @@ public partial class MoveInfo
     [PbsType(PbsFieldType.UnformattedText)]
     public Text Description { get; set; } = TextConstants.ThreeQuestions;
 
-    private static bool ValidateNumericValue(int value) => value > 0;
+    private static bool ValidateNumericValue(int value) => value != 0;
 }

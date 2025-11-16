@@ -1,11 +1,11 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Collections.Immutable;
 using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
-using PokeSharp.Core.Data;
+using PokeSharp.Compiler.Validators;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -14,9 +14,12 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
-public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInfo>
+public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers)
+    : PbsCompilerBase<SpeciesFormInfo>
 {
     public override int Order => 9;
+
+    private readonly ImmutableArray<IEvolutionParameterParser> _evolutionParsers = [.. evolutionParameterParsers];
 
     [CreateSyncVersion]
     public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
@@ -114,34 +117,10 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
             {
                 var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo) ? evo.Parameter : null;
                 var paramValue = evolution.Parameter?.ToString() ?? string.Empty;
-                if (paramType is null)
+                var parameterParser = _evolutionParsers.SingleOrDefault(p => p.ParameterType == paramType);
+                if (parameterParser is not null)
                 {
-                    evolutionList.Add(evolution with { Parameter = null });
-                }
-                else if (paramType == typeof(int))
-                {
-                    try
-                    {
-                        evolutionList.Add(evolution with { Parameter = CsvParser.ParseUnsigned<int>(paramValue) });
-                    }
-                    catch (SerializationException e)
-                    {
-                        throw new PbsParseException($"{e}\n{fileLineData.LineReport}", e);
-                    }
-                }
-                else if (
-                    paramType.IsEnum
-                    || paramType
-                        .GetInterfaces()
-                        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>))
-                )
-                {
-                    evolutionList.Add(
-                        evolution with
-                        {
-                            Parameter = CsvParser.ParseEnumField(paramValue, paramType, false),
-                        }
-                    );
+                    evolutionList.Add(evolution with { Parameter = parameterParser.Parse(paramValue) });
                 }
                 else
                 {

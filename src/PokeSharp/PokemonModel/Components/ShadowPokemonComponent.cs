@@ -204,7 +204,7 @@ public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowP
     }
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class ShadowPokemonComponentFactory : IPokemonComponentFactory
 {
     public int Priority => 20;
@@ -214,7 +214,7 @@ public class ShadowPokemonComponentFactory : IPokemonComponentFactory
     public IPokemonComponent Create(Pokemon pokemon) => new ShadowPokemonComponent(pokemon);
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 [AutoServiceShortcut]
 public class ShadowPokemonHandler(
     IEnumerable<IHeartGaugeChangeAmountsProvider> providers,
@@ -272,7 +272,7 @@ public interface IHeartGaugeChangeAmountsProvider
     IEnumerable<KeyValuePair<Name, HeartGaugeChangeAmounts>> GetAmounts();
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class DefaultHeartGaugeChangeAmountsProvider : IHeartGaugeChangeAmountsProvider
 {
     private readonly Dictionary<Name, HeartGaugeChangeAmounts> _amounts = new()

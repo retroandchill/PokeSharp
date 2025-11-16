@@ -4,7 +4,7 @@ using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Moves;
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class EggCanRelearnMoveChecker : IRelearnMoveChecker
 {
     public int Priority => 10;

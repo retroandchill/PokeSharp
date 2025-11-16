@@ -1,12 +1,11 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Collections.Immutable;
 using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
-using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
-using PokeSharp.Core.Data;
+using PokeSharp.Compiler.Validators;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -15,9 +14,12 @@ using ZLinq;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
-public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
+public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers)
+    : PbsCompiler<Species, SpeciesInfo>
 {
     public override int Order => 8;
+
+    private readonly ImmutableArray<IEvolutionParameterParser> _evolutionParsers = [.. evolutionParameterParsers];
 
     public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
@@ -73,22 +75,8 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
                 var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo) ? evo.Parameter : null;
                 var paramValue = evolution.Parameter?.ToString() ?? string.Empty;
-                if (paramType is null)
-                {
-                    evolutionList.Add(evolution with { Parameter = null });
-                }
-                else if (paramType == typeof(int))
-                {
-                    try
-                    {
-                        evolutionList.Add(evolution with { Parameter = CsvParser.ParseUnsigned<int>(paramValue) });
-                    }
-                    catch (SerializationException e)
-                    {
-                        throw new PbsParseException($"{e}\n{fileLineData.LineReport}", e);
-                    }
-                }
-                else if (paramType == typeof(Species))
+
+                if (paramType == typeof(Species))
                 {
                     var asName = new Name(paramValue);
                     if (!allSpeciesKeys.Contains(asName))
@@ -98,23 +86,17 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
                     evolutionList.Add(evolution with { Parameter = asName });
                 }
-                else if (
-                    paramType.IsEnum
-                    || paramType
-                        .GetInterfaces()
-                        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGameDataEntity<,>))
-                )
-                {
-                    evolutionList.Add(
-                        evolution with
-                        {
-                            Parameter = CsvParser.ParseEnumField(paramValue, paramType, false),
-                        }
-                    );
-                }
                 else
                 {
-                    evolutionList.Add(evolution);
+                    var parameterParser = _evolutionParsers.SingleOrDefault(p => p.ParameterType == paramType);
+                    if (parameterParser is not null)
+                    {
+                        evolutionList.Add(evolution with { Parameter = parameterParser.Parse(paramValue) });
+                    }
+                    else
+                    {
+                        evolutionList.Add(evolution);
+                    }
                 }
             }
 

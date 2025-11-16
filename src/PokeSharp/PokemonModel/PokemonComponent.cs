@@ -27,7 +27,7 @@ public interface IPokemonComponentFactory
     IPokemonComponent Create(Pokemon pokemon);
 }
 
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 [AutoServiceShortcut]
 public sealed class PokemonComponentService(IEnumerable<IPokemonComponentFactory> factories)
 {

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Compiler.Mappers;
 using PokeSharp.Data;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -77,12 +78,15 @@ public partial class SpeciesInfo
     public int HatchSteps { get; set; } = 1;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
+    [PbsWriteValidation(nameof(ValidateNameNotNone))]
     public Name Incense { get; set; }
 
     public List<Name> Offspring { get; set; } = [];
 
+    [PbsCustomWrite(nameof(WriteDecimalValue))]
     public decimal Height { get; set; } = 1;
 
+    [PbsCustomWrite(nameof(WriteDecimalValue))]
     public decimal Weight { get; set; } = 1;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyColor))]
@@ -92,6 +96,7 @@ public partial class SpeciesInfo
     public Name Shape { get; set; } = BodyShape.Head.Id;
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Habitat))]
+    [PbsWriteValidation(nameof(ValidateNameNotNone))]
     public Name Habitat { get; set; }
 
     public Text Category { get; set; } = TextConstants.ThreeQuestions;
@@ -115,6 +120,10 @@ public partial class SpeciesInfo
     [PbsKeyName("Evolution")]
     [PbsKeyRepeat]
     public List<EvolutionMethodInfo> Evolutions { get; set; } = [];
+
+    public static bool ValidateNameNotNone(Name name) => !name.IsNone;
+
+    public static string WriteDecimalValue(decimal value) => value.ToString("0.0");
 }
 
 public readonly record struct SpeciesFormIdentifierInfo(
@@ -131,7 +140,7 @@ public readonly record struct FormEvolutionMethodInfo(
     string? Parameter = null
 );
 
-[PbsData("pokemon_forms")]
+[PbsData("pokemon_forms", ComparisonFactory = nameof(GetBaseForm))]
 public partial class SpeciesFormInfo
 {
     [PbsSectionName]
@@ -155,15 +164,15 @@ public partial class SpeciesFormInfo
     public MegaMessageType MegaMessage { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(PokemonType))]
-    public List<Name>? Types { get; set; }
+    public List<Name> Types { get; set; } = [];
 
     [PbsType(PbsFieldType.PositiveInteger, FixedSize = 6)]
-    public List<int>? BaseStats { get; set; }
+    public List<int> BaseStats { get; set; } = [];
 
     [PbsType(PbsFieldType.PositiveInteger)]
     public int BaseExp { get; set; }
 
-    public List<EVYieldInfo>? EVs { get; set; }
+    public List<EVYieldInfo> EVs { get; set; } = [];
 
     [PbsType(PbsFieldType.UnsignedInteger)]
     public int CatchRate { get; set; }
@@ -172,30 +181,32 @@ public partial class SpeciesFormInfo
     public int Happiness { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Ability))]
-    public List<Name>? Abilities { get; set; }
+    public List<Name> Abilities { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Ability))]
-    public List<Name>? HiddenAbilities { get; set; }
+    public List<Name> HiddenAbilities { get; set; } = [];
 
-    public List<LevelUpMoveInfo>? Moves { get; set; }
-
-    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public List<Name>? TutorMoves { get; set; }
+    public List<LevelUpMoveInfo> Moves { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
-    public List<Name>? EggMoves { get; set; }
+    public List<Name> TutorMoves { get; set; } = [];
+
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Move))]
+    public List<Name> EggMoves { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(EggGroup))]
-    public List<Name>? EggGroups { get; set; }
+    public List<Name> EggGroups { get; set; } = [];
 
     [PbsType(PbsFieldType.PositiveInteger)]
     public int HatchSteps { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))]
-    public List<Name>? Offspring { get; set; }
+    public List<Name> Offspring { get; set; } = [];
 
+    [PbsCustomWrite(nameof(WriteDecimalValue))]
     public decimal Height { get; set; }
 
+    [PbsCustomWrite(nameof(WriteDecimalValue))]
     public decimal Weight { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(BodyColor))]
@@ -217,15 +228,19 @@ public partial class SpeciesFormInfo
     public List<string> Flags { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public List<Name>? WildItemCommon { get; set; }
+    public List<Name> WildItemCommon { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public List<Name>? WildItemUncommon { get; set; }
+    public List<Name> WildItemUncommon { get; set; } = [];
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public List<Name>? WildItemRare { get; set; }
+    public List<Name> WildItemRare { get; set; } = [];
 
     [PbsKeyName("Evolution")]
     [PbsKeyRepeat]
-    public List<FormEvolutionMethodInfo>? Evolutions { get; set; }
+    public List<FormEvolutionMethodInfo> Evolutions { get; set; } = [];
+
+    private SpeciesFormInfo GetBaseForm() => Species.GetSpeciesForm(Id.Species, 0).ToSpeciesFormInfo();
+
+    public static string WriteDecimalValue(decimal value) => value.ToString("0.0");
 }

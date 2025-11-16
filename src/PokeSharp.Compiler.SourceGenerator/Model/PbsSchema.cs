@@ -61,20 +61,21 @@ internal readonly record struct PbsSchemaTypeData(
     {
         get
         {
-            if (Type == PbsFieldType.EnumerableOrInteger && TargetType.TypeKind == TypeKind.Enum)
+            var underlyingType = GetUnderlyingType(TargetType);
+            if (Type == PbsFieldType.EnumerableOrInteger && underlyingType.TypeKind == TypeKind.Enum)
             {
                 return "CsvWriter.WriteEnumOrIntegerRecord";
             }
 
             if (
-                TargetType.SpecialType == SpecialType.System_String
+                underlyingType.SpecialType == SpecialType.System_String
                 || TargetType.ToDisplayString(NullableFlowState.NotNull) == GeneratorConstants.Text
             )
             {
                 return Type == PbsFieldType.UnformattedText ? null : "TextFormatter.CsvQuote";
             }
 
-            return TargetType.SpecialType == SpecialType.System_Boolean ? "CsvWriter.WriteBoolean" : null;
+            return underlyingType.SpecialType == SpecialType.System_Boolean ? "CsvWriter.WriteBoolean" : null;
         }
     }
 
@@ -82,17 +83,22 @@ internal readonly record struct PbsSchemaTypeData(
 
     public bool IsString => TargetType.SpecialType == SpecialType.System_String;
 
-    public static string GetTargetTypeString(ITypeSymbol type)
+    public static ITypeSymbol GetUnderlyingType(ITypeSymbol type)
     {
         if (
             type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol
             && namedTypeSymbol.ConstructUnboundGenericType().ToDisplayString() == "T?"
         )
         {
-            return GetTargetTypeString(namedTypeSymbol.TypeArguments[0]);
+            return namedTypeSymbol.TypeArguments[0];
         }
 
-        return type.ToDisplayString(NullableFlowState.NotNull);
+        return type;
+    }
+
+    public static string GetTargetTypeString(ITypeSymbol type)
+    {
+        return GetUnderlyingType(type).ToDisplayString(NullableFlowState.NotNull);
     }
 
     public bool NeedsParsing => ParseMethod is not null;
@@ -170,6 +176,12 @@ internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, Immutab
 
     public bool IsCollection => FieldStructure == PbsFieldStructure.Array || IsFixedSize;
 
+    public bool IsSequence =>
+        Property.Type.AllInterfaces.Any(i =>
+            i.IsGenericType
+            && i.ConstructUnboundGenericType().ToDisplayString() == "System.Collections.Generic.IEnumerable<>"
+        );
+
     public bool NeedsSubsections => TypeEntries.Length > 1;
 
     private bool? _needsSectionName;
@@ -189,13 +201,39 @@ internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, Immutab
     public int MaxLength => TypeEntries.Length;
 
     public bool NoOptionalParameters => TypeEntries.All(e => !e.IsOptional);
+
+    public bool HasValidation => HasBuiltInValidation || HasCustomValidation;
+
+    public string? ValidateMethodName => HasBuiltInValidation ? $"Validate_{Name}" : CustomValidateMethod;
+
+    public bool HasBuiltInValidation => IsCollection || IsBoolean;
+
+    public bool HasCustomValidation => CustomValidateMethod is not null;
+
+    public bool IsBoolean =>
+        PbsSchemaTypeData.GetUnderlyingType(Property.Type).SpecialType == SpecialType.System_Boolean;
+
+    public string? CustomValidateMethod { get; init; }
+
+    public bool ValidateMethodIsStatic =>
+        CustomValidateMethod is null
+        || Property.ContainingType.GetMembers(CustomValidateMethod).OfType<IMethodSymbol>().All(m => m.IsStatic);
+
+    public string? CustomWriteMethod { get; init; }
+
+    public bool HasCustomWriteMethod => CustomWriteMethod is not null;
+
+    public bool CustomWriteMethodIsStatic =>
+        CustomWriteMethod is null
+        || Property.ContainingType.GetMembers(CustomWriteMethod).OfType<IMethodSymbol>().All(m => m.IsStatic);
 }
 
 internal record PbsSchema(
     ITypeSymbol ModelType,
     ImmutableArray<PbsSchemaEntry> Properties,
     string FilePath,
-    bool IsOptional
+    bool IsOptional,
+    string? ComparisonFactory
 )
 {
     public string Namespace => ModelType.ContainingNamespace.ToDisplayString();
@@ -229,4 +267,6 @@ internal record PbsSchema(
             return ModelType.IsValueType ? "struct" : "class";
         }
     }
+
+    public bool HasComparisonFactory => ComparisonFactory is not null;
 }

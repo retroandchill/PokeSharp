@@ -21,7 +21,7 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
     public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        await serializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel), GetPropertyForPbs);
+        await PbsSerializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel));
     }
 
     protected override Species ConvertToEntity(SpeciesInfo model) => model.ToGameData();
@@ -148,18 +148,5 @@ public sealed class PokemonCompiler : PbsCompiler<Species, SpeciesInfo>
 
             entities[i] = species with { Evolutions = [.. evolutionList] };
         }
-    }
-
-    protected override object? GetPropertyForPbs(SpeciesInfo model, string key)
-    {
-        var original = base.GetPropertyForPbs(model, key);
-
-        return key switch
-        {
-            nameof(SpeciesInfo.Incense) or nameof(SpeciesInfo.Habitat) when original is Name { IsNone: true } => null,
-            nameof(SpeciesInfo.Height) or nameof(SpeciesInfo.Weight) when original is decimal asDecimal =>
-                asDecimal.ToString("0.0"),
-            _ => original,
-        };
     }
 }

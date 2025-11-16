@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Reflection;
-using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core.Data;
@@ -80,7 +79,7 @@ public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TMo
     [CreateSyncVersion]
     public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        await serializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel), GetPropertyForPbs);
+        await PbsSerializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel));
     }
 
     protected abstract TEntity ConvertToEntity(TModel model);

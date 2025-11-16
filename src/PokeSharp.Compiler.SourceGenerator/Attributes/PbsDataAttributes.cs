@@ -56,6 +56,8 @@ internal sealed class PbsDataAttribute(string baseFilename) : Attribute
     public string BaseFilename { get; } = baseFilename;
 
     public bool IsOptional { get; init; } = false;
+
+    public string? ComparisonFactory { get; init; }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
@@ -86,3 +88,15 @@ internal sealed class PbsKeyRepeatAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
 internal sealed class PbsIgnoreAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Property)]
+internal sealed class PbsWriteValidationAttribute(string methodName) : Attribute
+{
+    public string MethodName { get; } = methodName;
+}
+
+[AttributeUsage(AttributeTargets.Property)]
+internal sealed class PbsCustomWriteAttribute(string methodName) : Attribute
+{
+    public string MethodName { get; } = methodName;
+}

@@ -54,11 +54,7 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
     [CreateSyncVersion]
     public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
-        await serializer.WritePbsFileAsync(
-            FileName,
-            Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel),
-            GetPropertyForPbs
-        );
+        await PbsSerializer.WritePbsFileAsync(FileName, Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel));
     }
 
     private static Species ConvertToEntity(SpeciesFormInfo model)
@@ -67,7 +63,23 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         return model.ToGameData(baseForm.Name, baseForm.GrowthRate, baseForm.GenderRatio, baseForm.Incense);
     }
 
-    private static SpeciesFormInfo ConvertToModel(Species entity) => entity.ToSpeciesFormInfo();
+    private static SpeciesFormInfo ConvertToModel(Species entity)
+    {
+        var model = entity.ToSpeciesFormInfo();
+        var baseForm = Species.GetSpeciesForm(model.Id.Species, 0).ToSpeciesFormInfo();
+        if (
+            SequenceEqual(baseForm.WildItemCommon, model.WildItemCommon)
+            && SequenceEqual(baseForm.WildItemUncommon, model.WildItemUncommon)
+            && SequenceEqual(baseForm.WildItemRare, model.WildItemRare)
+        )
+        {
+            model.WildItemCommon = null;
+            model.WildItemUncommon = null;
+            model.WildItemRare = null;
+        }
+
+        return model;
+    }
 
     private static void ValidateCompiledModel(SpeciesFormInfo model, FileLineData fileLineData)
     {
@@ -201,43 +213,6 @@ public sealed partial class PokemonFormCompiler : PbsCompilerBase<SpeciesFormInf
         }
 
         return allSpecies.Select(x => x with { Evolutions = [.. newEvolutions[x.Id]] }).ToList();
-    }
-
-    protected override object? GetPropertyForPbs(SpeciesFormInfo model, string key)
-    {
-        var original = base.GetPropertyForPbs(model, key);
-        if (original is null)
-            return null;
-
-        var baseForm = Species.GetSpeciesForm(model.Id.Species, 0).ToSpeciesFormInfo();
-
-        if (
-            key
-                is nameof(SpeciesFormInfo.WildItemCommon)
-                    or nameof(SpeciesFormInfo.WildItemUncommon)
-                    or nameof(SpeciesFormInfo.WildItemRare)
-            && (
-                !SequenceEqual(baseForm.WildItemCommon, model.WildItemCommon)
-                || !SequenceEqual(baseForm.WildItemUncommon, model.WildItemUncommon)
-                || !SequenceEqual(baseForm.WildItemRare, model.WildItemRare)
-            )
-        )
-        {
-            return original;
-        }
-
-        var property = PropertyMap[key];
-        var baseFormValue = property.GetValue(baseForm);
-
-        if (CompareEqual(original, baseFormValue))
-            return null;
-
-        if (key is nameof(SpeciesFormInfo.Height) or nameof(SpeciesFormInfo.Weight) && original is decimal asDecimal)
-        {
-            return asDecimal.ToString("0.0");
-        }
-
-        return original;
     }
 
     private static bool SequenceEqual<T>(IEnumerable<T>? enumerable1, IEnumerable<T>? enumerable2)

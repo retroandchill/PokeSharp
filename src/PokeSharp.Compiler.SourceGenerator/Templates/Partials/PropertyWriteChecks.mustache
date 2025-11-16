@@ -1,0 +1,21 @@
+{{#IsNullable}}
+if ({{Name}}{{#IsValueType}}.HasValue{{/IsValueType}}{{^IsValueType}} is not null{{/IsValueType}}{{#HasValidation}} && {{ValidateMethodName}}({{Name}}{{#IsValueType}}.Value{{/IsValueType}}){{/HasValidation}})
+{
+    {{#WithIndent '    '}}
+    {{>PropertyWrite}}
+    {{/WithIndent}}
+}
+{{/IsNullable}}
+{{^IsNullable}}
+{{#HasValidation}}
+if ({{ValidateMethodName}}({{Name}}))
+{
+    {{#WithIndent '    '}}
+    {{>PropertyWrite}}
+    {{/WithIndent}}
+}
+{{/HasValidation}}
+{{^HasValidation}}
+{{>PropertyWrite}}
+{{/HasValidation}}
+{{/IsNullable}}

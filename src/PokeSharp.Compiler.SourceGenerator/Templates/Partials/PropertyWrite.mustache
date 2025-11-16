@@ -1,0 +1,9 @@
+{{#AppearsOnce}}
+yield return $"{{KeyName}} = {Write_{{Name}}({{Name}}{{>NullableAccess}})}";
+{{/AppearsOnce}}
+{{^AppearsOnce}}
+foreach (var element in {{Name}}{{>NullableAccess}})
+{
+    yield return $"{{KeyName}} = {Write_{{Name}}(element)}";
+}
+{{/AppearsOnce}}

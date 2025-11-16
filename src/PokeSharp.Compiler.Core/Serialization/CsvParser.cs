@@ -1,13 +1,10 @@
-﻿using System.Collections.Immutable;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Microsoft.CodeAnalysis.Operations;
 using PokeSharp.Abstractions;
-using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Core.Data;
 
 namespace PokeSharp.Compiler.Core.Serialization;
@@ -58,32 +55,6 @@ public static partial class CsvParser
         return values.Where(v => v is not null)!;
     }
 
-    public static object? CastCsvValue(string value, SchemaTypeData schema)
-    {
-        return schema.Type switch
-        {
-            PbsFieldType.Integer => ParseInt(value),
-            PbsFieldType.UnsignedInteger => ParseUnsigned(value),
-            PbsFieldType.PositiveInteger => ParsePositive(value),
-            PbsFieldType.Hexadecimal => ParseHex(value),
-            PbsFieldType.Float => ParseFloat(value),
-            PbsFieldType.Boolean => ParseBoolean(value),
-            PbsFieldType.Name => ParseName(value),
-            PbsFieldType.String or PbsFieldType.UnformattedText => value,
-            PbsFieldType.Symbol => ParseSymbol(value),
-            PbsFieldType.Enumerable => ParseEnumField(value, schema.EnumType, schema.AllowNone),
-            PbsFieldType.EnumerableOrInteger => ParseEnumOrInt(value, schema.EnumType, schema.AllowNone),
-            _ => throw new SerializationException($"Unknown schema '{schema}'."),
-        };
-    }
-
-    public static long ParseInt(string value)
-    {
-        return long.TryParse(value, out var result)
-            ? result
-            : throw new SerializationException($"Field '{value}' is not an integer.");
-    }
-
     public static T ParseInt<T>(string value)
         where T : struct, INumber<T>
     {
@@ -113,32 +84,12 @@ public static partial class CsvParser
         return result;
     }
 
-    public static ulong ParsePositive(string value)
-    {
-        if (!ulong.TryParse(value, out var result) || result == 0)
-        {
-            throw new SerializationException($"Field '{value}' is not a positive integer.");
-        }
-
-        return result;
-    }
-
     public static T ParsePositive<T>(string value)
         where T : struct, INumber<T>, IComparisonOperators<T, int, bool>
     {
         if (!T.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) || result <= 0)
         {
             throw new SerializationException($"Field '{value}' is not a positive integer or 0.");
-        }
-
-        return result;
-    }
-
-    public static ulong ParseHex(string value)
-    {
-        if (!ulong.TryParse(value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
-        {
-            throw new SerializationException($"Field '{value}' is not a hexadecimal number.");
         }
 
         return result;
@@ -153,13 +104,6 @@ public static partial class CsvParser
         }
 
         return result;
-    }
-
-    public static decimal ParseFloat(string value)
-    {
-        return decimal.TryParse(value, out var result)
-            ? result
-            : throw new SerializationException($"Field '{value}' is not a number.");
     }
 
     public static T ParseFloat<T>(string value)
@@ -308,13 +252,6 @@ public static partial class CsvParser
             : throw new SerializationException($"Could not parse {value} to type {typeof(TKey)}");
     }
 
-    public static object? ParseEnumOrInt(string value, Type? enumeration, bool allowNone)
-    {
-        return int.TryParse(value, out var result)
-            ? ConvertToEnumType(result, enumeration)
-            : ParseEnumField(value, enumeration, allowNone);
-    }
-
     public static TEnum ParseEnumOrInt<TEnum>(string value)
         where TEnum : struct, Enum
     {
@@ -326,16 +263,6 @@ public static partial class CsvParser
         return long.TryParse(value, out var asSigned)
             ? ConvertToEnumType<TEnum>((ulong)asSigned)
             : ParseEnumField<TEnum>(value);
-    }
-
-    private static object? ConvertToEnumType(int value, Type? enumType)
-    {
-        if (enumType is null)
-            return value;
-
-        return Enum.IsDefined(enumType, value)
-            ? Enum.ToObject(enumType, value)
-            : throw new SerializationException($"Value {value} is not a valid value for {enumType}.");
     }
 
     private static TEnum ConvertToEnumType<TEnum>(ulong value)
@@ -350,74 +277,5 @@ public static partial class CsvParser
             sizeof(byte) => Unsafe.As<byte, TEnum>(ref Unsafe.As<ulong, byte>(ref value)),
             _ => throw new SerializationException($"Enum type {typeof(TEnum)} is not supported."),
         };
-    }
-
-    public static object? GetCsvRecord(string record, SchemaEntry schema)
-    {
-        var result = new List<object?>();
-        var repeat = false;
-        var schemaLength = schema.TypeEntries.Length;
-        switch (schema.FieldStructure)
-        {
-            case PbsFieldStructure.Array:
-                repeat = true;
-                break;
-            case PbsFieldStructure.Repeating:
-                schemaLength--;
-                break;
-            case PbsFieldStructure.Single:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(schema), schema.FieldStructure, null);
-        }
-
-        var subarrays = repeat && schema.TypeEntries.Length > 1;
-        var values = SplitCsvLine(record).ToImmutableArray();
-        if (
-            (values.Length == 0 || values.Length == 1 && string.IsNullOrWhiteSpace(values[0]))
-            && schema.FieldStructure == PbsFieldStructure.Array
-        )
-            return new List<object?>();
-
-        var index = -1;
-        while (true)
-        {
-            var parsedValues = new List<object?>();
-            foreach (var typeData in schema.TypeEntries)
-            {
-                index++;
-                if (typeData.IsOptional && (values.Length <= index || string.IsNullOrEmpty(values[index])))
-                {
-                    parsedValues.Add(null);
-                    continue;
-                }
-
-                if (typeData.Type == PbsFieldType.UnformattedText)
-                {
-                    parsedValues.Add(record);
-                    index = values.Length;
-                    break;
-                }
-
-                parsedValues.Add(CastCsvValue(values[index], typeData));
-            }
-
-            if (parsedValues.Count > 0)
-            {
-                if (subarrays)
-                {
-                    result.Add(parsedValues);
-                }
-                else
-                {
-                    result.AddRange(parsedValues);
-                }
-            }
-
-            if (!repeat || index >= values.Length - 1)
-                break;
-        }
-
-        return !repeat && schemaLength == 1 ? result[0] : result;
     }
 }

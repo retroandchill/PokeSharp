@@ -128,6 +128,8 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             handlebars.RegisterTemplate("EvaluateComplexType", SourceTemplates.EvaluateComplexTypeTemplate);
             handlebars.RegisterTemplate("WriteMethodCall", SourceTemplates.WriteMethodCallTemplate);
             handlebars.RegisterTemplate("NullableAccess", SourceTemplates.NullableAccessTemplate);
+            handlebars.RegisterTemplate("PropertyWrite", SourceTemplates.PropertyWriteTemplate);
+            handlebars.RegisterTemplate("PropertyWriteChecks", SourceTemplates.PropertyWriteChecksTemplate);
 
             handlebars.RegisterHelper(
                 "WithIndent",
@@ -242,7 +244,13 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         }
 
         if (sectionName is not null && errors.Count == 0)
-            return new PbsSchema(targetType, keyValuePairs.ToImmutable(), info.BaseFilename, info.IsOptional);
+            return new PbsSchema(
+                targetType,
+                keyValuePairs.ToImmutable(),
+                info.BaseFilename,
+                info.IsOptional,
+                info.ComparisonFactory
+            );
 
         if (sectionName is null)
         {
@@ -298,6 +306,10 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             IsSectionName = isSectionName,
             IsFixedSize = typeInfo?.FixedSize > 0,
             FieldStructure = GetFieldStructure(propertySymbol, typeInfo),
+            CustomValidateMethod = propertySymbol.TryGetPbsWriteValidationInfo(out var info) ? info.MethodName : null,
+            CustomWriteMethod = propertySymbol.TryGetPbsCustomWriteInfo(out var customWriteInfo)
+                ? customWriteInfo.MethodName
+                : null,
         };
     }
 

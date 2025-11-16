@@ -21,6 +21,7 @@ public partial class MoveInfo
     public DamageCategory Category { get; set; } = DamageCategory.Status;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
+    [PbsWriteValidation(nameof(ValidateNumericValue))]
     public int Power { get; set; }
 
     [PbsType(PbsFieldType.UnsignedInteger)]
@@ -32,6 +33,7 @@ public partial class MoveInfo
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Target), AllowNone = true)]
     public Name Target { get; set; }
 
+    [PbsWriteValidation(nameof(ValidateNumericValue))]
     public int Priority { get; set; }
 
     public Name FunctionCode { get; set; }
@@ -39,8 +41,11 @@ public partial class MoveInfo
     public List<string> Flags { get; set; } = [];
 
     [PbsType(PbsFieldType.UnsignedInteger)]
+    [PbsWriteValidation(nameof(ValidateNumericValue))]
     public int EffectChance { get; set; }
 
     [PbsType(PbsFieldType.UnformattedText)]
     public Text Description { get; set; } = TextConstants.ThreeQuestions;
+
+    private static bool ValidateNumericValue(int value) => value > 0;
 }

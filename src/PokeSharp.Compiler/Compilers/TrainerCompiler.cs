@@ -24,17 +24,10 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
 
     private readonly Dictionary<string, PropertyInfo> _pokemonPropertyMap = new();
 
-    private static readonly SchemaEntry PokemonSchemaEntry = new(
-        typeof(EnemyTrainerInfo).GetProperty(nameof(EnemyTrainerInfo.Pokemon))!,
-        [
-            //new SchemaTypeData(PbsFieldType.Enumerable, false, typeof(Species)),
-            //new SchemaTypeData(PbsFieldType.PositiveInteger),
-        ]
-    );
-
     [CreateSyncVersion]
     public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
+        /*
         var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
         schema.Add(PokemonSchemaEntry.PropertyName, PokemonSchemaEntry);
         var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
@@ -146,6 +139,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
         }
 
         await EnemyTrainer.ImportAsync(result, cancellationToken);
+        */
     }
 
     private static void ValidateCompiledTrainer(EnemyTrainerInfo trainer, FileLineData fileLineData)
@@ -245,6 +239,7 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
     [CreateSyncVersion]
     public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
     {
+        /*
         var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
         var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
 
@@ -319,5 +314,6 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
             nameof(TrainerPokemonInfo.Shiny) when model.SuperShiny is true => null,
             _ => elementValue,
         };
+        */
     }
 }

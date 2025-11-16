@@ -77,7 +77,7 @@ namespace PokeSharp.Compiler.SourceGenerator.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {{#AppearsOnce}}{{#IsNullable}}{{#IsValueType}}.Value{{/IsValueType}}{{/IsNullable}}{{/AppearsOnce}}.
+        ///   Looks up a localized string similar to {{#IsNullable}}{{#IsValueType}}.Value{{/IsValueType}}{{/IsNullable}}.
         /// </summary>
         internal static string NullableAccessTemplate {
             get {
@@ -128,6 +128,49 @@ namespace PokeSharp.Compiler.SourceGenerator.Properties {
         internal static string PbsSerializerTemplate {
             get {
                 return ResourceManager.GetString("PbsSerializerTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{#IsNullable}}
+        ///if ({{Name}}{{#IsValueType}}.HasValue{{/IsValueType}}{{^IsValueType}} is not null{{/IsValueType}}{{#HasValidation}} &amp;&amp; {{ValidateMethodName}}({{Name}}{{#IsValueType}}.Value{{/IsValueType}}){{/HasValidation}})
+        ///{
+        ///    {{#WithIndent &apos;    &apos;}}
+        ///    {{&gt;PropertyWrite}}
+        ///    {{/WithIndent}}
+        ///}
+        ///{{/IsNullable}}
+        ///{{^IsNullable}}
+        ///{{#HasValidation}}
+        ///if ({{ValidateMethodName}}({{Name}}))
+        ///{
+        ///    {{#WithIndent &apos;    &apos;}}
+        ///    {{&gt;PropertyWrite}}
+        ///    {{/WithIndent}}
+        ///}
+        ///{{/HasValidation}}
+        ///{{^HasValidati [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string PropertyWriteChecksTemplate {
+            get {
+                return ResourceManager.GetString("PropertyWriteChecksTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{#AppearsOnce}}
+        ///yield return $&quot;{{KeyName}} = {Write_{{Name}}({{Name}}{{&gt;NullableAccess}})}&quot;;
+        ///{{/AppearsOnce}}
+        ///{{^AppearsOnce}}
+        ///foreach (var element in {{Name}}{{&gt;NullableAccess}})
+        ///{
+        ///    yield return $&quot;{{KeyName}} = {Write_{{Name}}(element)}&quot;;
+        ///}
+        ///{{/AppearsOnce}}.
+        /// </summary>
+        internal static string PropertyWriteTemplate {
+            get {
+                return ResourceManager.GetString("PropertyWriteTemplate", resourceCulture);
             }
         }
         

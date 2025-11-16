@@ -8,6 +8,8 @@ namespace PokeSharp.Compiler.SourceGenerator.Model;
 internal readonly record struct PbsDataInfo(string BaseFilename)
 {
     public bool IsOptional { get; init; } = false;
+
+    public string? ComparisonFactory { get; init; }
 }
 
 [AttributeInfoType<PbsKeyNameAttribute>]
@@ -24,3 +26,9 @@ internal sealed record PbsTypeInfo(PbsFieldType FieldType)
 
     public bool FixedSizeIsMax { get; init; }
 }
+
+[AttributeInfoType<PbsWriteValidationAttribute>]
+internal readonly record struct PbsWriteValidationInfo(string MethodName);
+
+[AttributeInfoType<PbsCustomWriteAttribute>]
+internal readonly record struct PbsCustomWriteInfo(string MethodName);

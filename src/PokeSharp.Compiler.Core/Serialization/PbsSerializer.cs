@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Immutable;
-using System.Reflection;
+﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using PokeSharp.Compiler.Core.Schema;
-using PokeSharp.Compiler.Core.Serialization.Converters;
 using PokeSharp.Compiler.Core.Utils;
 using Zomp.SyncMethodGenerator;
 
@@ -24,13 +20,6 @@ public readonly record struct ModelWithLine<T>(T Model, FileLineData LineData);
 
 public partial class PbsSerializer
 {
-    private readonly SchemaBuilder _schemaBuilder = new();
-
-    public List<IPbsConverter> Converters { get; } =
-    [new LocalizingTextConverter(), new NumericTypeConverter(), new CollectionConverter(), new ComplexTypeConverter()];
-
-    public IReadOnlyDictionary<string, SchemaEntry> GetSchema(Type type) => _schemaBuilder.BuildSchema(type);
-
     [CreateSyncVersion]
     public static async IAsyncEnumerable<PbsSection> ParseFileSectionsAsync(
         StreamReader fileReader,
@@ -200,23 +189,11 @@ public partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public async Task WritePbsFileAsync<T>(
-        string path,
-        IEnumerable<T> entities,
-        Func<T, string, object?> propertyGetter
-    )
+    public static async Task WritePbsFileAsync<T>(string path, IEnumerable<T> entities)
+        where T : IPbsDataModel<T>
     {
-        var attribute = typeof(T).GetCustomAttribute<PbsDataAttribute>()!;
-
-        if (attribute.IsOptional && !File.Exists(path))
+        if (T.IsOptional && !File.Exists(path))
             return;
-
-        var schema = _schemaBuilder.BuildSchema(typeof(T));
-
-        if (!schema.TryGetValue("SectionName", out var sectionName))
-        {
-            throw new PbsSchemaException($"Schema for type '{typeof(T).Name}' does not have a 'SectionName' field.");
-        }
 
         await FileUtils.WriteFileWithBackupAsync(path, WriteAction);
         return;
@@ -225,35 +202,13 @@ public partial class PbsSerializer
         {
             await AddPbsHeaderToFileAsync(fileWriter);
 
+            // ReSharper disable once PossibleMultipleEnumeration
             foreach (var entity in entities)
             {
                 await fileWriter.WriteLineAsync("#-------------------------------");
-                await fileWriter.WriteLineAsync($"[{propertyGetter(entity, sectionName.PropertyName)}]");
-
-                foreach (var (key, value) in schema)
+                foreach (var line in entity.WritePbsData())
                 {
-                    if (key == "SectionName")
-                        continue;
-
-                    var elementValue = propertyGetter(entity, value.PropertyName);
-                    if (elementValue is null)
-                        continue;
-
-                    if (value.FieldStructure == PbsFieldStructure.Repeating && elementValue is IEnumerable list)
-                    {
-                        foreach (var item in list)
-                        {
-                            await fileWriter.WriteAsync($"{key} = ");
-                            await CsvWriter.WriteCsvRecordAsync(item, fileWriter, value);
-                            await fileWriter.WriteLineAsync();
-                        }
-                    }
-                    else
-                    {
-                        await fileWriter.WriteAsync($"{key} = ");
-                        await CsvWriter.WriteCsvRecordAsync(elementValue, fileWriter, value);
-                        await fileWriter.WriteLineAsync();
-                    }
+                    await fileWriter.WriteLineAsync(line);
                 }
             }
         }

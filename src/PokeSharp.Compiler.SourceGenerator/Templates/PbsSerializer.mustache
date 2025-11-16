@@ -159,47 +159,52 @@ namespace {{Namespace}};
 
     public IEnumerable<string> WritePbsData()
     {
+        {{#HasComparisonFactory}}
+        var comparison = {{ComparisonFactory}}();
+        {{/HasComparisonFactory}}
         {{#Properties}}
         {{#IsSectionName}}
         yield return $"[{Write_{{Name}}({{Name}})}]";    
         {{/IsSectionName}}
         {{/Properties}}
-
         {{#Properties}}
         {{^IsSectionName}}
-        {{#AppearsOnce}}
-        var prop_{{Name}}_str = Write_{{Name}}({{Name}});    
-        if (prop_{{Name}}_str is not null)
+
+        {{#if ../HasComparisonFactory}}
+        if ({{#IsSequence}}!{{Name}}.SequenceEqual(comparison.{{Name}}){{/IsSequence}}{{^IsSequence}}{{Name}} != comparison.{{Name}}{{/IsSequence}})
         {
-            yield return $"{{KeyName}} = {prop_{{Name}}_str}";
+            {{#WithIndent '            '}}
+            {{>PropertyWriteChecks}}    
+            {{/WithIndent}}
         }
-        {{/AppearsOnce}}
-        {{^AppearsOnce}}
-        foreach (var element in {{Name}})
-        {
-            var prop_{{Name}}_str = Write_{{Name}}(element);    
-            if (prop_{{Name}}_str is not null)
-            {
-                yield return $"{{KeyName}} = {prop_{{Name}}_str}";
-            }
-        }
-        {{/AppearsOnce}}
+        {{/if}}
+        {{^if ../HasComparisonFactory}}
+        {{#WithIndent '        '}}
+        {{>PropertyWriteChecks}}    
+        {{/WithIndent}}
+        {{/if}}
         {{/IsSectionName}}    
         {{/Properties}}
     }
     {{#Properties}}
     
-    private static string Write_{{Name}}({{RawParsedType}} value)
+    {{#HasValidation}}
+    {{#HasBuiltInValidation}}
+    private {{#ValidateMethodIsStatic}}static {{/ValidateMethodIsStatic}}bool {{ValidateMethodName}}({{ParsedType}} value)
     {
-        {{#AppearsOnce}}
-        {{#IsNullable}}
-        if ({{#IsValueType}}!value.HasValue{{/IsValueType}}{{^IsValueType}}value is null{{/IsValueType}}) return null;
-        {{/IsNullable}}
-        {{/AppearsOnce}}
-        {{#IsCollection}}
-        if (value.Count == 0) return null;
-        {{/IsCollection}}
-
+        {{#HasCustomValidation}}if ({{CustomValidateMethod}}(value)) return true;{{/HasCustomValidation}}
+        {{#IsCollection}}if (value.Count == 0) return false;{{/IsCollection}}
+        return {{#IsBoolean}}value{{/IsBoolean}}{{^IsBoolean}}true{{/IsBoolean}};
+    }
+    
+    {{/HasBuiltInValidation}}
+    {{/HasValidation}}    
+    private {{#CustomWriteMethodIsStatic}}static {{/CustomWriteMethodIsStatic}}string Write_{{Name}}({{ParsedType}} value)
+    {
+        {{#HasCustomWriteMethod}}
+        return {{CustomWriteMethod}}(value);
+        {{/HasCustomWriteMethod}}
+        {{^HasCustomWriteMethod}}
         {{#IsSimpleType}}
         return {{>WriteMethodCall Value='value'}};
         {{/IsSimpleType}}
@@ -209,11 +214,12 @@ namespace {{Namespace}};
         {{#IsFixedSize}}
         var output = new List<string>({{MaxLength}});
         {{#TypeEntries}}
-        {{#IsOptional}}if (value{{>NullableAccess}}.Count > {{Index}}) {{/IsOptional}}output.Add({{#Indexed}}{{>WriteMethodCall Value='value[{{Index}}]'}}{{/Indexed}});
+        {{#IsOptional}}if (value.Count > {{Index}}) {{/IsOptional}}output.Add({{#Indexed}}{{>WriteMethodCall Value='value[{{Index}}]'}}{{/Indexed}});
         {{/TypeEntries}}
+        return string.Join(',', output);    
         {{/IsFixedSize}}
         {{^IsFixedSize}} 
-        return string.Join(',', value{{>NullableAccess}}.SelectMany(IEnumerable<string> (x) =>
+        return string.Join(',', value.SelectMany(IEnumerable<string> (x) =>
             {
                 var ({{#TypeEntries}}item{{Index}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}) = x;
                 return [{{#TypeEntries}}{{#Indexed}}{{>WriteMethodCall Value='item{{Index}}'}}{{/Indexed}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}];
@@ -221,12 +227,11 @@ namespace {{Namespace}};
         {{/IsFixedSize}}
         {{/NeedsSubsections}}
         {{^NeedsSubsections}}
-        return string.Join(',', value{{>NullableAccess}}.Select(x => {{>WriteMethodCall Value='x'}}));
+        return string.Join(',', value.Select(x => {{>WriteMethodCall Value='x'}}));
         {{/NeedsSubsections}}
-        return null;
         {{/IsCollection}}
         {{^IsCollection}}
-        var ({{#TypeEntries}}item{{Index}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}) = value{{>NullableAccess}};
+        var ({{#TypeEntries}}item{{Index}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}) = value;
         var output = new List<string>({{MaxLength}});
         {{#TypeEntries}}
         {{#IsOptional}}if (item{{Index}} != {{DefaultValue}}) {{/IsOptional}}output.Add({{#Indexed}}{{>WriteMethodCall Value='item{{Index}}'}}{{/Indexed}});
@@ -234,6 +239,7 @@ namespace {{Namespace}};
         return string.Join(',', output);
         {{/IsCollection}}
         {{/IsSimpleType}}
+        {{/HasCustomWriteMethod}}
     }
     {{/Properties}}
 }

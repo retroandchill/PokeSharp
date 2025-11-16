@@ -1,7 +1,6 @@
 ﻿using Injectio.Attributes;
 using Microsoft.Extensions.Options;
 using PokeSharp.Abstractions;
-using PokeSharp.State;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Game;
@@ -10,6 +9,7 @@ using PokeSharp.PokemonModel;
 using PokeSharp.Services.DayNightCycle;
 using PokeSharp.Services.Overworld;
 using PokeSharp.Settings;
+using PokeSharp.State;
 using PokeSharp.State;
 using PokeSharp.Trainers;
 using PokeSharp.Utilities;

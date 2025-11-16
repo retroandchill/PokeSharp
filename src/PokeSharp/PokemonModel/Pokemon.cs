@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Core.Engine;
-using PokeSharp.State;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -16,6 +15,7 @@ using PokeSharp.Services.Healing;
 using PokeSharp.Services.Moves;
 using PokeSharp.Services.Screens;
 using PokeSharp.Settings;
+using PokeSharp.State;
 using PokeSharp.Trainers;
 using ZLinq;
 
@@ -337,7 +337,7 @@ public class Pokemon
             if (_shiny.HasValue)
                 return _shiny.Value;
 
-            _shiny = ShinyValue < GameServices.GameSettings.ShinyChance;
+            _shiny = ShinyValue < GameServices.GameSettings.ShinyPokemonChance;
 
             return _shiny.Value;
         }

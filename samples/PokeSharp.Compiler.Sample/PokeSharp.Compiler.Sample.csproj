@@ -16,4 +16,7 @@
   <ItemGroup>
     <Content Include="PBS\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Settings\" />
+  </ItemGroup>
 </Project>

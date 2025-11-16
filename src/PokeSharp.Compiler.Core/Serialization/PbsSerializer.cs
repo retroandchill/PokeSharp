@@ -18,7 +18,7 @@ public readonly record struct LineWithNumber(string Line, int LineNumber);
 
 public readonly record struct ModelWithLine<T>(T Model, FileLineData LineData);
 
-public partial class PbsSerializer
+public static partial class PbsSerializer
 {
     [CreateSyncVersion]
     public static async IAsyncEnumerable<PbsSection> ParseFileSectionsAsync(
@@ -96,7 +96,7 @@ public partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public async IAsyncEnumerable<LineWithNumber> ParseFileLinesAsync(
+    public static async IAsyncEnumerable<LineWithNumber> ParseFileLinesAsync(
         string filename,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
@@ -115,7 +115,7 @@ public partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public async IAsyncEnumerable<LineWithNumber> ParsePreppedLinesAsync(
+    public static async IAsyncEnumerable<LineWithNumber> ParsePreppedLinesAsync(
         string filename,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )

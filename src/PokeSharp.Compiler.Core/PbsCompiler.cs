@@ -9,13 +9,13 @@ public interface IPbsCompiler
 {
     int Order { get; }
 
-    void Compile(PbsSerializer serializer);
+    void Compile();
 
-    Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
+    Task CompileAsync(CancellationToken cancellationToken = default);
 
-    void WriteToFile(PbsSerializer serializer);
+    void WriteToFile();
 
-    Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
+    Task WriteToFileAsync(CancellationToken cancellationToken = default);
 }
 
 public abstract class PbsCompilerBase<TModel> : IPbsCompiler
@@ -24,13 +24,13 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
     public abstract int Order { get; }
     protected string FileName { get; } = Path.Join("PBS", $"{TModel.BasePath}.txt");
 
-    public abstract void Compile(PbsSerializer serializer);
+    public abstract void Compile();
 
-    public abstract Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
+    public abstract Task CompileAsync(CancellationToken cancellationToken = default);
 
-    public abstract void WriteToFile(PbsSerializer serializer);
+    public abstract void WriteToFile();
 
-    public abstract Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default);
+    public abstract Task WriteToFileAsync(CancellationToken cancellationToken = default);
 }
 
 public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TModel>
@@ -38,7 +38,7 @@ public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TMo
     where TModel : IPbsDataModel<TModel>
 {
     [CreateSyncVersion]
-    public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public override async Task CompileAsync(CancellationToken cancellationToken = default)
     {
         var entities = await PbsSerializer
             .ReadFromFileAsync<TModel>(FileName, cancellationToken)
@@ -54,7 +54,7 @@ public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TMo
     }
 
     [CreateSyncVersion]
-    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         await PbsSerializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel));
     }

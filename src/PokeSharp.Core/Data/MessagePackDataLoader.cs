@@ -27,7 +27,7 @@ public partial class MessagePackDataLoader : IDataLoader
         {
             Directory.CreateDirectory("Data");
         }
-        
+
         await using var fileStream = File.OpenWrite(Path.Join("Data", $"{outputPath}.pkdata"));
         await MessagePackSerializer.SerializeAsync(fileStream, entities, _options, cancellationToken);
     }

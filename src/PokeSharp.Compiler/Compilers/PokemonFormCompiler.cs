@@ -22,7 +22,7 @@ public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterP
     private readonly ImmutableArray<IEvolutionParameterParser> _evolutionParsers = [.. evolutionParameterParsers];
 
     [CreateSyncVersion]
-    public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public override async Task CompileAsync(CancellationToken cancellationToken = default)
     {
         var entities = await PbsSerializer
             .ReadFromFileAsync<SpeciesFormInfo>(
@@ -48,7 +48,7 @@ public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterP
     }
 
     [CreateSyncVersion]
-    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         await PbsSerializer.WritePbsFileAsync(FileName, Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel));
     }

@@ -9,7 +9,6 @@ namespace PokeSharp.Compiler.Core;
 public sealed partial class PbsCompilerService
 {
     private readonly ImmutableArray<IPbsCompiler> _compilers;
-    private readonly PbsSerializer _serializer = new();
 
     public PbsCompilerService(IEnumerable<IPbsCompiler> compilers)
     {
@@ -21,7 +20,7 @@ public sealed partial class PbsCompilerService
     {
         foreach (var compiler in _compilers)
         {
-            await compiler.CompileAsync(_serializer, cancellationToken);
+            await compiler.CompileAsync(cancellationToken);
         }
     }
 
@@ -30,7 +29,7 @@ public sealed partial class PbsCompilerService
     {
         foreach (var compiler in _compilers)
         {
-            await compiler.WriteToFileAsync(_serializer, cancellationToken);
+            await compiler.WriteToFileAsync(cancellationToken);
         }
     }
 }

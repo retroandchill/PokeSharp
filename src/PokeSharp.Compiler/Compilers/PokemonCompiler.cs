@@ -21,7 +21,7 @@ public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolu
 
     private readonly ImmutableArray<IEvolutionParameterParser> _evolutionParsers = [.. evolutionParameterParsers];
 
-    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         await PbsSerializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel));
     }

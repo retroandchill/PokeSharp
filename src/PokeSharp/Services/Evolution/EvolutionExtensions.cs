@@ -68,19 +68,19 @@ public static class EvolutionExtensions
                 return species.SpeciesId;
 
             var result = species.SpeciesId;
-            foreach (var evo in species.Evolutions.Where(evo => !evo.IsPrevious))
+            foreach (var evo in species.Evolutions.Where(evo => evo.IsPrevious))
             {
                 if (checkItems)
                 {
-                    var incense = Species.Get(species.PreviousSpecies).Incense;
+                    var incense = Species.Get(evo.Species).Incense;
                     if (incense.IsNone || incense == item1 || incense == item2)
                     {
-                        result = species.PreviousSpecies;
+                        result = evo.Species;
                     }
                 }
                 else
                 {
-                    result = species.PreviousSpecies;
+                    result = evo.Species;
                 }
             }
 
@@ -92,7 +92,7 @@ public static class EvolutionExtensions
             var babySpecies = species.GetBabySpecies();
             yield return babySpecies;
 
-            foreach (var evo in species.GetFamilyEvolutions(false))
+            foreach (var evo in Species.Get(babySpecies).GetFamilyEvolutions(false))
             {
                 yield return evo.Species;
             }

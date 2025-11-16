@@ -554,7 +554,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
                 })
                 .Select(
                     (t, i) =>
-                        GetFieldType(t.ConstructorParameter, t.ParameterType, typeAttribute, i) with
+                        GetFieldType(t.ConstructorParameter, GetUnderlyingType(t.ParameterType), typeAttribute, i) with
                         {
                             DefaultValue = t.ConstructorParameter.GetDefaultValueString(),
                             IsLast = i == constructor.Parameters.Length - 1,

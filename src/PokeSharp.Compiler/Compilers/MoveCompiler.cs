@@ -9,7 +9,7 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class MoveCompiler(ILogger<MoveCompiler> logger) : PbsCompiler<Move, MoveInfo>
 {
     public override int Order => 5;

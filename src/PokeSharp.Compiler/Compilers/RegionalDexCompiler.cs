@@ -13,7 +13,7 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public partial class RegionalDexCompiler(IDataLoader dataLoader) : IPbsCompiler
+public partial class RegionalDexCompiler : IPbsCompiler
 {
     public int Order => 11;
 

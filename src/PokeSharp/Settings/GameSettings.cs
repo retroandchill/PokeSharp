@@ -1,4 +1,7 @@
 ﻿using System.Collections.Immutable;
+using Injectio.Attributes;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using PokeSharp.Abstractions;
 using PokeSharp.Core;
@@ -81,8 +84,11 @@ public readonly record struct BadgeBoosts(int Attack, int Defense, int SpecialAt
 /// which are used in and out of battle (you can of course change those settings to suit your game).
 /// Note that this isn't perfect. Essentials doesn't accurately replicate every single generation's mechanics.
 /// It's considered to be good enough. Only generations 5 and later are reasonably supported.</param>
-public record GameSettings(string Version = "1.0.0", int MechanicsGeneration = 8)
+public record GameSettings(string Version, int MechanicsGeneration = 8)
 {
+    public GameSettings()
+        : this("1.0.0") { }
+
     #region The Player and NPCs
 
     /// <summary>
@@ -899,4 +905,7 @@ public static class GameSettingsServiceShortcut
     {
         public static GameSettings GameSettings => _cachedService.Instance.CurrentValue;
     }
+
+    [RegisterServices]
+    public static void Register(IServiceCollection services) { }
 }

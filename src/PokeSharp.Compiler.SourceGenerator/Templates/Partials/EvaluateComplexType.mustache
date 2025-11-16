@@ -18,7 +18,7 @@ if (splitLine.Length > {{MaxLength}})
 {{^IsFixedSize}}
 {{ResultLineStart}}new {{ElementType}}(
 {{#TypeEntries}}
-    {{#Indexed}}{{#IsOptional}}splitLine.Length > {{Index}} ? {{/IsOptional}}{{>ParseLogic OutputOperation='' Parameter='splitLine[{{Index}}]'}}{{#IsOptional}} : {{DefaultValue}}{{/IsOptional}}{{~^IsLast~}},{{~/IsLast~}}{{/Indexed}}
+    {{#Indexed}}{{#IsOptional}}splitLine.Length > {{Index}} && !string.IsNullOrWhiteSpace(splitLine[{{Index}}]) ? {{/IsOptional}}{{>ParseLogic OutputOperation='' Parameter='splitLine[{{Index}}]'}}{{#IsOptional}} : {{DefaultValue}}{{/IsOptional}}{{~^IsLast~}},{{~/IsLast~}}{{/Indexed}}
 {{/TypeEntries}}
 ){{ResultLineEnd}}
 {{/IsFixedSize}}

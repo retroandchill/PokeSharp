@@ -11,7 +11,7 @@ using ZLinq;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class TypeCompiler : PbsCompiler<PokemonType, PokemonTypeInfo>
 {
     public override int Order => 3;

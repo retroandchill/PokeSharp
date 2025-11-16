@@ -7,7 +7,7 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class ItemCompiler : PbsCompiler<Item, ItemInfo>
 {
     public override int Order => 6;

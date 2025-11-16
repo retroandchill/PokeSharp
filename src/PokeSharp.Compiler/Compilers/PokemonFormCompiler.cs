@@ -13,7 +13,7 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers)
     : PbsCompilerBase<SpeciesFormInfo>
 {

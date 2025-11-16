@@ -6,7 +6,7 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public class AbilityCompiler : PbsCompiler<Ability, AbilityInfo>
 {
     public override int Order => 4;

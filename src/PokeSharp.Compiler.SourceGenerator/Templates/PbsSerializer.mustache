@@ -105,7 +105,7 @@ namespace {{Namespace}};
         
         if (!found_{{Name}})
         {
-            throw new PbsParseException($"Missing required property '{{Name}}'\n{lineData.LineReport}");
+            throw new PbsParseException($"Missing required property '{{Name}}'\n{section.HeaderLine.LineReport}");
         }    
         {{/AppearsOnce}}
         {{/IsRequired}}
@@ -337,7 +337,17 @@ namespace {{Namespace}};
         var output = new List<string>({{MaxLength}});
         {{#TypeEntries}}
         {{#IsOptional}}if (item{{Index}} != {{DefaultValue}}) {{/IsOptional}}output.Add({{#Indexed}}{{>WriteMethodCall Value='item{{Index}}'}}{{/Indexed}});
+        {{#IsOptional}}else output.Add(string.Empty);{{/IsOptional}}
         {{/TypeEntries}}
+        {{^NoOptionalParameters}}
+        for (var i = output.Count - 1; i >= 0; i--)
+        {
+            if (!string.IsNullOrWhiteSpace(output[i])) break;
+
+            output.RemoveAt(i);
+        }    
+        {{/NoOptionalParameters}}
+
         return string.Join(',', output);
         {{/IsCollection}}
         {{/IsSimpleType}}

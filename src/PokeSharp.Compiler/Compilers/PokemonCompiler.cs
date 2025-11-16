@@ -13,7 +13,7 @@ using ZLinq;
 
 namespace PokeSharp.Compiler.Compilers;
 
-[RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers)
     : PbsCompiler<Species, SpeciesInfo>
 {

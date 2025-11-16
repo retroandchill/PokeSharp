@@ -19,10 +19,14 @@ public static partial class TrainerMapper
 
     public static partial EnemyTrainerInfo ToDto(this EnemyTrainer entity);
 
+    [MapPropertyFromSource(nameof(TrainerPokemonInfo.Id))]
     [MapProperty(nameof(TrainerPokemon.Nickname), nameof(TrainerPokemonInfo.Name))]
     [MapProperty(nameof(TrainerPokemon.IVs), nameof(TrainerPokemonInfo.IV))]
     [MapProperty(nameof(TrainerPokemon.EVs), nameof(TrainerPokemonInfo.EV))]
     public static partial TrainerPokemonInfo ToDto(this TrainerPokemon entity);
+
+    private static TrainerPokemonKey MapTrainerPokemonKey(TrainerPokemon pokemon) =>
+        new(pokemon.Species, pokemon.Level);
 
     private static IReadOnlyDictionary<Name, int> MapStats(List<int> stats)
     {

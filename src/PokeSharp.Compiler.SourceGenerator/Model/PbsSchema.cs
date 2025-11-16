@@ -46,4 +46,6 @@ internal record PbsSchema(
     }
 
     public bool HasComparisonFactory => ComparisonFactory is not null;
+
+    public ImmutableArray<PbsSubSchema> SubSchemas { get; init; } = [];
 }

@@ -69,10 +69,10 @@ internal record PbsSchemaTypeData
             PbsFieldType.Name => "CsvParser.ParseName",
             PbsFieldType.String or PbsFieldType.UnformattedText => null,
             PbsFieldType.Symbol => "CsvParser.ParseSymbol",
-            PbsFieldType.Enumerable => TargetType.TypeKind == TypeKind.Enum
+            PbsFieldType.Enumerable => underlyingType.TypeKind == TypeKind.Enum
                 ? $"CsvParser.ParseEnumField<{targetTypeString}>"
                 : $"CsvParser.ParseDataEnum<{enumTypeStr}, {targetTypeString}>",
-            PbsFieldType.EnumerableOrInteger => TargetType.TypeKind == TypeKind.Enum
+            PbsFieldType.EnumerableOrInteger => underlyingType.TypeKind == TypeKind.Enum
                 ? $"CsvParser.ParseEnumOrInt<{targetTypeString}>"
                 : null,
             _ => throw new ArgumentOutOfRangeException(),

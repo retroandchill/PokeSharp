@@ -119,7 +119,7 @@ namespace PokeSharp.Compiler.SourceGenerator.Properties {
         ///
         ///{{DeclaredAccessiblity}}partial {{ObjectType}} {{ClassName}} : IPbsDataModel&lt;{{ClassName}}&gt;
         ///{
-        ///    public static string BasePath =&gt; &quot;{{FileName}}&quot;;
+        ///    public static string BasePath =&gt; &quot;{{FilePath}}&quot;;
         ///    public static bool IsOptional =&gt; {{IsOptionalString}};
         ///
         ///    public static {{ClassName}} ParsePbsData(PbsSection section, Func&lt;string, {{ClassName}}&gt; modelFactory = null)

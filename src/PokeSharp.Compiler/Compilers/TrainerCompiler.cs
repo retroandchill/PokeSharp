@@ -18,131 +18,21 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton<IPbsCompiler>(Duplicate = DuplicateStrategy.Append)]
-public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
+public class TrainerCompiler : PbsCompiler<EnemyTrainer, EnemyTrainerInfo>
 {
     public override int Order => 15;
 
-    private readonly Dictionary<string, PropertyInfo> _pokemonPropertyMap = new();
-
-    [CreateSyncVersion]
-    public override async Task CompileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
+    protected override EnemyTrainer ConvertToEntity(EnemyTrainerInfo model)
     {
-        /*
-        var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
-        schema.Add(PokemonSchemaEntry.PropertyName, PokemonSchemaEntry);
-        var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
-
-        EnemyTrainerInfo? currentTrainer = null;
-        TrainerPokemonInfo? currentPokemon = null;
-        string? sectionName = null;
-        string? sectionLine = null;
-
-        var fileLineData = new FileLineData(FileName);
-        var result = new List<EnemyTrainer>();
-        await foreach (var (line, _) in serializer.ParsePreppedLinesAsync(FileName, cancellationToken))
-        {
-            var matchSectionHeader = PbsSerializer.SectionHeader.Match(line);
-            if (matchSectionHeader.Success)
-            {
-                sectionName = matchSectionHeader.Groups[1].Value;
-                sectionLine = line;
-
-                if (currentTrainer is not null)
-                {
-                    ValidateCompiledTrainer(currentTrainer, fileLineData);
-                    result.Add(currentTrainer.ToGameData());
-                }
-
-                fileLineData = fileLineData.WithSection(sectionName, null, sectionLine);
-
-                try
-                {
-                    var sectionNameSchema = schema["SectionName"];
-                    var record = CsvParser.GetCsvRecord(sectionName, sectionNameSchema);
-                    var converted = (TrainerKey)
-                        ConversionUtils.ConvertTypeIfNecessary(
-                            sectionName,
-                            record,
-                            sectionNameSchema.Property.PropertyType,
-                            sectionNameSchema.Property,
-                            serializer.Converters
-                        )!;
-                    currentTrainer = new EnemyTrainerInfo { Id = converted };
-                }
-                catch (Exception e)
-                {
-                    throw PbsParseException.Create(e, fileLineData);
-                }
-            }
-
-            var matchKey = PbsSerializer.KeyValuePair.Match(line);
-            if (!matchKey.Success)
-                continue;
-
-            if (currentTrainer is null)
-            {
-                throw new PbsParseException(
-                    $"Expected a section at the beginning of the file.\n{fileLineData.LineReport}"
-                );
-            }
-
-            var key = matchKey.Groups[1].Value;
-            var value = matchKey.Groups[2].Value;
-
-            if (schema.TryGetValue(key, out var entry))
-            {
-                var propertyValue = CsvParser.GetCsvRecord(value, entry);
-                ArgumentNullException.ThrowIfNull(propertyValue);
-                if (key == nameof(EnemyTrainerInfo.Pokemon))
-                {
-                    var asList = (IList)propertyValue;
-                    currentPokemon = new TrainerPokemonInfo
-                    {
-                        Species = ((SpeciesForm)asList[0]!).Species,
-                        Level = (int)(ulong)asList[1]!,
-                    };
-                    currentTrainer.Pokemon.Add(currentPokemon);
-                }
-                else
-                {
-                    ConversionUtils.SetValueToProperty(
-                        key,
-                        currentTrainer,
-                        entry.Property,
-                        propertyValue,
-                        serializer.Converters
-                    );
-                }
-            }
-            else if (subschema.TryGetValue(key, out var subentry))
-            {
-                if (currentPokemon is null)
-                {
-                    throw new PbsParseException($"Pokémon hasn't been defined yet!\n{fileLineData.LineReport}");
-                }
-
-                ConversionUtils.SetValueToProperty(
-                    key,
-                    currentPokemon,
-                    subentry.Property,
-                    CsvParser.GetCsvRecord(value, subentry),
-                    serializer.Converters
-                );
-            }
-        }
-
-        if (currentTrainer is not null)
-        {
-            fileLineData = fileLineData.WithSection(sectionName, null, sectionLine);
-            ValidateCompiledTrainer(currentTrainer, fileLineData);
-            result.Add(currentTrainer.ToGameData());
-        }
-
-        await EnemyTrainer.ImportAsync(result, cancellationToken);
-        */
+        return model.ToGameData();
     }
 
-    private static void ValidateCompiledTrainer(EnemyTrainerInfo trainer, FileLineData fileLineData)
+    protected override EnemyTrainerInfo ConvertToModel(EnemyTrainer entity)
+    {
+        return entity.ToDto();
+    }
+
+    protected override void ValidateCompiledModel(EnemyTrainerInfo trainer, FileLineData fileLineData)
     {
         if (trainer.Pokemon.Count == 0)
         {
@@ -234,86 +124,5 @@ public partial class TrainerCompiler : PbsCompilerBase<EnemyTrainerInfo>
                 );
             }
         }
-    }
-
-    [CreateSyncVersion]
-    public override async Task WriteToFileAsync(PbsSerializer serializer, CancellationToken cancellationToken = default)
-    {
-        /*
-        var schema = serializer.GetSchema(typeof(EnemyTrainerInfo)).ToDictionary();
-        var subschema = serializer.GetSchema(typeof(TrainerPokemonInfo));
-
-        await FileUtils.WriteFileWithBackupAsync(FileName, WriteAction);
-        return;
-
-        async ValueTask WriteAction(StreamWriter fileWriter)
-        {
-            await PbsSerializer.AddPbsHeaderToFileAsync(fileWriter);
-
-            foreach (var trainer in EnemyTrainer.Entities.Select(x => x.ToDto()))
-            {
-                await fileWriter.WriteLineAsync("#-------------------------------");
-                await fileWriter.WriteLineAsync($"[{trainer.Id}]");
-
-                foreach (var (key, schemaEntry) in schema)
-                {
-                    if (key == "SectionName")
-                        continue;
-
-                    var value = GetPropertyForPbs(trainer, key);
-                    if (value is null)
-                        continue;
-
-                    await fileWriter.WriteAsync($"{key} = ");
-                    await CsvWriter.WriteCsvRecordAsync(value, fileWriter, schemaEntry);
-                    await fileWriter.WriteLineAsync();
-                }
-
-                foreach (var pokemon in trainer.Pokemon)
-                {
-                    await fileWriter.WriteLineAsync($"Pokemon = {pokemon.Species},{pokemon.Level}");
-
-                    foreach (var (key, schemaEntry) in subschema)
-                    {
-                        var value = GetPropertyForPbs(pokemon, key);
-                        if (value is null)
-                            continue;
-
-                        await fileWriter.WriteAsync($"    {key} = ");
-                        await CsvWriter.WriteCsvRecordAsync(value, fileWriter, schemaEntry);
-                        await fileWriter.WriteLineAsync();
-                    }
-                }
-            }
-        }
-    }
-
-    private object? GetPropertyForPbs(TrainerPokemonInfo model, string key)
-    {
-        if (!_pokemonPropertyMap.TryGetValue(key, out var property))
-        {
-            property = typeof(TrainerPokemonInfo).GetProperty(key);
-            ArgumentNullException.ThrowIfNull(property);
-            _pokemonPropertyMap.Add(key, property);
-        }
-
-        var elementValue = property.GetValue(model);
-        if (
-            elementValue is false
-            || (elementValue is IEnumerable enumerable && CollectionUtils.IsEmptyEnumerable(enumerable))
-        )
-        {
-            return null;
-        }
-
-        return key switch
-        {
-            nameof(TrainerPokemonInfo.Gender) => !Species.Get(model.Species).IsSingleGendered
-                ? model.Gender?.ToString().ToLowerInvariant()
-                : null,
-            nameof(TrainerPokemonInfo.Shiny) when model.SuperShiny is true => null,
-            _ => elementValue,
-        };
-        */
     }
 }

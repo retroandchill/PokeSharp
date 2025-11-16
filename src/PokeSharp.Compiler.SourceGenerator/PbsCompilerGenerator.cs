@@ -203,9 +203,15 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             );
         }
 
+        return BuildSchema(targetType, info);
+    }
+
+    private static PbsSchema BuildSchema(ITypeSymbol targetType, PbsDataInfo info, bool isSubSchema = false)
+    {
         var errors = ImmutableArray.CreateBuilder<Diagnostic>();
         PbsSchemaEntry? sectionName = null;
         var keyValuePairs = ImmutableArray.CreateBuilder<PbsSchemaEntry>();
+        var subSchemas = ImmutableArray.CreateBuilder<PbsSubSchema>();
 
         foreach (
             var property in targetType
@@ -225,18 +231,30 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         {
             try
             {
-                var entry = GetSchemaEntryInfo(property);
-                keyValuePairs.Add(entry);
-                if (!entry.IsSectionName)
-                    continue;
-
-                if (sectionName is null)
+                if (!property.HasAttribute<PbsSubSchemaAttribute>())
                 {
-                    sectionName = entry;
+                    var entry = GetSchemaEntryInfo(property);
+                    keyValuePairs.Add(entry);
+                    if (!entry.IsSectionName)
+                        continue;
+
+                    if (sectionName is null)
+                    {
+                        sectionName = entry;
+                    }
+                    else
+                    {
+                        Diagnostic.Create(MultipleSectionNames, property.Locations[0], property.Name);
+                    }
                 }
                 else
                 {
-                    Diagnostic.Create(MultipleSectionNames, property.Locations[0], property.Name);
+                    var underlyingType = GetUnderlyingType(property.Type);
+                    var infoData = new PbsDataInfo(string.Empty);
+                    var schemaEntry = BuildSchema(underlyingType, infoData, true);
+                    subSchemas.Add(
+                        new PbsSubSchema(property, schemaEntry) { IsCollection = IsCollectionType(property.Type) }
+                    );
                 }
             }
             catch (PbsSchemaException ex)
@@ -252,7 +270,10 @@ public class PbsCompilerGenerator : IIncrementalGenerator
                 info.BaseFilename,
                 info.IsOptional,
                 info.ComparisonFactory
-            );
+            )
+            {
+                SubSchemas = subSchemas.ToImmutable(),
+            };
 
         if (sectionName is null)
         {

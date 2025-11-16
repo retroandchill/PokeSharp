@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 
@@ -28,17 +29,24 @@ public partial class EnemyTrainerInfo
     [PbsType(PbsFieldType.UnformattedText)]
     public Text LoseText { get; set; }
 
-    [PbsIgnore]
-    public List<TrainerPokemonInfo> Pokemon { get; init; } = [];
+    [PbsSubSchema]
+    public List<TrainerPokemonInfo> Pokemon { get; set; } = [];
 }
 
-public class TrainerPokemonInfo
-{
-    [PbsIgnore]
-    public required Name Species { get; init; }
+public readonly record struct TrainerPokemonKey(
+    [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Species))] Name Species,
+    [PbsType(PbsFieldType.PositiveInteger)] int Level
+);
 
-    [PbsIgnore]
-    public required int Level { get; init; }
+[PbsData("trainers")]
+public partial class TrainerPokemonInfo
+{
+    [PbsSectionName]
+    public required TrainerPokemonKey Id { get; init; }
+
+    public Name Species => Id.Species;
+
+    public int Level => Id.Level;
 
     [PbsType(PbsFieldType.UnsignedInteger)]
     public int? Form { get; set; }
@@ -57,6 +65,7 @@ public class TrainerPokemonInfo
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
     public Name? Item { get; set; }
 
+    [PbsCustomWrite(nameof(WriteGender))]
     public PokemonGender? Gender { get; set; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Nature))]
@@ -79,4 +88,6 @@ public class TrainerPokemonInfo
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
     public Name? Ball { get; set; }
+
+    private static string WriteGender(PokemonGender gender) => gender.ToString().ToLowerInvariant();
 }

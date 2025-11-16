@@ -27,6 +27,17 @@ namespace {{Namespace}};
         {{/IsSectionName}}
     
         {{/Properties}}
+        {{#SubSchemas}}
+        var found_{{Name}} = false;
+        {{#IsCollection}}
+        var prop_{{Name}} = new List<(string SectionName, List<PbsKeyValueLine> Lines, FileLineData HeaderLine)>();    
+        (string SectionName, List<PbsKeyValueLine> Lines, FileLineData HeaderLine)? prop_{{Name}}_current = null;
+        {{/IsCollection}} 
+        {{^IsCollection}}
+        (string SectionName, List<PbsKeyValueLine> Lines, FileLineData HeaderLine)? prop_{{Name}} = null;    
+        {{/IsCollection}}  
+            
+        {{/SubSchemas}}
         foreach (var (key, rawValue, lineData) in section.Lines)
         {
             try
@@ -46,6 +57,31 @@ namespace {{Namespace}};
                         break;
                     {{/IsSectionName}}
                     {{/Properties}}
+                    {{#SubSchemas}}
+                    case "{{Name}}":
+                        found_{{Name}} = true;
+                        {{#IsCollection}}
+                        if (prop_{{Name}}_current.HasValue)
+                        {
+                            prop_{{Name}}.Add(prop_{{Name}}_current.Value);
+                        }
+                        
+                        {{/IsCollection}}
+                        prop_{{Name}}{{#IsCollection}}_current{{/IsCollection}} = (rawValue, [], lineData);
+                        break;
+                    {{#Schema.Properties}}
+                    {{^IsSectionName}}
+                    case "{{KeyName}}":
+                        if (!prop_{{../Name}}_current.HasValue)
+                        {
+                            throw new SerializationException("{{../Name}} hasn't been defined yet!");
+                        }
+                        
+                        prop_{{../Name}}{{#if ../IsCollection}}_current{{/if}}.Value.Lines.Add(new PbsKeyValueLine(key, rawValue, lineData));
+                        break;
+                    {{/IsSectionName}}
+                    {{/Schema.Properties}}
+                    {{/SubSchemas}}
                 }
             }
             catch (SerializationException ex)
@@ -53,6 +89,15 @@ namespace {{Namespace}};
                 throw new PbsParseException($"{ex.Message}\n{lineData.LineReport}", ex);
             }
         }
+        {{#SubSchemas}}
+        {{#IsCollection}}
+
+        if (prop_{{Name}}_current{{#IsValueType}}.HasValue{{/IsValueType}}{{^IsValueType}} is not null{{/IsValueType}})
+        {
+            prop_{{Name}}.Add(prop_{{Name}}_current.Value);
+        }            
+        {{/IsCollection}}
+        {{/SubSchemas}}
         {{#Properties}}
         {{^IsSectionName}}
         {{#IsRequired}}
@@ -105,6 +150,27 @@ namespace {{Namespace}};
         {{/AppearsOnce}}    
         {{/IsRequired}}
         {{/Properties}}
+        {{#SubSchemas}}
+        {{#IsCollection}}
+        
+        if (found_{{Name}})
+        {
+            var outputList = new List<{{SchemaType}}>();
+            foreach (var (sectionName, lines, fileLineData) in prop_{{Name}})
+            {
+                outputList.Add({{SchemaType}}.ParsePbsData(new PbsSection(sectionName, lines.ToImmutableArray(), fileLineData)));
+            }
+            result.{{Name}} =  outputList;
+        }
+        {{/IsCollection}}
+        {{^IsCollection}}
+        if (found_{{Name}} && prop_{{Name}}.HasValue)
+        {
+            var (sectionName, lines, fileLineData) = prop_{{Name}}.Value;
+            result.{{Name}} = {{SchemaType}}.ParsePbsData(new PbsSection(sectionName, lines.ToImmutableArray(), fileLineData));
+        } 
+        {{/IsCollection}}    
+        {{/SubSchemas}}
 
         return result;
     }
@@ -190,6 +256,35 @@ namespace {{Namespace}};
         {{/if}}
         {{/IsSectionName}}    
         {{/Properties}}
+        {{#SubSchemas}}
+        {{#IsCollection}}
+        foreach (var item in {{Name}})
+        {
+            foreach (var (i, line) in item.WritePbsData().Index()) {
+                if (i == 0)
+                {
+                    yield return $"{{Name}} = {line[1..^1]}";
+                }
+                else 
+                {
+                    yield return $"    {line}";
+                }
+            }
+        }    
+        {{/IsCollection}} 
+        {{^IsCollection}}
+        foreach (var (i, line) in {{Name}}.WritePbsData().Index()) {
+            if (i == 0)
+            {
+                yield return $"{{Name}} = {line[1..^1]}";
+            }
+            else 
+            {
+                yield return $"    {line}";
+            }
+        }
+        {{/IsCollection}}    
+        {{/SubSchemas}}
     }
     {{#Properties}}
     

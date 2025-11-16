@@ -113,8 +113,9 @@ namespace {{Namespace}};
     private static {{ParsedType}} Parse_{{Name}}({{#NeedsSectionName}}string sectionName, {{/NeedsSectionName}}string value)
     {
         {{#IsSimpleType}}
+        var soleEntry = CsvParser.SplitCsvLine(value).Single();
         {{#TypeEntries}}
-        return {{>ParseLogic Parameter='value'}};  
+        return {{>ParseLogic Parameter='soleEntry'}};  
         {{/TypeEntries}}
         {{/IsSimpleType}}
         {{^IsSimpleType}}
@@ -151,6 +152,86 @@ namespace {{Namespace}};
         {{#WithIndent '        '}}
         {{>EvaluateComplexType ResultLineStart='return ' ResultLineEnd=';'}}
         {{/WithIndent}}
+        {{/IsCollection}}
+        {{/IsSimpleType}}
+    }
+    {{/Properties}}
+
+    public IEnumerable<string> WritePbsData()
+    {
+        {{#Properties}}
+        {{#IsSectionName}}
+        yield return $"[{Write_{{Name}}({{Name}})}]";    
+        {{/IsSectionName}}
+        {{/Properties}}
+
+        {{#Properties}}
+        {{^IsSectionName}}
+        {{#AppearsOnce}}
+        var prop_{{Name}}_str = Write_{{Name}}({{Name}});    
+        if (prop_{{Name}}_str is not null)
+        {
+            yield return $"{{KeyName}} = {prop_{{Name}}_str}";
+        }
+        {{/AppearsOnce}}
+        {{^AppearsOnce}}
+        foreach (var element in {{Name}})
+        {
+            var prop_{{Name}}_str = Write_{{Name}}(element);    
+            if (prop_{{Name}}_str is not null)
+            {
+                yield return $"{{KeyName}} = {prop_{{Name}}_str}";
+            }
+        }
+        {{/AppearsOnce}}
+        {{/IsSectionName}}    
+        {{/Properties}}
+    }
+    {{#Properties}}
+    
+    private static string Write_{{Name}}({{RawParsedType}} value)
+    {
+        {{#AppearsOnce}}
+        {{#IsNullable}}
+        if ({{#IsValueType}}!value.HasValue{{/IsValueType}}{{^IsValueType}}value is null{{/IsValueType}}) return null;
+        {{/IsNullable}}
+        {{/AppearsOnce}}
+        {{#IsCollection}}
+        if (value.Count == 0) return null;
+        {{/IsCollection}}
+
+        {{#IsSimpleType}}
+        return {{>WriteMethodCall Value='value'}};
+        {{/IsSimpleType}}
+        {{^IsSimpleType}}
+        {{#IsCollection}}
+        {{#NeedsSubsections}}
+        {{#IsFixedSize}}
+        var output = new List<string>({{MaxLength}});
+        {{#TypeEntries}}
+        {{#IsOptional}}if (value{{>NullableAccess}}.Count > {{Index}}) {{/IsOptional}}output.Add({{#Indexed}}{{>WriteMethodCall Value='value[{{Index}}]'}}{{/Indexed}});
+        {{/TypeEntries}}
+        {{/IsFixedSize}}
+        {{^IsFixedSize}} 
+        return string.Join(',', value{{>NullableAccess}}.SelectMany(IEnumerable<string> (x) =>
+            {
+                var ({{#TypeEntries}}item{{Index}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}) = x;
+                return [{{#TypeEntries}}{{#Indexed}}{{>WriteMethodCall Value='item{{Index}}'}}{{/Indexed}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}];
+            }));
+        {{/IsFixedSize}}
+        {{/NeedsSubsections}}
+        {{^NeedsSubsections}}
+        return string.Join(',', value{{>NullableAccess}}.Select(x => {{>WriteMethodCall Value='x'}}));
+        {{/NeedsSubsections}}
+        return null;
+        {{/IsCollection}}
+        {{^IsCollection}}
+        var ({{#TypeEntries}}item{{Index}}{{^IsLast}}, {{/IsLast}}{{/TypeEntries}}) = value{{>NullableAccess}};
+        var output = new List<string>({{MaxLength}});
+        {{#TypeEntries}}
+        {{#IsOptional}}if (item{{Index}} != {{DefaultValue}}) {{/IsOptional}}output.Add({{#Indexed}}{{>WriteMethodCall Value='item{{Index}}'}}{{/Indexed}});
+        {{/TypeEntries}}
+        return string.Join(',', output);
         {{/IsCollection}}
         {{/IsSimpleType}}
     }

@@ -23,7 +23,7 @@ public partial class EnemyTrainerInfo
     public required TrainerKey Id { get; init; }
 
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
-    public ImmutableArray<Name> Items { get; set; } = [];
+    public List<Name> Items { get; set; } = [];
 
     [PbsType(PbsFieldType.UnformattedText)]
     public Text LoseText { get; set; }

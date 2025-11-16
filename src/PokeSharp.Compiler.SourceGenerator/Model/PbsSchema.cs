@@ -57,6 +57,31 @@ internal readonly record struct PbsSchemaTypeData(
         }
     }
 
+    public string? WriteMethod
+    {
+        get
+        {
+            if (Type == PbsFieldType.EnumerableOrInteger && TargetType.TypeKind == TypeKind.Enum)
+            {
+                return "CsvWriter.WriteEnumOrIntegerRecord";
+            }
+
+            if (
+                TargetType.SpecialType == SpecialType.System_String
+                || TargetType.ToDisplayString(NullableFlowState.NotNull) == GeneratorConstants.Text
+            )
+            {
+                return Type == PbsFieldType.UnformattedText ? null : "TextFormatter.CsvQuote";
+            }
+
+            return TargetType.SpecialType == SpecialType.System_Boolean ? "CsvWriter.WriteBoolean" : null;
+        }
+    }
+
+    public bool HasWriteMethod => WriteMethod is not null;
+
+    public bool IsString => TargetType.SpecialType == SpecialType.System_String;
+
     public static string GetTargetTypeString(ITypeSymbol type)
     {
         if (
@@ -82,6 +107,8 @@ internal readonly record struct PbsSchemaTypeData(
 internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, ImmutableArray<PbsSchemaTypeData> TypeEntries)
 {
     public string Type => PbsSchemaTypeData.GetTargetTypeString(Property.Type);
+
+    public string RawType => Property.Type.ToDisplayString(NullableFlowState.NotNull);
 
     public string Name => Property.Name;
 
@@ -121,6 +148,8 @@ internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, Immutab
 
     public string ParsedType => AppearsOnce ? Type : ElementType ?? Type;
 
+    public string RawParsedType => AppearsOnce ? RawType : ElementType ?? RawType;
+
     public bool IsSectionName { get; init; }
 
     public bool IsFixedSize { get; init; }
@@ -128,6 +157,10 @@ internal record PbsSchemaEntry(string KeyName, IPropertySymbol Property, Immutab
     public bool IsRequired => IsSectionName || Property.IsRequired;
 
     public bool IsInitOnly => Property.SetMethod is { IsInitOnly: true };
+
+    public bool IsNullable => Property.Type.NullableAnnotation == NullableAnnotation.Annotated;
+
+    public bool IsValueType => Property.Type.IsValueType;
 
     public PbsFieldStructure FieldStructure { get; init; } = PbsFieldStructure.Single;
 

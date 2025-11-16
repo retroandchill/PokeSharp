@@ -126,6 +126,8 @@ public class PbsCompilerGenerator : IIncrementalGenerator
             handlebars.RegisterTemplate("ParseLogic", SourceTemplates.ParseLogicTemplate);
             handlebars.RegisterTemplate("ParseMethodCall", SourceTemplates.ParseMethodCallTemplate);
             handlebars.RegisterTemplate("EvaluateComplexType", SourceTemplates.EvaluateComplexTypeTemplate);
+            handlebars.RegisterTemplate("WriteMethodCall", SourceTemplates.WriteMethodCallTemplate);
+            handlebars.RegisterTemplate("NullableAccess", SourceTemplates.NullableAccessTemplate);
 
             handlebars.RegisterHelper(
                 "WithIndent",
@@ -149,7 +151,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
 
             handlebars.RegisterHelper(
                 "Indexed",
-                (writer, options, ctx, parameters) =>
+                (writer, options, ctx, _) =>
                 {
                     var data = (PbsSchemaTypeData)ctx.Value;
                     var content = options.Template();

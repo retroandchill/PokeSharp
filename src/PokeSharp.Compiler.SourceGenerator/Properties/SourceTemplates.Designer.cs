@@ -60,18 +60,28 @@ namespace PokeSharp.Compiler.SourceGenerator.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to if ({{Entries}}.Length != {{TypeEntries.Length}})
-        ///    throw new SerializationException($&quot;Unexpected number of elements in {value}! Expecting {{#MultipleOf}}a multiple of{{/MultipleOf}}{{TypeEntries.Length}}, got { {{Entries}}.Length}.&quot;);
+        ///   Looks up a localized string similar to {{#NoOptionalParameters}}
+        ///if (splitLine.Length != {{TypeEntries.Length}})
+        ///    throw new SerializationException($&quot;Unexpected number of elements in {value}! Expecting {{#MultipleOf}}a multiple of {{/MultipleOf}}{{TypeEntries.Length}}, got {splitLine.Length}.&quot;);
+        ///{{/NoOptionalParameters}}
+        ///{{^NoOptionalParameters}}
+        ///if (splitLine.Length &lt; {{RequiredLength}})
+        ///    throw new SerializationException($&quot;Unexpected number of elements in {value}! Got {splitLine.Length}, expected at least {{RequiredLength}}&quot;);
         ///
-        ///{{ResultLineStart}}new {{ParsedType}}(
-        ///{{#TypeEntries}}
-        ///    {{#Indexed}}{{&gt;ParseLogic OutputOperation=&apos;&apos; Parameter=&apos;splitLine[{{Index}}]&apos;}}{{~^IsLast~}},{{~/IsLast~}}{{/Indexed}}
-        ///{{/TypeEntries}}
-        ///){{ResultLineEnd}}.
+        ///if  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string EvaluateComplexTypeTemplate {
             get {
                 return ResourceManager.GetString("EvaluateComplexTypeTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{#AppearsOnce}}{{#IsNullable}}{{#IsValueType}}.Value{{/IsValueType}}{{/IsNullable}}{{/AppearsOnce}}.
+        /// </summary>
+        internal static string NullableAccessTemplate {
+            get {
+                return ResourceManager.GetString("NullableAccessTemplate", resourceCulture);
             }
         }
         
@@ -107,19 +117,27 @@ namespace PokeSharp.Compiler.SourceGenerator.Properties {
         ///
         ///namespace {{Namespace}};
         ///
-        ///public static class {{ClassName}}Serializer
+        ///{{DeclaredAccessiblity}}partial {{ObjectType}} {{ClassName}} : IPbsDataModel&lt;{{ClassName}}&gt;
         ///{
-        ///    public static {{ClassName}} ParsePbsData(PbsSection section)
-        ///    {
-        ///        {{#Properties}}
-        ///        {{#IsSectionName}}
-        ///        var prop_{{Name}} = Parse_{{Name}}({{#NeedsSectionName}}section.SectionName, {{/NeedsSectionName}}section.SectionName);
-        ///        {{/IsSectionName}}
-        /// [rest of string was truncated]&quot;;.
+        ///    public static string BasePath =&gt; &quot;{{FileName}}&quot;;
+        ///    public static bool IsOptional =&gt; {{IsOptionalString}};
+        ///
+        ///    public static {{ClassName}} ParsePbsData(PbsSection section, Func&lt;string, {{ClassName}}&gt; modelFactory = null)
+        ///     [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string PbsSerializerTemplate {
             get {
                 return ResourceManager.GetString("PbsSerializerTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{~#HasWriteMethod~}}{{WriteMethod}}({{Value}}){{~/HasWriteMethod~}}   
+        ///{{~^HasWriteMethod~}}{{Value}}{{^IsString}}.ToString(){{/IsString}}{{~/HasWriteMethod~}}.
+        /// </summary>
+        internal static string WriteMethodCallTemplate {
+            get {
+                return ResourceManager.GetString("WriteMethodCallTemplate", resourceCulture);
             }
         }
     }

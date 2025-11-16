@@ -1,0 +1,2 @@
+{{~#HasWriteMethod~}}{{WriteMethod}}({{Value}}){{~/HasWriteMethod~}}   
+{{~^HasWriteMethod~}}{{Value}}{{^IsString}}.ToString(){{/IsString}}{{~/HasWriteMethod~}}

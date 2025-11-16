@@ -8,4 +8,6 @@ public interface IPbsDataModel<TModel>
     static abstract bool IsOptional { get; }
 
     static abstract TModel ParsePbsData(PbsSection section, Func<string, TModel>? factory = null);
+
+    IEnumerable<string> WritePbsData();
 }

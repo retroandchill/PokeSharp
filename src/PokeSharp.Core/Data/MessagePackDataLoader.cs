@@ -23,7 +23,12 @@ public partial class MessagePackDataLoader : IDataLoader
         CancellationToken cancellationToken = default
     )
     {
-        await using var fileStream = File.OpenWrite($"{outputPath}.pkdata");
+        if (!Directory.Exists("Data"))
+        {
+            Directory.CreateDirectory("Data");
+        }
+        
+        await using var fileStream = File.OpenWrite(Path.Join("Data", $"{outputPath}.pkdata"));
         await MessagePackSerializer.SerializeAsync(fileStream, entities, _options, cancellationToken);
     }
 
@@ -34,7 +39,7 @@ public partial class MessagePackDataLoader : IDataLoader
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-        await using var fileStream = File.OpenRead($"{inputPath}.pkdata");
+        await using var fileStream = File.OpenRead(Path.Join("Data", $"{inputPath}.pkdata"));
         foreach (
             var entity in await MessagePackSerializer.DeserializeAsync<IEnumerable<T>>(
                 fileStream,

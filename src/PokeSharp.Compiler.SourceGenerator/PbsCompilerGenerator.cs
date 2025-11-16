@@ -110,74 +110,76 @@ public class PbsCompilerGenerator : IIncrementalGenerator
                     return ctx.SemanticModel.GetDeclaredSymbol(type) as INamedTypeSymbol;
                 }
             )
-            .Where(t => t is not null);
+            .Where(t => t is not null)
+            .Collect();
 
         context.RegisterSourceOutput(dataTypes, Execute!);
     }
 
-    private static void Execute(SourceProductionContext context, INamedTypeSymbol targetType)
+    private static void Execute(SourceProductionContext context, ImmutableArray<INamedTypeSymbol> targetTypes)
     {
-        try
-        {
-            var schema = BuildSchema(targetType);
+        var handlebars = Handlebars.Create();
+        handlebars.Configuration.TextEncoder = null;
+        handlebars.RegisterTemplate("ParseLogic", SourceTemplates.ParseLogicTemplate);
+        handlebars.RegisterTemplate("ParseMethodCall", SourceTemplates.ParseMethodCallTemplate);
+        handlebars.RegisterTemplate("EvaluateComplexType", SourceTemplates.EvaluateComplexTypeTemplate);
+        handlebars.RegisterTemplate("WriteMethodCall", SourceTemplates.WriteMethodCallTemplate);
+        handlebars.RegisterTemplate("NullableAccess", SourceTemplates.NullableAccessTemplate);
+        handlebars.RegisterTemplate("PropertyWrite", SourceTemplates.PropertyWriteTemplate);
+        handlebars.RegisterTemplate("PropertyWriteChecks", SourceTemplates.PropertyWriteChecksTemplate);
 
-            var handlebars = Handlebars.Create();
-            handlebars.Configuration.TextEncoder = null;
-            handlebars.RegisterTemplate("ParseLogic", SourceTemplates.ParseLogicTemplate);
-            handlebars.RegisterTemplate("ParseMethodCall", SourceTemplates.ParseMethodCallTemplate);
-            handlebars.RegisterTemplate("EvaluateComplexType", SourceTemplates.EvaluateComplexTypeTemplate);
-            handlebars.RegisterTemplate("WriteMethodCall", SourceTemplates.WriteMethodCallTemplate);
-            handlebars.RegisterTemplate("NullableAccess", SourceTemplates.NullableAccessTemplate);
-            handlebars.RegisterTemplate("PropertyWrite", SourceTemplates.PropertyWriteTemplate);
-            handlebars.RegisterTemplate("PropertyWriteChecks", SourceTemplates.PropertyWriteChecksTemplate);
-
-            handlebars.RegisterHelper(
-                "WithIndent",
-                (writer, options, _, parameters) =>
-                {
-                    var indent = parameters[0] as string ?? "";
-
-                    // Capture the block content
-                    var content = options.Template();
-
-                    // Split the content into lines
-                    var lines = content.Split('\n');
-
-                    // Add indentation to each line except empty lines
-                    var indentedLines = lines.Select(line => string.IsNullOrWhiteSpace(line) ? line : indent + line);
-
-                    // Join the lines back together
-                    writer.WriteSafeString(string.Join("\n", indentedLines));
-                }
-            );
-
-            handlebars.RegisterHelper(
-                "Indexed",
-                (writer, options, ctx, _) =>
-                {
-                    var data = (PbsSchemaTypeData)ctx.Value;
-                    var content = options.Template();
-                    writer.WriteSafeString(content.Replace("{{Index}}", data.Index.ToString()));
-                }
-            );
-
-            context.AddSource(
-                $"{schema.ClassName}.g.cs",
-                handlebars.Compile(SourceTemplates.PbsSerializerTemplate)(schema)
-            );
-        }
-        catch (PbsSchemaException ex)
-        {
-            foreach (var diagnostic in ex.Diagnostics)
+        handlebars.RegisterHelper(
+            "WithIndent",
+            (writer, options, _, parameters) =>
             {
-                context.ReportDiagnostic(diagnostic);
+                var indent = parameters[0] as string ?? "";
+
+                // Capture the block content
+                var content = options.Template();
+
+                // Split the content into lines
+                var lines = content.Split('\n');
+
+                // Add indentation to each line except empty lines
+                var indentedLines = lines.Select(line => string.IsNullOrWhiteSpace(line) ? line : indent + line);
+
+                // Join the lines back together
+                writer.WriteSafeString(string.Join("\n", indentedLines));
             }
-        }
-        catch (Exception ex)
+        );
+
+        var sourceTemplate = handlebars.Compile(SourceTemplates.PbsSerializerTemplate);
+
+        handlebars.RegisterHelper(
+            "Indexed",
+            (writer, options, ctx, _) =>
+            {
+                var data = (PbsSchemaTypeData)ctx.Value;
+                var content = options.Template();
+                writer.WriteSafeString(content.Replace("{{Index}}", data.Index.ToString()));
+            }
+        );
+
+        foreach (var targetType in targetTypes)
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(UnknownSourceGenerationError, targetType.Locations[0], ex.ToString())
-            );
+            try
+            {
+                var schema = BuildSchema(targetType);
+                context.AddSource($"{schema.ClassName}.g.cs", sourceTemplate(schema));
+            }
+            catch (PbsSchemaException ex)
+            {
+                foreach (var diagnostic in ex.Diagnostics)
+                {
+                    context.ReportDiagnostic(diagnostic);
+                }
+            }
+            catch (Exception ex)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(UnknownSourceGenerationError, targetType.Locations[0], ex.ToString())
+                );
+            }
         }
     }
 

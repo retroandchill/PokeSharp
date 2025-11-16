@@ -100,3 +100,6 @@ internal sealed class PbsCustomWriteAttribute(string methodName) : Attribute
 {
     public string MethodName { get; } = methodName;
 }
+
+[AttributeUsage(AttributeTargets.Property)]
+internal sealed class PbsSubSchema<T> : Attribute;

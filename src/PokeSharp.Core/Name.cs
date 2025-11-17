@@ -3,11 +3,7 @@ using System.Text.Json.Serialization;
 using MessagePack;
 using PokeSharp.Core.Serialization.Json;
 using PokeSharp.Core.Serialization.MessagePack;
-#if UNREAL_ENGINE
-using UnrealSharp.Core;
-#else
 using System.Collections.Concurrent;
-#endif
 
 namespace PokeSharp.Core;
 
@@ -27,21 +23,8 @@ namespace PokeSharp.Core;
 [JsonConverter(typeof(NameJsonConverter))]
 public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<ReadOnlySpan<char>>, IComparable<Name>
 {
-#if UNREAL_ENGINE
-    private readonly FName _value;
-#else
     private readonly uint _comparisonIndex;
     private readonly uint _displayStringIndex;
-#endif
-#if UNREAL_ENGINE
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Name"/> struct from an Unreal Engine <see cref="FName"/>.
-    /// </summary>
-    public Name(FName name)
-    {
-        _value = name;
-    }
-#endif
 
     /// <summary>
     /// Construct a new <see cref="Name"/> from a <see cref="ReadOnlySpan{char}"/>
@@ -49,12 +32,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <param name="name">The characters to construct from.</param>
     public Name(ReadOnlySpan<char> name)
     {
-#if UNREAL_ENGINE
-        _value = new FName(name);
-#else
-        _comparisonIndex = NameTable.Instance.GetOrAddEntry(name);
-        _displayStringIndex = NameTable.DisplayStringInstance.GetOrAddEntry(name);
-#endif
+        (_comparisonIndex, _displayStringIndex) = INameProvider.Instance.GetOrAddEntry(name);
     }
 
     /// <summary>
@@ -77,17 +55,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <threadsafety>
     /// This property is thread-safe due to the immutable nature of the <see cref="Name"/> struct.
     /// </threadsafety>
-    public static Name None
-    {
-        get
-        {
-#if UNREAL_ENGINE
-            return new Name(FName.None);
-#else
-            return new Name();
-#endif
-        }
-    }
+    public static Name None => new();
 
     /// <summary>
     /// Gets a value indicating whether the current <see cref="Name"/> instance represents a valid state.
@@ -103,17 +71,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <threadsafety>
     /// This property is thread-safe due to the immutable nature of the <see cref="Name"/> struct.
     /// </threadsafety>
-    public bool IsValid
-    {
-        get
-        {
-#if UNREAL_ENGINE
-            return _value.IsValid;
-#else
-            return !IsNone;
-#endif
-        }
-    }
+    public bool IsValid => !IsNone;
 
     /// <summary>
     /// Indicates whether the current <see cref="Name"/> instance represents a "none" or null-like state.
@@ -129,17 +87,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <threadsafety>
     /// This property is thread-safe due to the immutable nature of the <see cref="Name"/> struct.
     /// </threadsafety>
-    public bool IsNone
-    {
-        get
-        {
-#if UNREAL_ENGINE
-            return _value.IsNone;
-#else
-            return this == None;
-#endif
-        }
-    }
+    public bool IsNone => this == None;
 
     /// <summary>
     /// Determines whether two <see cref="Name"/> instances are equal.
@@ -151,11 +99,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// </returns>
     public static bool operator ==(Name lhs, Name rhs)
     {
-#if UNREAL_ENGINE
-        return lhs._value == rhs._value;
-#else
         return lhs._comparisonIndex == rhs._comparisonIndex;
-#endif
     }
 
     /// <summary>
@@ -177,12 +121,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <returns><c>true</c> if the instances are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(Name lhs, string? rhs)
     {
-#if UNREAL_ENGINE
-        // TODO: Add additional interop to UnrealSharp to make this comparison directly using StringViews
-        return lhs._value == (rhs ?? string.Empty);
-#else
-        return NameTable.Instance.Equals(lhs._comparisonIndex, rhs);
-#endif
+        return INameProvider.Instance.Equals(lhs._comparisonIndex, rhs);
     }
 
     /// <summary>
@@ -206,12 +145,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// </returns>
     public static bool operator ==(Name lhs, ReadOnlySpan<char> rhs)
     {
-#if UNREAL_ENGINE
-        // TODO: Add additional interop to UnrealSharp to make this comparison directly using StringViews
-        return lhs._value == rhs.ToString();
-#else
-        return NameTable.Instance.Equals(lhs._comparisonIndex, rhs);
-#endif
+        return INameProvider.Instance.Equals(lhs._comparisonIndex, rhs);
     }
 
     /// <summary>
@@ -239,22 +173,6 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <returns>A <see cref="string"/> representation of the <see cref="Name"/> instance.</returns>
     public static implicit operator string(Name name) => name.ToString();
 
-#if UNREAL_ENGINE
-    /// <summary>
-    /// Defines the implicit conversion from an <see cref="FName"/> to a <see cref="Name"/>.
-    /// </summary>
-    /// <param name="name">The <see cref="FName"/> to convert to a <see cref="Name"/>.</param>
-    /// <returns>A new <see cref="Name"/> instance containing the given <see cref="FName"/>.</returns>
-    public static implicit operator Name(FName name) => new(name);
-
-    /// <summary>
-    /// Converts a <see cref="Name"/> instance to an <see cref="FName"/> implicitly.
-    /// </summary>
-    /// <param name="name">The <see cref="Name"/> instance to convert.</param>
-    /// <returns>An <see cref="FName"/> representation of the <see cref="Name"/> instance.</returns>
-    public static implicit operator FName(Name name) => name._value;
-#endif
-
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
@@ -264,21 +182,13 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <inheritdoc />
     public bool Equals(Name other)
     {
-#if UNREAL_ENGINE
-        return _value == other._value;
-#else
         return _comparisonIndex == other._comparisonIndex;
-#endif
     }
 
     /// <inheritdoc />
     public int CompareTo(Name other)
     {
-#if UNREAL_ENGINE
-        return _value.CompareTo(other._value);
-#else
         return (int)(_comparisonIndex - other._comparisonIndex);
-#endif
     }
 
     /// <inheritdoc />
@@ -296,25 +206,82 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <inheritdoc />
     public override string ToString()
     {
-#if UNREAL_ENGINE
-        return _value.ToString();
-#else
-        return NameTable.DisplayStringInstance.GetString(_displayStringIndex);
-#endif
+        return INameProvider.Instance.GetString(_displayStringIndex);
     }
 
     /// <inheritdoc />
     public override int GetHashCode()
     {
-#if UNREAL_ENGINE
-        return _value.GetHashCode();
-#else
         return (int)_comparisonIndex;
-#endif
     }
 }
 
-#if !UNREAL_ENGINE
+/// <summary>
+/// Interface for getting the comparison and display string indices for a given name.
+/// By default, this uses a C#-provided hash table to store the indices, but it can be changed to
+/// use a different implementation.
+/// </summary>
+public interface INameProvider
+{
+    /// <summary>
+    /// Gets the current instance of the name provider.
+    /// </summary>
+    static INameProvider Instance { get; internal set; } = new DefaultNameProvider();
+    
+    /// <summary>
+    /// Sets the current instance of the name provider to the specified provider.
+    /// </summary>
+    /// <param name="provider">The new provider to use</param>
+    /// <remarks>
+    /// This method should not be called after the application has started processing as it may
+    /// break existing name instances.
+    /// </remarks>
+    static void UseCustomProvider(INameProvider provider) => Instance = provider;
+    
+    /// <summary>
+    /// Gets the comparison and display string indices for the given name.
+    /// </summary>
+    /// <param name="value">The character span to use for the string.</param>
+    /// <returns>A tuple of the comparison and display index.</returns>
+    (uint ComparisonIndex, uint DisplayIndex) GetOrAddEntry(ReadOnlySpan<char> value);
+
+    /// <summary>
+    /// Checks whether the given span is equal to the name at the specified index.
+    /// </summary>
+    /// <param name="comparisonIndex">The comparison index</param>
+    /// <param name="span">The character span to compare to.</param>
+    /// <returns>Are the two equal.</returns>
+    bool Equals(uint comparisonIndex, ReadOnlySpan<char> span);
+
+    /// <summary>
+    /// Gets the display string for the given index.
+    /// </summary>
+    /// <param name="displayStringId">The ID of the display string.</param>
+    /// <returns>The string that can be displayed.</returns>
+    string GetString(uint displayStringId);
+}
+
+internal class DefaultNameProvider : INameProvider
+{
+    private readonly NameTable _comparisonTable = new();
+    private readonly NameTable _displayStringTable = new(true);
+    
+    public (uint ComparisonIndex, uint DisplayIndex) GetOrAddEntry(ReadOnlySpan<char> value)
+    {
+        return (_comparisonTable.GetOrAddEntry(value), _displayStringTable.GetOrAddEntry(value));
+    }
+
+    public bool Equals(uint comparisonIndex, ReadOnlySpan<char> span)
+    {
+        return _comparisonTable.Equals(comparisonIndex, span);
+    }
+
+    public string GetString(uint displayStringId)
+    {
+        return _displayStringTable.GetString(displayStringId);
+    }
+}
+
 internal readonly record struct NameHashEntry(uint Id, int Hash, string Value);
 
 internal class NameTable
@@ -328,10 +295,7 @@ internal class NameTable
 
     private uint _nextId = 1;
 
-    public static NameTable Instance { get; } = new();
-    public static NameTable DisplayStringInstance { get; } = new(true);
-
-    private NameTable(bool caseSensitive = false)
+    public NameTable(bool caseSensitive = false)
     {
         _caseSensitive = caseSensitive;
         for (var i = 0; i < BucketCount; i++)
@@ -437,4 +401,3 @@ internal class NameTable
             );
     }
 }
-#endif

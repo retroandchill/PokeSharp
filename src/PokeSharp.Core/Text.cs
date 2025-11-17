@@ -2,9 +2,6 @@
 using MessagePack;
 using PokeSharp.Core.Serialization.Json;
 using PokeSharp.Core.Serialization.MessagePack;
-#if UNREAL_ENGINE
-using UnrealSharp.Core;
-#endif
 
 namespace PokeSharp.Core;
 
@@ -29,11 +26,7 @@ namespace PokeSharp.Core;
 [JsonConverter(typeof(TextJsonConverter))]
 public readonly struct Text : IEquatable<Text>
 {
-#if UNREAL_ENGINE
-    private readonly FText _text;
-#else
     private readonly string _text;
-#endif
 
     /// <summary>
     /// Gets a value indicating whether the text is empty or consists only of whitespace.
@@ -50,17 +43,7 @@ public readonly struct Text : IEquatable<Text>
     /// <threadsafety>
     /// This property is thread-safe due to the immutable nature of the <see cref="Text"/> struct.
     /// </threadsafety>
-    public bool Empty
-    {
-        get
-        {
-#if UNREAL_ENGINE
-            return _text.Empty;
-#else
-            return string.IsNullOrWhiteSpace(_text);
-#endif
-        }
-    }
+    public bool Empty => string.IsNullOrWhiteSpace(_text);
 
     /// <summary>
     /// Represents an empty or uninitialized instance of the <see cref="Text"/> struct.
@@ -84,23 +67,8 @@ public readonly struct Text : IEquatable<Text>
     /// </summary>
     public Text()
     {
-#if UNREAL_ENGINE
-        _text = FText.None;
-#else
         _text = string.Empty;
-#endif
     }
-
-#if UNREAL_ENGINE
-    /// <summary>
-    /// Constructs a new instance of the <see cref="Text"/> struct.
-    /// </summary>
-    /// <param name="text">The text to initialize the instance with.</param>
-    public Text(FText text)
-    {
-        _text = text;
-    }
-#endif
 
     /// <summary>
     /// Constructs a new instance of the <see cref="Text"/> struct.
@@ -108,11 +76,7 @@ public readonly struct Text : IEquatable<Text>
     /// <param name="text">The text to initialize the instance with.</param>
     public Text(ReadOnlySpan<char> text)
     {
-#if UNREAL_ENGINE
-        _text = new FText(text);
-#else
         _text = text.ToString();
-#endif
     }
 
     /// <summary>
@@ -121,11 +85,7 @@ public readonly struct Text : IEquatable<Text>
     /// <param name="text">The text to initialize the instance with.</param>
     public Text(string text)
     {
-#if UNREAL_ENGINE
-        _text = new FText(text);
-#else
         _text = text;
-#endif
     }
 
     /// <summary>
@@ -134,11 +94,7 @@ public readonly struct Text : IEquatable<Text>
     /// <param name="name">The name to initialize the instance with.</param>
     public Text(Name name)
     {
-#if UNREAL_ENGINE
-        _text = new FText((FName)name);
-#else
         _text = name.ToString();
-#endif
     }
 
     /// <summary>
@@ -175,11 +131,7 @@ public readonly struct Text : IEquatable<Text>
     /// <inheritdoc />
     public override string ToString()
     {
-#if UNREAL_ENGINE
-        return _text.ToString();
-#else
         return _text;
-#endif
     }
 
     /// <summary>
@@ -188,28 +140,8 @@ public readonly struct Text : IEquatable<Text>
     /// <returns>A <see cref="ReadOnlySpan{Char}"/> representing the content of the text.</returns>
     public ReadOnlySpan<char> AsReadOnlySpan()
     {
-#if UNREAL_ENGINE
-        return _text.AsReadOnlySpan();
-#else
         return _text.AsSpan();
-#endif
     }
-
-#if UNREAL_ENGINE
-    /// <summary>
-    /// Implicitly converts a <see cref="FText"/> instance to a <see cref="Text"/> instance.
-    /// </summary>
-    /// <param name="value">The <see cref="FText"/> instance to convert.</param>
-    /// <returns>A new <see cref="Text"/> instance containing the converted value.</returns>
-    public static implicit operator Text(FText value) => new(value);
-
-    /// <summary>
-    /// Implicitly converts a <see cref="Text"/> instance to a <see cref="FText"/> instance.
-    /// </summary>
-    /// <param name="value">The <see cref="Text"/> instance to convert.</param>
-    /// <returns>A new <see cref="FText"/> instance containing the converted value.</returns>
-    public static implicit operator FText(Text value) => value._text;
-#endif
 
     /// <summary>
     /// Allows implicit conversion from a <see cref="string"/> to a <see cref="Text"/> instance.

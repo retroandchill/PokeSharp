@@ -7,7 +7,6 @@ using PokeSharp.Services.Evolution;
 using PokeSharp.Services.Happiness;
 using PokeSharp.Services.Healing;
 using PokeSharp.Services.Moves;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.PokemonModel.Components;
 

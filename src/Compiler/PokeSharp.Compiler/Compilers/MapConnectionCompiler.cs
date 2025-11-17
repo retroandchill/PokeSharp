@@ -5,14 +5,14 @@ using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Data.Pbs;
-using PokeSharp.RGSS.Services;
+using PokeSharp.Maps;
 using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public partial class MapConnectionCompiler([ReadOnly] RgssLoader rgssLoader) : IPbsCompiler
+public partial class MapConnectionCompiler([ReadOnly] IMapMetadataRepository mapMetadataRepository) : IPbsCompiler
 {
     public int Order => 2;
 
@@ -35,7 +35,6 @@ public partial class MapConnectionCompiler([ReadOnly] RgssLoader rgssLoader) : I
     {
         var mapConnections = new List<MapConnection>();
 
-        var mapInfos = rgssLoader.MapInfos;
         await foreach (
             var (i, foundLine) in PbsSerializer
                 .ParsePreppedLinesAsync(_path, cancellationToken)
@@ -154,12 +153,11 @@ public partial class MapConnectionCompiler([ReadOnly] RgssLoader rgssLoader) : I
 
             await fileWriter.WriteLineAsync("#-------------------------------");
 
-            var mapInfos = rgssLoader.MapInfos;
             foreach (var conn in MapConnection.Entities)
             {
                 if (
-                    !mapInfos.TryGetValue(conn.Map1.Id, out var map1)
-                    || !mapInfos.TryGetValue(conn.Map2.Id, out var map2)
+                    !mapMetadataRepository.TryGet(conn.Map1.Id, out var map1)
+                    || !mapMetadataRepository.TryGet(conn.Map2.Id, out var map2)
                 )
                     continue;
 

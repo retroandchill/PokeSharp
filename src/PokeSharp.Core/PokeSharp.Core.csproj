@@ -13,6 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Injectio" Version="5.1.0" />
+    <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
@@ -23,7 +24,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj" />
     <ProjectReference
       Include="..\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj"
       OutputItemType="Analyzer"

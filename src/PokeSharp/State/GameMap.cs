@@ -1,5 +1,4 @@
 ﻿using PokeSharp.Core;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.State;
 

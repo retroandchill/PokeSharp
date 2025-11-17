@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using MessagePack;
 using PokeSharp.Core;
+using PokeSharp.Core.Data;
 using PokeSharp.Data.Core;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;
 

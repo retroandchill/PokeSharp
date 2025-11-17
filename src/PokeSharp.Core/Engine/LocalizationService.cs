@@ -1,6 +1,4 @@
-﻿using PokeSharp.SourceGenerator.Attributes;
-
-namespace PokeSharp.Core.Engine;
+﻿namespace PokeSharp.Core.Engine;
 
 [RegisterSingleton]
 [AutoServiceShortcut]

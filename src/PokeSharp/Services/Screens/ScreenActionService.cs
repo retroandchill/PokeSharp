@@ -1,6 +1,5 @@
 ﻿using PokeSharp.Core;
 using PokeSharp.PokemonModel;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Services.Screens;
 

@@ -147,9 +147,10 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
 /// </summary>
 /// <typeparam name="TEntity">The type of the loaded game data entities stored in this data set.</typeparam>
 /// <typeparam name="TKey">The type of the key used to uniquely identify entities.</typeparam>
-[RegisterSingleton]
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
 public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoader dataLoader)
-    : GameDataSet<TEntity, TKey>
+    : GameDataSet<TEntity, TKey>,
+        IDataRepository
     where TEntity : ILoadedGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {

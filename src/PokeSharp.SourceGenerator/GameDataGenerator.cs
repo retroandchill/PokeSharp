@@ -2,7 +2,7 @@
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PokeSharp.SourceGenerator.Attributes;
+using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Model;
 using PokeSharp.SourceGenerator.Properties;
 using Retro.SourceGeneratorUtilities.Utilities.Members;

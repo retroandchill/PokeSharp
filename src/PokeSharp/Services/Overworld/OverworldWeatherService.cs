@@ -1,6 +1,5 @@
 ﻿using PokeSharp.Core;
 using PokeSharp.Data.Core;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Services.Overworld;
 

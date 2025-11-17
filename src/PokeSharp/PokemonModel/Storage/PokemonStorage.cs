@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Core;
 using PokeSharp.Settings;
-using PokeSharp.SourceGenerator.Attributes;
 using PokeSharp.Trainers;
 
 namespace PokeSharp.PokemonModel.Storage;

@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using MessagePack;
 using PokeSharp.Core;
-using PokeSharp.SourceGenerator.Attributes;
+using PokeSharp.Core.Data;
 using ZLinq;
 
 namespace PokeSharp.Data.Pbs;

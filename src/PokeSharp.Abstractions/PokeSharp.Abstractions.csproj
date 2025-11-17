@@ -4,14 +4,14 @@
     <LangVersion>14</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile>bin\Debug\PokeSharp.Abstractions.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DocumentationFile>bin\Release\PokeSharp.Abstractions.xml</DocumentationFile>
+    <RootNamespace>PokeSharp</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="3.1.4" />
+    <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
+    <ProjectReference
+      Include="..\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
 </Project>

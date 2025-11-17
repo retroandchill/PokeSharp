@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
 using PokeSharp.Core;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.PokemonModel;
 

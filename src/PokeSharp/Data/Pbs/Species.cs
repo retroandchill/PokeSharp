@@ -4,8 +4,8 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MessagePack;
 using PokeSharp.Core;
+using PokeSharp.Core.Data;
 using PokeSharp.Data.Core;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;
 

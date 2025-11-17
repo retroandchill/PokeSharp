@@ -1,4 +1,4 @@
-﻿using PokeSharp.SourceGenerator.Attributes;
+﻿using PokeSharp.Core;
 using Retro.SourceGeneratorUtilities.Utilities.Attributes;
 
 namespace PokeSharp.SourceGenerator.Model;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using PokeSharp.SourceGenerator.Attributes;
+using PokeSharp.Core.Data;
 using Retro.SourceGeneratorUtilities.Utilities.Attributes;
 
 namespace PokeSharp.SourceGenerator.Model;

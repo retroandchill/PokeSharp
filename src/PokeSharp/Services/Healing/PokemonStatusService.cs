@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using PokeSharp.Core;
 using PokeSharp.PokemonModel;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Services.Healing;
 

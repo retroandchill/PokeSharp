@@ -1,4 +1,4 @@
-﻿using PokeSharp.SourceGenerator.Attributes;
+﻿using PokeSharp.Core;
 
 namespace PokeSharp.Services;
 

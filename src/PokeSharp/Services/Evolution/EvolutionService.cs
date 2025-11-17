@@ -3,7 +3,6 @@ using Injectio.Attributes;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.PokemonModel;
-using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Services.Evolution;
 

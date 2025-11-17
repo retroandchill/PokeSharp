@@ -6,6 +6,7 @@ using PokeSharp.Compiler.Core;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Data;
+using PokeSharp.Maps;
 using PokeSharp.Settings;
 
 var configurationBuilder = new ConfigurationBuilder();
@@ -29,6 +30,9 @@ var context = builder.Build();
 try
 {
     GameContext.Initialize(context);
+
+    var mapMetadataRepository = context.GetService<IMapMetadataRepository>();
+    await mapMetadataRepository.LoadAsync();
 
     var compilerService = context.GetService<PbsCompilerService>();
 

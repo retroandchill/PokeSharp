@@ -2,7 +2,8 @@
 using RhoMicro.CodeAnalysis;
 #endif
 
-namespace PokeSharp.SourceGenerator.Attributes;
+// ReSharper disable once CheckNamespace
+namespace PokeSharp.Core.Data;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 #if POKESHARP_GENERATOR

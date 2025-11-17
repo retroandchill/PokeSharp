@@ -10,14 +10,14 @@ using PokeSharp.Compiler.Model;
 using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
-using PokeSharp.RGSS.Services;
+using PokeSharp.Maps;
 using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public partial class EncounterCompiler([ReadOnly] RgssLoader rgssLoader) : IPbsCompiler
+public partial class EncounterCompiler([ReadOnly] IMapMetadataRepository mapMetadataRepository) : IPbsCompiler
 {
     public int Order => 13;
     private readonly string _path = Path.Join("PBS", "encounters.txt");
@@ -216,11 +216,12 @@ public partial class EncounterCompiler([ReadOnly] RgssLoader rgssLoader) : IPbsC
 
         async ValueTask FileWrite(StreamWriter fileWriter)
         {
-            var mapInfos = rgssLoader.MapInfos;
             await PbsSerializer.AddPbsHeaderToFileAsync(fileWriter);
             foreach (var encounter in Encounter.Entities)
             {
-                var mapName = mapInfos.TryGetValue(encounter.MapId, out var mapInfo) ? $" # {mapInfo.Name}" : "";
+                var mapName = mapMetadataRepository.TryGet(encounter.MapId, out var mapInfo)
+                    ? $" # {mapInfo.Name}"
+                    : "";
                 await fileWriter.WriteLineAsync("#-------------------------------");
                 if (encounter.Version > 0)
                 {

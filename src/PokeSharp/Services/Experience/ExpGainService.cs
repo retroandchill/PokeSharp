@@ -1,5 +1,5 @@
 ﻿using Injectio.Attributes;
-using PokeSharp.SourceGenerator.Attributes;
+using PokeSharp.Core;
 
 namespace PokeSharp.Services.Experience;
 

@@ -1,6 +1,4 @@
-﻿using PokeSharp.SourceGenerator.Attributes;
-
-namespace PokeSharp.Core.Engine;
+﻿namespace PokeSharp.Core.Engine;
 
 /// <summary>
 /// Abstraction used for interoping between the game engine that this library is running on and the rest of the application.

@@ -2,7 +2,6 @@
 using Injectio.Attributes;
 using PokeSharp.Abstractions;
 using PokeSharp.Core.Data;
-using PokeSharp.Game;
 using PokeSharp.PokemonModel;
 using PokeSharp.SourceGenerator.Attributes;
 

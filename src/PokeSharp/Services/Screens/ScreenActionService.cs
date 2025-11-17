@@ -1,5 +1,4 @@
 ﻿using PokeSharp.Abstractions;
-using PokeSharp.Game;
 using PokeSharp.PokemonModel;
 using PokeSharp.SourceGenerator.Attributes;
 

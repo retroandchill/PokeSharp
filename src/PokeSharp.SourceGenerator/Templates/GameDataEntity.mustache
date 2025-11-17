@@ -29,6 +29,8 @@ partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{C
     
     public static bool TryGet({{Key}} key, {{#IsReferenceType}}[NotNullWhen(true)] {{/IsReferenceType}}out {{ClassName}}{{#IsReferenceType}}?{{/IsReferenceType}} entity) => Data.TryGet(key, out entity);
     
+    public static int IndexOf({{Key}} key) => Data.IndexOf(key);
+
     {{#IsLoaded}}
     public static void Import(IEnumerable<{{ClassName}}> entities) => Data.Import(entities);    
         

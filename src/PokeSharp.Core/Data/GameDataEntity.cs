@@ -76,6 +76,8 @@ public interface IGameDataEntity<TKey, TEntity> : IGameDataEntity<TEntity>
     /// </param>
     /// <returns>True if the entity with the specified key exists and was retrieved successfully; otherwise, false.</returns>
     static abstract bool TryGet(TKey key, [NotNullWhen(true)] out TEntity? entity);
+
+    static abstract int IndexOf(TKey key);
 }
 
 /// <summary>

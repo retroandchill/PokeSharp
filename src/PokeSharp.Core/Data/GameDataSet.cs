@@ -90,6 +90,11 @@ public abstract partial class GameDataSet<TEntity, TKey>
     /// </returns>
     public bool TryGet(TKey key, [NotNullWhen(true)] out TEntity? entity) => _data.TryGetValue(key, out entity);
 
+    public int IndexOf(TKey key)
+    {
+        return _data.IndexOf(key);
+    }
+
     /// <summary>
     /// Replaces the current data set with a new set of entities provided asynchronously.
     /// </summary>

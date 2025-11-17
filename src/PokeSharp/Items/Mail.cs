@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Abstractions;
 using PokeSharp.Data.Core;
 
-namespace PokeSharp.Game.Items;
+namespace PokeSharp.Items;
 
 public record MailPokemonInfo(Name Species, PokemonGender Gender, bool Shiny, int Form, bool Shadow, bool IsEgg);
 

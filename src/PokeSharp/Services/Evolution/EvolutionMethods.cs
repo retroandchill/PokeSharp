@@ -3,8 +3,7 @@ using Microsoft.Extensions.Options;
 using PokeSharp.Abstractions;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
-using PokeSharp.Game;
-using PokeSharp.Game.Items;
+using PokeSharp.Items;
 using PokeSharp.PokemonModel;
 using PokeSharp.Services.DayNightCycle;
 using PokeSharp.Services.Overworld;
@@ -303,11 +302,11 @@ public sealed class ShedinjaEvolutionEvaluator : EvolutionMethodEvaluator<int>
 
     protected override bool AfterEvolution(Pokemon pokemon, Name evoSpecies, int parameter, Name newSpecies)
     {
-        if (PlayerTrainer.Instance.IsPartyFull || !Bag.Instance.HasItem(PokeBall))
+        if (PlayerTrainer.Instance.IsPartyFull || !PokemonBag.Instance.Has(PokeBall))
             return false;
 
         pokemon.DuplicateForEvolution(newSpecies);
-        Bag.Instance.RemoveItem(PokeBall);
+        PokemonBag.Instance.Remove(PokeBall);
 
         return true;
     }

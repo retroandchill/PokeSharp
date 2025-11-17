@@ -11,7 +11,6 @@ using PokeSharp.Compiler.Model;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
-using PokeSharp.Game;
 using PokeSharp.PokemonModel;
 using Zomp.SyncMethodGenerator;
 

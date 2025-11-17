@@ -1,5 +1,4 @@
 ﻿using Injectio.Attributes;
-using PokeSharp.Game;
 using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Moves;

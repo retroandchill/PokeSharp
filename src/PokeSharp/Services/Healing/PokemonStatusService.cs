@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
-using PokeSharp.Game;
 using PokeSharp.PokemonModel;
 using PokeSharp.SourceGenerator.Attributes;
 

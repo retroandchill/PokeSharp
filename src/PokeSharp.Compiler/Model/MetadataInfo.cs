@@ -24,9 +24,9 @@ public partial class MetadataInfo
     [PbsType(PbsFieldType.Enumerable, EnumType = typeof(Item))]
     public List<Name> StartItemStorage { get; set; } = [];
 
-    public HomeLocationInfo? Home { get; set; }
+    public required HomeLocationInfo Home { get; init; }
 
-    public Text? StorageCreator { get; set; }
+    public Text StorageCreator { get; set; } = Text.Localized("Metadata.StorageCreator", "Bill", "Bill");
 
     public string? WildBattleBGM { get; set; }
 

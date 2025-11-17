@@ -20,13 +20,17 @@ public partial record ShadowPokemon
     /// <param name="species">The primary ID of the species.</param>
     /// <param name="form">The specific form to search for.</param>
     /// <returns></returns>
-    public static ShadowPokemon GetSpeciesForm(Name species, int form) => Get(new SpeciesForm(species, form));
+    public static ShadowPokemon Get(Name species, int form) => Get(new SpeciesForm(species, form));
 
-    public static bool TryGetSpeciesForm(
-        Name species,
-        int form,
-        [NotNullWhen(true)] out ShadowPokemon? shadowPokemon
-    ) => TryGet(new SpeciesForm(species, form), out shadowPokemon);
+    public static bool TryGet(Name species, [NotNullWhen(true)] out ShadowPokemon? shadowPokemon)
+    {
+        return TryGet(new SpeciesForm(species), out shadowPokemon);
+    }
+
+    public static bool TryGet(Name species, int form, [NotNullWhen(true)] out ShadowPokemon? shadowPokemon)
+    {
+        return TryGet(new SpeciesForm(species, form), out shadowPokemon);
+    }
 
     public const int MaxGaugeSize = 4000;
 

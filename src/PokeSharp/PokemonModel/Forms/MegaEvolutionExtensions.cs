@@ -86,7 +86,7 @@ public static class MegaEvolutionExtensions
             {
                 var megaForm = pokemon.MegaForm;
                 return megaForm.HasValue
-                    ? Species.GetSpeciesForm(pokemon.Species, megaForm.Value).MegaMessage
+                    ? Species.Get(pokemon.Species, megaForm.Value).MegaMessage
                     : MegaMessageType.Normal;
             }
         }

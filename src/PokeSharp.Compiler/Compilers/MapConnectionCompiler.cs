@@ -5,12 +5,14 @@ using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Data.Pbs;
+using PokeSharp.RGSS.Services;
+using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public partial class MapConnectionCompiler : IPbsCompiler
+public partial class MapConnectionCompiler([ReadOnly] RgssLoader rgssLoader) : IPbsCompiler
 {
     public int Order => 2;
 
@@ -33,7 +35,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
     {
         var mapConnections = new List<MapConnection>();
 
-        var fileLineData = new FileLineData(_path);
+        var mapInfos = rgssLoader.MapInfos;
         await foreach (
             var (i, foundLine) in PbsSerializer
                 .ParsePreppedLinesAsync(_path, cancellationToken)
@@ -41,8 +43,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
                 .WithCancellation(cancellationToken)
         )
         {
-            var (line, lineNumber) = foundLine;
-            fileLineData = fileLineData.WithLine(line, lineNumber);
+            var (line, _, fileLineData) = foundLine;
 
             try
             {
@@ -90,7 +91,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
             }
             catch (SerializationException ex)
             {
-                throw new PbsParseException($"{ex.Message}\n{fileLineData.LineReport}");
+                throw new PbsParseException($"{ex.Message}\n{fileLineData.LineReport}", ex);
             }
         }
 
@@ -153,9 +154,18 @@ public partial class MapConnectionCompiler : IPbsCompiler
 
             await fileWriter.WriteLineAsync("#-------------------------------");
 
+            var mapInfos = rgssLoader.MapInfos;
             foreach (var conn in MapConnection.Entities)
             {
-                // TODO: We eventually want to write the map names here, but for now we will just skip them.
+                if (
+                    !mapInfos.TryGetValue(conn.Map1.Id, out var map1)
+                    || !mapInfos.TryGetValue(conn.Map2.Id, out var map2)
+                )
+                    continue;
+
+                var map1Name = !string.IsNullOrWhiteSpace(map1.Name) ? map1.Name : "???";
+                var map2Name = !string.IsNullOrWhiteSpace(map2.Name) ? map2.Name : "???";
+                await fileWriter.WriteLineAsync($"# {map1Name} ({conn.Map1.Id}) - {map2Name} ({conn.Map2.Id})");
 
                 await fileWriter.WriteLineAsync(
                     $"{conn.Map1.Id},{conn.Map1.Direction.ToStringBrief()},{conn.Map1.Offset},{conn.Map2.Id},"

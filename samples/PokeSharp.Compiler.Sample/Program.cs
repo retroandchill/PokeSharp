@@ -21,7 +21,8 @@ builder
     .AddPokeSharpCore(SerializerTags.MessagePack)
     .AddPokeSharpCompilerCore()
     .AddPokeSharp()
-    .AddPokeSharpCompiler();
+    .AddPokeSharpCompiler()
+    .AddPokeSharpRGSS();
 
 var context = builder.Build();
 

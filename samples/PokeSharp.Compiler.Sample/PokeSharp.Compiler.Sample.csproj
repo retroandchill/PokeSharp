@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj" />
     <ProjectReference Include="..\..\src\PokeSharp.Compiler\PokeSharp.Compiler.csproj" />
+    <ProjectReference Include="..\..\src\PokeSharp.RGSS\PokeSharp.RGSS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
@@ -17,6 +18,7 @@
     <Content Include="PBS\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="rgss-db\" />
     <Folder Include="Settings\" />
   </ItemGroup>
 </Project>

@@ -14,7 +14,7 @@ public readonly record struct PbsSection(
     FileLineData HeaderLine
 );
 
-public readonly record struct LineWithNumber(string Line, int LineNumber);
+public readonly record struct LineWithNumber(string Line, int LineNumber, FileLineData FileLineData);
 
 public readonly record struct ModelWithLine<T>(T Model, FileLineData LineData);
 
@@ -101,13 +101,14 @@ public static partial class PbsSerializer
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
+        var fileLineData = new FileLineData(filename);
         using var fileReader = new StreamReader(filename);
         var lineNumber = 1;
         while (await fileReader.ReadLineAsync(cancellationToken) is { } line)
         {
             if (!line.StartsWith('#') && !string.IsNullOrWhiteSpace(line))
             {
-                yield return new LineWithNumber(line, lineNumber);
+                yield return new LineWithNumber(line, lineNumber, fileLineData.WithLine(line, lineNumber));
             }
 
             lineNumber++;
@@ -120,6 +121,7 @@ public static partial class PbsSerializer
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
+        var fileLineData = new FileLineData(filename);
         using var fileReader = new StreamReader(filename);
 
         var lineNumber = 1;
@@ -128,7 +130,7 @@ public static partial class PbsSerializer
             line = TextFormatter.PrepLine(line);
             if (!line.StartsWith('#') && !string.IsNullOrWhiteSpace(line))
             {
-                yield return new LineWithNumber(line, lineNumber);
+                yield return new LineWithNumber(line, lineNumber, fileLineData.WithLine(line, lineNumber));
             }
 
             lineNumber++;
@@ -136,10 +138,10 @@ public static partial class PbsSerializer
     }
 
     [GeneratedRegex(@"^\s*\[\s*(.+)\s*\]\s*$")]
-    public static partial Regex SectionHeader { get; }
+    private static partial Regex SectionHeader { get; }
 
     [GeneratedRegex(@"^\s*(\w+)\s*=\s*(.*)$")]
-    public static partial Regex KeyValuePair { get; }
+    private static partial Regex KeyValuePair { get; }
 
     [CreateSyncVersion]
     public static async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(

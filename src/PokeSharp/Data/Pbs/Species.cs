@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MessagePack;
@@ -38,13 +39,23 @@ public enum MegaMessageType
     Move,
 }
 
-[GameDataEntity(DataPath = "pokemon")]
+[GameDataEntity(DataPath = "species")]
 [MessagePackObject(true)]
 public partial record Species
 {
-    public static Species GetSpeciesForm(Name species, int form)
+    public static Species Get(Name species, int form = 0)
     {
         return Get(new SpeciesForm(species, form));
+    }
+
+    public static bool TryGet(Name species, [NotNullWhen(true)] out Species? result)
+    {
+        return TryGet(new SpeciesForm(species), out result);
+    }
+
+    public static bool TryGet(Name species, int form, [NotNullWhen(true)] out Species? result)
+    {
+        return TryGet(new SpeciesForm(species, form), out result);
     }
 
     public static IEnumerable<Species> AllSpecies => Entities.Where(e => e.Form == 0);

@@ -1,0 +1,606 @@
+[
+  null,
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "Phone::Call.start_message"
+        ],
+        "indent": 0,
+        "code": 355
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          12,
+          "$game_map.map_id==4"
+        ],
+        "indent": 0,
+        "code": 111
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bHello, \\PN!\\nI can see you calling me over there!"
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bCome over and talk to me."
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End call"
+        ],
+        "indent": 1,
+        "code": 119
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 412
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bHello, this is Professor Oak...\\nOh, hello, \\PN!"
+        ],
+        "indent": 0,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bSo, how's your Pokédex coming along?"
+        ],
+        "indent": 0,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          [
+            "Evaluate Pokédex",
+            "Quit"
+          ],
+          2
+        ],
+        "indent": 0,
+        "code": 102
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          0,
+          "Evaluate Pokédex"
+        ],
+        "indent": 0,
+        "code": 402
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "pbSet(1,$player.pokedex.seen_count)"
+        ],
+        "indent": 1,
+        "code": 355
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "pbSet(2,$player.pokedex.owned_count)"
+        ],
+        "indent": 1,
+        "code": 655
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bHmm, let's see..\\nYou've seen \\v[1] Pokémon, and"
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\nyou've caught \\v[2] Pokémon!\\nI see!"
+        ],
+        "indent": 1,
+        "code": 401
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          1,
+          2,
+          0,
+          30,
+          4
+        ],
+        "indent": 1,
+        "code": 111
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bHmm, you still have a long journey ahead of you!"
+        ],
+        "indent": 2,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\nKeep on going!"
+        ],
+        "indent": 2,
+        "code": 401
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End evaluation"
+        ],
+        "indent": 2,
+        "code": 119
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 2,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 412
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          1,
+          2,
+          0,
+          75,
+          4
+        ],
+        "indent": 1,
+        "code": 111
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bHmm, you're catching Pokémon at a decent pace!"
+        ],
+        "indent": 2,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End evaluation"
+        ],
+        "indent": 2,
+        "code": 119
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 2,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 412
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          1,
+          2,
+          0,
+          150,
+          4
+        ],
+        "indent": 1,
+        "code": 111
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bYou've caught a lot of Pokémon, but make sure "
+        ],
+        "indent": 2,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "you're raising them carefully!"
+        ],
+        "indent": 2,
+        "code": 401
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End evaluation"
+        ],
+        "indent": 2,
+        "code": 119
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 2,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 412
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          1,
+          2,
+          0,
+          150,
+          1
+        ],
+        "indent": 1,
+        "code": 111
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bI didn't even know that many Pokémon existed!"
+        ],
+        "indent": 2,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End evaluation"
+        ],
+        "indent": 2,
+        "code": 119
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 2,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 412
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End evaluation"
+        ],
+        "indent": 1,
+        "code": 118
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bShow me your Pokédex again anytime!"
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          1,
+          "Quit"
+        ],
+        "indent": 0,
+        "code": 402
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\bShow me your Pokédex anytime!"
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 404
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "End call"
+        ],
+        "indent": 0,
+        "code": 118
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "Phone::Call.end_message"
+        ],
+        "indent": 0,
+        "code": 355
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "Professor Oak phone",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 1
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\rDo you want me to stop following you?"
+        ],
+        "indent": 0,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          [
+            "Yes",
+            "No"
+          ],
+          2
+        ],
+        "indent": 0,
+        "code": 102
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          0,
+          "Yes"
+        ],
+        "indent": 0,
+        "code": 402
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\rI'll just vanish, then."
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "Followers.remove(\"May\")"
+        ],
+        "indent": 1,
+        "code": 355
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "pbDeregisterPartner"
+        ],
+        "indent": 1,
+        "code": 355
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          1,
+          "No"
+        ],
+        "indent": 0,
+        "code": 402
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [
+          "\\rLet's keep going!"
+        ],
+        "indent": 1,
+        "code": 101
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 1,
+        "code": 0
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 404
+      },
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "May dependent event",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 2
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 3
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 4
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 5
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 6
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 7
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 8
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 9
+  },
+  {
+    "json_class": "RPG::CommonEvent",
+    "list": [
+      {
+        "json_class": "RPG::EventCommand",
+        "parameters": [],
+        "indent": 0,
+        "code": 0
+      }
+    ],
+    "name": "",
+    "trigger": 0,
+    "switch_id": 1,
+    "id": 10
+  }
+]

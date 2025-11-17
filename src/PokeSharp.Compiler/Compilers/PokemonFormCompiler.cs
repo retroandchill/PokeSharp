@@ -55,14 +55,14 @@ public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterP
 
     private static Species ConvertToEntity(SpeciesFormInfo model)
     {
-        var baseForm = Species.GetSpeciesForm(model.Id.Species, 0);
+        var baseForm = Species.Get(model.Id.Species, 0);
         return model.ToGameData(baseForm.Name, baseForm.GrowthRate, baseForm.GenderRatio, baseForm.Incense);
     }
 
     private static SpeciesFormInfo ConvertToModel(Species entity)
     {
         var model = entity.ToSpeciesFormInfo();
-        var baseForm = Species.GetSpeciesForm(model.Id.Species, 0).ToSpeciesFormInfo();
+        var baseForm = Species.Get(model.Id.Species, 0).ToSpeciesFormInfo();
         if (
             !SequenceEqual(baseForm.WildItemCommon, model.WildItemCommon)
             || !SequenceEqual(baseForm.WildItemUncommon, model.WildItemUncommon)
@@ -90,7 +90,7 @@ public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterP
             );
         }
 
-        var baseData = Species.GetSpeciesForm(model.Id.Species, 0);
+        var baseData = Species.Get(model.Id.Species, 0);
 
         if (model.WildItemCommon.Count == 0 && model.WildItemUncommon.Count == 0 && model.WildItemRare.Count == 0)
         {

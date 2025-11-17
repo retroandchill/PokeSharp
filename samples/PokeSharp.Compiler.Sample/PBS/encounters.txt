@@ -115,8 +115,8 @@ BugContest,21
     5,PINSIR,13,14
     5,SCYTHER,13,14
 PokeRadar,40
-    50,BUTTERFREE,15,18
     50,BEEDRILL,15,18
+    50,BUTTERFREE,15,18
 #-------------------------------
 [031] # Route 3
 Land,21

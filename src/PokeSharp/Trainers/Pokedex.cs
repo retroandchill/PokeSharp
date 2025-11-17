@@ -173,7 +173,7 @@ public class Pokedex
         bool shouldRefreshDexes = true
     )
     {
-        Register(Species.GetSpeciesForm(species, form), gender, shiny, shouldRefreshDexes);
+        Register(Species.Get(species, form), gender, shiny, shouldRefreshDexes);
     }
 
     private void Register(Species species, PokemonGender gender, bool shiny, bool shouldRefreshDexes)
@@ -181,7 +181,7 @@ public class Pokedex
         var pokedexGender = gender.ToPokedexGender();
         if (species.Form != species.PokedexForm)
         {
-            species = Species.GetSpeciesForm(species.SpeciesId, species.PokedexForm);
+            species = Species.Get(species.SpeciesId, species.PokedexForm);
         }
 
         var form = species.FormName.GetValueOrDefault().AsReadOnlySpan().IsEmpty ? species.Form : 0;

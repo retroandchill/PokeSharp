@@ -25,10 +25,8 @@ public partial class RegionalDexCompiler : IPbsCompiler
         var dexLists = new OrderedDictionary<int, List<SpeciesForm>>();
 
         int? section = null;
-        var fileLineData = new FileLineData(_path);
-        await foreach (var (line, lineNumber) in PbsSerializer.ParsePreppedLinesAsync(_path, cancellationToken))
+        await foreach (var (line, _, fileLineData) in PbsSerializer.ParsePreppedLinesAsync(_path, cancellationToken))
         {
-            fileLineData = fileLineData.WithLine(line, lineNumber);
             var sectionMatch = SectionHeaderRegex.Match(line);
             if (sectionMatch.Success)
             {

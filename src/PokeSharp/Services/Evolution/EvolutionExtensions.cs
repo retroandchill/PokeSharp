@@ -113,7 +113,7 @@ public static class EvolutionExtensions
 
             var previousSpecies = species.PreviousSpecies;
             return previousSpecies != species.SpeciesId
-                ? Species.GetSpeciesForm(previousSpecies, species.Form).GetEggMoves()
+                ? Species.Get(previousSpecies, species.Form).GetEggMoves()
                 : species.EggMoves;
         }
 
@@ -154,7 +154,7 @@ public static class EvolutionExtensions
                 if (evo is null)
                     return 1;
 
-                var previousData = Species.GetSpeciesForm(evo.Species, species.BaseForm);
+                var previousData = Species.Get(evo.Species, species.BaseForm);
                 var previousMinLevel = previousData.MinimumLevel;
 
                 if (previousData.Incense.IsValid)

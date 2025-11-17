@@ -61,7 +61,7 @@ public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowP
     }
 
     public ShadowPokemon? ShadowData =>
-        ShadowPokemon.TryGetSpeciesForm(_pokemon.Species, _pokemon.FormSimple, out var result) ? result : null;
+        ShadowPokemon.TryGet(_pokemon.Species, _pokemon.FormSimple, out var result) ? result : null;
 
     public int MaxGaugeSize => ShadowData?.GaugeSize ?? ShadowPokemon.MaxGaugeSize;
 

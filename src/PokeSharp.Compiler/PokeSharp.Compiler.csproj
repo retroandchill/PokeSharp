@@ -12,6 +12,7 @@
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
+    <ProjectReference Include="..\PokeSharp.RGSS\PokeSharp.RGSS.csproj" />
     <ProjectReference Include="..\PokeSharp\PokeSharp.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using PokeSharp.Abstractions;
+﻿using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Data;
@@ -240,7 +239,7 @@ public partial class SpeciesFormInfo
     [PbsKeyRepeat]
     public List<FormEvolutionMethodInfo> Evolutions { get; set; } = [];
 
-    private SpeciesFormInfo GetBaseForm() => Species.GetSpeciesForm(Id.Species, 0).ToSpeciesFormInfo();
+    private SpeciesFormInfo GetBaseForm() => Species.Get(Id.Species, 0).ToSpeciesFormInfo();
 
     public static string WriteDecimalValue(decimal value) => value.ToString("0.0");
 }

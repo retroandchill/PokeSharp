@@ -89,7 +89,7 @@ public class Pokemon
 
     public bool IsSpecies(Name species) => Species == species;
 
-    public Species SpeciesData => Data.Pbs.Species.GetSpeciesForm(Species, FormSimple);
+    public Species SpeciesData => Data.Pbs.Species.Get(Species, FormSimple);
 
     private int _form;
 

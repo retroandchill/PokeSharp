@@ -1,5 +1,4 @@
-﻿using PokeSharp.Abstractions;
-using PokeSharp.Core;
+﻿using PokeSharp.Core;
 using PokeSharp.Settings;
 using PokeSharp.State;
 
@@ -10,7 +9,7 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
     private const int BadgeNumber = 8;
 
     // TODO: Implement this
-    public static PlayerTrainer Instance { get; } = new(Text.None, Abstractions.Name.None);
+    public static PlayerTrainer Instance { get; } = new(Text.None, Core.Name.None);
 
     public int CharacterId
     {

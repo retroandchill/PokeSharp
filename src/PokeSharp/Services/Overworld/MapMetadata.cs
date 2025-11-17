@@ -1,4 +1,4 @@
-﻿using PokeSharp.Abstractions;
+﻿using PokeSharp.Core;
 
 namespace PokeSharp.Services.Overworld;
 

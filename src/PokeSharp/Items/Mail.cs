@@ -1,4 +1,4 @@
-﻿using PokeSharp.Abstractions;
+﻿using PokeSharp.Core;
 using PokeSharp.Data.Core;
 
 namespace PokeSharp.Items;

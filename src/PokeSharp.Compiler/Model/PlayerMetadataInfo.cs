@@ -1,5 +1,5 @@
-﻿using PokeSharp.Abstractions;
-using PokeSharp.Compiler.Core.Schema;
+﻿using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Core;
 
 namespace PokeSharp.Compiler.Model;
 

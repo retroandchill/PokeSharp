@@ -3,7 +3,6 @@ using Injectio.Attributes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Trainers;
 

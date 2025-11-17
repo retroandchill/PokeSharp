@@ -1,5 +1,4 @@
 ﻿using Injectio.Attributes;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;

@@ -1,8 +1,10 @@
-﻿namespace PokeSharp.RGSS.RPG;
+﻿using PokeSharp.Core;
+
+namespace PokeSharp.RGSS.RPG;
 
 public record MapInfo
 {
-    public string Name { get; init; } = "";
+    public Text Name { get; init; } = "";
 
     public int ParentId { get; init; }
 

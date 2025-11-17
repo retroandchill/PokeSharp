@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.PokemonModel;
 

@@ -1,7 +1,7 @@
 ﻿using MessagePack;
 using MessagePack.Formatters;
 
-namespace PokeSharp.Abstractions.Serializers.MessagePack;
+namespace PokeSharp.Core.Serialization.MessagePack;
 
 /// <summary>
 /// A custom MessagePack formatter for the <see cref="Text"/> struct, enabling serialization

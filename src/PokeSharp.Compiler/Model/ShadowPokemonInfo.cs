@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
+using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Model;

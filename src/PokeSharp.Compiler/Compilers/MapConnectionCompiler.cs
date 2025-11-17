@@ -163,8 +163,8 @@ public partial class MapConnectionCompiler([ReadOnly] RgssLoader rgssLoader) : I
                 )
                     continue;
 
-                var map1Name = !string.IsNullOrWhiteSpace(map1.Name) ? map1.Name : "???";
-                var map2Name = !string.IsNullOrWhiteSpace(map2.Name) ? map2.Name : "???";
+                var map1Name = !string.IsNullOrWhiteSpace(map1.Name) ? map1.Name.ToString() : "???";
+                var map2Name = !string.IsNullOrWhiteSpace(map2.Name) ? map2.Name.ToString() : "???";
                 await fileWriter.WriteLineAsync($"# {map1Name} ({conn.Map1.Id}) - {map2Name} ({conn.Map2.Id})");
 
                 await fileWriter.WriteLineAsync(

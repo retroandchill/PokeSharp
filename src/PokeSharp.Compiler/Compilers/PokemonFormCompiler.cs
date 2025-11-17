@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Compiler.Validators;
+using PokeSharp.Core;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;

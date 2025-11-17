@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
+using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 

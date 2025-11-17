@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PokeSharp.Abstractions.Serializers.Json;
+namespace PokeSharp.Core.Serialization.Json;
 
 /// <summary>
 /// Custom JSON converter for the <see cref="Name"/> struct, enabling serialization

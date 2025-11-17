@@ -1,6 +1,6 @@
 ﻿using Injectio.Attributes;
 using Microsoft.Extensions.Options;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.PokemonModel;
 using PokeSharp.Settings;
 using PokeSharp.State;

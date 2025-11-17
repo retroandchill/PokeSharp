@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Model;
+using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using Riok.Mapperly.Abstractions;

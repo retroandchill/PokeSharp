@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Items;

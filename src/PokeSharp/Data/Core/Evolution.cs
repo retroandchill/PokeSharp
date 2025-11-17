@@ -1,5 +1,5 @@
 ﻿using Injectio.Attributes;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Data.Pbs;
 using PokeSharp.SourceGenerator.Attributes;

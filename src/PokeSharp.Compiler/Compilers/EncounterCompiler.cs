@@ -2,12 +2,12 @@
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
+using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.RGSS.Services;

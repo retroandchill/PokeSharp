@@ -1,5 +1,4 @@
-﻿using PokeSharp.Abstractions;
-using PokeSharp.SourceGenerator.Attributes;
+﻿using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Core.Engine;
 

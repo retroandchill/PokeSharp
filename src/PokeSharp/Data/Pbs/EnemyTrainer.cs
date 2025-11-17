@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using MessagePack;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.SourceGenerator.Attributes;
 

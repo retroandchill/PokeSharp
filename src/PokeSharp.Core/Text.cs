@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using MessagePack;
-using PokeSharp.Abstractions.Serializers.Json;
-using PokeSharp.Abstractions.Serializers.MessagePack;
+using PokeSharp.Core.Serialization.Json;
+using PokeSharp.Core.Serialization.MessagePack;
 #if UNREAL_ENGINE
 using UnrealSharp.Core;
 #endif
 
-namespace PokeSharp.Abstractions;
+namespace PokeSharp.Core;
 
 /// <summary>
 /// Represents a flexible text abstraction that supports integration with different serialization formats

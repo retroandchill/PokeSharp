@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Settings;
 using PokeSharp.SourceGenerator.Attributes;

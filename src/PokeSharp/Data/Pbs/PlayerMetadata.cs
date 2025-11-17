@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using MessagePack;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.SourceGenerator.Attributes;
 
 namespace PokeSharp.Data.Pbs;

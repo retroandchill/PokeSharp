@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using PokeSharp.Abstractions;
 using PokeSharp.Core;
 using PokeSharp.Core.Engine;
 using PokeSharp.Core.Utils;
@@ -238,7 +237,7 @@ public class Pokemon
         if (IsEgg)
             return;
 
-        Status = Abstractions.Name.None;
+        Status = Core.Name.None;
         StatusCount = 0;
     }
 
@@ -448,7 +447,7 @@ public class Pokemon
                 }
                 else
                 {
-                    _ability = Abstractions.Name.None;
+                    _ability = Core.Name.None;
                 }
             }
 
@@ -578,7 +577,7 @@ public class Pokemon
 
     public Item? Item
     {
-        get => Item.TryGet(ItemId ?? Abstractions.Name.None, out var item) ? item : null;
+        get => Item.TryGet(ItemId ?? Core.Name.None, out var item) ? item : null;
         set => ItemId = value?.Id;
     }
 

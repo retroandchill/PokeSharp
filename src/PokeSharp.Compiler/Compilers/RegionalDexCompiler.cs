@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
-using PokeSharp.Abstractions;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
+using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Services.Evolution;

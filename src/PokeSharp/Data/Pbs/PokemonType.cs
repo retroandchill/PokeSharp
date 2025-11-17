@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 using MessagePack;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.SourceGenerator.Attributes;
 using ZLinq;
 

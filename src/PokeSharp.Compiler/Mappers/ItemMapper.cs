@@ -1,5 +1,5 @@
-﻿using PokeSharp.Abstractions;
-using PokeSharp.Compiler.Model;
+﻿using PokeSharp.Compiler.Model;
+using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 using Riok.Mapperly.Abstractions;
 

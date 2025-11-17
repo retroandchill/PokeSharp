@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using PokeSharp.Abstractions;
+using PokeSharp.Core;
 using PokeSharp.Core.Data;
 
 namespace PokeSharp.Compiler.Core.Serialization;

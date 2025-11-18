@@ -1,9 +1,9 @@
 ﻿using System.Drawing;
 using PokeSharp.Core;
 
-namespace PokeSharp.Messages;
+namespace PokeSharp.UI;
 
-public interface IMessageWindow
+public interface ITextWindow : IWindow
 {
     Text Text { get; set; }
 

@@ -12,6 +12,7 @@
     <DocumentationFile></DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj" />
     <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
     <ProjectReference
       Include="..\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj"

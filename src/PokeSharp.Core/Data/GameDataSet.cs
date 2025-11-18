@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
@@ -147,7 +148,7 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
 /// </summary>
 /// <typeparam name="TEntity">The type of the loaded game data entities stored in this data set.</typeparam>
 /// <typeparam name="TKey">The type of the key used to uniquely identify entities.</typeparam>
-[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
+[RegisterSingleton(ServiceType = typeof(LoadedGameDataSet<,>))]
 public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoader dataLoader)
     : GameDataSet<TEntity, TKey>,
         IDataRepository
@@ -187,5 +188,15 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     public ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
         return dataLoader.SaveEntitiesAsync(Data.Values, TEntity.DataPath, cancellationToken);
+    }
+}
+
+public static class GameDataSetExtensions
+{
+    public static IServiceCollection RegisterGameDataRepository<TEntity, TKey>(this IServiceCollection services)
+        where TEntity : ILoadedGameDataEntity<TKey, TEntity>
+        where TKey : notnull
+    {
+        return services.AddSingleton<IDataRepository>(sp => sp.GetRequiredService<LoadedGameDataSet<TEntity, TKey>>());
     }
 }

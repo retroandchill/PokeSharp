@@ -3,13 +3,13 @@ using PokeSharp.Core;
 
 namespace PokeSharp.Messages;
 
-public interface IMessageWindow 
+public interface IMessageWindow
 {
-	Text Text { get; set;}
-    
+    Text Text { get; set; }
+
     Color BaseColor { get; set; }
-    
+
     Color ShadowColor { get; set; }
-    
+
     bool LetterByLetter { get; set; }
 }

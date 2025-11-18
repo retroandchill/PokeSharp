@@ -4,7 +4,7 @@ using PokeSharp.RGSS.RPG;
 namespace PokeSharp.RGSS.Serialization;
 
 [JsonSourceGenerationOptions(
-    GenerationMode = JsonSourceGenerationMode.Serialization,
+    GenerationMode = JsonSourceGenerationMode.Metadata,
     WriteIndented = true,
     PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower
 )]

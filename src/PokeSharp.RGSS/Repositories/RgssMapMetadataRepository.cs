@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using PokeSharp.Maps;
+using PokeSharp.RGSS.RPG;
 using PokeSharp.RGSS.Serialization;
 using Zomp.SyncMethodGenerator;
 

@@ -26,7 +26,7 @@ namespace PokeSharp.Core;
 [JsonConverter(typeof(TextJsonConverter))]
 public readonly struct Text : IEquatable<Text>
 {
-    private readonly string _text;
+    private readonly ITextData? _data;
 
     /// <summary>
     /// Gets a value indicating whether the text is empty or consists only of whitespace.
@@ -43,7 +43,12 @@ public readonly struct Text : IEquatable<Text>
     /// <threadsafety>
     /// This property is thread-safe due to the immutable nature of the <see cref="Text"/> struct.
     /// </threadsafety>
-    public bool Empty => string.IsNullOrWhiteSpace(_text);
+    public bool IsEmpty => _data is null || _data.IsEmpty;
+
+    /// <summary>
+    /// Gets a value indicating whether the text consists solely of whitespace characters.
+    /// </summary>
+    public bool IsWhitespace => _data is not null && _data.IsWhitespace;
 
     /// <summary>
     /// Represents an empty or uninitialized instance of the <see cref="Text"/> struct.
@@ -65,18 +70,10 @@ public readonly struct Text : IEquatable<Text>
     /// <summary>
     /// Constructs a new instance of the <see cref="Text"/> struct.
     /// </summary>
-    public Text()
-    {
-        _text = string.Empty;
-    }
-
-    /// <summary>
-    /// Constructs a new instance of the <see cref="Text"/> struct.
-    /// </summary>
     /// <param name="text">The text to initialize the instance with.</param>
     public Text(ReadOnlySpan<char> text)
     {
-        _text = text.ToString();
+        _data = ITextProvider.Instance.FromSimpleString(text);
     }
 
     /// <summary>
@@ -85,7 +82,7 @@ public readonly struct Text : IEquatable<Text>
     /// <param name="text">The text to initialize the instance with.</param>
     public Text(string text)
     {
-        _text = text;
+        _data = ITextProvider.Instance.FromSimpleString(text);
     }
 
     /// <summary>
@@ -94,7 +91,12 @@ public readonly struct Text : IEquatable<Text>
     /// <param name="name">The name to initialize the instance with.</param>
     public Text(Name name)
     {
-        _text = name.ToString();
+        _data = ITextProvider.Instance.FromSimpleString(name.ToString());
+    }
+
+    private Text(ITextData data)
+    {
+        _data = data;
     }
 
     /// <summary>
@@ -106,8 +108,19 @@ public readonly struct Text : IEquatable<Text>
     /// <returns>The constructed <see cref="Text"/> instance containing the localized value.</returns>
     public static Text Localized(ReadOnlySpan<char> ns, ReadOnlySpan<char> key, ReadOnlySpan<char> value)
     {
-        // TODO: We need to implement the native localization API
-        return new Text(value);
+        return new Text(ITextProvider.Instance.FromLocalized(ns, key, value));
+    }
+
+    /// <summary>
+    /// Creates a localized <see cref="Text"/> instance associated with the specified namespace, key, and value.
+    /// </summary>
+    /// <param name="ns">The namespace associated with the localized text.</param>
+    /// <param name="key">The key used to identify the localized text.</param>
+    /// <param name="value">The localized value for the provided key.</param>
+    /// <returns>The constructed <see cref="Text"/> instance containing the localized value.</returns>
+    public static Text Localized(string ns, string key, string value)
+    {
+        return new Text(ITextProvider.Instance.FromLocalized(ns, key, value));
     }
 
     /// <inheritdoc />
@@ -125,13 +138,13 @@ public readonly struct Text : IEquatable<Text>
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        return _text.GetHashCode();
+        return _data?.GetHashCode() ?? 0;
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return _text;
+        return _data?.DisplayString ?? string.Empty;
     }
 
     /// <summary>
@@ -140,7 +153,7 @@ public readonly struct Text : IEquatable<Text>
     /// <returns>A <see cref="ReadOnlySpan{Char}"/> representing the content of the text.</returns>
     public ReadOnlySpan<char> AsReadOnlySpan()
     {
-        return _text.AsSpan();
+        return _data is not null ? _data.AsDisplaySpan() : ReadOnlySpan<char>.Empty;
     }
 
     /// <summary>
@@ -156,7 +169,7 @@ public readonly struct Text : IEquatable<Text>
     /// </summary>
     /// <param name="value">The <see cref="Text"/> instance to convert.</param>
     /// <returns>The underlying string value of the <see cref="Text"/> instance.</returns>
-    public static implicit operator string(Text value) => value._text;
+    public static implicit operator string(Text value) => value._data?.DisplayString ?? string.Empty;
 
     /// <summary>
     /// Converts an instance of <see cref="Text"/> to a read-only character span.
@@ -173,7 +186,7 @@ public readonly struct Text : IEquatable<Text>
     /// <returns><c>true</c> if both <see cref="Text"/> instances are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(Text lhs, Text rhs)
     {
-        return lhs._text == rhs._text;
+        return Equals(lhs._data, rhs._data);
     }
 
     /// <summary>
@@ -187,5 +200,212 @@ public readonly struct Text : IEquatable<Text>
     public static bool operator !=(Text lhs, Text rhs)
     {
         return !(lhs == rhs);
+    }
+}
+
+/// <summary>
+/// Basic abstraction unit for text data.
+/// </summary>
+public interface ITextData
+{
+    /// <summary>
+    /// Original source string (authoring-time text, typically in English).
+    /// </summary>
+    string SourceString { get; }
+
+    /// <summary>
+    /// Current display string, after localization / transformation.
+    /// For simple invariant text, this can just be SourceString.
+    /// </summary>
+    string DisplayString { get; }
+
+    /// <summary>
+    /// Optional namespace used for localization lookup.
+    /// Null or empty means "no namespace".
+    /// </summary>
+    string? Namespace { get; }
+
+    /// <summary>
+    /// Optional key used for localization lookup.
+    /// Null or empty means "no key".
+    /// </summary>
+    string? Key { get; }
+
+    /// <summary>
+    /// True if this text should not be localized (culture invariant).
+    /// </summary>
+    bool IsCultureInvariant { get; }
+
+    /// <summary>
+    /// True if this text is transient (not meant to be gathered/serialized for localization).
+    /// </summary>
+    bool IsTransient { get; }
+
+    /// <summary>
+    /// True if this text should be gathered for localization (rough equivalent of UE ShouldGatherForLocalization()).
+    /// </summary>
+    bool ShouldGatherForLocalization { get; }
+
+    /// <summary>
+    /// True if the text is empty.
+    /// </summary>
+    bool IsEmpty { get; }
+
+    /// <summary>
+    /// True if the text is empty or consists solely of whitespace characters.
+    /// </summary>
+    bool IsWhitespace { get; }
+
+    /// <summary>
+    /// Returns a copy of this data with a different display string.
+    /// Useful for transformations like ToUpper/ToLower without losing the identity.
+    /// </summary>
+    ITextData WithDisplayString(string newDisplay);
+
+    /// <summary>
+    /// Returns a copy of this data with different namespace/key (for ChangeKey‑style operations).
+    /// </summary>
+    ITextData WithIdentity(string? @namespace, string? key);
+
+    /// <summary>
+    /// Returns the display string as a read-only span. This typically can just get the span for <see cref="DisplayString"/>,
+    /// but if your implementation stores the string in native memory, this can be used to avoid the costs of copying
+    /// the string data to managed memory.
+    /// </summary>
+    /// <returns></returns>
+    ReadOnlySpan<char> AsDisplaySpan();
+}
+
+/// <summary>
+/// Basic implementation of <see cref="ITextData"/> that stores the original source string and display string. This
+/// version will not update in real time when the display string changes, and thus is not suitable for localization
+/// where the user can change the language at runtime.
+/// </summary>
+/// <param name="SourceString">Original source string (authoring-time text, typically in English).</param>
+/// <param name="DisplayString">Current display string, after localization / transformation.</param>
+/// <param name="Namespace">Optional namespace used for localization lookup.</param>
+/// <param name="Key">Optional key used for localization lookup.</param>
+/// <param name="IsCultureInvariant">True if this text should not be localized (culture invariant).</param>
+/// <param name="IsTransient">True if this text is transient (not meant to be gathered/serialized for localization).</param>
+/// <param name="ShouldGatherForLocalization">True if this text should be gathered for localization (rough equivalent of UE ShouldGatherForLocalization()).</param>
+public sealed record BasicTextData(
+    string SourceString,
+    string DisplayString,
+    string? Namespace = null,
+    string? Key = null,
+    bool IsCultureInvariant = false,
+    bool IsTransient = false,
+    bool ShouldGatherForLocalization = false
+) : ITextData
+{
+    /// <inheritdoc />
+    public bool IsEmpty => string.IsNullOrEmpty(DisplayString);
+
+    /// <inheritdoc />
+    public bool IsWhitespace => string.IsNullOrWhiteSpace(DisplayString);
+
+    /// <inheritdoc />
+    public ITextData WithDisplayString(string newDisplay)
+    {
+        return this with { DisplayString = newDisplay };
+    }
+
+    /// <inheritdoc />
+    public ITextData WithIdentity(string? @namespace, string? key)
+    {
+        return this with { Namespace = @namespace, Key = key };
+    }
+
+    /// <inheritdoc />
+    public ReadOnlySpan<char> AsDisplaySpan()
+    {
+        return DisplayString.AsSpan();
+    }
+}
+
+/// <summary>
+/// Abstract singleton provider for text data. By default, uses <see cref="UnlocalizedTextProvider"/>, but can be
+/// changed to use a different implementation.
+/// </summary>
+public interface ITextProvider
+{
+    /// <summary>
+    /// The current instance of the text provider.
+    /// </summary>
+    static ITextProvider Instance { get; internal set; } = new UnlocalizedTextProvider();
+
+    /// <summary>
+    /// Sets the current instance of the text provider to the specified provider.
+    /// </summary>
+    /// <param name="provider">The new provider to use</param>
+    static void UseCustomProvider(ITextProvider provider)
+    {
+        Instance = provider;
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="ITextData"/> instance from the given text. This text will not have any localization
+    /// keys, and thus will not be localized.
+    /// </summary>
+    /// <param name="text">The text to use</param>
+    /// <returns>The text data used by the Text struct</returns>
+    ITextData FromSimpleString(string text);
+
+    /// <summary>
+    /// Creates a new <see cref="ITextData"/> instance from the given text. This text will not have any localization
+    /// keys, and thus will not be localized.
+    /// </summary>
+    /// <param name="text">The text to use</param>
+    /// <returns>The text data used by the Text struct</returns>
+    ITextData FromSimpleString(ReadOnlySpan<char> text);
+
+    /// <summary>
+    /// Creates a new <see cref="ITextData"/> instance from the given namespace, key, and value.
+    /// </summary>
+    /// <param name="ns">The localization namespace.</param>
+    /// <param name="key">The localization key.</param>
+    /// <param name="value">The value of the string.</param>
+    /// <returns>The text data that can be polled.</returns>
+    ITextData FromLocalized(string ns, string key, string value);
+
+    /// <summary>
+    /// Creates a new <see cref="ITextData"/> instance from the given namespace, key, and value.
+    /// </summary>
+    /// <param name="ns">The localization namespace.</param>
+    /// <param name="key">The localization key.</param>
+    /// <param name="value">The value of the string.</param>
+    /// <returns>The text data that can be polled.</returns>
+    ITextData FromLocalized(ReadOnlySpan<char> ns, ReadOnlySpan<char> key, ReadOnlySpan<char> value);
+}
+
+/// <summary>
+/// A simple text provider that does not perform any localization.
+/// </summary>
+public sealed class UnlocalizedTextProvider : ITextProvider
+{
+    /// <inheritdoc />
+    public ITextData FromSimpleString(string text)
+    {
+        return new BasicTextData(text, text);
+    }
+
+    /// <inheritdoc />
+    public ITextData FromSimpleString(ReadOnlySpan<char> text)
+    {
+        var asString = text.ToString();
+        return new BasicTextData(asString, asString);
+    }
+
+    /// <inheritdoc />
+    public ITextData FromLocalized(string ns, string key, string value)
+    {
+        return new BasicTextData(value, value, ns, key);
+    }
+
+    /// <inheritdoc />
+    public ITextData FromLocalized(ReadOnlySpan<char> ns, ReadOnlySpan<char> key, ReadOnlySpan<char> value)
+    {
+        var valueAsString = value.ToString();
+        return new BasicTextData(valueAsString, valueAsString, ns.ToString(), key.ToString());
     }
 }

@@ -1,4 +1,5 @@
-﻿using PokeSharp.Core;
+﻿using MessagePack;
+using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.PokemonModel;
@@ -29,28 +30,38 @@ public static class PokedexGenderExtensions
     }
 }
 
+[MessagePackObject(true)]
 public readonly record struct SeenForm(PokedexGender Gender, bool Shiny, int Form);
 
-public class Pokedex
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class Pokedex
 {
     public const int NationalDex = -1;
 
     public List<int> AccessibleDexes { get; } = [];
-    private readonly bool[] _unlockedDexes;
-    private readonly HashSet<Name> _seen = [];
+    private bool[] _unlockedDexes;
+    private HashSet<Name> _seen = [];
     private readonly HashSet<Name> _owned = [];
-    private readonly Dictionary<Name, HashSet<SeenForm>> _seenForms = new();
-    private readonly HashSet<Name> _seenEggs = [];
-    private readonly Dictionary<Name, SeenForm> _lastSeenForms = new();
-    private readonly HashSet<Name> _ownedShadow = [];
-    private readonly Dictionary<Name, int> _caughtCounts = new();
-    private readonly Dictionary<Name, int> _defeatedCounts = new();
+    private Dictionary<Name, HashSet<SeenForm>> _seenForms = new();
+    private HashSet<Name> _seenEggs = [];
+    private Dictionary<Name, SeenForm> _lastSeenForms = new();
+    private HashSet<Name> _ownedShadow = [];
+    private Dictionary<Name, int> _caughtCounts = new();
+    private Dictionary<Name, int> _defeatedCounts = new();
 
     public Pokedex()
     {
         _unlockedDexes = Enumerable.Range(0, RegionalDex.Count + 1).Select(i => i == 0).ToArray();
 
         RefreshAccessibleDexes();
+    }
+
+    [SerializationConstructor]
+    // ReSharper disable once InconsistentNaming
+    private Pokedex(List<int> accessibleDexes, bool[] _unlockedDexes)
+    {
+        AccessibleDexes = accessibleDexes;
+        this._unlockedDexes = _unlockedDexes;
     }
 
     public void Clear()

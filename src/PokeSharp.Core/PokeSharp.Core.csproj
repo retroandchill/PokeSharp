@@ -31,7 +31,4 @@
       ReferenceOutputAssembly="false"
     />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FileSystem\" />
-  </ItemGroup>
 </Project>

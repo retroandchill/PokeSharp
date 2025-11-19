@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using MessagePack;
+using MessagePack.Formatters;
 using PokeSharp.Core;
 
 namespace PokeSharp.PokemonModel;
@@ -7,6 +9,8 @@ namespace PokeSharp.PokemonModel;
 public interface IPokemonComponent
 {
     Name Id { get; }
+    
+    void Attach(Pokemon pokemon);
 
     IPokemonComponent Clone(Pokemon newPokemon);
 }

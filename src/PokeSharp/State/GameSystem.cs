@@ -1,4 +1,5 @@
 ﻿using Injectio.Attributes;
+using MessagePack;
 using PokeSharp.Core;
 
 namespace PokeSharp.State;
@@ -12,7 +13,8 @@ public enum MessagePosition : byte
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public class GameSystem
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class GameSystem
 {
     public DateTimeOffset? TimerStart { get; set; }
     public int TimerDuration { get; set; }

@@ -1,10 +1,12 @@
 ﻿using System.Collections;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Items;
 
-public class PCItemStorage : IReadOnlyList<ItemSlot>
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class PCItemStorage : IReadOnlyList<ItemSlot>
 {
     public const int MaxSize = 999;
     public const int MaxPerSlot = 999;
@@ -19,8 +21,17 @@ public class PCItemStorage : IReadOnlyList<ItemSlot>
         }
     }
 
+    [SerializationConstructor]
+    // ReSharper disable once InconsistentNaming
+    private PCItemStorage(List<ItemSlot> _items)
+    {
+        this._items = _items;
+    }
+
+    [IgnoreMember]
     public ItemSlot this[int index] => _items[index];
 
+    [IgnoreMember]
     public int Count => _items.Count;
 
     public int GetQuantity(Name item)

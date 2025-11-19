@@ -1,9 +1,11 @@
 ﻿using System.Collections;
+using MessagePack;
 using PokeSharp.Core;
 
 namespace PokeSharp.PokemonModel.Storage;
 
-public class PokemonBox : IReadOnlyList<Pokemon?>
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class PokemonBox : IReadOnlyList<Pokemon?>
 {
     public Pokemon?[] Pokemon { get; }
     public Text Name { get; set; }
@@ -20,14 +22,25 @@ public class PokemonBox : IReadOnlyList<Pokemon?>
         Pokemon = new Pokemon?[maxPokemon];
     }
 
+    [SerializationConstructor]
+    private PokemonBox(Text name, Pokemon[] pokemon)
+    {
+        Name = name;
+        Pokemon = pokemon;
+    }
+
+    [IgnoreMember]
     public int Count => Pokemon.Length;
 
     public int PokemonCount => Pokemon.Count(p => p is not null);
 
+    [IgnoreMember]
     public bool IsFull => PokemonCount == Count;
 
+    [IgnoreMember]
     public bool IsEmpty => PokemonCount == 0;
 
+    [IgnoreMember]
     public Pokemon? this[int index]
     {
         get => Pokemon[index];

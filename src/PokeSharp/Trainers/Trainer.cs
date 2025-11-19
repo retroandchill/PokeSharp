@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Core.Engine;
 using PokeSharp.Data.Pbs;
@@ -7,6 +8,9 @@ using PokeSharp.Settings;
 
 namespace PokeSharp.Trainers;
 
+[MessagePackObject(true)]
+[Union(0, typeof(NPCTrainer))]
+[Union(1, typeof(PlayerTrainer))]
 public abstract class Trainer(Text name, Name trainerType)
 {
     public Name TrainerType { get; set; } = trainerType;

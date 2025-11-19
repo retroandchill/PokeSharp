@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -18,13 +19,23 @@ public enum HeartGaugeChangeMethod : byte
     Scent,
 }
 
+[MessagePackObject(true)]
 public readonly record struct HeartGaugeChangeAmounts(int Battle, int Call, int Walking, int Scent);
 
-public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowPokemonComponent>
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowPokemonComponent>
 {
+    [IgnoreMember]
     private Pokemon _pokemon = pokemon;
 
+    [SerializationConstructor]
+    private ShadowPokemonComponent() : this(null!)
+    {
+    }
+
     public static Name ComponentId => ShadowPokemonComponentExtensions.ComponentId;
+    
+    [IgnoreMember]
     public Name Id => ShadowPokemonComponentExtensions.ComponentId;
 
     public bool IsShadow { get; set; }
@@ -45,6 +56,7 @@ public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowP
 
     public int HeartGaugeStepCount { get; set; }
 
+    [IgnoreMember]
     public int HeartStage
     {
         get
@@ -58,9 +70,11 @@ public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowP
         }
     }
 
+    [IgnoreMember]
     public ShadowPokemon? ShadowData =>
         ShadowPokemon.TryGet(_pokemon.Species, _pokemon.FormSimple, out var result) ? result : null;
 
+    [IgnoreMember]
     public int MaxGaugeSize => ShadowData?.GaugeSize ?? ShadowPokemon.MaxGaugeSize;
 
     public void AdjustHeart(int amount)
@@ -190,7 +204,13 @@ public class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent<ShadowP
         }
     }
 
+    [IgnoreMember]
     public bool IsPurifiable => IsShadow && HeartGauge == 0 && GameServices.ShadowPokemonHandler.IsPurifiable(_pokemon);
+
+    public void Attach(Pokemon pokemon)
+    {
+        _pokemon = pokemon;
+    }
 
     public IPokemonComponent Clone(Pokemon newPokemon)
     {

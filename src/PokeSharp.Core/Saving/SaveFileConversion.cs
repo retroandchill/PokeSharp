@@ -2,7 +2,7 @@
 
 namespace PokeSharp.Core.Saving;
 
-public enum ConversionTriggerType : byte
+public enum  ConversionTriggerType : byte
 {
     Framework,
     Game,

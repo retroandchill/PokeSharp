@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using MessagePack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Core.Versioning;
@@ -17,7 +18,8 @@ public sealed partial class SaveDataService(
     ISaveSystem saveSystem,
     VersioningService versioningService,
     IEnumerable<ISaveDataValue> saveDataValues,
-    IEnumerable<ISaveDataConversion> conversions
+    IEnumerable<ISaveDataConversion> conversions,
+    MessagePackSerializerOptions messagePackSerializerOptions
 )
 {
     public static readonly Name PokeSharpVersion = "PokeSharpVersion";
@@ -38,7 +40,8 @@ public sealed partial class SaveDataService(
         CancellationToken cancellationToken = default
     )
     {
-        return await saveSystem.GetDataFromFileAsync(filePath, cancellationToken);
+        await using var saveDataStream = saveSystem.OpenRead(filePath);
+        return await MessagePackSerializer.DeserializeAsync<Dictionary<Name, object>>(saveDataStream, messagePackSerializerOptions, cancellationToken);
     }
 
     [CreateSyncVersion]
@@ -49,11 +52,10 @@ public sealed partial class SaveDataService(
     {
         var saveData = await GetDataFromFileAsync(filepath, cancellationToken);
 
-        if (saveData.Count > 0 && RunConversions(saveData))
-        {
-            await saveSystem.SaveToFileAsync(filepath, saveData, cancellationToken);
-        }
-
+        if (saveData.Count <= 0 || !await RunConversionsAsync(saveData, cancellationToken)) return saveData;
+        
+        await using var saveDataStream = saveSystem.OpenWrite(filepath);
+        await MessagePackSerializer.SerializeAsync(saveDataStream, saveData, messagePackSerializerOptions, cancellationToken);
         return saveData;
     }
 
@@ -61,13 +63,14 @@ public sealed partial class SaveDataService(
     public async ValueTask SaveToFileAsync(string filepath, CancellationToken cancellationToken = default)
     {
         var saveData = CompileSaveDictionary();
-        await saveSystem.SaveToFileAsync(filepath, saveData, cancellationToken);
+        await using var saveDataStream = saveSystem.OpenWrite(filepath);
+        await MessagePackSerializer.SerializeAsync(saveDataStream, saveData, messagePackSerializerOptions, cancellationToken);
     }
 
     [CreateSyncVersion]
     public async ValueTask DeleteFileAsync(CancellationToken cancellationToken = default)
     {
-        await saveSystem.DeleteFileAsync(FilePath, cancellationToken);
+        await saveSystem.DeleteAsync(FilePath, cancellationToken);
     }
 
     public bool IsValid(Dictionary<Name, object> saveData)
@@ -162,7 +165,7 @@ public sealed partial class SaveDataService(
         if (conversionsToRun.Length == 0)
             return false;
 
-        await saveSystem.BackupSaveDataAsync(FilePath, saveData, cancellationToken);
+        await saveSystem.CopyAsync(FilePath, $"{FilePath}.bak", cancellationToken);
         logger.LogInformation("Converting save file");
 
         foreach (var conversion in conversionsToRun)

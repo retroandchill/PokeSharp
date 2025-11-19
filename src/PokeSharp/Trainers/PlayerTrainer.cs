@@ -1,9 +1,11 @@
-﻿using PokeSharp.Core;
+﻿using MessagePack;
+using PokeSharp.Core;
 using PokeSharp.Settings;
 using PokeSharp.State;
 
 namespace PokeSharp.Trainers;
 
+[MessagePackObject(true)]
 public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerType)
 {
     private const int BadgeNumber = 8;

@@ -32,14 +32,4 @@ public static class PbsDataRegistration
             .RegisterGameDataRepository<TownMap, int>()
             .RegisterGameDataRepository<TrainerType, Name>();
     }
-
-    [RegisterServices]
-    public static void RegisterMessagePackFormatter(IServiceCollection serviceCollection)
-    {
-        serviceCollection.AddSingleton(
-            MessagePackSerializerOptions
-                .Standard.WithResolver(GeneratedMessagePackResolver.Instance)
-                .WithResolver(ContractlessStandardResolver.Instance)
-        );
-    }
 }

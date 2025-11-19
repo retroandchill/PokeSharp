@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Core.Engine;
 using PokeSharp.Core.Utils;
@@ -7,6 +8,7 @@ using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Items;
 using PokeSharp.PokemonModel.Forms;
+using PokeSharp.Serialization.MessagePack;
 using PokeSharp.Services.Evolution;
 using PokeSharp.Services.Happiness;
 using PokeSharp.Services.Healing;
@@ -40,7 +42,8 @@ public enum PokerusStage : byte
     Cured,
 }
 
-public class Pokemon
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class Pokemon
 {
     public const int IVStatLimit = 31;
     public const int EVLimit = 510;
@@ -87,10 +90,12 @@ public class Pokemon
 
     public bool IsSpecies(Name species) => Species == species;
 
+    [IgnoreMember]
     public Species SpeciesData => Data.Pbs.Species.Get(Species, FormSimple);
 
     private int _form;
 
+    [IgnoreMember]
     public int Form
     {
         get
@@ -119,6 +124,7 @@ public class Pokemon
         }
     }
 
+    [IgnoreMember]
     public int FormSimple
     {
         get => ForcedForm ?? _form;
@@ -138,6 +144,7 @@ public class Pokemon
     #region Level
     private int? _level;
 
+    [IgnoreMember]
     public int Level
     {
         get
@@ -155,6 +162,8 @@ public class Pokemon
     }
 
     private int _exp;
+    
+    [IgnoreMember]
     public int Exp
     {
         get => _exp;
@@ -165,14 +174,18 @@ public class Pokemon
         }
     }
 
+    [IgnoreMember]
     public bool IsEgg => StepsToHatch > 0;
 
     public int StepsToHatch { get; set; }
 
+    [IgnoreMember]
     public GrowthRate GrowthRate => GrowthRate.Get(SpeciesData.GrowthRate);
 
+    [IgnoreMember]
     public int BaseExp => SpeciesData.BaseExp;
 
+    [IgnoreMember]
     public float ExpFraction
     {
         get
@@ -221,8 +234,10 @@ public class Pokemon
 
     public int StatusCount { get; private set; }
 
+    [IgnoreMember]
     public bool IsAble => !IsEgg && HP > 0;
 
+    [IgnoreMember]
     public bool IsFainted => !IsEgg && HP <= 0;
 
     public void HealHP()
@@ -277,6 +292,7 @@ public class Pokemon
 
     #region Types
 
+    [IgnoreMember]
     public ImmutableArray<Name> Types => SpeciesData.Types;
 
     public bool HasType(Name type) => Types.Contains(type);
@@ -287,6 +303,7 @@ public class Pokemon
 
     private PokemonGender? _gender;
 
+    [IgnoreMember]
     public PokemonGender Gender
     {
         get
@@ -317,10 +334,13 @@ public class Pokemon
 
     public void ClearGender() => _gender = null;
 
+    [IgnoreMember]
     public bool IsMale => Gender == PokemonGender.Male;
 
+    [IgnoreMember]
     public bool IsFemale => Gender == PokemonGender.Female;
 
+    [IgnoreMember]
     public bool SingleGendered => GenderRatio.Get(SpeciesData.GenderRatio).IsSingleGender;
 
     #endregion
@@ -328,6 +348,8 @@ public class Pokemon
     #region Shininess
 
     private bool? _shiny;
+    
+    [IgnoreMember]
     public bool Shiny
     {
         get
@@ -343,6 +365,8 @@ public class Pokemon
     }
 
     private bool? _superShiny;
+    
+    [IgnoreMember]
     public bool SuperShiny
     {
         get
@@ -367,6 +391,7 @@ public class Pokemon
         _superShiny = null;
     }
 
+    [IgnoreMember]
     private uint ShinyValue
     {
         get
@@ -384,6 +409,7 @@ public class Pokemon
 
     private int? _abilityIndex;
 
+    [IgnoreMember]
     public int AbilityIndex
     {
         get
@@ -407,10 +433,12 @@ public class Pokemon
         _ability = null;
     }
 
+    [IgnoreMember]
     public Ability? Ability => Ability.TryGet(AbilityId, out var ability) ? ability : null;
 
     private Name? _ability;
 
+    [IgnoreMember]
     public Name AbilityId
     {
         get
@@ -462,6 +490,7 @@ public class Pokemon
         _ability = ability;
     }
 
+    [IgnoreMember]
     public bool HasAbility => Ability is not null;
 
     public bool HasSpecificAbility(Name checkAbility)
@@ -469,8 +498,10 @@ public class Pokemon
         return AbilityId == checkAbility;
     }
 
+    [IgnoreMember]
     public bool HasHiddenAbility => AbilityIndex >= 2;
 
+    [IgnoreMember]
     public IEnumerable<(Name Id, int Index)> AbilityList
     {
         get
@@ -509,6 +540,7 @@ public class Pokemon
         }
     }
 
+    [IgnoreMember]
     public Nature? Nature
     {
         get
@@ -538,6 +570,7 @@ public class Pokemon
         }
     }
 
+    [IgnoreMember]
     public Nature? NatureForStats
     {
         get
@@ -552,6 +585,7 @@ public class Pokemon
         set => NatureForStatsId = value?.Id;
     }
 
+    [IgnoreMember]
     public bool HasNature => NatureId.HasValue;
 
     public bool HasSpecificNature(Name checkNature)
@@ -575,12 +609,14 @@ public class Pokemon
         }
     }
 
+    [IgnoreMember]
     public Item? Item
     {
         get => Item.TryGet(ItemId ?? Core.Name.None, out var item) ? item : null;
         set => ItemId = value?.Id;
     }
 
+    [IgnoreMember]
     public bool HasItem => ItemId.HasValue;
 
     public bool HasSpecificItem(Name checkItem)
@@ -588,6 +624,7 @@ public class Pokemon
         return ItemId == checkItem;
     }
 
+    [IgnoreMember]
     public WildHoldItems WildHoldItems
     {
         get
@@ -616,6 +653,7 @@ public class Pokemon
     #region Moves
     public List<PokemonMove> Moves { get; set; } = [];
 
+    [IgnoreMember]
     public int MoveCount => Moves.Count;
 
     public bool HasMove(Name moveId)
@@ -623,6 +661,7 @@ public class Pokemon
         return Moves.Any(m => m.Id == moveId);
     }
 
+    [IgnoreMember]
     public ImmutableArray<LevelUpMove> MoveList => SpeciesData.LevelUpMoves;
 
     public void ResetMoves()
@@ -703,6 +742,7 @@ public class Pokemon
             .Contains(moveId);
     }
 
+    [IgnoreMember]
     public bool CanRelearnMove => GameServices.MoveService.CanRelearnMoves(this);
 
     #endregion
@@ -710,6 +750,7 @@ public class Pokemon
     #region Ribbons
     public List<Name> Ribbons { get; set; } = [];
 
+    [IgnoreMember]
     public int RibbonCount => Ribbons.Count;
 
     public bool HasRibbon(Name ribbonId) => Ribbons.Contains(ribbonId);
@@ -755,8 +796,10 @@ public class Pokemon
 
     public int Pokerus { get; set; }
 
+    [IgnoreMember]
     public int PokerusStrain => Pokerus / 16;
 
+    [IgnoreMember]
     public PokerusStage PokerusStage
     {
         get
@@ -817,6 +860,7 @@ public class Pokemon
 
     public PokemonOwner Owner { get; set; }
 
+    [IgnoreMember]
     public bool IsForeign => IsForeignTo(PlayerTrainer.Instance);
 
     public bool IsForeignTo(Trainer trainer)
@@ -844,6 +888,7 @@ public class Pokemon
 
     private Text? _name;
 
+    [IgnoreMember]
     public Text Name
     {
         get => _name ?? SpeciesName;
@@ -860,18 +905,24 @@ public class Pokemon
     }
 
     [MemberNotNullWhen(true, nameof(_name))]
+    [IgnoreMember]
     public bool IsNicknamed => _name.HasValue && !_name.Value.AsReadOnlySpan().IsEmpty;
 
+    [IgnoreMember]
     public Text SpeciesName => SpeciesData.Name;
 
+    [IgnoreMember]
     public int Height => SpeciesData.Height;
 
+    [IgnoreMember]
     public int Weight => SpeciesData.Weight;
 
+    [IgnoreMember]
     public IReadOnlyDictionary<Name, int> EVYield => SpeciesData.EVs;
 
     public int Happiness { get; set; }
 
+    [IgnoreMember]
     public int AffectionLevel
     {
         get
@@ -1002,6 +1053,7 @@ public class Pokemon
 
     public int Speed { get; private set; }
 
+    [IgnoreMember]
     public IReadOnlyDictionary<Name, int> BaseStats => SpeciesData.BaseStats;
 
     private IReadOnlyDictionary<Name, int> CalcIV()
@@ -1136,8 +1188,10 @@ public class Pokemon
 
     #region Components
 
+    [MessagePackFormatter(typeof(PokemonComponentsMessagePackFormatter))]
     private Dictionary<Name, IPokemonComponent> _components;
 
+    [IgnoreMember]
     public IEnumerable<IPokemonComponent> Components => _components.Values;
 
     public IPokemonComponent? GetComponent(Name componentId)
@@ -1169,6 +1223,18 @@ public class Pokemon
     }
 
     private static readonly Name PokeBallName = "POKEBALL";
+
+    [SerializationConstructor]
+    // ReSharper disable once InconsistentNaming
+    private Pokemon(PokemonOwner owner, Dictionary<Name, IPokemonComponent> _components)
+    {
+        Owner = owner;
+        this._components = _components;
+        foreach (var component in _components.Values)
+        {
+            component.Attach(this);
+        }
+    }
 
     public Pokemon(SpeciesForm species, int level, PokemonOwner owner, bool withMoves = true, bool recheckForm = true)
     {

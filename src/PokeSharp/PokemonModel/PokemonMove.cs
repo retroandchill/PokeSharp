@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.PokemonModel;
 
+[MessagePackObject(true, AllowPrivate = true)]
 public class PokemonMove
 {
     public Name Id
@@ -40,6 +42,11 @@ public class PokemonMove
             field = value;
             PP = Math.Clamp(PP, 0, TotalPP);
         }
+    }
+
+    internal PokemonMove()
+    {
+        
     }
 
     public PokemonMove(Name moveId)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Settings;
 using PokeSharp.Trainers;
@@ -28,7 +29,8 @@ public interface IPokemonStorage
     void Delete(int box, int index);
 }
 
-public class PokemonStorage : IPokemonStorage
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class PokemonStorage : IPokemonStorage
 {
     public const int PartyBox = -1;
 
@@ -51,6 +53,14 @@ public class PokemonStorage : IPokemonStorage
         UnlockedWallpapers = new bool[AllWallpapers.Length];
     }
 
+    [SerializationConstructor]
+    private PokemonStorage(PokemonBox[] boxes, bool[] unlockedWallpapers)
+    {
+        Boxes = boxes;
+        UnlockedWallpapers = unlockedWallpapers;
+    }
+
+    [IgnoreMember]
     public ImmutableArray<Text> AllWallpapers { get; } =
     [
         // Basic wallpapers
@@ -102,17 +112,21 @@ public class PokemonStorage : IPokemonStorage
         return index < BasicWallpaperQuantity || UnlockedWallpapers[index];
     }
 
+    [IgnoreMember]
     public IEnumerable<(int Index, Text Name)> AvailableWallpapers =>
         AllWallpapers.Where((_, index) => IsAvailableWallpaper(index)).Select((text, index) => (index, text));
 
+    [IgnoreMember]
     public List<Pokemon> Party
     {
         get => PlayerTrainer.Instance.Party;
         set => throw new InvalidOperationException("Party cannot be set directly");
     }
 
+    [IgnoreMember]
     public bool IsPartyFull => PlayerTrainer.Instance.IsPartyFull;
 
+    [IgnoreMember]
     public int MaxBoxes => Boxes.Length;
 
     public int MaxPokemon(int box)
@@ -123,6 +137,7 @@ public class PokemonStorage : IPokemonStorage
         return box < 0 ? GameServices.GameSettings.MaxPartySize : this[box].Count;
     }
 
+    [IgnoreMember]
     public bool IsFull => Boxes.All(b => b.IsFull);
 
     public int? GetFirstFreePosition(int box)
@@ -143,8 +158,10 @@ public class PokemonStorage : IPokemonStorage
         return null;
     }
 
+    [IgnoreMember]
     public IReadOnlyList<Pokemon?> this[int box] => box == PartyBox ? Party : Boxes[box];
 
+    [IgnoreMember]
     public Pokemon? this[int box, int index]
     {
         get => box == PartyBox ? Party[index] : Boxes[box][index];

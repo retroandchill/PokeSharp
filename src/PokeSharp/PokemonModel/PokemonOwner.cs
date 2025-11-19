@@ -1,9 +1,11 @@
-﻿using PokeSharp.Core;
+﻿using MessagePack;
+using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Trainers;
 
 namespace PokeSharp.PokemonModel;
 
+[MessagePackObject(true)]
 public record PokemonOwner(uint Id, Text Name, TrainerGender Gender, Name Language)
 {
     public static PokemonOwner FromNewTrainer(Trainer trainer)

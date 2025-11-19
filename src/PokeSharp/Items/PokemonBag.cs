@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
+using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Pbs;
@@ -7,6 +8,7 @@ using PokeSharp.Settings;
 
 namespace PokeSharp.Items;
 
+[MessagePackObject(true)]
 public readonly record struct ItemSlot(Name Item, int Quantity);
 
 public readonly struct ReadOnlyPockets(ImmutableArray<List<ItemSlot>> pockets) : IReadOnlyList<IReadOnlyList<ItemSlot>>
@@ -23,15 +25,19 @@ public readonly struct ReadOnlyPockets(ImmutableArray<List<ItemSlot>> pockets) :
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
-public class PokemonBag
+[MessagePackObject(true, AllowPrivate = true)]
+public partial class PokemonBag
 {
     public static PokemonBag Instance { get; } = new();
 
     public static IEnumerable<Text> PocketNames => GameServices.GameSettings.BagPockets.Select(x => x.Name);
 
+    [IgnoreMember]
     public static int PocketCount => GameServices.GameSettings.BagPockets.Length;
 
     private readonly ImmutableArray<List<ItemSlot>> _pockets;
+    
+    [IgnoreMember]
     public ReadOnlyPockets Pockets => new(_pockets);
 
     public int LastViewedPocket { get; set; } = 1;
@@ -49,6 +55,15 @@ public class PokemonBag
         {
             LastPocketSelections[i] = 0;
         }
+    }
+
+    [SerializationConstructor]
+    // ReSharper disable once InconsistentNaming
+    private PokemonBag(ImmutableArray<List<ItemSlot>> _pockets, int[] lastPocketSelections, List<Name> registeredItems)
+    {
+        this._pockets = _pockets;
+        LastPocketSelections = lastPocketSelections;
+        RegisteredItems = registeredItems;
     }
 
     public void ResetLastSelections()

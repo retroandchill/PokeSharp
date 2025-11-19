@@ -1,4 +1,5 @@
 ﻿using Injectio.Attributes;
+using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
 using PokeSharp.Core.State;
@@ -49,6 +50,7 @@ public enum TextInputStyle : byte
     Keyboard,
 }
 
+[MessagePackObject(true)]
 public class PokemonSystem
 {
     public TextSpeed TextSpeed { get; set; } = TextSpeed.Medium;

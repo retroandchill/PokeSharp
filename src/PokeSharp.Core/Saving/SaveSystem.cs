@@ -12,16 +12,20 @@ public interface ISaveSystem
     /// <param name="filePath">The path to the save file</param>
     /// <returns>Does the file exist?</returns>
     bool Exists(string filePath);
-    
+
     Stream OpenRead(string filePath);
-    
+
     Stream OpenWrite(string filePath);
-    
+
     void Copy(string sourceFilePath, string destinationFilePath);
-    
-    ValueTask CopyAsync(string sourceFilePath, string destinationFilePath, CancellationToken cancellationToken = default);
-    
+
+    ValueTask CopyAsync(
+        string sourceFilePath,
+        string destinationFilePath,
+        CancellationToken cancellationToken = default
+    );
+
     void Delete(string filePath);
-    
+
     ValueTask DeleteAsync(string filePath, CancellationToken cancellationToken = default);
 }

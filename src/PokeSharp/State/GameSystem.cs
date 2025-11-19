@@ -1,6 +1,8 @@
 ﻿using Injectio.Attributes;
 using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
+using PokeSharp.Core.State;
 
 namespace PokeSharp.State;
 
@@ -11,8 +13,6 @@ public enum MessagePosition : byte
     Bottom,
 }
 
-[RegisterSingleton]
-[AutoServiceShortcut]
 [MessagePackObject(true, AllowPrivate = true)]
 public partial class GameSystem
 {
@@ -33,4 +33,20 @@ public partial class GameSystem
     public int BgmPosition { get; set; }
 
     private int _bgsPosition;
+}
+
+public static class GameSystemExtensions
+{
+    private static CachedService<IGameStateAccessor<GameSystem>> _cachedService = new();
+
+    [RegisterServices]
+    public static void GameSystem(this IServiceCollection services)
+    {
+        services.AddGameState<GameSystem>();
+    }
+
+    extension(GameServices)
+    {
+        public static GameSystem GameSystem => _cachedService.Instance.Current;
+    }
 }

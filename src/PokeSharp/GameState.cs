@@ -9,8 +9,7 @@ namespace PokeSharp;
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public partial class GameState([ReadOnly] DataService dataService, 
-    [ReadOnly] SaveDataService saveDataService)
+public partial class GameState([ReadOnly] DataService dataService, [ReadOnly] SaveDataService saveDataService)
 {
     [CreateSyncVersion]
     public async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
@@ -22,7 +21,9 @@ public partial class GameState([ReadOnly] DataService dataService,
     [CreateSyncVersion]
     public async ValueTask SetUpSystemAsync(CancellationToken cancellationToken = default)
     {
-        var saveData = saveDataService.Exists ? await saveDataService.ReadDataFromFileAsync(saveDataService.FilePath, cancellationToken) : new Dictionary<Name, object>();
+        var saveData = saveDataService.Exists
+            ? await saveDataService.ReadDataFromFileAsync(saveDataService.FilePath, cancellationToken)
+            : new Dictionary<Name, object>();
         if (saveData.Count == 0)
         {
             saveDataService.InitializeBootupValues();
@@ -31,7 +32,7 @@ public partial class GameState([ReadOnly] DataService dataService,
         {
             saveDataService.LoadBootupValues(saveData);
         }
-        
-        // TODO: We need to prompt for the language choice here 
+
+        // TODO: We need to prompt for the language choice here
     }
 }

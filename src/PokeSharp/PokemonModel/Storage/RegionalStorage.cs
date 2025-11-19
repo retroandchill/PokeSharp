@@ -13,10 +13,7 @@ public partial class RegionalStorage : IPokemonStorage
     private int? _lastMap;
     private int? _regionMap;
 
-    public RegionalStorage()
-    {
-        
-    }
+    public RegionalStorage() { }
 
     // ReSharper disable once InconsistentNaming
     [SerializationConstructor]

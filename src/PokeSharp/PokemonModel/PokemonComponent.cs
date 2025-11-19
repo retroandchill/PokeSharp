@@ -9,7 +9,7 @@ namespace PokeSharp.PokemonModel;
 public interface IPokemonComponent
 {
     Name Id { get; }
-    
+
     void Attach(Pokemon pokemon);
 
     IPokemonComponent Clone(Pokemon newPokemon);

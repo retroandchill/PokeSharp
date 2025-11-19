@@ -9,10 +9,15 @@ public static class MessagePackFormatterResolverRegistration
     [RegisterServices]
     public static void RegisterMessagePackFormatter(IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton(services => MessagePackSerializerOptions
-            .Standard.WithResolver(CompositeResolver.Create(services
-                .GetRequiredService<IEnumerable<IFormatterResolver>>()
-                .Concat([TypelessContractlessStandardResolver.Instance])
-                .ToArray())));
+        serviceCollection.AddSingleton(services =>
+            MessagePackSerializerOptions.Standard.WithResolver(
+                CompositeResolver.Create(
+                    services
+                        .GetRequiredService<IEnumerable<IFormatterResolver>>()
+                        .Concat([TypelessContractlessStandardResolver.Instance])
+                        .ToArray()
+                )
+            )
+        );
     }
 }

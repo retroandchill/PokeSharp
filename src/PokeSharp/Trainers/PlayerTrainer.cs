@@ -1,5 +1,8 @@
-﻿using MessagePack;
+﻿using Injectio.Attributes;
+using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
+using PokeSharp.Core.State;
 using PokeSharp.Settings;
 using PokeSharp.State;
 
@@ -9,8 +12,6 @@ namespace PokeSharp.Trainers;
 public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerType)
 {
     private const int BadgeNumber = 8;
-
-    public static PlayerTrainer Instance { get; internal set; } = new(Text.None, Core.Name.None);
 
     public int CharacterId
     {
@@ -88,4 +89,20 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
     public bool HasSeen(Name species) => Pokedex.HasSeen(species);
 
     public bool Owns(Name species) => Pokedex.Owns(species);
+}
+
+public static class PlayerTrainerExtensions
+{
+    private static CachedService<IGameStateAccessor<PlayerTrainer>> _cachedService = new();
+
+    [RegisterServices]
+    public static void RegisterPlayerTrainer(this IServiceCollection services)
+    {
+        services.AddGameState(_ => new PlayerTrainer(Text.None, Name.None));
+    }
+
+    extension(GameServices)
+    {
+        public static PlayerTrainer PlayerTrainer => _cachedService.Instance.Current;
+    }
 }

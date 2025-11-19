@@ -1,4 +1,6 @@
-﻿namespace PokeSharp.Core.Saving;
+﻿using System.Reflection;
+
+namespace PokeSharp.Core.Saving;
 
 public interface ISaveDataValue
 {
@@ -37,7 +39,8 @@ public abstract class SaveDataValue<T> : ISaveDataValue
     {
         Id = id;
 
-        var loadMethod = GetType().GetMethod(nameof(GetNewGameValue), []);
+        var loadMethod = GetType()
+            .GetMethod(nameof(GetNewGameValue), BindingFlags.Instance | BindingFlags.NonPublic, []);
         HasNewGameValue = loadMethod!.DeclaringType != typeof(SaveDataValue<T>);
     }
 

@@ -29,12 +29,11 @@ public partial class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent
     private Pokemon _pokemon = pokemon;
 
     [SerializationConstructor]
-    private ShadowPokemonComponent() : this(null!)
-    {
-    }
+    private ShadowPokemonComponent()
+        : this(null!) { }
 
     public static Name ComponentId => ShadowPokemonComponentExtensions.ComponentId;
-    
+
     [IgnoreMember]
     public Name Id => ShadowPokemonComponentExtensions.ComponentId;
 

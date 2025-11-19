@@ -119,12 +119,12 @@ public partial class PokemonStorage : IPokemonStorage
     [IgnoreMember]
     public List<Pokemon> Party
     {
-        get => PlayerTrainer.Instance.Party;
+        get => GameServices.PlayerTrainer.Party;
         set => throw new InvalidOperationException("Party cannot be set directly");
     }
 
     [IgnoreMember]
-    public bool IsPartyFull => PlayerTrainer.Instance.IsPartyFull;
+    public bool IsPartyFull => GameServices.PlayerTrainer.IsPartyFull;
 
     [IgnoreMember]
     public int MaxBoxes => Boxes.Length;

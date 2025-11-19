@@ -41,7 +41,11 @@ public sealed partial class SaveDataService(
     )
     {
         await using var saveDataStream = saveSystem.OpenRead(filePath);
-        return await MessagePackSerializer.DeserializeAsync<Dictionary<Name, object>>(saveDataStream, messagePackSerializerOptions, cancellationToken);
+        return await MessagePackSerializer.DeserializeAsync<Dictionary<Name, object>>(
+            saveDataStream,
+            messagePackSerializerOptions,
+            cancellationToken
+        );
     }
 
     [CreateSyncVersion]
@@ -52,10 +56,16 @@ public sealed partial class SaveDataService(
     {
         var saveData = await GetDataFromFileAsync(filepath, cancellationToken);
 
-        if (saveData.Count <= 0 || !await RunConversionsAsync(saveData, cancellationToken)) return saveData;
-        
+        if (saveData.Count <= 0 || !await RunConversionsAsync(saveData, cancellationToken))
+            return saveData;
+
         await using var saveDataStream = saveSystem.OpenWrite(filepath);
-        await MessagePackSerializer.SerializeAsync(saveDataStream, saveData, messagePackSerializerOptions, cancellationToken);
+        await MessagePackSerializer.SerializeAsync(
+            saveDataStream,
+            saveData,
+            messagePackSerializerOptions,
+            cancellationToken
+        );
         return saveData;
     }
 
@@ -64,7 +74,12 @@ public sealed partial class SaveDataService(
     {
         var saveData = CompileSaveDictionary();
         await using var saveDataStream = saveSystem.OpenWrite(filepath);
-        await MessagePackSerializer.SerializeAsync(saveDataStream, saveData, messagePackSerializerOptions, cancellationToken);
+        await MessagePackSerializer.SerializeAsync(
+            saveDataStream,
+            saveData,
+            messagePackSerializerOptions,
+            cancellationToken
+        );
     }
 
     [CreateSyncVersion]

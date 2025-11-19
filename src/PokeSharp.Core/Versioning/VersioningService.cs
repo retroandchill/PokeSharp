@@ -2,6 +2,7 @@
 
 namespace PokeSharp.Core.Versioning;
 
+[RegisterSingleton]
 public class VersioningService(IGameVersionProvider versionProvider)
 {
     // TODO: See if we can bake this into the build, instead of having to remember to bump it

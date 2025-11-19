@@ -120,7 +120,7 @@ public partial class Pokemon
             _ability = null;
             MultipleForms.OnFormSet(this, value, oldForm);
             CalcStats();
-            PlayerTrainer.Instance.Pokedex.Register(this);
+            GameServices.PlayerTrainer.Pokedex.Register(this);
         }
     }
 
@@ -162,7 +162,7 @@ public partial class Pokemon
     }
 
     private int _exp;
-    
+
     [IgnoreMember]
     public int Exp
     {
@@ -348,7 +348,7 @@ public partial class Pokemon
     #region Shininess
 
     private bool? _shiny;
-    
+
     [IgnoreMember]
     public bool Shiny
     {
@@ -365,7 +365,7 @@ public partial class Pokemon
     }
 
     private bool? _superShiny;
-    
+
     [IgnoreMember]
     public bool SuperShiny
     {
@@ -861,7 +861,7 @@ public partial class Pokemon
     public PokemonOwner Owner { get; set; }
 
     [IgnoreMember]
-    public bool IsForeign => IsForeignTo(PlayerTrainer.Instance);
+    public bool IsForeign => IsForeignTo(GameServices.PlayerTrainer);
 
     public bool IsForeignTo(Trainer trainer)
     {

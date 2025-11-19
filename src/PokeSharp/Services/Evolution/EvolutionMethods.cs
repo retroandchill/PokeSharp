@@ -1,6 +1,7 @@
 ﻿using Injectio.Attributes;
 using Microsoft.Extensions.Options;
 using PokeSharp.Core;
+using PokeSharp.Core.State;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Items;
@@ -216,14 +217,15 @@ public sealed class LevelDarknessEvolutionEvaluator([ReadOnly] GameMap gameMap) 
 }
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class LevelDarkInPartyEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class LevelDarkInPartyEvolutionEvaluator(IGameStateAccessor<PlayerTrainer> playerTrainer)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.LevelDarkInParty.Id;
     private static readonly Name DarkType = "DARK";
 
     protected override bool OnLevelUp(Pokemon pokemon, int parameter)
     {
-        return pokemon.Level >= parameter && PlayerTrainer.Instance.HasPokemonOfType(DarkType);
+        return pokemon.Level >= parameter && playerTrainer.Current.HasPokemonOfType(DarkType);
     }
 }
 
@@ -294,14 +296,15 @@ public sealed class NinjaskEvolutionEvaluator : EvolutionMethodEvaluator<int>
 }
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class ShedinjaEvolutionEvaluator : EvolutionMethodEvaluator<int>
+public sealed class ShedinjaEvolutionEvaluator(IGameStateAccessor<PlayerTrainer> playerTrainer)
+    : EvolutionMethodEvaluator<int>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.Shedinja.Id;
     private static readonly Name PokeBall = "POKEBALL";
 
     protected override bool AfterEvolution(Pokemon pokemon, Name evoSpecies, int parameter, Name newSpecies)
     {
-        if (PlayerTrainer.Instance.IsPartyFull || !PokemonBag.Instance.Has(PokeBall))
+        if (playerTrainer.Current.IsPartyFull || !PokemonBag.Instance.Has(PokeBall))
             return false;
 
         pokemon.DuplicateForEvolution(newSpecies);
@@ -566,13 +569,14 @@ public sealed class HasMoveTypeEvolutionEvaluator : EvolutionMethodEvaluator<Nam
 }
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class HasInPartyEvolutionEvaluator : EvolutionMethodEvaluator<SpeciesForm, Species>
+public sealed class HasInPartyEvolutionEvaluator(IGameStateAccessor<PlayerTrainer> playerTrainer)
+    : EvolutionMethodEvaluator<SpeciesForm, Species>
 {
     public override Name EvolutionMethod => Data.Core.Evolution.HasInParty.Id;
 
     protected override bool OnLevelUp(Pokemon pokemon, SpeciesForm parameter)
     {
-        return PlayerTrainer.Instance.HasSpecies(parameter.Species);
+        return playerTrainer.Current.HasSpecies(parameter.Species);
     }
 }
 

@@ -22,9 +22,16 @@ public partial class FilesystemSaveSystem(IOptionsMonitor<SaveDataConfig> config
     }
 
     [CreateSyncVersion]
-    public ValueTask CopyAsync(string sourceFilePath, string destinationFilePath, CancellationToken cancellationToken = default)
+    public ValueTask CopyAsync(
+        string sourceFilePath,
+        string destinationFilePath,
+        CancellationToken cancellationToken = default
+    )
     {
-        File.Copy(Path.Join(config.CurrentValue.SaveFilePath, sourceFilePath), Path.Join(config.CurrentValue.SaveFilePath, destinationFilePath));
+        File.Copy(
+            Path.Join(config.CurrentValue.SaveFilePath, sourceFilePath),
+            Path.Join(config.CurrentValue.SaveFilePath, destinationFilePath)
+        );
         return ValueTask.CompletedTask;
     }
 

@@ -36,7 +36,7 @@ public partial class PokemonBag
     public static int PocketCount => GameServices.GameSettings.BagPockets.Length;
 
     private readonly ImmutableArray<List<ItemSlot>> _pockets;
-    
+
     [IgnoreMember]
     public ReadOnlyPockets Pockets => new(_pockets);
 

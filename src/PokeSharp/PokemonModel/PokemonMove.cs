@@ -44,10 +44,7 @@ public class PokemonMove
         }
     }
 
-    internal PokemonMove()
-    {
-        
-    }
+    internal PokemonMove() { }
 
     public PokemonMove(Name moveId)
     {

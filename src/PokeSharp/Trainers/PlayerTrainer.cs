@@ -8,8 +8,7 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
 {
     private const int BadgeNumber = 8;
 
-    // TODO: Implement this
-    public static PlayerTrainer Instance { get; } = new(Text.None, Core.Name.None);
+    public static PlayerTrainer Instance { get; internal set; } = new(Text.None, Core.Name.None);
 
     public int CharacterId
     {

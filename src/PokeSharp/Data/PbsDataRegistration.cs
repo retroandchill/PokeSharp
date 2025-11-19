@@ -1,4 +1,6 @@
 ﻿using Injectio.Attributes;
+using MessagePack;
+using MessagePack.Resolvers;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
@@ -29,5 +31,13 @@ public static class PbsDataRegistration
             .RegisterGameDataRepository<SpeciesMetrics, SpeciesForm>()
             .RegisterGameDataRepository<TownMap, int>()
             .RegisterGameDataRepository<TrainerType, Name>();
+    }
+
+    [RegisterServices]
+    public static void RegisterMessagePackFormatter(IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddSingleton(MessagePackSerializerOptions.Standard
+            .WithResolver(GeneratedMessagePackResolver.Instance)
+            .WithResolver(ContractlessStandardResolver.Instance));
     }
 }

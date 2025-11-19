@@ -1,4 +1,5 @@
 ﻿using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
@@ -13,7 +14,14 @@ namespace PokeSharp.Compiler.Compilers;
 public partial class MetadataCompiler : IPbsCompiler
 {
     public int Order => 17;
-    private readonly string _path = Path.Join("PBS", $"{Metadata.DataPath}.txt");
+    private string _path;
+    public IEnumerable<string> FileNames => [_path];
+
+    public MetadataCompiler(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    {
+        _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, $"{Metadata.DataPath}.txt");
+        pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, $"{Metadata.DataPath}.txt"));
+    }
 
     [CreateSyncVersion]
     public async Task CompileAsync(CancellationToken cancellationToken = default)

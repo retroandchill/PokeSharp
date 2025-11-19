@@ -63,6 +63,7 @@ public class GameDataGenerator : IIncrementalGenerator
             IsReferenceType = !type.IsValueType,
             IsLoaded = info.DataPath is not null,
             info.DataPath,
+            info.IsOptional,
             Identifiers = type.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m =>

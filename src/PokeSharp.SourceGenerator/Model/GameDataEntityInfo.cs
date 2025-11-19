@@ -7,4 +7,6 @@ namespace PokeSharp.SourceGenerator.Model;
 public readonly record struct GameDataEntityInfo
 {
     public string? DataPath { get; init; }
+    
+    public bool IsOptional { get; init; }
 }

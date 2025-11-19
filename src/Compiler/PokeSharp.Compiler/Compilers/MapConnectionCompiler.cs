@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.Serialization;
 using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
@@ -12,9 +13,10 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public partial class MapConnectionCompiler([ReadOnly] IMapMetadataRepository mapMetadataRepository) : IPbsCompiler
+public partial class MapConnectionCompiler : IPbsCompiler
 {
     public int Order => 2;
+    public IEnumerable<string> FileNames => [_path];
 
     private static readonly Dictionary<string, MapDirection> Directions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -28,7 +30,16 @@ public partial class MapConnectionCompiler([ReadOnly] IMapMetadataRepository map
         ["WEST"] = MapDirection.West,
     };
 
-    private readonly string _path = Path.Join("PBS", "map_connections.txt");
+    private string _path;
+    private readonly IMapMetadataRepository _mapMetadataRepository;
+
+    public MapConnectionCompiler(IMapMetadataRepository mapMetadataRepository, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    {
+        
+        _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "map_connections.txt");
+        pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "map_connections.txt"));
+        _mapMetadataRepository = mapMetadataRepository;
+    }
 
     [CreateSyncVersion]
     public async Task CompileAsync(CancellationToken cancellationToken = default)
@@ -156,8 +167,8 @@ public partial class MapConnectionCompiler([ReadOnly] IMapMetadataRepository map
             foreach (var conn in MapConnection.Entities)
             {
                 if (
-                    !mapMetadataRepository.TryGet(conn.Map1.Id, out var map1)
-                    || !mapMetadataRepository.TryGet(conn.Map2.Id, out var map2)
+                    !_mapMetadataRepository.TryGet(conn.Map1.Id, out var map1)
+                    || !_mapMetadataRepository.TryGet(conn.Map2.Id, out var map2)
                 )
                     continue;
 

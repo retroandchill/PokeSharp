@@ -143,6 +143,21 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
     }
 }
 
+public interface ILoadedGameDataSet
+{
+    string DataPath { get; }
+    
+    bool IsOptional { get; }
+    
+    void Load();
+    
+    ValueTask LoadAsync(CancellationToken cancellationToken = default);
+
+    void Save();
+    
+    ValueTask SaveAsync(CancellationToken cancellationToken = default);
+}
+
 /// <summary>
 /// Represents a specialized data set for managing game data entities that are loaded dynamically.
 /// </summary>
@@ -151,10 +166,14 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
 [RegisterSingleton(ServiceType = typeof(LoadedGameDataSet<,>))]
 public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoader dataLoader)
     : GameDataSet<TEntity, TKey>,
-        IDataRepository
+        ILoadedGameDataSet
     where TEntity : ILoadedGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
+    public string DataPath => TEntity.DataPath;
+
+    public bool IsOptional => TEntity.IsOptional;
+    
     /// <summary>
     /// Imports a collection of entities into the data set asynchronously.
     /// </summary>
@@ -197,6 +216,6 @@ public static class GameDataSetExtensions
         where TEntity : ILoadedGameDataEntity<TKey, TEntity>
         where TKey : notnull
     {
-        return services.AddSingleton<IDataRepository>(sp => sp.GetRequiredService<LoadedGameDataSet<TEntity, TKey>>());
+        return services.AddSingleton<ILoadedGameDataSet>(sp => sp.GetRequiredService<LoadedGameDataSet<TEntity, TKey>>());
     }
 }

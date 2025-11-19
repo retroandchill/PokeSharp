@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Core.Data;
 using Zomp.SyncMethodGenerator;
@@ -8,6 +9,8 @@ namespace PokeSharp.Compiler.Core;
 public interface IPbsCompiler
 {
     int Order { get; }
+    
+    IEnumerable<string> FileNames { get; }
 
     void Compile();
 
@@ -21,8 +24,17 @@ public interface IPbsCompiler
 public abstract class PbsCompilerBase<TModel> : IPbsCompiler
     where TModel : IPbsDataModel<TModel>
 {
+
     public abstract int Order { get; }
-    protected string FileName { get; } = Path.Join("PBS", $"{TModel.BasePath}.txt");
+    protected string FileName { get; private set; }
+    
+    public IEnumerable<string> FileNames => [FileName];
+    
+    protected PbsCompilerBase(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    {
+        FileName = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, $"{TModel.BasePath}.txt");
+        pbsCompileSettings.OnChange(x => FileName = Path.Join(x.PbsFileBasePath, $"{TModel.BasePath}.txt"));
+    }
 
     public abstract void Compile();
 
@@ -33,7 +45,7 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
     public abstract Task WriteToFileAsync(CancellationToken cancellationToken = default);
 }
 
-public abstract partial class PbsCompiler<TEntity, TModel> : PbsCompilerBase<TModel>
+public abstract partial class PbsCompiler<TEntity, TModel>(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings) : PbsCompilerBase<TModel>(pbsCompileSettings)
     where TEntity : ILoadedGameDataEntity<TEntity>
     where TModel : IPbsDataModel<TModel>
 {

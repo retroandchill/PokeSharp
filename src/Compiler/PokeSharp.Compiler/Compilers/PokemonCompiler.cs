@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
@@ -14,8 +15,8 @@ using ZLinq;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers)
-    : PbsCompiler<Species, SpeciesInfo>
+public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    : PbsCompiler<Species, SpeciesInfo>(pbsCompileSettings)
 {
     public override int Order => 8;
 
@@ -81,7 +82,7 @@ public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolu
                     var asName = new Name(paramValue);
                     if (!allSpeciesKeys.Contains(asName))
                         throw new PbsParseException(
-                            $"Species '{evolution.Species}' is not defined.\n{fileLineData.LineReport}"
+                            $"Species '{asName}' is not defined.\n{fileLineData.LineReport}"
                         );
 
                     evolutionList.Add(evolution with { Parameter = asName });

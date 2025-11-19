@@ -9,7 +9,6 @@ using PokeSharp.Services.DayNightCycle;
 using PokeSharp.Services.Overworld;
 using PokeSharp.Settings;
 using PokeSharp.State;
-using PokeSharp.State;
 using PokeSharp.Trainers;
 using PokeSharp.Utilities;
 using Retro.ReadOnlyParams.Annotations;

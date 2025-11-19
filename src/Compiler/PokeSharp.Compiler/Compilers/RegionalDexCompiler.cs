@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
@@ -17,7 +18,15 @@ public partial class RegionalDexCompiler : IPbsCompiler
 {
     public int Order => 11;
 
-    private readonly string _path = Path.Join("PBS", "regional_dexes.txt");
+    private string _path;
+    public IEnumerable<string> FileNames => [_path];
+
+    public RegionalDexCompiler(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    {
+        _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "regional_dexes.txt");
+        pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "regional_dexes.txt"));
+    }
+
 
     [CreateSyncVersion]
     public async Task CompileAsync(CancellationToken cancellationToken = default)

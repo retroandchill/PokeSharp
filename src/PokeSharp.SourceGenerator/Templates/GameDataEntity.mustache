@@ -14,6 +14,10 @@ partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{C
 
     {{#IsLoaded}}
     public static string DataPath => "{{DataPath}}";
+    
+    {{#IsOptional}}
+    public static bool IsOptional => true;
+    {{/IsOptional}}
     {{/IsLoaded}}
 
     public static IEnumerable<{{Key}}> Keys => Data.Keys;

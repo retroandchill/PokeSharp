@@ -1,24 +1,17 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PokeSharp;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
-using PokeSharp.Data;
 using PokeSharp.Maps;
-using PokeSharp.Settings;
-
-var configurationBuilder = new ConfigurationBuilder();
-
-var configuration = configurationBuilder.Build();
-
-configuration.Get<GameSettings>();
 
 var builder = new GameContextBuilder();
 
 builder
-    .Services.AddLogging()
+    .Services.AddLogging(logging => logging.AddConsole())
     .AddPokeSharpCore(SerializerTags.MessagePack)
     .AddPokeSharpCompilerCore()
     .AddPokeSharp()
@@ -35,9 +28,11 @@ try
     await mapMetadataRepository.LoadAsync();
 
     var compilerService = context.GetService<PbsCompilerService>();
+    await compilerService.RunCompileOnStartAsync();
 
-    await compilerService.CompilePbsFilesAsync();
-
+    var gameState = context.GetService<GameState>();
+    await gameState.InitializeAsync();
+    
     await compilerService.WritePbsFilesAsync();
 }
 finally

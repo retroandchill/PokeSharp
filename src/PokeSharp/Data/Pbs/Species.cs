@@ -3,9 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MessagePack;
+using MessagePack.Formatters;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Data.Core;
+using PokeSharp.Serialization.MessagePack;
 
 namespace PokeSharp.Data.Pbs;
 
@@ -23,7 +25,12 @@ public readonly record struct SpeciesForm(Name Species, int Form = 0)
 public readonly record struct LevelUpMove(Name Move, int Level);
 
 [MessagePackObject(true)]
-public record EvolutionInfo(Name Species, Name EvolutionMethod, object? Parameter = null, bool IsPrevious = false);
+public record EvolutionInfo(
+    Name Species, 
+    Name EvolutionMethod, 
+    [property: MessagePackFormatter(typeof(EvolutionInfoParameterFormatter))]
+    object? Parameter = null, 
+    bool IsPrevious = false);
 
 public readonly record struct EvolutionFamily(
     Name PreviousSpecies,

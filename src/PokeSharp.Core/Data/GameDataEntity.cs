@@ -119,6 +119,8 @@ public interface ILoadedGameDataEntity : IGameDataEntity
     /// </summary>
     static abstract string DataPath { get; }
 
+    static virtual bool IsOptional => false;
+
     /// <summary>
     /// Loads game data from the specified source.
     /// </summary>

@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
@@ -17,10 +18,19 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public partial class EncounterCompiler([ReadOnly] IMapMetadataRepository mapMetadataRepository) : IPbsCompiler
+public partial class EncounterCompiler : IPbsCompiler
 {
     public int Order => 13;
-    private readonly string _path = Path.Join("PBS", "encounters.txt");
+    public IEnumerable<string> FileNames => [_path];
+    private string _path;
+    private readonly IMapMetadataRepository _mapMetadataRepository;
+
+    public EncounterCompiler(IMapMetadataRepository mapMetadataRepository, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    {
+        _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "encounters.txt");
+        pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "encounters.txt"));
+        _mapMetadataRepository = mapMetadataRepository;
+    }
 
     [CreateSyncVersion]
     public async Task CompileAsync(CancellationToken cancellationToken = default)
@@ -219,7 +229,7 @@ public partial class EncounterCompiler([ReadOnly] IMapMetadataRepository mapMeta
             await PbsSerializer.AddPbsHeaderToFileAsync(fileWriter);
             foreach (var encounter in Encounter.Entities)
             {
-                var mapName = mapMetadataRepository.TryGet(encounter.MapId, out var mapInfo)
+                var mapName = _mapMetadataRepository.TryGet(encounter.MapId, out var mapInfo)
                     ? $" # {mapInfo.Name}"
                     : "";
                 await fileWriter.WriteLineAsync("#-------------------------------");

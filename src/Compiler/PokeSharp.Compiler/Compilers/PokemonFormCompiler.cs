@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
@@ -14,8 +15,8 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers)
-    : PbsCompilerBase<SpeciesFormInfo>
+public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    : PbsCompilerBase<SpeciesFormInfo>(pbsCompileSettings)
 {
     public override int Order => 9;
 

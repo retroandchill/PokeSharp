@@ -1,7 +1,9 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
@@ -15,8 +17,11 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompilerBase<SpeciesFormInfo>(pbsCompileSettings)
+public sealed partial class PokemonFormCompiler(
+    ILogger<PokemonCompiler> logger,
+    IEnumerable<IEvolutionParameterParser> evolutionParameterParsers,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings
+) : PbsCompilerBase<SpeciesFormInfo>(pbsCompileSettings)
 {
     public override int Order => 9;
 
@@ -25,6 +30,7 @@ public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterP
     [CreateSyncVersion]
     public override async Task CompileAsync(CancellationToken cancellationToken = default)
     {
+        logger.LogCompilingPbsFile(Path.GetFileName(FileName));
         var entities = await PbsSerializer
             .ReadFromFileAsync<SpeciesFormInfo>(
                 FileName,
@@ -51,6 +57,7 @@ public sealed partial class PokemonFormCompiler(IEnumerable<IEvolutionParameterP
     [CreateSyncVersion]
     public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
+        logger.LogWritingPbsFile(Path.GetFileName(FileName));
         await PbsSerializer.WritePbsFileAsync(FileName, Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel));
     }
 

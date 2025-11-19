@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Core.Data;
 using Zomp.SyncMethodGenerator;
@@ -9,7 +11,7 @@ namespace PokeSharp.Compiler.Core;
 public interface IPbsCompiler
 {
     int Order { get; }
-    
+
     IEnumerable<string> FileNames { get; }
 
     void Compile();
@@ -24,12 +26,11 @@ public interface IPbsCompiler
 public abstract class PbsCompilerBase<TModel> : IPbsCompiler
     where TModel : IPbsDataModel<TModel>
 {
-
     public abstract int Order { get; }
     protected string FileName { get; private set; }
-    
+
     public IEnumerable<string> FileNames => [FileName];
-    
+
     protected PbsCompilerBase(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
     {
         FileName = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, $"{TModel.BasePath}.txt");
@@ -45,13 +46,19 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
     public abstract Task WriteToFileAsync(CancellationToken cancellationToken = default);
 }
 
-public abstract partial class PbsCompiler<TEntity, TModel>(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings) : PbsCompilerBase<TModel>(pbsCompileSettings)
+public abstract partial class PbsCompiler<TEntity, TModel>(
+    ILogger<PbsCompiler<TEntity, TModel>> logger,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings
+) : PbsCompilerBase<TModel>(pbsCompileSettings)
     where TEntity : ILoadedGameDataEntity<TEntity>
     where TModel : IPbsDataModel<TModel>
 {
+    protected ILogger<PbsCompiler<TEntity, TModel>> Logger { get; } = logger;
+
     [CreateSyncVersion]
     public override async Task CompileAsync(CancellationToken cancellationToken = default)
     {
+        Logger.LogCompilingPbsFile(Path.GetFileName(FileName));
         var entities = await PbsSerializer
             .ReadFromFileAsync<TModel>(FileName, cancellationToken)
             .Select(x =>
@@ -68,6 +75,7 @@ public abstract partial class PbsCompiler<TEntity, TModel>(IOptionsMonitor<PbsCo
     [CreateSyncVersion]
     public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
+        Logger.LogWritingPbsFile(Path.GetFileName(FileName));
         await PbsSerializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel));
     }
 

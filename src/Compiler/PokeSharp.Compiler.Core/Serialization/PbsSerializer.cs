@@ -177,7 +177,6 @@ public static partial class PbsSerializer
         using var fileStream = new StreamReader(path);
 
         var initialLineData = new FileLineData(path);
-
         await foreach (var section in ParseFileSectionsAsync(fileStream, initialLineData, cancellationToken))
         {
             yield return new ModelWithLine<T>(T.ParsePbsData(section, factory), section.HeaderLine);

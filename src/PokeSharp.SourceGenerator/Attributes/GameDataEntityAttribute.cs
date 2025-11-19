@@ -12,6 +12,6 @@ namespace PokeSharp.Core.Data;
 internal class GameDataEntityAttribute : Attribute
 {
     public string? DataPath { get; init; }
-    
+
     public bool IsOptional { get; init; } = false;
 }

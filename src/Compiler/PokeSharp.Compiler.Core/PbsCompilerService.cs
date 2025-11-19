@@ -9,10 +9,12 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Core;
 
 [RegisterSingleton]
-public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerService> logger, 
+public sealed partial class PbsCompilerService(
+    [ReadOnly] ILogger<PbsCompilerService> logger,
     [ReadOnly] DataService dataService,
-    IOptionsMonitor<PbsCompilerSettings> pbsCompilerSettings, 
-    IEnumerable<IPbsCompiler> compilers)
+    IOptionsMonitor<PbsCompilerSettings> pbsCompilerSettings,
+    IEnumerable<IPbsCompiler> compilers
+)
 {
     private readonly ImmutableArray<IPbsCompiler> _compilers = [.. compilers.OrderBy(x => x.Order)];
 
@@ -33,7 +35,7 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
             await compiler.WriteToFileAsync(cancellationToken);
         }
     }
-    
+
     [CreateSyncVersion]
     public async Task RunCompileOnStartAsync(CancellationToken cancellationToken = default)
     {
@@ -52,12 +54,12 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
                 {
                     logger.LogWarning(e, "Could not create base path for PBS files");
                 }
-                
+
                 await dataService.LoadGameDataAsync(cancellationToken);
                 await WritePbsFilesAsync(cancellationToken);
                 mustCompile = true;
             }
-            
+
             var latestDataTime = DateTime.MinValue;
             var latestPbsTime = DateTime.MinValue;
 
@@ -66,7 +68,8 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
                 var fileInfo = new FileInfo(fileName);
                 if (fileInfo.Exists)
                 {
-                    latestDataTime = fileInfo.LastWriteTimeUtc > latestDataTime ? fileInfo.LastWriteTimeUtc : latestDataTime;
+                    latestDataTime =
+                        fileInfo.LastWriteTimeUtc > latestDataTime ? fileInfo.LastWriteTimeUtc : latestDataTime;
                 }
                 else if (isMandatory)
                 {
@@ -74,9 +77,15 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
                 }
             }
 
+            latestPbsTime = _compilers
+                .SelectMany(x => x.FileNames)
+                .Select(p => new FileInfo(p))
+                .Where(f => f.Exists)
+                .Aggregate(
+                    latestPbsTime,
+                    (current, filename) => filename.LastWriteTimeUtc > current ? filename.LastWriteTimeUtc : current
+                );
 
-            latestPbsTime = _compilers.SelectMany(x => x.FileNames).Select(p => new FileInfo(p)).Where(f => f.Exists).Aggregate(latestPbsTime, (current, filename) => filename.LastWriteTimeUtc > current ? filename.LastWriteTimeUtc : current);
-            
             mustCompile |= latestPbsTime > latestDataTime;
             if (pbsCompilerSettings.CurrentValue.AlwaysCompile)
             {
@@ -89,7 +98,7 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
                 {
                     dataFile.Delete();
                 }
-            
+
                 logger.LogInformation("PBS files are newer than data files. Recompiling.");
                 await CompilePbsFilesAsync(cancellationToken);
             }
@@ -97,8 +106,7 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
             {
                 logger.LogInformation("Data files are up to date.");
             }
-            
-        } 
+        }
         catch (Exception e)
         {
             logger.LogCritical(e, "Unknown exception when compiling.");
@@ -106,7 +114,7 @@ public sealed partial class PbsCompilerService([ReadOnly] ILogger<PbsCompilerSer
             {
                 dataFile.Delete();
             }
-            
+
             throw new InvalidOperationException("Unknown exception when compiling.", e);
         }
     }

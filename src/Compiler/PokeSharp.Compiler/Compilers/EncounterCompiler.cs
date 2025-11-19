@@ -2,8 +2,10 @@
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Compiler.Mappers;
@@ -24,12 +26,18 @@ public partial class EncounterCompiler : IPbsCompiler
     public IEnumerable<string> FileNames => [_path];
     private string _path;
     private readonly IMapMetadataRepository _mapMetadataRepository;
+    private readonly ILogger<EncounterCompiler> _logger;
 
-    public EncounterCompiler(IMapMetadataRepository mapMetadataRepository, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    public EncounterCompiler(
+        IMapMetadataRepository mapMetadataRepository,
+        IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+        ILogger<EncounterCompiler> logger
+    )
     {
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "encounters.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "encounters.txt"));
         _mapMetadataRepository = mapMetadataRepository;
+        _logger = logger;
     }
 
     [CreateSyncVersion]
@@ -41,6 +49,7 @@ public partial class EncounterCompiler : IPbsCompiler
         var encounters = new List<Encounter>();
         EncounterInfo? currentEncounter = null;
         Name? currentType = null;
+        _logger.LogCompilingPbsFile(Path.GetFileName(_path));
         await foreach (var (line, _, fileLineData) in PbsSerializer.ParsePreppedLinesAsync(_path, cancellationToken))
         {
             if (string.IsNullOrWhiteSpace(line))
@@ -221,6 +230,7 @@ public partial class EncounterCompiler : IPbsCompiler
     [CreateSyncVersion]
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
+        _logger.LogWritingPbsFile(Path.GetFileName(_path));
         await FileUtils.WriteFileWithBackupAsync(_path, FileWrite);
         return;
 

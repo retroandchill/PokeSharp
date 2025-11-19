@@ -26,11 +26,11 @@ public readonly record struct LevelUpMove(Name Move, int Level);
 
 [MessagePackObject(true)]
 public record EvolutionInfo(
-    Name Species, 
-    Name EvolutionMethod, 
-    [property: MessagePackFormatter(typeof(EvolutionInfoParameterFormatter))]
-    object? Parameter = null, 
-    bool IsPrevious = false);
+    Name Species,
+    Name EvolutionMethod,
+    [property: MessagePackFormatter(typeof(EvolutionInfoParameterFormatter))] object? Parameter = null,
+    bool IsPrevious = false
+);
 
 public readonly record struct EvolutionFamily(
     Name PreviousSpecies,

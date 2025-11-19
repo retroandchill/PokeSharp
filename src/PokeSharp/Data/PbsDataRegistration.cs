@@ -36,8 +36,10 @@ public static class PbsDataRegistration
     [RegisterServices]
     public static void RegisterMessagePackFormatter(IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton(MessagePackSerializerOptions.Standard
-            .WithResolver(GeneratedMessagePackResolver.Instance)
-            .WithResolver(ContractlessStandardResolver.Instance));
+        serviceCollection.AddSingleton(
+            MessagePackSerializerOptions
+                .Standard.WithResolver(GeneratedMessagePackResolver.Instance)
+                .WithResolver(ContractlessStandardResolver.Instance)
+        );
     }
 }

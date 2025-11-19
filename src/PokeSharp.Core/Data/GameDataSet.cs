@@ -146,15 +146,15 @@ public sealed class RegisteredGameDataSet<TEntity, TKey> : GameDataSet<TEntity, 
 public interface ILoadedGameDataSet
 {
     string DataPath { get; }
-    
+
     bool IsOptional { get; }
-    
+
     void Load();
-    
+
     ValueTask LoadAsync(CancellationToken cancellationToken = default);
 
     void Save();
-    
+
     ValueTask SaveAsync(CancellationToken cancellationToken = default);
 }
 
@@ -173,7 +173,7 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     public string DataPath => TEntity.DataPath;
 
     public bool IsOptional => TEntity.IsOptional;
-    
+
     /// <summary>
     /// Imports a collection of entities into the data set asynchronously.
     /// </summary>
@@ -216,6 +216,8 @@ public static class GameDataSetExtensions
         where TEntity : ILoadedGameDataEntity<TKey, TEntity>
         where TKey : notnull
     {
-        return services.AddSingleton<ILoadedGameDataSet>(sp => sp.GetRequiredService<LoadedGameDataSet<TEntity, TKey>>());
+        return services.AddSingleton<ILoadedGameDataSet>(sp =>
+            sp.GetRequiredService<LoadedGameDataSet<TEntity, TKey>>()
+        );
     }
 }

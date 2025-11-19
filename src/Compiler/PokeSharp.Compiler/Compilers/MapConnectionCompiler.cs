@@ -1,8 +1,10 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.Serialization;
 using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Data.Pbs;
@@ -32,13 +34,18 @@ public partial class MapConnectionCompiler : IPbsCompiler
 
     private string _path;
     private readonly IMapMetadataRepository _mapMetadataRepository;
+    private readonly ILogger<MapConnectionCompiler> _logger;
 
-    public MapConnectionCompiler(IMapMetadataRepository mapMetadataRepository, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    public MapConnectionCompiler(
+        IMapMetadataRepository mapMetadataRepository,
+        IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+        ILogger<MapConnectionCompiler> logger
+    )
     {
-        
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "map_connections.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "map_connections.txt"));
         _mapMetadataRepository = mapMetadataRepository;
+        _logger = logger;
     }
 
     [CreateSyncVersion]
@@ -46,6 +53,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
     {
         var mapConnections = new List<MapConnection>();
 
+        _logger.LogCompilingPbsFile(Path.GetFileName(_path));
         await foreach (
             var (i, foundLine) in PbsSerializer
                 .ParsePreppedLinesAsync(_path, cancellationToken)
@@ -155,6 +163,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
     [CreateSyncVersion]
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
+        _logger.LogWritingPbsFile(Path.GetFileName(_path));
         await FileUtils.WriteFileWithBackupAsync(_path, WriteOperations);
         return;
 

@@ -9,13 +9,14 @@ public enum MessagePosition : byte
     Center,
     Bottom,
 }
+
 [RegisterSingleton]
 [AutoServiceShortcut]
 public class GameSystem
 {
     public DateTimeOffset? TimerStart { get; set; }
     public int TimerDuration { get; set; }
-    
+
     public bool SaveDisabled { get; set; }
     public bool MenuDisabled { get; set; }
     public bool EncounterDisabled { get; set; }
@@ -26,9 +27,8 @@ public class GameSystem
 
     private int _autoScrollXSpeed;
     private int _autoScrollYSpeed;
-    
-    public int BgmPosition { get; set; }
-    
-    private int _bgsPosition;
 
+    public int BgmPosition { get; set; }
+
+    private int _bgsPosition;
 }

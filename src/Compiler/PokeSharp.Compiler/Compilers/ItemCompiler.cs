@@ -1,4 +1,5 @@
 ﻿using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
 using PokeSharp.Compiler.Mappers;
@@ -8,7 +9,8 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public class ItemCompiler(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings) : PbsCompiler<Item, ItemInfo>(pbsCompileSettings)
+public class ItemCompiler(ILogger<ItemCompiler> logger, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    : PbsCompiler<Item, ItemInfo>(logger, pbsCompileSettings)
 {
     public override int Order => 6;
 

@@ -32,8 +32,6 @@ try
 
     var gameState = context.GetService<GameState>();
     await gameState.InitializeAsync();
-    
-    await compilerService.WritePbsFilesAsync();
 }
 finally
 {

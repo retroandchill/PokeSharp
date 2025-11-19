@@ -1,7 +1,9 @@
 ﻿using System.Collections.Immutable;
 using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
@@ -15,8 +17,11 @@ using ZLinq;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolutionParameterParsers, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompiler<Species, SpeciesInfo>(pbsCompileSettings)
+public sealed class PokemonCompiler(
+    ILogger<PokemonCompiler> logger,
+    IEnumerable<IEvolutionParameterParser> evolutionParameterParsers,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings
+) : PbsCompiler<Species, SpeciesInfo>(logger, pbsCompileSettings)
 {
     public override int Order => 8;
 
@@ -24,6 +29,7 @@ public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolu
 
     public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
+        Logger.LogWritingPbsFile(Path.GetFileName(FileName));
         await PbsSerializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel));
     }
 
@@ -81,9 +87,7 @@ public sealed class PokemonCompiler(IEnumerable<IEvolutionParameterParser> evolu
                 {
                     var asName = new Name(paramValue);
                     if (!allSpeciesKeys.Contains(asName))
-                        throw new PbsParseException(
-                            $"Species '{asName}' is not defined.\n{fileLineData.LineReport}"
-                        );
+                        throw new PbsParseException($"Species '{asName}' is not defined.\n{fileLineData.LineReport}");
 
                     evolutionList.Add(evolution with { Parameter = asName });
                 }

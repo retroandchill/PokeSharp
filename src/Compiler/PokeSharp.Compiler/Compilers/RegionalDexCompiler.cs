@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core;
@@ -20,13 +22,17 @@ public partial class RegionalDexCompiler : IPbsCompiler
 
     private string _path;
     public IEnumerable<string> FileNames => [_path];
+    private readonly ILogger<RegionalDexCompiler> _logger;
 
-    public RegionalDexCompiler(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
+    public RegionalDexCompiler(
+        IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+        ILogger<RegionalDexCompiler> logger
+    )
     {
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "regional_dexes.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "regional_dexes.txt"));
+        _logger = logger;
     }
-
 
     [CreateSyncVersion]
     public async Task CompileAsync(CancellationToken cancellationToken = default)
@@ -34,6 +40,7 @@ public partial class RegionalDexCompiler : IPbsCompiler
         var dexLists = new OrderedDictionary<int, List<SpeciesForm>>();
 
         int? section = null;
+        _logger.LogCompilingPbsFile(Path.GetFileName(_path));
         await foreach (var (line, _, fileLineData) in PbsSerializer.ParsePreppedLinesAsync(_path, cancellationToken))
         {
             var sectionMatch = SectionHeaderRegex.Match(line);
@@ -105,6 +112,7 @@ public partial class RegionalDexCompiler : IPbsCompiler
     [CreateSyncVersion]
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
+        _logger.LogWritingPbsFile(Path.GetFileName(_path));
         await FileUtils.WriteFileWithBackupAsync(_path, WriteAction);
         return;
 

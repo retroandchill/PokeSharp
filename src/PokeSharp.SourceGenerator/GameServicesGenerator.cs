@@ -29,11 +29,27 @@ public class GameServicesGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, INamedTypeSymbol type)
     {
+        var serviceShortcutInfo = type.GetAttributes().GetAutoServiceShortcutInfos().Single();
+        var serviceType = type.ToDisplayString();
         var templateParameters = new
         {
             Namespace = type.ContainingNamespace.ToDisplayString(),
-            ServiceName = GetClassName(type),
-            ServiceType = type.ToDisplayString(),
+            ServiceName = GetClassName(serviceShortcutInfo, type),
+            ServiceType = serviceType,
+            WrappedType = serviceShortcutInfo.Type switch
+            {
+                AutoServiceShortcutType.Default => serviceType,
+                AutoServiceShortcutType.Options => $"IOptionsMonitor<{serviceType}>",
+                AutoServiceShortcutType.GameState => $"IGameStateAccessor<{serviceType}>",
+                _ => throw new ArgumentOutOfRangeException(),
+            },
+            AdditionalAccessor = serviceShortcutInfo.Type switch
+            {
+                AutoServiceShortcutType.Default => "",
+                AutoServiceShortcutType.Options => ".CurrentValue",
+                AutoServiceShortcutType.GameState => ".Current",
+                _ => throw new ArgumentOutOfRangeException(),
+            },
         };
 
         var handlebars = Handlebars.Create();
@@ -45,10 +61,8 @@ public class GameServicesGenerator : IIncrementalGenerator
         );
     }
 
-    private static string GetClassName(INamedTypeSymbol typeSymbol)
+    private static string GetClassName(AutoServiceShortcutInfo serviceShortcutInfo, INamedTypeSymbol typeSymbol)
     {
-        var serviceShortcutInfo = typeSymbol.GetAttributes().GetAutoServiceShortcutInfos().Single();
-
         if (serviceShortcutInfo.Name is not null)
             return serviceShortcutInfo.Name;
 

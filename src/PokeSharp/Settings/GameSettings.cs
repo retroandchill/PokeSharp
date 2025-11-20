@@ -83,6 +83,7 @@ public readonly record struct BadgeBoosts(int Attack, int Defense, int SpecialAt
 /// which are used in and out of battle (you can of course change those settings to suit your game).
 /// Note that this isn't perfect. Essentials doesn't accurately replicate every single generation's mechanics.
 /// It's considered to be good enough. Only generations 5 and later are reasonably supported.</param>
+[AutoServiceShortcut(Type = AutoServiceShortcutType.Options)]
 public record GameSettings(string Version, int MechanicsGeneration = 8)
 {
     public GameSettings()
@@ -894,17 +895,4 @@ public record GameSettings(string Version, int MechanicsGeneration = 8)
     #endregion
 
     public int StartMoney { get; init; } = 3000;
-}
-
-public static class GameSettingsServiceShortcut
-{
-    private static CachedService<IOptionsMonitor<GameSettings>> _cachedService;
-
-    extension(GameServices)
-    {
-        public static GameSettings GameSettings => _cachedService.Instance.CurrentValue;
-    }
-
-    [RegisterServices]
-    public static void Register(IServiceCollection services) { }
 }

@@ -9,6 +9,7 @@ using PokeSharp.State;
 namespace PokeSharp.Trainers;
 
 [MessagePackObject(true)]
+[AutoServiceShortcut(Type = AutoServiceShortcutType.GameState)]
 public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerType)
 {
     private const int BadgeNumber = 8;
@@ -22,7 +23,7 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
                 return;
 
             field = value;
-            GameServices.GamePlayer.RefreshCharset();
+            GameGlobal.GamePlayer.RefreshCharset();
         }
     } = 0;
 
@@ -35,7 +36,7 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
                 return;
 
             field = value;
-            GameServices.GamePlayer.RefreshCharset();
+            GameGlobal.GamePlayer.RefreshCharset();
         }
     } = 0;
 
@@ -46,25 +47,25 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
     public int Money
     {
         get;
-        set => field = Math.Clamp(value, 0, GameServices.GameSettings.MaxMoney);
-    } = GameServices.GameSettings.StartMoney;
+        set => field = Math.Clamp(value, 0, GameGlobal.GameSettings.MaxMoney);
+    } = GameGlobal.GameSettings.StartMoney;
 
     public int Coins
     {
         get;
-        set => field = Math.Clamp(value, 0, GameServices.GameSettings.MaxCoins);
+        set => field = Math.Clamp(value, 0, GameGlobal.GameSettings.MaxCoins);
     } = 0;
 
     public int BattlePoints
     {
         get;
-        set => field = Math.Clamp(value, 0, GameServices.GameSettings.MaxBattlePoints);
+        set => field = Math.Clamp(value, 0, GameGlobal.GameSettings.MaxBattlePoints);
     } = 0;
 
     public int Soot
     {
         get;
-        set => field = Math.Clamp(value, 0, GameServices.GameSettings.MaxSoot);
+        set => field = Math.Clamp(value, 0, GameGlobal.GameSettings.MaxSoot);
     } = 0;
 
     public Pokedex Pokedex { get; } = new();
@@ -93,16 +94,9 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
 
 public static class PlayerTrainerExtensions
 {
-    private static CachedService<IGameStateAccessor<PlayerTrainer>> _cachedService = new();
-
     [RegisterServices]
     public static void RegisterPlayerTrainer(this IServiceCollection services)
     {
         services.AddGameState(_ => new PlayerTrainer(Text.None, Name.None));
-    }
-
-    extension(GameServices)
-    {
-        public static PlayerTrainer PlayerTrainer => _cachedService.Instance.Current;
     }
 }

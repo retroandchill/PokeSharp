@@ -27,7 +27,7 @@ public partial class RegionalStorage : IPokemonStorage
     {
         get
         {
-            var gameMap = GameServices.GameMap;
+            var gameMap = GameGlobal.GameMap;
             if (_lastMap != gameMap.MapId)
             {
                 _regionMap = GameplayUtils.CurrentRegion;

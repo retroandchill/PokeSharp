@@ -16,7 +16,7 @@ public class PokemonPauseMenu([ReadOnly] IPokemonPauseMenuScene scene)
 
     private void ShowInfo()
     {
-        GameServices.PauseMenuService.ShowInfo(this);
+        GameGlobal.PauseMenuService.ShowInfo(this);
     }
 
     public async ValueTask StartPokemonMenu(CancellationToken cancellationToken = default)
@@ -25,7 +25,7 @@ public class PokemonPauseMenu([ReadOnly] IPokemonPauseMenuScene scene)
         ShowInfo();
         var commandList = new List<Text>();
         var commands = new List<PauseMenuOption>();
-        foreach (var (_, handler, name) in GameServices.PauseMenuHandlers.GetAllAvailable())
+        foreach (var (_, handler, name) in GameGlobal.PauseMenuHandlers.GetAllAvailable())
         {
             commandList.Add(name);
             commands.Add(handler);
@@ -37,7 +37,7 @@ public class PokemonPauseMenu([ReadOnly] IPokemonPauseMenuScene scene)
             var choice = await scene.ShowCommands(commandList, cancellationToken);
             if (!choice.HasValue)
             {
-                GameServices.AudioPlayService.PlayCloseMenuSE();
+                GameGlobal.AudioPlayService.PlayCloseMenuSE();
                 endScene = true;
                 break;
             }
@@ -59,7 +59,7 @@ public static class PokemonPauseMenuExtensions
 {
     private static CachedService<MenuHandlers<PauseMenuOption, NullContext>> _cachedService;
 
-    extension(GameServices)
+    extension(GameGlobal)
     {
         public static MenuHandlers<PauseMenuOption, NullContext> PauseMenuHandlers => _cachedService.Instance;
     }

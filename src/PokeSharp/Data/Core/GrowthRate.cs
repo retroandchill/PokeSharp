@@ -17,7 +17,7 @@ public partial record GrowthRate
     /// Gets the maximum allowable level for entities, as defined by game settings.
     /// Serves as an upper boundary for level-based calculations and validations.
     /// </summary>
-    public static int MaxLevel => GameServices.GameSettings.MaxLevel;
+    public static int MaxLevel => GameGlobal.GameSettings.MaxLevel;
 
     /// <inheritdoc />
     public required Name Id { get; init; }

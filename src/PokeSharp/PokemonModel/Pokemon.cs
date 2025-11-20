@@ -102,7 +102,7 @@ public partial class Pokemon
         {
             if (ForcedForm.HasValue)
                 return ForcedForm.Value;
-            if (GameServices.GameTemp.InBattle || GameServices.GameTemp.InStorage)
+            if (GameGlobal.GameTemp.InBattle || GameGlobal.GameTemp.InStorage)
                 return _form;
 
             var calculatedForm = MultipleForms.GetForm(this);
@@ -120,7 +120,7 @@ public partial class Pokemon
             _ability = null;
             MultipleForms.OnFormSet(this, value, oldForm);
             CalcStats();
-            GameServices.PlayerTrainer.Pokedex.Register(this);
+            GameGlobal.PlayerTrainer.Pokedex.Register(this);
         }
     }
 
@@ -214,7 +214,7 @@ public partial class Pokemon
             if (field != 0)
                 return;
             HealStatus();
-            GameServices.PokemonStatusService.OnFainted(this);
+            GameGlobal.PokemonStatusService.OnFainted(this);
         }
     }
 
@@ -285,7 +285,7 @@ public partial class Pokemon
         HealStatus();
         HealPP();
 
-        GameServices.PokemonStatusService.OnFullyHealed(this);
+        GameGlobal.PokemonStatusService.OnFullyHealed(this);
     }
 
     #endregion
@@ -357,7 +357,7 @@ public partial class Pokemon
             if (_shiny.HasValue)
                 return _shiny.Value;
 
-            _shiny = ShinyValue < GameServices.GameSettings.ShinyPokemonChance;
+            _shiny = ShinyValue < GameGlobal.GameSettings.ShinyPokemonChance;
 
             return _shiny.Value;
         }
@@ -743,7 +743,7 @@ public partial class Pokemon
     }
 
     [IgnoreMember]
-    public bool CanRelearnMove => GameServices.MoveService.CanRelearnMoves(this);
+    public bool CanRelearnMove => GameGlobal.MoveService.CanRelearnMoves(this);
 
     #endregion
 
@@ -816,7 +816,7 @@ public partial class Pokemon
         if (PokerusStage == PokerusStage.Cured)
             return;
 
-        GameServices.GameStats.PokerusInfections++;
+        GameGlobal.GameStats.PokerusInfections++;
 
         if (strain is <= 0 or >= 16)
         {
@@ -861,7 +861,7 @@ public partial class Pokemon
     public PokemonOwner Owner { get; set; }
 
     [IgnoreMember]
-    public bool IsForeign => IsForeignTo(GameServices.PlayerTrainer);
+    public bool IsForeign => IsForeignTo(GameGlobal.PlayerTrainer);
 
     public bool IsForeignTo(Trainer trainer)
     {
@@ -950,7 +950,7 @@ public partial class Pokemon
 
     public Name? CheckEvolutionOnLevelUp()
     {
-        var evolutionService = GameServices.EvolutionService;
+        var evolutionService = GameGlobal.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
                 evolutionService.OnLevelUp(method, pkmn, parameter) ? newSpecies : (Name?)null
@@ -959,7 +959,7 @@ public partial class Pokemon
 
     public Name? CheckEvolutionOnUseItem(Name itemUsed)
     {
-        var evolutionService = GameServices.EvolutionService;
+        var evolutionService = GameGlobal.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
                 evolutionService.OnUseItem(method, pkmn, parameter, itemUsed) ? newSpecies : (Name?)null
@@ -968,7 +968,7 @@ public partial class Pokemon
 
     public Name? CheckEvolutionOnTrade(Pokemon otherPkmn)
     {
-        var evolutionService = GameServices.EvolutionService;
+        var evolutionService = GameGlobal.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
                 evolutionService.OnTrade(method, pkmn, parameter, otherPkmn) ? newSpecies : (Name?)null
@@ -977,7 +977,7 @@ public partial class Pokemon
 
     public Name? CheckEvolutionAfterBattle(int partyIndex)
     {
-        var evolutionService = GameServices.EvolutionService;
+        var evolutionService = GameGlobal.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
                 evolutionService.AfterBattle(method, pkmn, partyIndex, parameter) ? newSpecies : (Name?)null
@@ -986,7 +986,7 @@ public partial class Pokemon
 
     public Name? CheckEvolutionByEvent(object? value)
     {
-        var evolutionService = GameServices.EvolutionService;
+        var evolutionService = GameGlobal.EvolutionService;
         return CheckEvolutionInternal(
             (pkmn, newSpecies, method, parameter) =>
                 evolutionService.OnEvent(method, pkmn, parameter, value) ? newSpecies : (Name?)null
@@ -995,7 +995,7 @@ public partial class Pokemon
 
     public void ActionAfterEvolution(Name newSpecies)
     {
-        var evolutionService = GameServices.EvolutionService;
+        var evolutionService = GameGlobal.EvolutionService;
         foreach (var (evoSpecies, method, parameter, _) in SpeciesData.GetEvolutions(true))
         {
             if (evolutionService.AfterEvolution(method, this, evoSpecies, parameter, newSpecies))
@@ -1005,7 +1005,7 @@ public partial class Pokemon
 
     private Name? CheckEvolutionInternal(Func<Pokemon, Name, Name, object?, Name?> selector)
     {
-        if (!GameServices.EvolutionService.CanEvolve(this))
+        if (!GameGlobal.EvolutionService.CanEvolve(this))
             return null;
 
         foreach (var (newSpecies, method, parameter, _) in SpeciesData.GetEvolutions().Where(e => !e.IsPrevious))
@@ -1024,7 +1024,7 @@ public partial class Pokemon
         if (!newSpecies.HasValue)
             return false;
 
-        await GameServices.EngineInteropService.FadeOutInWithMusic(async () =>
+        await GameGlobal.EngineInteropService.FadeOutInWithMusic(async () =>
             await IScreenActionService.Instance.EvolvePokemonScreen(this, newSpecies.Value)
         );
 
@@ -1070,7 +1070,7 @@ public partial class Pokemon
             return 1;
 
         // ReSharper disable once InvertIf
-        if (GameServices.GameSettings.DisableIVsAndEVs)
+        if (GameGlobal.GameSettings.DisableIVsAndEVs)
         {
             iv = 0;
             ev = 0;
@@ -1082,7 +1082,7 @@ public partial class Pokemon
     private static int CalcStat(int baseValue, int level, int iv, int ev, int natureChange)
     {
         // ReSharper disable once InvertIf
-        if (GameServices.GameSettings.DisableIVsAndEVs)
+        if (GameGlobal.GameSettings.DisableIVsAndEVs)
         {
             iv = 0;
             ev = 0;
@@ -1254,7 +1254,7 @@ public partial class Pokemon
         }
 
         Owner = owner;
-        ObtainMap = GameServices.GameMap.MapId;
+        ObtainMap = GameGlobal.GameMap.MapId;
         ObtainLevel = level;
         TimeReceived = DateTimeOffset.Now;
 
@@ -1274,7 +1274,7 @@ public partial class Pokemon
             }
         }
 
-        _components = GameServices.PokemonComponentService.CreateComponents(this).ToDictionary(c => c.Id);
+        _components = GameGlobal.PokemonComponentService.CreateComponents(this).ToDictionary(c => c.Id);
     }
 
     #endregion

@@ -1,15 +1,17 @@
 ﻿#nullable enable
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using PokeSharp.Core;
+using PokeSharp.Core.State;
 
 namespace {{Namespace}};
 
 public static class {{ServiceName}}ServiceShortcut 
 {
-    private static CachedService<{{ServiceType}}> _instance = new();
+    private static CachedService<{{WrappedType}}> _instance = new();
 
-    extension(GameServices) 
+    extension(GameGlobal) 
     {
-        public static {{ServiceType}} {{ServiceName}} => _instance.Instance;
+        public static {{ServiceType}} {{ServiceName}} => _instance.Instance{{AdditionalAccessor}};
     }
 }

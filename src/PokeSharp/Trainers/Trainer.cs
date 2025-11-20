@@ -19,7 +19,7 @@ public abstract class Trainer(Text name, Name trainerType)
 
     public uint Id { get; set; } = (uint)Random.Shared.NextInt64(uint.MaxValue);
 
-    public Name Language { get; set; } = GameServices.LocalizationService.Language;
+    public Name Language { get; set; } = GameGlobal.LocalizationService.Language;
 
     public List<Pokemon> Party { get; set; } = [];
 
@@ -78,7 +78,7 @@ public abstract class Trainer(Text name, Name trainerType)
 
     public int AblePokemonCount => AbleParty.Count();
 
-    public bool IsPartyFull => PartyCount >= GameServices.GameSettings.MaxPartySize;
+    public bool IsPartyFull => PartyCount >= GameGlobal.GameSettings.MaxPartySize;
 
     public bool AllFainted => AblePokemonCount == 0;
 

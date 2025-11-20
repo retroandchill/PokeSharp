@@ -131,7 +131,7 @@ public static class EvolutionExtensions
 
         public bool FamilyItemEvolutionsUseItem(Name item = default)
         {
-            var evolutionService = GameServices.EvolutionService;
+            var evolutionService = GameGlobal.EvolutionService;
             return Species
                 .Get(species.GetBabySpecies())
                 .GetFamilyEvolutions()
@@ -160,7 +160,7 @@ public static class EvolutionExtensions
 
                 var evolutionMethodData = Data.Core.Evolution.Get(evo.EvolutionMethod);
                 if (
-                    GameServices.EvolutionService.MethodHasFlag(evo.EvolutionMethod, EvolutionConditionFlags.LevelUp)
+                    GameGlobal.EvolutionService.MethodHasFlag(evo.EvolutionMethod, EvolutionConditionFlags.LevelUp)
                     && evolutionMethodData.Id != Data.Core.Evolution.Shedinja.Id
                 )
                     return previousMinLevel;

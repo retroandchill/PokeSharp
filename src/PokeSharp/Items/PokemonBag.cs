@@ -30,10 +30,10 @@ public partial class PokemonBag
 {
     public static PokemonBag Instance { get; } = new();
 
-    public static IEnumerable<Text> PocketNames => GameServices.GameSettings.BagPockets.Select(x => x.Name);
+    public static IEnumerable<Text> PocketNames => GameGlobal.GameSettings.BagPockets.Select(x => x.Name);
 
     [IgnoreMember]
-    public static int PocketCount => GameServices.GameSettings.BagPockets.Length;
+    public static int PocketCount => GameGlobal.GameSettings.BagPockets.Length;
 
     private readonly ImmutableArray<List<ItemSlot>> _pockets;
 
@@ -126,7 +126,7 @@ public partial class PokemonBag
 
         var pocket = itemData.Pocket;
         var maxSize = GetMaxPocketSize(pocket) ?? _pockets[pocket].Count + 1;
-        var gameSettings = GameServices.GameSettings;
+        var gameSettings = GameGlobal.GameSettings;
         var result = ItemStorageHelper.CanAdd(_pockets[pocket], maxSize, gameSettings.BagMaxPerSlot, item, quantity);
         if (result && gameSettings.BagPockets[pocket - 1].AutoSort)
         {
@@ -145,13 +145,7 @@ public partial class PokemonBag
 
         var pocket = itemData.Pocket;
         var maxSize = GetMaxPocketSize(pocket) ?? _pockets[pocket].Count + 1;
-        return ItemStorageHelper.Add(
-            _pockets[pocket],
-            maxSize,
-            GameServices.GameSettings.BagMaxPerSlot,
-            item,
-            quantity
-        );
+        return ItemStorageHelper.Add(_pockets[pocket], maxSize, GameGlobal.GameSettings.BagMaxPerSlot, item, quantity);
     }
 
     public bool AddAll(Name item, int quantity = 1)
@@ -217,7 +211,7 @@ public partial class PokemonBag
 
     private static int? GetMaxPocketSize(int pocket)
     {
-        var bagPockets = GameServices.GameSettings.BagPockets;
+        var bagPockets = GameGlobal.GameSettings.BagPockets;
         var pocketIndex = pocket - 1;
         if (pocketIndex < 0 || pocketIndex >= bagPockets.Length)
             return null;

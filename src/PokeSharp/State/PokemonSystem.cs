@@ -88,7 +88,7 @@ public static class PokemonSystemExtensions
         services.AddGameState<PokemonSystem>();
     }
 
-    extension(GameServices)
+    extension(GameGlobal)
     {
         public static PokemonSystem PokemonSystem => _cachedService.Instance.Current;
     }

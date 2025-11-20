@@ -273,7 +273,7 @@ public partial class Pokedex
     private void RefreshAccessibleDexes()
     {
         AccessibleDexes.Clear();
-        if (GameServices.GameSettings.UseCurrentRegionDex)
+        if (GameGlobal.GameSettings.UseCurrentRegionDex)
         {
             var region = GameplayUtils.CurrentRegion ?? NationalDex;
             if (region >= DexesCount - 1)

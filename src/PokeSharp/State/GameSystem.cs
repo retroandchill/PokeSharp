@@ -14,6 +14,7 @@ public enum MessagePosition : byte
 }
 
 [MessagePackObject(true, AllowPrivate = true)]
+[AutoServiceShortcut(Type = AutoServiceShortcutType.GameState)]
 public partial class GameSystem
 {
     public DateTimeOffset? TimerStart { get; set; }
@@ -37,16 +38,9 @@ public partial class GameSystem
 
 public static class GameSystemExtensions
 {
-    private static CachedService<IGameStateAccessor<GameSystem>> _cachedService = new();
-
     [RegisterServices]
     public static void GameSystem(this IServiceCollection services)
     {
         services.AddGameState<GameSystem>();
-    }
-
-    extension(GameServices)
-    {
-        public static GameSystem GameSystem => _cachedService.Instance.Current;
     }
 }

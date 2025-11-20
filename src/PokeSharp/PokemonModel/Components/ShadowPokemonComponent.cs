@@ -89,7 +89,7 @@ public partial class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent
         if (!IsShadow)
             return;
 
-        var amounts = GameServices.ShadowPokemonHandler.GetAmounts(_pokemon.NatureId ?? Name.None);
+        var amounts = GameGlobal.ShadowPokemonHandler.GetAmounts(_pokemon.NatureId ?? Name.None);
         var amount = method switch
         {
             HeartGaugeChangeMethod.Battle => amounts.Battle,
@@ -204,7 +204,7 @@ public partial class ShadowPokemonComponent(Pokemon pokemon) : IPokemonComponent
     }
 
     [IgnoreMember]
-    public bool IsPurifiable => IsShadow && HeartGauge == 0 && GameServices.ShadowPokemonHandler.IsPurifiable(_pokemon);
+    public bool IsPurifiable => IsShadow && HeartGauge == 0 && GameGlobal.ShadowPokemonHandler.IsPurifiable(_pokemon);
 
     public void Attach(Pokemon pokemon)
     {

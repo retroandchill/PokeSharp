@@ -44,7 +44,7 @@ public partial class PokemonStorage : IPokemonStorage
 
     public PokemonStorage(int? maxBoxes = null, int maxPokemon = PokemonBox.BoxSize)
     {
-        var boxCount = maxBoxes ?? GameServices.GameSettings.NumStorageBoxes;
+        var boxCount = maxBoxes ?? GameGlobal.GameSettings.NumStorageBoxes;
         Boxes = Enumerable
             .Range(0, boxCount)
             .Select(i => new PokemonBox($"Box {i + 1}", maxPokemon) { Background = i % BasicWallpaperQuantity })
@@ -119,12 +119,12 @@ public partial class PokemonStorage : IPokemonStorage
     [IgnoreMember]
     public List<Pokemon> Party
     {
-        get => GameServices.PlayerTrainer.Party;
+        get => GameGlobal.PlayerTrainer.Party;
         set => throw new InvalidOperationException("Party cannot be set directly");
     }
 
     [IgnoreMember]
-    public bool IsPartyFull => GameServices.PlayerTrainer.IsPartyFull;
+    public bool IsPartyFull => GameGlobal.PlayerTrainer.IsPartyFull;
 
     [IgnoreMember]
     public int MaxBoxes => Boxes.Length;
@@ -134,7 +134,7 @@ public partial class PokemonStorage : IPokemonStorage
         if (box >= MaxBoxes)
             return 0;
 
-        return box < 0 ? GameServices.GameSettings.MaxPartySize : this[box].Count;
+        return box < 0 ? GameGlobal.GameSettings.MaxPartySize : this[box].Count;
     }
 
     [IgnoreMember]
@@ -145,7 +145,7 @@ public partial class PokemonStorage : IPokemonStorage
         if (box == PartyBox)
         {
             var partyLength = Party.Count;
-            return partyLength >= GameServices.GameSettings.MaxPartySize ? null : partyLength;
+            return partyLength >= GameGlobal.GameSettings.MaxPartySize ? null : partyLength;
         }
 
         var maxPokemon = MaxPokemon(box);
@@ -215,7 +215,7 @@ public partial class PokemonStorage : IPokemonStorage
                 throw new InvalidOperationException("Trying to copy null to storage");
             }
 
-            if (GameServices.GameSettings.HealStoredPokemon)
+            if (GameGlobal.GameSettings.HealStoredPokemon)
             {
                 var oldReadyToEvolve = pokemon.HasTag(PokemonTags.ReadyToEvolve);
                 pokemon.Heal();
@@ -262,7 +262,7 @@ public partial class PokemonStorage : IPokemonStorage
             if (this[box, i] is null)
                 continue;
 
-            if (GameServices.GameSettings.HealStoredPokemon)
+            if (GameGlobal.GameSettings.HealStoredPokemon)
             {
                 var oldReadyToEvolve = pokemon.HasTag(PokemonTags.ReadyToEvolve);
                 pokemon.Heal();
@@ -281,7 +281,7 @@ public partial class PokemonStorage : IPokemonStorage
 
     public int? StoreCaught(Pokemon pokemon)
     {
-        if (GameServices.GameSettings.HealStoredPokemon && CurrentBox >= 0)
+        if (GameGlobal.GameSettings.HealStoredPokemon && CurrentBox >= 0)
         {
             var oldReadyToEvolve = pokemon.HasTag(PokemonTags.ReadyToEvolve);
             pokemon.Heal();

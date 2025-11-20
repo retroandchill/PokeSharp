@@ -5,6 +5,13 @@ using RhoMicro.CodeAnalysis;
 // ReSharper disable once CheckNamespace
 namespace PokeSharp.Core;
 
+internal enum AutoServiceShortcutType : byte
+{
+    Default,
+    Options,
+    GameState,
+}
+
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 #if POKESHARP_GENERATOR
 [IncludeFile]
@@ -12,4 +19,6 @@ namespace PokeSharp.Core;
 internal class AutoServiceShortcutAttribute : Attribute
 {
     public string? Name { get; init; }
+
+    public AutoServiceShortcutType Type { get; init; } = AutoServiceShortcutType.Default;
 }

@@ -13,6 +13,11 @@
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
+    <ProjectReference
+      Include="..\PokeSharp.SourceGenerator\PokeSharp.CodeFixes.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
     <ProjectReference Include="..\..\PokeSharp\PokeSharp.csproj" />
   </ItemGroup>
   <ItemGroup>

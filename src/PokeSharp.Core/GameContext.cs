@@ -9,7 +9,7 @@ namespace PokeSharp.Core;
 /// Marker class used for the creation of static extension methods to retrieve services from the game context, by name
 /// without using reflection every time.
 /// </summary>
-public static class GameServices;
+public static class GameGlobal;
 
 /// <summary>
 /// Represents the execution context of a game, managing services and resources for the game lifecycle.

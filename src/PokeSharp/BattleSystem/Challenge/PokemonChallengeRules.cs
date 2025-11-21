@@ -1,51 +1,58 @@
-﻿using PokeSharp.PokemonModel;
+﻿using System.Collections.Immutable;
+using PokeSharp.PokemonModel;
 using PokeSharp.Trainers;
 
 namespace PokeSharp.BattleSystem.Challenge;
 
-public class PokemonChallengeRules(PokemonChallengeRuleset? ruleset = null)
+public record PokemonChallengeRules
 {
-    public PokemonChallengeRuleset Ruleset { get; set; } = ruleset ?? new PokemonChallengeRuleset();
-    public BattleType BattleType { get; set; } = new BattleTower();
-    public LevelAdjustment? LevelAdjustment { get; set; }
-    private readonly List<IBattleRule> _battleRules = [];
+    public PokemonChallengeRuleset Ruleset { get; private init; }
+    public BattleType BattleType { get; init; } = BattleTower.Default;
+    public LevelAdjustment? LevelAdjustment { get; init; }
+    public ImmutableArray<IBattleRule> BattleRules { get; init; } = [];
 
     public int Number
     {
         get => Ruleset.Number;
-        set => Ruleset.Number = value;
-    }
-
-    public PokemonChallengeRules Copy()
-    {
-        var result = new PokemonChallengeRules(Ruleset.Copy())
-        {
-            BattleType = BattleType,
-            LevelAdjustment = LevelAdjustment,
-        };
-        foreach (var rule in _battleRules)
-        {
-            result.AddBattleRule(rule);
-        }
-
-        return result;
+        init => Ruleset = Ruleset with { Number = value };
     }
 
     public bool DoubleBattle
     {
-        set
+        init
         {
             if (value)
             {
-                Ruleset.Number = 4;
-                AddBattleRule(new DoubleBattle());
+                Ruleset = Ruleset with { Number = 4 };
+                BattleRules = BattleRules.Add(new DoubleBattle());
             }
             else
             {
-                Ruleset.Number = 3;
-                AddBattleRule(new SingleBattle());
+                Ruleset = Ruleset with { Number = 3 };
+                BattleRules = BattleRules.Add(new SingleBattle());
             }
         }
+    }
+
+    public (int Min, int Max, int Total) LevelRule
+    {
+        init
+        {
+            Ruleset = Ruleset with
+            {
+                PokemonRules = Ruleset.PokemonRules.AddRange(
+                    new MinimumLevelRestriction(value.Min),
+                    new MaximumLevelRestriction(value.Max)
+                ),
+                SubsetRules = Ruleset.SubsetRules.Add(new TotalLevelRestriction(value.Total)),
+            };
+            LevelAdjustment = new TotalLevelAdjustment(value.Min, value.Max, value.Total);
+        }
+    }
+
+    public PokemonChallengeRules(PokemonChallengeRuleset? ruleset = null)
+    {
+        Ruleset = ruleset ?? new PokemonChallengeRuleset();
     }
 
     public Adjustments? AdjustLevels(IReadOnlyList<Pokemon> team1, IReadOnlyList<Pokemon> team2)
@@ -55,9 +62,9 @@ public class PokemonChallengeRules(PokemonChallengeRuleset? ruleset = null)
 
     public void UnadjustLevels(IReadOnlyList<Pokemon> team1, IReadOnlyList<Pokemon> team2, Adjustments? adjustments)
     {
-        if (adjustments is not null)
+        if (adjustments is not null && LevelAdjustment is not null)
         {
-            LevelAdjustment?.UnadjustLevels(team1, team2, adjustments.Value);
+            LevelAdjustment.UnadjustLevels(team1, team2, adjustments.Value);
         }
     }
 
@@ -80,38 +87,10 @@ public class PokemonChallengeRules(PokemonChallengeRuleset? ruleset = null)
         }
     }
 
-    public void AddPokemonRule(IPokemonRestriction restriction)
-    {
-        Ruleset.AddPokemonRule(restriction);
-    }
-
-    public void AddLevelRule(int minLevel, int maxLevel, int totalLevel)
-    {
-        AddPokemonRule(new MinimumLevelRestriction(minLevel));
-        AddPokemonRule(new MaximumLevelRestriction(maxLevel));
-        AddSubsetRule(new TotalLevelRestriction(totalLevel));
-        LevelAdjustment = new TotalLevelAdjustment(minLevel, maxLevel, totalLevel);
-    }
-
-    public void AddSubsetRule(ITeamRestriction teamRestriction)
-    {
-        Ruleset.AddSubsetRule(teamRestriction);
-    }
-
-    public void AddTeamRule(ITeamRestriction teamRestriction)
-    {
-        Ruleset.AddTeamRule(teamRestriction);
-    }
-
-    public void AddBattleRule(IBattleRule rule)
-    {
-        _battleRules.Add(rule);
-    }
-
     public Battle CreateBattle(IBattleScreen screen, Trainer trainer1, Trainer trainer2)
     {
         var battle = BattleType.CreateBattle(screen, trainer1, trainer2);
-        foreach (var rule in _battleRules)
+        foreach (var rule in BattleRules)
         {
             rule.SetRule(battle);
         }

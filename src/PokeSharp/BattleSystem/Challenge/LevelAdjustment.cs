@@ -14,10 +14,8 @@ public enum LevelAdjustmentType : byte
 
 public readonly record struct Adjustments(ImmutableArray<int> Team1, ImmutableArray<int> Team2);
 
-public class LevelAdjustment(LevelAdjustmentType type)
+public record LevelAdjustment(LevelAdjustmentType Type)
 {
-    public LevelAdjustmentType Type { get; } = type;
-
     private static IEnumerable<int> GetNullAdjustment(IEnumerable<Pokemon> team)
     {
         return team.Select(p => p.Level);
@@ -29,9 +27,13 @@ public class LevelAdjustment(LevelAdjustmentType type)
 
     protected virtual IEnumerable<int> GetOpponentAdjustment(IEnumerable<Pokemon> team) => GetNullAdjustment(team);
 
-    public IEnumerable<int> GetOldExp(IEnumerable<Pokemon> team) => team.Select(p => p.Exp);
+    private static IEnumerable<int> GetOldExp(IEnumerable<Pokemon> team) => team.Select(p => p.Exp);
 
-    public void UnadjustLevels(IReadOnlyList<Pokemon> team1, IReadOnlyList<Pokemon> team2, Adjustments adjustments)
+    public static void UnadjustLevels(
+        IReadOnlyList<Pokemon> team1,
+        IReadOnlyList<Pokemon> team2,
+        Adjustments adjustments
+    )
     {
         foreach (var (i, pokemon) in team1.Index())
         {
@@ -99,12 +101,19 @@ public class LevelAdjustment(LevelAdjustmentType type)
     }
 }
 
-public class TotalLevelAdjustment(int minLevel, int maxLevel, int totalLevel)
-    : LevelAdjustment(LevelAdjustmentType.EnemyTeam)
+public record TotalLevelAdjustment : LevelAdjustment
 {
-    private readonly int _minLevel = Math.Clamp(minLevel, 1, GrowthRate.MaxLevel);
-    private readonly int _maxLevel = Math.Clamp(maxLevel, 1, GrowthRate.MaxLevel);
-    private readonly int _totalLevel = Math.Clamp(totalLevel, 1, GrowthRate.MaxLevel);
+    private readonly int _minLevel;
+    private readonly int _maxLevel;
+    private readonly int _totalLevel;
+
+    public TotalLevelAdjustment(int minLevel, int maxLevel, int totalLevel)
+        : base(LevelAdjustmentType.EnemyTeam)
+    {
+        _minLevel = Math.Clamp(minLevel, 1, GrowthRate.MaxLevel);
+        _maxLevel = Math.Clamp(maxLevel, 1, GrowthRate.MaxLevel);
+        _totalLevel = Math.Clamp(totalLevel, 1, GrowthRate.MaxLevel);
+    }
 
     protected override IEnumerable<int> GetAdjustment(IEnumerable<Pokemon> team)
     {
@@ -112,7 +121,7 @@ public class TotalLevelAdjustment(int minLevel, int maxLevel, int totalLevel)
 
         var result = new List<int>();
         var total = 0;
-        foreach (var pokemon in teamList)
+        foreach (var _ in teamList)
         {
             result.Add(_minLevel);
             total += _minLevel;
@@ -123,7 +132,7 @@ public class TotalLevelAdjustment(int minLevel, int maxLevel, int totalLevel)
             var work = false;
             for (var i = 0; i < teamList.Count; i++)
             {
-                if (result[i] >= _maxLevel || total >= totalLevel)
+                if (result[i] >= _maxLevel || total >= _totalLevel)
                     continue;
 
                 result[i]++;

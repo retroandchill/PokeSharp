@@ -1,4 +1,5 @@
-﻿using PokeSharp.Core;
+﻿using System.Collections.Immutable;
+using PokeSharp.Core;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.PokemonModel;
@@ -6,38 +7,24 @@ using PokeSharp.Settings;
 
 namespace PokeSharp.BattleSystem.Challenge;
 
-public class PokemonChallengeRuleset(int number = 0)
+public record PokemonChallengeRuleset
 {
-    private int _number = number;
+    private readonly int _number;
+
+    public PokemonChallengeRuleset(int number = 0)
+    {
+        _number = number;
+    }
+
     public int Number
     {
         get => _number;
-        set => SetNumberRange(value, value);
+        init => NumberRange = (value, value);
     }
-    private readonly List<IPokemonRestriction> _pokemonRules = [];
-    private readonly List<ITeamRestriction> _teamRules = [];
-    private readonly List<ITeamRestriction> _subsetRules = [];
 
-    public PokemonChallengeRuleset Copy()
-    {
-        var result = new PokemonChallengeRuleset(Number);
-        foreach (var rule in _pokemonRules)
-        {
-            result.AddPokemonRule(rule);
-        }
-
-        foreach (var rule in _teamRules)
-        {
-            result.AddTeamRule(rule);
-        }
-
-        foreach (var rule in _subsetRules)
-        {
-            result.AddSubsetRule(rule);
-        }
-
-        return result;
-    }
+    public ImmutableArray<IPokemonRestriction> PokemonRules { get; init; } = [];
+    public ImmutableArray<ITeamRestriction> TeamRules { get; init; } = [];
+    public ImmutableArray<ITeamRestriction> SubsetRules { get; init; } = [];
 
     public int MinLength
     {
@@ -60,7 +47,7 @@ public class PokemonChallengeRuleset(int number = 0)
             var minLevel = 1;
             var maxLevel = GrowthRate.MaxLevel;
             var num = SuggestedNumber;
-            foreach (var rule in _pokemonRules)
+            foreach (var rule in PokemonRules)
             {
                 switch (rule)
                 {
@@ -74,7 +61,7 @@ public class PokemonChallengeRuleset(int number = 0)
             }
 
             var totalLevel = maxLevel * num;
-            foreach (var rule in _subsetRules.OfType<TotalLevelRestriction>())
+            foreach (var rule in SubsetRules.OfType<TotalLevelRestriction>())
             {
                 totalLevel = rule.Level;
             }
@@ -85,45 +72,18 @@ public class PokemonChallengeRuleset(int number = 0)
         }
     }
 
-    public void SetNumberRange(int minValue, int maxValue)
+    public (int Min, int Max) NumberRange
     {
-        MinLength = Math.Max(1, minValue);
-        _number = Math.Max(1, maxValue);
-    }
-
-    public void AddTeamRule(ITeamRestriction rule)
-    {
-        _teamRules.Add(rule);
-    }
-
-    public void AddSubsetRule(ITeamRestriction rule)
-    {
-        _subsetRules.Add(rule);
-    }
-
-    public void AddPokemonRule(IPokemonRestriction rule)
-    {
-        _pokemonRules.Add(rule);
-    }
-
-    public void ClearTeamRules()
-    {
-        _teamRules.Clear();
-    }
-
-    public void ClearSubsetRules()
-    {
-        _subsetRules.Clear();
-    }
-
-    public void ClearPokemonRules()
-    {
-        _pokemonRules.Clear();
+        init
+        {
+            MinLength = Math.Max(1, value.Min);
+            _number = Math.Max(1, value.Max);
+        }
     }
 
     public bool IsPokemonValid(Pokemon pokemon)
     {
-        return _pokemonRules.All(rule => rule.IsValid(pokemon));
+        return PokemonRules.All(rule => rule.IsValid(pokemon));
     }
 
     public bool HasRegisterableTeam(IReadOnlyList<Pokemon> team)
@@ -144,16 +104,16 @@ public class PokemonChallengeRuleset(int number = 0)
             return false;
         }
 
-        if (_teamRules.Any(rule => !rule.IsValid(team)))
+        if (TeamRules.Any(rule => !rule.IsValid(team)))
         {
             return false;
         }
 
-        if (_subsetRules.Count <= 0)
+        if (SubsetRules.Length <= 0)
             return true;
 
         return team.EachCombination(teamNumber)
-                .Select(combination => _subsetRules.All(rule => rule.IsValid(combination)))
+                .Select(combination => SubsetRules.All(rule => rule.IsValid(combination)))
                 .Any(isValid => isValid) || true;
     }
 
@@ -168,7 +128,7 @@ public class PokemonChallengeRuleset(int number = 0)
         if (validPokemon.Count < teamNumber)
             return false;
 
-        return _teamRules.Count <= 0 || team.EachCombination(teamNumber).Any(combination => IsValid(combination));
+        return TeamRules.Length <= 0 || team.EachCombination(teamNumber).Any(combination => IsValid(combination));
     }
 
     private static readonly Text ChoosePokemon = Text.Localized(
@@ -224,13 +184,13 @@ public class PokemonChallengeRuleset(int number = 0)
             return false;
         }
 
-        foreach (var rule in _teamRules.Where(rule => !rule.IsValid(team)))
+        foreach (var rule in TeamRules.Where(rule => !rule.IsValid(team)))
         {
             errors?.Add(rule.ErrorMessage);
             return false;
         }
 
-        foreach (var rule in _subsetRules.Where(rule => !rule.IsValid(team)))
+        foreach (var rule in SubsetRules.Where(rule => !rule.IsValid(team)))
         {
             errors?.Add(rule.ErrorMessage);
             return false;

@@ -2,7 +2,7 @@
 
 namespace PokeSharp.BattleSystem.Challenge;
 
-public class BattleType
+public record BattleType
 {
     public virtual Battle CreateBattle(IBattleScreen screen, Trainer trainer1, Trainer trainer2)
     {
@@ -10,8 +10,10 @@ public class BattleType
     }
 }
 
-public class BattleTower : BattleType
+public record BattleTower : BattleType
 {
+    public static readonly BattleTower Default = new();
+
     public override Battle CreateBattle(IBattleScreen screen, Trainer trainer1, Trainer trainer2)
     {
         throw new NotImplementedException();

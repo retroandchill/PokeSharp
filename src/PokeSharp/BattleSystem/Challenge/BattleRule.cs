@@ -5,7 +5,7 @@ public interface IBattleRule
     void SetRule(Battle battle);
 }
 
-public class SingleBattle : IBattleRule
+public record SingleBattle : IBattleRule
 {
     public void SetRule(Battle battle)
     {
@@ -13,7 +13,7 @@ public class SingleBattle : IBattleRule
     }
 }
 
-public class DoubleBattle : IBattleRule
+public record DoubleBattle : IBattleRule
 {
     public void SetRule(Battle battle)
     {

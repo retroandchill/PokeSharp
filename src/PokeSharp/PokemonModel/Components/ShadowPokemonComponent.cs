@@ -8,6 +8,7 @@ using PokeSharp.Services.Evolution;
 using PokeSharp.Services.Happiness;
 using PokeSharp.Services.Healing;
 using PokeSharp.Services.Moves;
+using PokeSharp.Services.Trading;
 
 namespace PokeSharp.PokemonModel.Components;
 
@@ -236,7 +237,7 @@ public class ShadowPokemonComponentFactory : IPokemonComponentFactory
 public class ShadowPokemonHandler(
     IEnumerable<IHeartGaugeChangeAmountsProvider> providers,
     IEnumerable<IPurifiableEvaluator> purifiableEvaluators
-) : IPokemonFaintHandler, ICanEvolveEvaluator, IRelearnMoveChecker, IHappinessChangeBlocker
+) : IPokemonFaintHandler, ICanEvolveEvaluator, IRelearnMoveChecker, IHappinessChangeBlocker, ICanTradeEvaluator
 {
     private readonly Dictionary<Name, HeartGaugeChangeAmounts> _amounts = providers
         .SelectMany(x => x.GetAmounts())
@@ -248,10 +249,10 @@ public class ShadowPokemonHandler(
     ];
 
     int IPokemonFaintHandler.Priority => 30;
-
     int ICanEvolveEvaluator.Priority => 10;
     int IRelearnMoveChecker.Priority => 20;
     int IHappinessChangeBlocker.Priority => 10;
+    int ICanTradeEvaluator.Priority => 20;
 
     public HeartGaugeChangeAmounts GetAmounts(Name nature)
     {
@@ -281,6 +282,11 @@ public class ShadowPokemonHandler(
     public bool ShouldBlockHappinessChange(Pokemon pokemon)
     {
         return pokemon.ShadowPokemonComponent is { IsShadow: true, HeartStage: >= 4 };
+    }
+
+    public bool CanTrade(Pokemon pokemon)
+    {
+        return !pokemon.IsShadow;
     }
 }
 

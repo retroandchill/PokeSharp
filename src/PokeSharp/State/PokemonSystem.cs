@@ -51,6 +51,7 @@ public enum TextInputStyle : byte
 }
 
 [MessagePackObject(true)]
+[AutoServiceShortcut(Type = AutoServiceShortcutType.GameState)]
 public class PokemonSystem
 {
     public TextSpeed TextSpeed { get; set; } = TextSpeed.Medium;
@@ -80,16 +81,9 @@ public class PokemonSystem
 
 public static class PokemonSystemExtensions
 {
-    private static CachedService<IGameStateAccessor<PokemonSystem>> _cachedService = new();
-
     [RegisterServices]
     public static void RegisterGameState(this IServiceCollection services)
     {
         services.AddGameState<PokemonSystem>();
-    }
-
-    extension(GameGlobal)
-    {
-        public static PokemonSystem PokemonSystem => _cachedService.Instance.Current;
     }
 }

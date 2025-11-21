@@ -20,6 +20,7 @@ public class GameStats
 
     public int DistanceSurfed { get; set; }
 
+    [IgnoreMember]
     public int DistanceMoved => DistanceWalked + DistanceCycled + DistanceSurfed;
 
     public int DistanceSlidOnIce { get; set; }
@@ -88,7 +89,8 @@ public class GameStats
 
     #region Pokémon
 
-    public int CaughtPokemonCount
+    [IgnoreMember]
+    public static int CaughtPokemonCount
     {
         get
         {
@@ -203,15 +205,17 @@ public class GameStats
 
     public int PlaySessions { get; set; }
 
+    [IgnoreMember]
     public float PlayTimePerSession => PlayTime / PlaySessions;
 
     public float TimeLastSaved { get; set; }
 
     public void SetTimeLastSaved() => TimeLastSaved = PlayTime;
 
+    [IgnoreMember]
     public float TimeSinceLastSave => PlayTime - TimeLastSaved;
 
-    public int SaveCount => GameGlobal.GameSystem.SaveCount;
+    public static int SaveCount => GameGlobal.GameSystem.SaveCount;
 
     #endregion
 }

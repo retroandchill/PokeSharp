@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
+using Injectio.Attributes;
 using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
+using PokeSharp.Core.State;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Settings;
@@ -26,6 +29,7 @@ public readonly struct ReadOnlyPockets(ImmutableArray<List<ItemSlot>> pockets) :
 }
 
 [MessagePackObject(true, AllowPrivate = true)]
+[AutoServiceShortcut(Type = AutoServiceShortcutType.GameState)]
 public partial class PokemonBag
 {
     public static PokemonBag Instance { get; } = new();
@@ -217,5 +221,14 @@ public partial class PokemonBag
             return null;
 
         return bagPockets[pocketIndex].Size;
+    }
+}
+
+public static class PokemonBagExtensions
+{
+    [RegisterServices]
+    public static void RegisterPokemonBag(this IServiceCollection services)
+    {
+        services.AddGameState<PokemonBag>();
     }
 }

@@ -1,7 +1,9 @@
-﻿using PokeSharp.Core;
+﻿using Injectio.Attributes;
+using PokeSharp.Core;
 
 namespace PokeSharp.State;
 
+[RegisterSingleton]
 [AutoServiceShortcut]
 public class GameMap
 {

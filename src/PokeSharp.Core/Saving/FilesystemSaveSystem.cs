@@ -18,6 +18,11 @@ public partial class FilesystemSaveSystem(IOptionsMonitor<SaveDataConfig> config
 
     public Stream OpenWrite(string filePath)
     {
+        if (!Directory.Exists(config.CurrentValue.SaveFilePath))
+        {
+            Directory.CreateDirectory(config.CurrentValue.SaveFilePath);
+        }
+
         return File.OpenWrite(Path.Join(config.CurrentValue.SaveFilePath, filePath));
     }
 

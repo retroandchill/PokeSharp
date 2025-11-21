@@ -617,6 +617,8 @@ public partial class Pokemon
     }
 
     [IgnoreMember]
+    [MemberNotNullWhen(true, nameof(ItemId))]
+    [MemberNotNullWhen(true, nameof(Item))]
     public bool HasItem => ItemId.HasValue;
 
     public bool HasSpecificItem(Name checkItem)
@@ -678,7 +680,7 @@ public partial class Pokemon
 
         Moves.Clear();
         var firstMoveIndex = Math.Max(knowableMoves.Count - MaxMoves, 0);
-        for (var i = firstMoveIndex; i <= knowableMoves.Count; i++)
+        for (var i = firstMoveIndex; i < knowableMoves.Count; i++)
         {
             Moves.Add(new PokemonMove(knowableMoves[i]));
         }
@@ -1093,6 +1095,9 @@ public partial class Pokemon
 
     public void CalcStats()
     {
+        if (IV.Count == 0 || EV.Count == 0)
+            return;
+
         var baseStats = BaseStats;
         var thisLevel = Level;
         var thisIV = CalcIV();
@@ -1239,7 +1244,7 @@ public partial class Pokemon
     public Pokemon(SpeciesForm species, int level, PokemonOwner owner, bool withMoves = true, bool recheckForm = true)
     {
         var speciesData = Data.Pbs.Species.Get(species);
-        Species = speciesData.SpeciesId;
+        _species = speciesData.SpeciesId;
         _form = speciesData.BaseForm;
         Level = level;
         if (withMoves)
@@ -1259,8 +1264,8 @@ public partial class Pokemon
         TimeReceived = DateTimeOffset.Now;
 
         PersonalityValue = (uint)(Random.Shared.Next(0x10000) | (Random.Shared.Next(0x10000) << 16));
-        HP = 1;
         MaxHP = 1;
+        HP = 1;
         CalcStats();
 
         if (_form == 0 && recheckForm)
@@ -1276,6 +1281,23 @@ public partial class Pokemon
 
         _components = GameGlobal.PokemonComponentService.CreateComponents(this).ToDictionary(c => c.Id);
     }
+
+    public Pokemon(
+        SpeciesForm species,
+        int level,
+        Trainer? owner = null,
+        bool withMoves = true,
+        bool recheckForm = true
+    )
+        : this(
+            species,
+            level,
+            owner is not null
+                ? PokemonOwner.FromNewTrainer(owner)
+                : PokemonOwner.FromNewTrainer(GameGlobal.PlayerTrainer),
+            withMoves,
+            recheckForm
+        ) { }
 
     #endregion
 }

@@ -2,6 +2,8 @@
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Saving;
+using PokeSharp.Core.State;
+using PokeSharp.State;
 using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
@@ -9,7 +11,12 @@ namespace PokeSharp;
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public partial class GameState([ReadOnly] DataService dataService, [ReadOnly] SaveDataService saveDataService)
+public partial class GameState(
+    [ReadOnly] DataService dataService,
+    [ReadOnly] SaveDataService saveDataService,
+    [ReadOnly] GameTemp gameTemp,
+    [ReadOnly] IGameStateAccessor<GameStats> gameStats
+)
 {
     [CreateSyncVersion]
     public async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
@@ -34,5 +41,16 @@ public partial class GameState([ReadOnly] DataService dataService, [ReadOnly] Sa
         }
 
         // TODO: We need to prompt for the language choice here
+    }
+
+    [CreateSyncVersion]
+    public async ValueTask StartNewAsync(CancellationToken cancellationToken = default)
+    {
+        gameTemp.CommonEventId = 0;
+        gameTemp.BegunNewGame = true;
+        saveDataService.LoadNewGameValues();
+        gameStats.Current.PlaySessions++;
+
+        // TODO: Basic map setup
     }
 }

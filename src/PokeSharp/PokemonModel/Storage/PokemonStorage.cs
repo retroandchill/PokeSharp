@@ -1,12 +1,17 @@
 ﻿using System.Collections.Immutable;
+using Injectio.Attributes;
 using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
+using PokeSharp.Core.State;
 using PokeSharp.Settings;
 using PokeSharp.Trainers;
 
 namespace PokeSharp.PokemonModel.Storage;
 
-[AutoServiceShortcut]
+[Union(0, typeof(PokemonStorage))]
+[Union(1, typeof(RegionalStorage))]
+[AutoServiceShortcut(Type = AutoServiceShortcutType.GameState)]
 public interface IPokemonStorage
 {
     bool[] UnlockedWallpapers { get; }
@@ -338,5 +343,14 @@ public partial class PokemonStorage : IPokemonStorage
         {
             box.Clear();
         }
+    }
+}
+
+public static class PokemonStorageRegistration
+{
+    [RegisterServices]
+    public static void RegisterPokemonStorage(this IServiceCollection services)
+    {
+        services.AddGameState<IPokemonStorage>(_ => new PokemonStorage());
     }
 }

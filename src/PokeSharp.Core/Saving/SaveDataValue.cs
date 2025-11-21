@@ -62,7 +62,7 @@ public abstract class SaveDataValue<T> : ISaveDataValue
 
     protected abstract T Save();
 
-    void ISaveDataValue.LoadNewGameValue() => GetNewGameValue();
+    void ISaveDataValue.LoadNewGameValue() => Load(GetNewGameValue());
 
     protected virtual T GetNewGameValue()
     {

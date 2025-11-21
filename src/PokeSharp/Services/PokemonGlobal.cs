@@ -1,5 +1,7 @@
 ﻿using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.BattleSystem.BugConstest;
+using PokeSharp.BattleSystem.SafariZone;
 using PokeSharp.Core;
 using PokeSharp.Core.State;
 using PokeSharp.Items;
@@ -16,6 +18,10 @@ public class PokemonGlobal
     public bool IsSurfing { get; }
 
     public bool IsDiving { get; }
+
+    public SafariState SafariState { get; } = new();
+
+    public BugContestState BugContestState { get; } = new();
 }
 
 public static class PokemonGlobalExtensions

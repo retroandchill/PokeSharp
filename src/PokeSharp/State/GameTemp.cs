@@ -1,5 +1,6 @@
 ﻿using Injectio.Attributes;
 using PokeSharp.Core;
+using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.State;
 
@@ -57,6 +58,8 @@ public class GameTemp
     public int PlayerNewY { get; set; }
 
     public int PlayerNewDirection { get; set; }
+
+    public FlyDestination? FlyDestination { get; set; }
 
     #endregion
 

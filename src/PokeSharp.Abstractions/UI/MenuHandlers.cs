@@ -22,6 +22,8 @@ public readonly struct HandlerName
         _nameFactory = nameFactory;
     }
 
+    public static HandlerName FromDelegate(Func<Text> nameFactory) => new(nameFactory);
+
     public Text GetName() => _nameFactory?.Invoke() ?? _name;
 
     public static implicit operator HandlerName(Text name) => new(name);
@@ -43,17 +45,21 @@ public interface IMenuOption<in TContext>
     Func<TContext, bool>? Condition { get; }
 }
 
+public interface IRegistrationProvider<THandler>
+{
+    int Priority { get; }
+
+    IEnumerable<(Name Id, THandler Handler)> GetHandlers();
+}
+
 [RegisterSingleton]
-public class MenuHandlers<THandler, TContext>
+public class MenuHandlers<THandler, TContext>(IEnumerable<IRegistrationProvider<THandler>> providers)
     where THandler : IMenuOption<TContext>
 {
-    private readonly Dictionary<Name, THandler> _handlers = new();
-
-    public void Add(Name option, THandler handler) => _handlers.Add(option, handler);
-
-    public void Remove(Name option) => _handlers.Remove(option);
-
-    public void Clear() => _handlers.Clear();
+    private readonly Dictionary<Name, THandler> _handlers = providers
+        .OrderBy(x => x.Priority)
+        .SelectMany(x => x.GetHandlers())
+        .ToDictionary(x => x.Id, x => x.Handler);
 
     public IEnumerable<KeyValuePair<Name, THandler>> Handlers => _handlers;
 

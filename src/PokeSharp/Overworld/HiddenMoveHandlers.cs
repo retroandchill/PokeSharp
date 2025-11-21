@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core;
 using PokeSharp.PokemonModel;
+using PokeSharp.State;
 using PokeSharp.UI;
 
 namespace PokeSharp.Overworld;
@@ -155,5 +156,38 @@ public static class HiddenMoveHandlerExtensions
         {
             return GameGlobal.HiddenMoveHandlers.SelectOptionBeforeUse(moveId, pokemon, onCancel, cancellationToken);
         }
+
+        public ValueTask<bool> UseHiddenMove(Name moveId, CancellationToken cancellationToken = default)
+        {
+            return GameGlobal.HiddenMoveHandlers.UseMove(moveId, pokemon, cancellationToken);
+        }
+    }
+}
+
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
+public sealed class HiddenMoveFly(IPokemonRegionMapSceneFactory factory, GameTemp gameTemp)
+    : ISelectOptionBeforeUseHiddenMoveHandler
+{
+    private static readonly Name Fly = "FLY";
+    public IEnumerable<Name> MoveIds => [Fly];
+
+    async ValueTask<bool> ISelectOptionBeforeUseHiddenMoveHandler.Handle(
+        Name move,
+        Pokemon pokemon,
+        Func<ValueTask> onCancel,
+        CancellationToken cancellationToken
+    )
+    {
+        var scene = factory.CreateScene(null, false);
+        var screen = new PokemonRegionMapScreen(scene);
+        var result = await screen.StartFlyScreen();
+        if (result is not null)
+        {
+            gameTemp.FlyDestination = result;
+            return true;
+        }
+
+        await onCancel();
+        return false;
     }
 }

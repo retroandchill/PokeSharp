@@ -61,6 +61,13 @@ public readonly record struct PartyMenuCommand(Text Name, int? ColorKey = null)
     public static implicit operator PartyMenuCommand(Text text) => new(text);
 }
 
+public delegate ValueTask<bool> PartyMenuCommandEffect(
+    PokemonPartyScreen screen,
+    IReadOnlyList<Pokemon> party,
+    int index,
+    CancellationToken cancellationToken = default
+);
+
 public sealed record PartyMenuOption : IMenuOption<PartyMenuOptionArgs>
 {
     public required HandlerName Name { get; init; }
@@ -69,13 +76,7 @@ public sealed record PartyMenuOption : IMenuOption<PartyMenuOptionArgs>
 
     public Func<PartyMenuOptionArgs, bool>? Condition { get; init; }
 
-    public required Func<
-        PokemonPartyScreen,
-        IReadOnlyList<Pokemon>,
-        int,
-        CancellationToken,
-        ValueTask<bool>
-    > Effect { get; init; }
+    public required PartyMenuCommandEffect Effect { get; init; }
 }
 
 public readonly struct PartyMenuCommandData
@@ -730,6 +731,11 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
 
         return null;
     }
+}
+
+public interface IPokemonPartySceneFactory
+{
+    IPokemonPartyScene Create();
 }
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]

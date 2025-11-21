@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using MessagePack;
 using PokeSharp.Core.Serialization.Json;
 using PokeSharp.Core.Serialization.MessagePack;
@@ -121,6 +122,11 @@ public readonly struct Text : IEquatable<Text>
     public static Text Localized(string ns, string key, string value)
     {
         return new Text(ITextProvider.Instance.FromLocalized(ns, key, value));
+    }
+
+    public static Text Format([StringSyntax(StringSyntaxAttribute.CompositeFormat)] Text format, params object[] args)
+    {
+        return new Text(string.Format(format, args));
     }
 
     /// <inheritdoc />

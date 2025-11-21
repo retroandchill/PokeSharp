@@ -58,7 +58,7 @@ public static class PrintTools
             {
                 Console.WriteLine($"Components: {string.Join(", ", components.Select(x => x.Id))}");
             }
-            
+
             foreach (var move in pokemon.Moves)
             {
                 Console.WriteLine($"- {move.Name}");

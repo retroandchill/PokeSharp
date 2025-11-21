@@ -6,7 +6,35 @@ using Retro.ReadOnlyParams.Annotations;
 
 namespace PokeSharp.UI;
 
-public class PokemonPauseMenu([ReadOnly] IPokemonPauseMenuScene scene)
+public sealed record PauseMenuOption : IMenuOption<NullContext>
+{
+    public required HandlerName Name { get; init; }
+
+    public required int? Order { get; init; }
+
+    public Func<NullContext, bool>? Condition { get; init; }
+
+    public required Func<IPokemonPauseMenuScene, CancellationToken, ValueTask<bool>> Effect { get; init; }
+}
+
+public interface IPokemonPauseMenuScene
+{
+    void StartScene();
+
+    void ShowInfo(Text text);
+
+    void ShowMenu();
+
+    void HideMenu();
+
+    ValueTask<int?> ShowCommands(IReadOnlyList<Text> handlers, CancellationToken cancellationToken = default);
+
+    void EndScene();
+
+    void Refresh();
+}
+
+public class PokemonPauseScreen([ReadOnly] IPokemonPauseMenuScene scene) : IScreen
 {
     public void ShowMenu()
     {
@@ -69,7 +97,7 @@ public interface IPauseSceneInfoProvider
 {
     int Order { get; }
 
-    bool ShowInfo(PokemonPauseMenu pauseMenu);
+    bool ShowInfo(PokemonPauseScreen pauseScreen);
 }
 
 [RegisterSingleton]
@@ -78,12 +106,12 @@ public sealed class PauseMenuService(IEnumerable<IPauseSceneInfoProvider> provid
 {
     private readonly ImmutableArray<IPauseSceneInfoProvider> _providers = [.. providers.OrderBy(x => x.Order)];
 
-    public void ShowInfo(PokemonPauseMenu pauseMenu)
+    public void ShowInfo(PokemonPauseScreen pauseScreen)
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var provider in _providers)
         {
-            if (provider.ShowInfo(pauseMenu))
+            if (provider.ShowInfo(pauseScreen))
             {
                 return;
             }

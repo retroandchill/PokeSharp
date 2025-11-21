@@ -25,4 +25,79 @@ public static class CollectionExtensions
             }
         }
     }
+
+    public static IEnumerable<IReadOnlyList<T>> EachCombination<T>(this IReadOnlyList<T> collection, int length)
+    {
+        if (collection.Count < length || collection.Count == 0)
+            yield break;
+
+        if (collection.Count == length)
+        {
+            yield return collection;
+            yield break;
+        }
+
+        if (length == 1)
+        {
+            foreach (var item in collection)
+            {
+                yield return [item];
+            }
+            yield break;
+        }
+
+        var currentCombination = new int[length];
+        var toYield = new T[length];
+        for (var i = 0; i < length; i++)
+        {
+            currentCombination[i] = i;
+        }
+
+        while (true)
+        {
+            for (var i = 0; i < length; i++)
+            {
+                toYield[i] = collection[currentCombination[i]];
+            }
+            yield return toYield;
+            if (!NextCombination(currentCombination, collection.Count))
+            {
+                yield break;
+            }
+        }
+    }
+
+    private static bool NextCombination(int[] combination, int length)
+    {
+        var i = combination.Length - 1;
+        while (true)
+        {
+            var valid = true;
+            for (var j = i; j < combination.Length; j++)
+            {
+                if (j == i)
+                {
+                    combination[j]++;
+                }
+                else
+                {
+                    combination[j] = combination[i] + (j - i);
+                }
+
+                if (combination[j] < length)
+                    continue;
+
+                valid = false;
+                break;
+            }
+
+            if (valid)
+                return true;
+            i--;
+            if (i < 0)
+                break;
+        }
+
+        return false;
+    }
 }

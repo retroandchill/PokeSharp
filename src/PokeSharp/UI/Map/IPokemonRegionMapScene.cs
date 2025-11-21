@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Core;
 using PokeSharp.Data.Pbs;
 
-namespace PokeSharp.UI;
+namespace PokeSharp.UI.Map;
 
 public interface IPokemonRegionMapScene
 {
@@ -30,28 +30,4 @@ public interface IPokemonRegionMapScene
     void RefreshFlyScreen();
 
     ValueTask<FlyDestination?> MapScene();
-}
-
-public class PokemonRegionMapScreen(IPokemonRegionMapScene scene)
-{
-    public async ValueTask<FlyDestination?> StartFlyScreen()
-    {
-        scene.StartScene(false, true);
-        var result = await scene.MapScene();
-        scene.EndScene();
-        return result;
-    }
-
-    public async ValueTask<FlyDestination?> StartScreen()
-    {
-        scene.StartScene();
-        var result = await scene.MapScene();
-        scene.EndScene();
-        return result;
-    }
-}
-
-public interface IPokemonRegionMapSceneFactory
-{
-    IPokemonRegionMapScene CreateScene(int? region = null, bool wallMap = true);
 }

@@ -1,97 +1,18 @@
-﻿using System.Collections.Immutable;
-using Injectio.Attributes;
+﻿using Injectio.Attributes;
 using PokeSharp.Audio;
 using PokeSharp.Core;
-using PokeSharp.Core.Engine;
 using PokeSharp.Core.State;
 using PokeSharp.Items;
 using PokeSharp.Overworld;
 using PokeSharp.Services;
 using PokeSharp.State;
 using PokeSharp.Trainers;
-using Retro.ReadOnlyParams.Annotations;
+using PokeSharp.UI.Party;
 
-namespace PokeSharp.UI;
+namespace PokeSharp.UI.Pause;
 
-public sealed record PauseMenuOption : IMenuOption<NullContext>
-{
-    public required HandlerName Name { get; init; }
-
-    public required int? Order { get; init; }
-
-    public Func<NullContext, bool>? Condition { get; init; }
-
-    public required Func<IPokemonPauseMenuScene, CancellationToken, ValueTask<bool>> Effect { get; init; }
-}
-
-public interface IPokemonPauseMenuScene
-{
-    void StartScene();
-
-    void ShowInfo(Text text);
-
-    void ShowMenu();
-
-    void HideMenu();
-
-    ValueTask<int?> ShowCommands(IReadOnlyList<Text> handlers, CancellationToken cancellationToken = default);
-
-    void EndScene();
-
-    void Refresh();
-}
-
-public class PokemonPauseScreen([ReadOnly] IPokemonPauseMenuScene scene) : IScreen
-{
-    public void ShowMenu()
-    {
-        scene.Refresh();
-        scene.ShowMenu();
-    }
-
-    private void ShowInfo()
-    {
-        GameGlobal.PauseMenuService.ShowInfo(this);
-    }
-
-    public async ValueTask StartPokemonMenu(CancellationToken cancellationToken = default)
-    {
-        scene.StartScene();
-        ShowInfo();
-        var commandList = new List<Text>();
-        var commands = new List<PauseMenuOption>();
-        foreach (var (_, handler, name) in GameGlobal.PauseMenuHandlers.GetAllAvailable())
-        {
-            commandList.Add(name);
-            commands.Add(handler);
-        }
-
-        var endScene = false;
-        while (true)
-        {
-            var choice = await scene.ShowCommands(commandList, cancellationToken);
-            if (!choice.HasValue)
-            {
-                GameGlobal.AudioPlayService.PlayCloseMenuSE();
-                endScene = true;
-                break;
-            }
-
-            if (await commands[choice.Value].Effect(scene, cancellationToken))
-            {
-                break;
-            }
-        }
-
-        if (endScene)
-        {
-            scene.EndScene();
-        }
-    }
-}
-
+[RegisterSingleton]
 public sealed class DefaultPauseMenuCommands(
-    IEngineInteropService engineInteropService,
     IAudioPlayService audioPlayService,
     IGameStateAccessor<PlayerTrainer> playerTrainer,
     IPokemonPartySceneFactory partySceneFactory,
@@ -227,41 +148,5 @@ public sealed class DefaultPauseMenuCommands(
                 Effect = (menu, ct) => throw new NotImplementedException(),
             }
         );
-    }
-}
-
-public static class PokemonPauseMenuExtensions
-{
-    private static CachedService<MenuHandlers<PauseMenuOption, NullContext>> _cachedService;
-
-    extension(GameGlobal)
-    {
-        public static MenuHandlers<PauseMenuOption, NullContext> PauseMenuHandlers => _cachedService.Instance;
-    }
-}
-
-public interface IPauseSceneInfoProvider
-{
-    int Order { get; }
-
-    bool ShowInfo(PokemonPauseScreen pauseScreen);
-}
-
-[RegisterSingleton]
-[AutoServiceShortcut]
-public sealed class PauseMenuService(IEnumerable<IPauseSceneInfoProvider> providers)
-{
-    private readonly ImmutableArray<IPauseSceneInfoProvider> _providers = [.. providers.OrderBy(x => x.Order)];
-
-    public void ShowInfo(PokemonPauseScreen pauseScreen)
-    {
-        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-        foreach (var provider in _providers)
-        {
-            if (provider.ShowInfo(pauseScreen))
-            {
-                return;
-            }
-        }
     }
 }

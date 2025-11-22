@@ -1,0 +1,40 @@
+# Unreal Engine generated files and folders
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vscode/
+.idea/
+
+# Editor-specific files
+*.VC.db
+*.VC.opendb
+*.sdf
+*.opensdf
+*.suo
+*.user
+
+# Object files and libraries
+*.o
+*.obj
+*.lib
+*.a
+*.exp
+*.ilk
+*.pdb
+*.gch
+*.pch
+
+# Executables and dynamic libraries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Mac-specific files
+.DS_Store
+
+# Windows-specific files
+Thumbs.db

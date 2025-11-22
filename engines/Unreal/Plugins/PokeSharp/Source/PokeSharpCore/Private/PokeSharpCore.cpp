@@ -4,14 +4,12 @@
 
 void FPokeSharpCoreModule::StartupModule()
 {
-    
 }
 
 void FPokeSharpCoreModule::ShutdownModule()
 {
-    
 }
 
 #undef LOCTEXT_NAMESPACE
-    
+
 IMPLEMENT_MODULE(FPokeSharpCoreModule, PokeSharpCore)

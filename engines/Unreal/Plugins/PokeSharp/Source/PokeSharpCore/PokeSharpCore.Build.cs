@@ -2,25 +2,13 @@
 
 public class PokeSharpCore : ModuleRules
 {
-    public PokeSharpCore(ReadOnlyTargetRules Target) : base(Target)
+    public PokeSharpCore(ReadOnlyTargetRules Target)
+        : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "Core",
-            }
-        );
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "UnrealSharpBinds" });
 
-        PrivateDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "CoreUObject",
-                "Engine",
-                "Slate",
-                "SlateCore"
-            }
-        );
+        PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "Slate", "SlateCore" });
     }
 }

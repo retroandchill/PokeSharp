@@ -4,7 +4,7 @@
 
 class FPokeSharpCoreModule : public IModuleInterface
 {
-public:
+  public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
 };

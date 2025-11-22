@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <Import Project="..\..\..\UnrealSharp\UnrealSharp.Shared.props" />
+    <ItemGroup Condition="'$(PokeSharpSlnDir)' != ''">
+        <ProjectReference Include="$(PokeSharpCoreProj)" />
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="UnrealSharp.Binds">
+            <HintPath>$(UnrealSharpPluginDir)Binaries\Managed\$(TargetFramework)\UnrealSharp.Binds.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+</Project>

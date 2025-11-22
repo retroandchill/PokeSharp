@@ -1,4 +1,4 @@
-﻿#if POKESHARP_GENERATOR
+﻿#if POKESHARP_CORE_GENERATOR
 using RhoMicro.CodeAnalysis;
 #endif
 
@@ -13,7 +13,7 @@ internal enum AutoServiceShortcutType : byte
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-#if POKESHARP_GENERATOR
+#if POKESHARP_CORE_GENERATOR
 [IncludeFile]
 #endif
 internal class AutoServiceShortcutAttribute : Attribute

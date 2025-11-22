@@ -36,16 +36,20 @@ public readonly struct HandlerName
 /// </summary>
 public readonly struct NullContext;
 
-public interface IMenuOption<in TContext>
+public interface IMenuOption
 {
     HandlerName Name { get; }
 
     int? Order { get; }
+}
 
+public interface IMenuOption<in TContext> : IMenuOption
+{
     Func<TContext, bool>? Condition { get; }
 }
 
-public interface IRegistrationProvider<THandler>
+public interface IMenuOptionProvider<THandler>
+    where THandler : IMenuOption
 {
     int Priority { get; }
 
@@ -53,7 +57,7 @@ public interface IRegistrationProvider<THandler>
 }
 
 [RegisterSingleton]
-public class MenuHandlers<THandler, TContext>(IEnumerable<IRegistrationProvider<THandler>> providers)
+public class MenuHandlers<THandler, TContext>(IEnumerable<IMenuOptionProvider<THandler>> providers)
     where THandler : IMenuOption<TContext>
 {
     private readonly Dictionary<Name, THandler> _handlers = providers

@@ -1,0 +1,26 @@
+#nullable enable
+using PokeSharp.Core;
+using PokeSharp.UI;
+
+namespace {{Namespace}};
+
+partial class {{ClassName}} : IMenuOptionProvider<{{DataType}}> 
+{
+    int IMenuOptionProvider<{{DataType}}>.Priority => {{Priority}};
+
+    {{#Registrations}}
+    private static readonly Name {{Name}}_Id = new("{{Id}}");    
+    {{/Registrations}}
+
+    IEnumerable<(Name Id, {{DataType}} Handler)> IMenuOptionProvider<{{DataType}}>.GetHandlers()
+    {
+        {{#HasRegistrations}}
+        {{#Registrations}}
+        yield return ({{Name}}_Id, {{Name}});    
+        {{/Registrations}}
+        {{/HasRegistrations}}
+        {{^HasRegistrations}}
+        return [];    
+        {{/HasRegistrations}}
+    }
+}

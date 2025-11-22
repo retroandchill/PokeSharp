@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Core;
 using Retro.SourceGeneratorUtilities.Utilities.Attributes;
 
-namespace PokeSharp.SourceGenerator.Model;
+namespace PokeSharp.Core.SourceGenerator.Model;
 
 [AttributeInfoType<AutoServiceShortcutAttribute>]
 internal readonly record struct AutoServiceShortcutInfo

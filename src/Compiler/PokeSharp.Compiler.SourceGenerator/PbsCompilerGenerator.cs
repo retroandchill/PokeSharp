@@ -21,7 +21,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0001",
         "Invalid PBS model type",
         "{0} must be either a class or a struct, and cannot be marked abstract",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -30,7 +30,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0002",
         "Missing section name property",
         "{0} does not have a property marked with [PbsSectionName], exactly one property must be marked with this attribute",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -39,7 +39,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0003",
         "Cannot use [PbsKeyName] on section name property",
         "{0} cannot be markeed with [PbsKeyName] because it is also marked with [PbsSectionName]",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -48,7 +48,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0004",
         "Property type cannot be deserialized",
         "Type {0} cannot be deserialized",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -57,7 +57,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0005",
         "Property type specified not valid",
         "Type {0} has been specified as {1}, which is not valid for type {2}",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -66,7 +66,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0006",
         "Cannot deduce enumerable type for property",
         "Property {0} has been specified as enumerable, but no enum type was specified, and it is not of type enum",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -75,7 +75,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0007",
         "Type requires exactly one constructor and one Deconstruct method with the same parameters",
         "Type {0} requires exactly one constructor and one Deconstruct method with the same parameters",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -84,7 +84,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0008",
         "Type requires exactly one section name property",
         "Specified property {0} as [PbsSectionName], but there are multiple properties marked with this attribute",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -93,7 +93,7 @@ public class PbsCompilerGenerator : IIncrementalGenerator
         "PBS0009",
         "An unknown error occurred during source generation",
         "An unknown error occurred during source generation: {0}",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );

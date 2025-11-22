@@ -1,4 +1,4 @@
-﻿#if POKESHARP_GENERATOR
+﻿#if POKESHARP_CORE_GENERATOR
 using RhoMicro.CodeAnalysis;
 #endif
 
@@ -6,7 +6,7 @@ using RhoMicro.CodeAnalysis;
 namespace PokeSharp.Core.Data;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-#if POKESHARP_GENERATOR
+#if POKESHARP_CORE_GENERATOR
 [IncludeFile]
 #endif
 internal class GameDataEntityAttribute : Attribute

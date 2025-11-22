@@ -1,7 +1,7 @@
 ﻿using PokeSharp.Core.Data;
 using Retro.SourceGeneratorUtilities.Utilities.Attributes;
 
-namespace PokeSharp.SourceGenerator.Model;
+namespace PokeSharp.Core.SourceGenerator.Model;
 
 [AttributeInfoType<GameDataEntityAttribute>]
 public readonly record struct GameDataEntityInfo

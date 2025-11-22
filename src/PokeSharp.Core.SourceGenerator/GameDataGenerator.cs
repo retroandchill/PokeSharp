@@ -3,11 +3,11 @@ using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PokeSharp.Core.Data;
-using PokeSharp.SourceGenerator.Model;
-using PokeSharp.SourceGenerator.Properties;
+using PokeSharp.Core.SourceGenerator.Model;
+using PokeSharp.Core.SourceGenerator.Properties;
 using Retro.SourceGeneratorUtilities.Utilities.Members;
 
-namespace PokeSharp.SourceGenerator;
+namespace PokeSharp.Core.SourceGenerator;
 
 [Generator]
 public class GameDataGenerator : IIncrementalGenerator
@@ -16,7 +16,7 @@ public class GameDataGenerator : IIncrementalGenerator
         "PSG0001",
         "No Id property found",
         "No Id property found on {0}",
-        "PokeSharp.SourceGenerator",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );

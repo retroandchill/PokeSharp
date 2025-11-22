@@ -63,8 +63,18 @@
             PublicKeyToken=b77a5c561934e089
         </value>
     </resheader>
-    <data name="MenuOptionRegistrationTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>..\Templates\MenuOptionRegistration.mustache;System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+    <data name="GameDataEntityTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Templates\GameDataEntity.mustache;System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </data>
+    <data name="AutoServiceShortcutTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Templates\AutoServiceShortcut.mustache;System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </data>
+    <data name="GameDataRegistrationTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Templates\GameDataRegistration.mustache;System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
             PublicKeyToken=b77a5c561934e089
         </value>
     </data>

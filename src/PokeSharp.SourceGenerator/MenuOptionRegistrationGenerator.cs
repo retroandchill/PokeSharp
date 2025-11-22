@@ -2,22 +2,22 @@
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PokeSharp.Core.Data;
 using PokeSharp.SourceGenerator.Model;
 using PokeSharp.SourceGenerator.Properties;
+using PokeSharp.UI;
 using Retro.SourceGeneratorUtilities.Utilities.Attributes;
 using Retro.SourceGeneratorUtilities.Utilities.Types;
 
 namespace PokeSharp.SourceGenerator;
 
 [Generator]
-public class GameDataRegistrationGenerator : IIncrementalGenerator
+public class MenuOptionRegistrationGenerator : IIncrementalGenerator
 {
     public static readonly DiagnosticDescriptor BadInterfacePropertyDiagnostic = new(
-        "PSG1001",
-        "Registration must be static and read-only",
-        "{0} be marked static and read-only",
-        "PokeSharp.SourceGenerator",
+        "PSG2001",
+        "Registration must be read-only",
+        "{0} be marked read-only",
+        "PokeSharp.Core.SourceGenerator",
         DiagnosticSeverity.Error,
         true
     );
@@ -26,7 +26,7 @@ public class GameDataRegistrationGenerator : IIncrementalGenerator
     {
         var dataTypes = context
             .SyntaxProvider.ForAttributeWithMetadataName(
-                typeof(GameDataRegistrationAttribute<>).FullName!,
+                typeof(MenuOptionRegistrationAttribute<>).FullName!,
                 (n, _) => n is TypeDeclarationSyntax,
                 (ctx, _) =>
                 {
@@ -41,16 +41,17 @@ public class GameDataRegistrationGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, INamedTypeSymbol type)
     {
-        foreach (var (targetType, priority) in type.GetGameDataRegistrationInfos())
+        foreach (var (targetType, priority) in type.GetMenuOptionRegistrationInfos())
         {
             var fields = type.GetMembers()
                 .OfType<IFieldSymbol>()
-                .Where(f => f.HasAttribute<GameDataEntityRegistrationAttribute>() && f.Type.IsAssignableTo(targetType))
+                .Where(f => f.HasAttribute<MenuOptionAttribute>() && f.Type.IsAssignableTo(targetType))
+                .Select(f => (Field: f, Attribute: f.GetMenuOptionInfo()))
                 .ToArray();
 
-            foreach (var field in fields)
+            foreach (var (field, _) in fields)
             {
-                if (!field.IsReadOnly || !field.IsStatic)
+                if (!field.IsReadOnly)
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(BadInterfacePropertyDiagnostic, field.Locations[0], field.Name)
@@ -63,9 +64,16 @@ public class GameDataRegistrationGenerator : IIncrementalGenerator
                 Namespace = type.ContainingNamespace.ToDisplayString(),
                 Priority = priority,
                 ClassName = type.Name,
-                EntityType = targetType.ToDisplayString(),
+                DataType = targetType.ToDisplayString(),
                 HasRegistrations = fields.Length > 0,
-                Registrations = fields.Select(x => new { x.Name, Type = x.Type.ToDisplayString() }).ToImmutableArray(),
+                Registrations = fields
+                    .Select(x => new
+                    {
+                        x.Field.Name,
+                        Id = x.Attribute.Name ?? x.Field.Name,
+                        Type = x.Field.Type.ToDisplayString(),
+                    })
+                    .ToImmutableArray(),
             };
 
             var handlebars = Handlebars.Create();
@@ -73,7 +81,7 @@ public class GameDataRegistrationGenerator : IIncrementalGenerator
 
             context.AddSource(
                 $"{templateParameters.ClassName}.{targetType.Name}.g.cs",
-                handlebars.Compile(SourceTemplates.GameDataRegistrationTemplate)(templateParameters)
+                handlebars.Compile(SourceTemplates.MenuOptionRegistrationTemplate)(templateParameters)
             );
         }
     }

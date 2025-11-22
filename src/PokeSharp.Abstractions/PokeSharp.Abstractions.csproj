@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
     <ProjectReference
-      Include="..\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj"
+      Include="..\PokeSharp.Core.SourceGenerator\PokeSharp.Core.SourceGenerator.csproj"
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />

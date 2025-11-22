@@ -1,13 +1,7 @@
-﻿using PokeSharp.Core;
+﻿using Injectio.Attributes;
 
 namespace PokeSharp.UI.Party;
 
-public class DefaultPartyMenuOptions : IMenuOptionProvider<PartyMenuOption>
-{
-    public int Priority => 10;
-
-    public IEnumerable<(Name Id, PartyMenuOption Handler)> GetHandlers()
-    {
-        return [];
-    }
-}
+[RegisterSingleton<IMenuOptionProvider<PartyMenuOption>>]
+[MenuOptionRegistration<PartyMenuOption>]
+public sealed partial class DefaultPartyMenuOptions;

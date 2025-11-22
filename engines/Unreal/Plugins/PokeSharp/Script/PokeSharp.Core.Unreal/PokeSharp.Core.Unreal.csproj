@@ -13,4 +13,8 @@
             <HintPath>$(UnrealSharpPluginDir)Binaries\Managed\$(TargetFramework)\UnrealSharp.Binds.dll</HintPath>
         </Reference>
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Injectio" />
+        <PackageReference Include="Microsoft.Extensions.Logging" />
+    </ItemGroup>
 </Project>

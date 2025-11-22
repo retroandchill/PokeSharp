@@ -25,5 +25,6 @@ internal static class LoggerExtensions
     public static void RegisterUnrealLogging(this IServiceCollection services)
     {
         services.AddLogging(logging => logging.AddProvider(new UnrealLoggerProvider()));
+        services.AddOptions();
     }
 }

@@ -7,7 +7,9 @@ public class PokeSharpCore : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "UnrealSharpBinds" });
+        PublicDependencyModuleNames.AddRange(
+            new string[] { "Core", "UnrealSharpBinds", "UnrealSharpCore", "DeveloperSettings" }
+        );
 
         PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "Slate", "SlateCore" });
     }

@@ -1,0 +1,4 @@
+﻿obj/
+launchSettings.json
+*.generated.cs
+Directory.Build.props

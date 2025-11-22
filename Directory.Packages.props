@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable central package management, https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Injectio" Version="5.1.0" />
+    <PackageVersion Include="MessagePack" Version="3.1.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
+    <PackageVersion Include="Retro.ReadOnlyParams" Version="1.0.1" />
+    <PackageVersion Include="Semver" Version="3.0.0" />
+    <PackageVersion Include="Zomp.SyncMethodGenerator" Version="1.6.17" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="System.Linq.Async" Version="7.0.0" />
+    <PackageVersion Include="ZLinq" Version="1.5.4" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
+    <PackageVersion Include="Handlebars.Net" Version="2.1.6" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageVersion Include="PolySharp" Version="1.15.0" />
+    <PackageVersion Include="Retro.SourceGeneratorUtilities" Version="0.1.5" />
+    <PackageVersion Include="RhoMicro.CodeAnalysis.UtilityGenerators" Version="22.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
+    <PackageVersion Include="RhoMicro.CodeAnalysis.UtilityGenerators" Version="22.0.3" />
+  </ItemGroup>
+</Project>

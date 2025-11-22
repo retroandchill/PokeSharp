@@ -11,18 +11,18 @@
     <RootNamespace>PokeSharp.Core.SourceGenerator</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Handlebars.Net" Version="2.1.6" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+    <PackageReference Include="Handlebars.Net" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    <PackageReference Include="PolySharp" Version="1.15.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="PolySharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Retro.SourceGeneratorUtilities" Version="0.1.4" />
-    <PackageReference Include="RhoMicro.CodeAnalysis.UtilityGenerators" Version="22.0.3">
+    <PackageReference Include="Retro.SourceGeneratorUtilities"/>
+    <PackageReference Include="RhoMicro.CodeAnalysis.UtilityGenerators">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

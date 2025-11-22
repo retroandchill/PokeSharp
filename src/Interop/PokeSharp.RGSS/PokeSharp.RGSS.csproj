@@ -6,8 +6,8 @@
     <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Injectio" Version="5.1.0" />
-    <PackageReference Include="Zomp.SyncMethodGenerator" Version="1.6.17">
+    <PackageReference Include="Injectio"/>
+    <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

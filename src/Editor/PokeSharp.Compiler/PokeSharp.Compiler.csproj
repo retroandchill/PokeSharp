@@ -20,8 +20,8 @@
     <ProjectReference Include="$(PokeSharpProj)" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Riok.Mapperly" Version="4.3.0" />
-    <PackageReference Include="Zomp.SyncMethodGenerator" Version="1.6.17">
+    <PackageReference Include="Riok.Mapperly"/>
+    <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

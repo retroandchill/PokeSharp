@@ -12,14 +12,14 @@
     <DocumentationFile></DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Injectio" Version="5.1.0" />
-    <PackageReference Include="MessagePack" Version="3.1.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
-    <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.1" />
-    <PackageReference Include="Semver" Version="3.0.0" />
-    <PackageReference Include="Zomp.SyncMethodGenerator" Version="1.6.17">
+    <PackageReference Include="Injectio"/>
+    <PackageReference Include="MessagePack"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Options"/>
+    <PackageReference Include="Retro.ReadOnlyParams"/>
+    <PackageReference Include="Semver"/>
+    <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

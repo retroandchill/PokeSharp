@@ -12,7 +12,7 @@
     <ProjectReference Include="$(PokeSharpRgssProj)" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="PBS\**\*" CopyToOutputDirectory="PreserveNewest" />

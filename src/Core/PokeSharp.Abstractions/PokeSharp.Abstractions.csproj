@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>14</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>PokeSharp</RootNamespace>
+    <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
+    <ProjectReference Include="$(PokeSharpCoreProj)" />
     <ProjectReference
-      Include="..\PokeSharp.Core.SourceGenerator\PokeSharp.Core.SourceGenerator.csproj"
+      Include="$(PokeSharpCoreGeneratorProj)"
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
     <ProjectReference
-      Include="..\PokeSharp.SourceGenerator\PokeSharp.CodeFixes.csproj"
+      Include="$(PokeSharpCodeFixesProj)"
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />

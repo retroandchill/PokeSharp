@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;

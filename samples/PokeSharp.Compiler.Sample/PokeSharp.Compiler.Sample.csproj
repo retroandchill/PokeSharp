@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>14</LangVersion>
+    <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Compiler\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj" />
-    <ProjectReference Include="..\..\src\Compiler\PokeSharp.Compiler\PokeSharp.Compiler.csproj" />
-    <ProjectReference Include="..\..\src\PokeSharp.RGSS\PokeSharp.RGSS.csproj" />
+    <ProjectReference Include="$(PokeSharpCompilerCoreProj)" />
+    <ProjectReference Include="$(PokeSharpCompilerProj)" />
+    <ProjectReference Include="$(PokeSharpRgssProj)" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />

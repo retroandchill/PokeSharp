@@ -1,24 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>14</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj" />
-    <ProjectReference Include="..\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj" />
+    <ProjectReference Include="$(PokeSharpCompilerCoreProj)" />
     <ProjectReference
-      Include="..\PokeSharp.Compiler.SourceGenerator\PokeSharp.Compiler.SourceGenerator.csproj"
+      Include="$(PokeSharpCompilerGeneratorProj)"
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
     <ProjectReference
-      Include="..\PokeSharp.SourceGenerator\PokeSharp.CodeFixes.csproj"
+      Include="$(PokeSharpCodeFixesProj)"
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
-    <ProjectReference Include="..\..\PokeSharp\PokeSharp.csproj" />
+    <ProjectReference Include="$(PokeSharpProj)" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Riok.Mapperly" Version="4.3.0" />

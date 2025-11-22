@@ -1,6 +1,5 @@
 ﻿using PokeSharp.Audio;
 using PokeSharp.Core;
-using PokeSharp.Core.Engine;
 using Retro.ReadOnlyParams.Annotations;
 
 namespace PokeSharp.UI.Pause;
@@ -31,7 +30,7 @@ public class PokemonPauseScreen([ReadOnly] IPokemonPauseMenuScene scene) : IScre
         }
 
         var endScene = false;
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             var choice = await scene.ShowCommands(commandList, cancellationToken);
             if (!choice.HasValue)

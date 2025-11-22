@@ -6,17 +6,15 @@ public class PokemonRegionMapScreen(IPokemonRegionMapScene scene)
 {
     public async ValueTask<FlyDestination?> StartFlyScreen()
     {
-        scene.StartScene(false, true);
+        using var scope = scene.StartScene(false, true);
         var result = await scene.MapScene();
-        scene.EndScene();
         return result;
     }
 
     public async ValueTask<FlyDestination?> StartScreen()
     {
-        scene.StartScene();
+        using var scope = scene.StartScene();
         var result = await scene.MapScene();
-        scene.EndScene();
         return result;
     }
 }

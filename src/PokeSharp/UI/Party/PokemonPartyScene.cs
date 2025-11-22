@@ -26,73 +26,20 @@ public enum PokemonSelectionMode : sbyte
     Switching = 1,
 }
 
-public readonly struct PartyScreenSelection(
-    int index,
-    PokemonSelectionMode selectionMode = PokemonSelectionMode.Selection
-)
-{
-    public int? Index => Selection != PokemonSelectionMode.Canceled ? index : null;
-
-    public PokemonSelectionMode Selection { get; } = selectionMode;
-
-    public PartyScreenSelection()
-        : this(-1, PokemonSelectionMode.Canceled) { }
-
-    public static implicit operator int?(PartyScreenSelection selection) => selection.Index;
-
-    public static implicit operator PartyScreenSelection(int index) => new(index);
-}
-
 public readonly record struct PartyMenuCommand(Text Name, int? ColorKey = null)
 {
     public static implicit operator PartyMenuCommand(Text text) => new(text);
 }
 
-public readonly struct PartyMenuCommandData
+public interface IPokemonPartyScene : IScene
 {
-    private readonly PartyMenuOption? _option;
-    private readonly int _moveIndex;
-
-    public PartyMenuCommandData(PartyMenuOption option)
-    {
-        _option = option;
-        _moveIndex = -1;
-    }
-
-    public PartyMenuCommandData(int moveIndex)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(moveIndex);
-        _option = null;
-        _moveIndex = moveIndex;
-    }
-
-    public static implicit operator PartyMenuCommandData(PartyMenuOption option) => new(option);
-
-    public static implicit operator PartyMenuCommandData(int moveIndex) => new(moveIndex);
-
-    public void Match(Action<PartyMenuOption> onOption, Action<int> onMove)
-    {
-        if (_option is not null)
-            onOption(_option);
-        else
-            onMove(_moveIndex);
-    }
-
-    public T Match<T>(Func<PartyMenuOption, T> onOption, Func<int, T> onMove) =>
-        _option is not null ? onOption(_option) : onMove(_moveIndex);
-}
-
-public interface IPokemonPartyScene
-{
-    void StartScene(
+    SceneScope StartScene(
         List<Pokemon> party,
         Text startHelpText,
         IReadOnlyList<Text>? annotations = null,
         bool multiSelect = false,
         bool canAccessStorage = false
     );
-
-    void EndScene();
 
     ValueTask Display(Text text, CancellationToken cancellationToken = default);
 
@@ -151,9 +98,4 @@ public interface IPokemonPartyScene
     void Refresh();
 
     void Refresh(int index);
-}
-
-public interface IPokemonPartySceneFactory
-{
-    IPokemonPartyScene Create();
 }

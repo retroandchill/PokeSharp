@@ -2,7 +2,7 @@
 
 namespace PokeSharp.UI.Pause;
 
-public interface IPokemonPauseMenuScene
+public interface IPokemonPauseMenuScene : IScene
 {
     void StartScene();
 
@@ -13,8 +13,6 @@ public interface IPokemonPauseMenuScene
     void HideMenu();
 
     ValueTask<int?> ShowCommands(IReadOnlyList<Text> handlers, CancellationToken cancellationToken = default);
-
-    void EndScene();
 
     void Refresh();
 }

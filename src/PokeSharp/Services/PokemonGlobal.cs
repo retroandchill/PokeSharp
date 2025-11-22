@@ -22,6 +22,8 @@ public class PokemonGlobal
     public SafariState SafariState { get; } = new();
 
     public BugContestState BugContestState { get; } = new();
+
+    public PCItemStorage PCItemStorage { get; } = new();
 }
 
 public static class PokemonGlobalExtensions

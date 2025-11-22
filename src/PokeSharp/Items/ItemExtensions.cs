@@ -1,6 +1,8 @@
 ﻿using PokeSharp.Core;
+using PokeSharp.Data.Pbs;
 using PokeSharp.PokemonModel;
 using PokeSharp.UI;
+using PokeSharp.UI.Bag;
 
 namespace PokeSharp.Items;
 
@@ -28,6 +30,24 @@ public static class ItemExtensions
         Name item,
         IScreen screen,
         int pokemonId = 0,
+        CancellationToken cancellationToken = default
+    )
+    {
+        throw new NotImplementedException();
+    }
+
+    extension(Item)
+    {
+        public static bool CanRegister(Name item)
+        {
+            return GameGlobal.ItemHandlers.HasUseInFieldHandler(item);
+        }
+    }
+
+    public static async ValueTask<UseFromBagResult> UseItem(
+        this PokemonBag bag,
+        Name item,
+        IPokemonBagScene? scene = null,
         CancellationToken cancellationToken = default
     )
     {

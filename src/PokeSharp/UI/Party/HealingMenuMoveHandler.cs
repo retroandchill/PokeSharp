@@ -58,7 +58,7 @@ public sealed class HealingMenuMoveHandler : IPartyMenuMoveHandler
             await screen.Display(NotEnoughHP, cancellationToken);
         }
         screen.Scene.HelpText = UseOnWhichPokemon;
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             screen.Scene.PreSelect(partyIndex);
             var newPartyIndex = await screen.ChoosePokemon(cancellationToken: cancellationToken);

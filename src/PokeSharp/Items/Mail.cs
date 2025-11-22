@@ -12,7 +12,13 @@ public record Mail(
     Name Item,
     Text Message,
     Text Sender,
-    MailPokemonInfo? Pokemon1,
-    MailPokemonInfo? Pokemon2,
-    MailPokemonInfo? Pokemon3
+    MailPokemonInfo? Pokemon1 = null,
+    MailPokemonInfo? Pokemon2 = null,
+    MailPokemonInfo? Pokemon3 = null
 );
+
+[AutoServiceShortcut]
+public interface IMailService
+{
+    ValueTask DisplayMail(Mail mail, CancellationToken cancellationToken = default);
+}

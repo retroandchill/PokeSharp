@@ -3,11 +3,9 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.UI.Map;
 
-public interface IPokemonRegionMapScene
+public interface IPokemonRegionMapScene : IScene
 {
-    void StartScene(bool asEditor = false, bool flyMap = false);
-
-    void EndScene();
+    SceneScope StartScene(bool asEditor = false, bool flyMap = false);
 
     float PointXToScreenX(int x);
 

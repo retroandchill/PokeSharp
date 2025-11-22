@@ -57,7 +57,7 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
 
     public async ValueTask<bool> PokemonGiveScreen(Name item, CancellationToken cancellationToken = default)
     {
-        Scene.StartScene(Party, GiveItemPrompt);
+        using var scope = Scene.StartScene(Party, GiveItemPrompt);
         int? pokemonId = await Scene.ChoosePokemon(cancellationToken: cancellationToken);
         var result = false;
         if (pokemonId is not null)
@@ -65,13 +65,12 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
             result = await Party[pokemonId.Value].GiveItemToPokemon(item, this, pokemonId.Value, cancellationToken);
             Refresh(pokemonId.Value);
         }
-        Scene.EndScene();
         return result;
     }
 
     public async ValueTask PokemonGiveMailScreen(int mailIndex, CancellationToken cancellationToken = default)
     {
-        Scene.StartScene(Party, GiveItemPrompt);
+        using var scope = Scene.StartScene(Party, GiveItemPrompt);
         int? pokemonId = await Scene.ChoosePokemon(cancellationToken: cancellationToken);
         if (pokemonId is not null)
         {
@@ -93,7 +92,6 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
                 Refresh(pokemonId.Value);
             }
         }
-        Scene.EndScene();
     }
 
     public void EndScene() => Scene.EndScene();
@@ -246,8 +244,8 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
             statuses[i] = ruleset.IsPokemonValid(Party[i]) ? EntryEligibility.NotEntered : EntryEligibility.Banned;
             annotations[i] = ordinals[(int)statuses[i]];
         }
-        Scene.StartScene(Party, ChooseAndConfirm, annotations, true);
-        while (true)
+        using var scope = Scene.StartScene(Party, ChooseAndConfirm, annotations, true);
+        while (!cancellationToken.IsCancellationRequested)
         {
             var realOrder = new List<int>(Party.Count);
             for (var i = 0; i < Party.Count; i++)
@@ -356,7 +354,6 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
             }
         }
 
-        Scene.EndScene();
         return result;
     }
 
@@ -375,8 +372,8 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
         }
 
         int? result = null;
-        Scene.StartScene(Party, Party.Count > 1 ? Choose : ChooseOrCancel, annotations);
-        while (true)
+        using var scope = Scene.StartScene(Party, Party.Count > 1 ? Choose : ChooseOrCancel, annotations);
+        while (!cancellationToken.IsCancellationRequested)
         {
             Scene.HelpText = Party.Count > 1 ? Choose : ChooseOrCancel;
             int? pokemonIndex = await Scene.ChoosePokemon(cancellationToken: cancellationToken);
@@ -390,7 +387,6 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
             break;
         }
 
-        Scene.EndScene();
         return result;
     }
 
@@ -421,7 +417,7 @@ public class PokemonPartyScreen(IPokemonPartyScene scene, List<Pokemon> party) :
                 && !GameGlobal.GameMap.HasMetadataTag(DisableBoxLink);
 
         Scene.StartScene(Party, Party.Count > 1 ? Choose : ChooseOrCancel, null, false, canAccessStorage);
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             Scene.HelpText = Party.Count > 1 ? Choose : ChooseOrCancel;
             var partyIndex = await Scene.ChoosePokemon(false, null, CanSwitch.CanSwitch, cancellationToken);

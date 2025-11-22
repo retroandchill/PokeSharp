@@ -76,6 +76,8 @@ public abstract class Trainer(Text name, Name trainerType)
 
     public int PartyCount => Party.Count;
 
+    public int PokemonCount => PokemonParty.Count();
+
     public int AblePokemonCount => AbleParty.Count();
 
     public bool IsPartyFull => PartyCount >= GameGlobal.GameSettings.MaxPartySize;

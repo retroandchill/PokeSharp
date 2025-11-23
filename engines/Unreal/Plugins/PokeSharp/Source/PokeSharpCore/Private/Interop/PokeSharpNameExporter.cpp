@@ -11,6 +11,12 @@ void UPokeSharpNameExporter::GetOrAddEntry(const UTF16CHAR *Str, const int32 Len
     Number = Name.GetNumber();
 }
 
+bool UPokeSharpNameExporter::IsValid(const uint32 ComparisonIndex, const uint32 DisplayIndex)
+{
+    const auto Name = GetName(ComparisonIndex, DisplayIndex, 0);
+    return Name.GetComparisonNameEntry() != nullptr && Name.GetDisplayNameEntry() != nullptr;
+}
+
 bool UPokeSharpNameExporter::EqualsBuffer(const uint32 ComparisonIndex, const uint32 DisplayIndex, const int32 Number,
                                           const UTF16CHAR *Str, const int32 Length)
 {
@@ -22,6 +28,14 @@ void UPokeSharpNameExporter::GetString(const uint32 ComparisonIndex, const uint3
                                        FString &OutString)
 {
     OutString = GetName(ComparisonIndex, DisplayIndex, Number).ToString();
+}
+
+void UPokeSharpNameExporter::FromUnrealName(const FName Name, uint32 &ComparisonIndex, uint32 &DisplayIndex,
+                                            int32 &Number)
+{
+    ComparisonIndex = Name.GetComparisonIndex().ToUnstableInt();
+    DisplayIndex = Name.GetDisplayIndex().ToUnstableInt();
+    Number = Name.GetNumber();
 }
 
 FName UPokeSharpNameExporter::GetName(const uint32 ComparisonIndex, const uint32 DisplayIndex, const int32 Number)

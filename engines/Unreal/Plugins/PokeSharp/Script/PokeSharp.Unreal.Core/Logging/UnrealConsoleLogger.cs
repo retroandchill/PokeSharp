@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using UnrealSharp.Log;
 
-namespace PokeSharp.Core.Unreal.Logging;
+namespace PokeSharp.Unreal.Core.Logging;
 
 public class UnrealConsoleLogger(string categoryName) : ILogger
 {

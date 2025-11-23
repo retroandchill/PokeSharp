@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Primitives;
 using UnrealSharp.DeveloperSettings;
 
-namespace PokeSharp.Core.Unreal.Configuration;
+namespace PokeSharp.Unreal.Core.Configuration;
 
 public class UnrealOptionsChangeTokenSource<TUnrealSettings, TOptions> : IOptionsChangeTokenSource<TOptions>
     where TUnrealSettings : UDeveloperSettings

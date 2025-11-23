@@ -1,6 +1,7 @@
+using PokeSharp.Core;
 using UnrealSharp.Engine.Core.Modules;
 
-namespace PokeSharp.Core.Unreal;
+namespace PokeSharp.Unreal.Core;
 
 public class FPokeSharpCoreUnrealModule : IModuleInterface
 {

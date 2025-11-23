@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace PokeSharp.Core.Unreal.Logging;
+namespace PokeSharp.Unreal.Core.Logging;
 
 public sealed class UnrealLoggerProvider : ILoggerProvider
 {

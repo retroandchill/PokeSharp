@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using UnrealSharp.Log;
 
-namespace PokeSharp.Core.Unreal.Logging;
+namespace PokeSharp.Unreal.Core.Logging;
 
 internal static class LoggerExtensions
 {

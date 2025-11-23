@@ -1,10 +1,10 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Extensions.Primitives;
-using PokeSharp.Core.Unreal.Interop;
+using PokeSharp.Unreal.Core.Interop;
 using UnrealSharp.CoreUObject;
 using UnrealSharp.DeveloperSettings;
 
-namespace PokeSharp.Core.Unreal.Configuration;
+namespace PokeSharp.Unreal.Core.Configuration;
 
 public class UnrealChangeToken<TUnrealSettings> : IChangeToken
     where TUnrealSettings : UDeveloperSettings

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using UnrealSharp.DeveloperSettings;
 
-namespace PokeSharp.Core.Unreal.Configuration;
+namespace PokeSharp.Unreal.Core.Configuration;
 
 public static class UnrealOptionsExtensions
 {

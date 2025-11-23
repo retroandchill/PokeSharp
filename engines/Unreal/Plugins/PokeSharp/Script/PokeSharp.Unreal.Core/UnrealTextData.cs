@@ -1,8 +1,9 @@
-﻿using PokeSharp.Core.Unreal.Interop;
+﻿using PokeSharp.Core;
+using PokeSharp.Unreal.Core.Interop;
 using UnrealSharp.Core;
 using UnrealSharp.Core.Marshallers;
 
-namespace PokeSharp.Core.Unreal;
+namespace PokeSharp.Unreal.Core;
 
 internal sealed unsafe class UnrealTextData : ITextData
 {
@@ -99,6 +100,11 @@ internal sealed unsafe class UnrealTextData : ITextData
         }
     }
 
+    public UnrealTextData(FTextData textData)
+    {
+        _textData = textData;
+    }
+
     ~UnrealTextData()
     {
         PokeSharpTextExporter.CallDestroy(ref _textData);
@@ -108,5 +114,19 @@ internal sealed unsafe class UnrealTextData : ITextData
     {
         PokeSharpTextExporter.CallAsDisplaySpan(ref _textData, out var buffer, out var length);
         return new ReadOnlySpan<char>((char*)buffer, length);
+    }
+}
+
+public static class UnrealTextDataExtensions
+{
+    extension(ITextData)
+    {
+        public static unsafe ITextData FromUnrealText(FText text)
+        {
+            var textData = new FTextData();
+            var textDataPtr = (IntPtr)(&textData);
+            TextMarshaller.ToNative(textDataPtr, 0, text);
+            return new UnrealTextData(textData);
+        }
     }
 }

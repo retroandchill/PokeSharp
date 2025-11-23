@@ -1,6 +1,6 @@
 ﻿using UnrealSharp.DeveloperSettings;
 
-namespace PokeSharp.Core.Unreal.Configuration;
+namespace PokeSharp.Unreal.Core.Configuration;
 
 public interface IUnrealOptionsMapper<in TUnrealSettings, out TOptions>
     where TUnrealSettings : UDeveloperSettings

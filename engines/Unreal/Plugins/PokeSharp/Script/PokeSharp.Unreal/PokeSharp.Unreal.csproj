@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\PokeSharp.Glue\PokeSharp.Glue.csproj" />
+        <ProjectReference Include="..\PokeSharp.Unreal.Core\PokeSharp.Unreal.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(PokeSharpSlnDir)' != ''">
+        <ProjectReference Include="$(PokeSharpProj)" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Injectio" />
+        <PackageReference Include="Riok.Mapperly" />
+    </ItemGroup>
+    <Import Project="..\..\..\UnrealSharp\UnrealSharp.Shared.props" />
+</Project>

@@ -1,7 +1,7 @@
 ﻿using UnrealSharp.Binds;
 using UnrealSharp.Core;
 
-namespace PokeSharp.Core.Unreal.Interop;
+namespace PokeSharp.Unreal.Core.Interop;
 
 [NativeCallbacks]
 public static unsafe partial class PokeSharpTextExporter

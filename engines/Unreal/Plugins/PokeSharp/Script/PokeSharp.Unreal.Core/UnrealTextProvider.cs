@@ -1,4 +1,6 @@
-﻿namespace PokeSharp.Core.Unreal;
+﻿using PokeSharp.Core;
+
+namespace PokeSharp.Unreal.Core;
 
 internal class UnrealTextProvider : ITextProvider
 {

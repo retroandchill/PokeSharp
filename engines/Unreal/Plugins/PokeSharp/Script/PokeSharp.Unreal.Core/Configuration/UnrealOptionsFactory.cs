@@ -2,7 +2,7 @@
 using UnrealSharp.CoreUObject;
 using UnrealSharp.DeveloperSettings;
 
-namespace PokeSharp.Core.Unreal.Configuration;
+namespace PokeSharp.Unreal.Core.Configuration;
 
 public class UnrealOptionsFactory<TUnrealSettings, TOptions>(IUnrealOptionsMapper<TUnrealSettings, TOptions> mapper)
     : IOptionsFactory<TOptions>

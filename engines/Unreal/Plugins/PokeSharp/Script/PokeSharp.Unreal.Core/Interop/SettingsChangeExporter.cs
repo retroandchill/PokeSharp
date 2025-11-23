@@ -1,6 +1,6 @@
 ﻿using UnrealSharp.Binds;
 
-namespace PokeSharp.Core.Unreal.Interop;
+namespace PokeSharp.Unreal.Core.Interop;
 
 [NativeCallbacks]
 public static unsafe partial class SettingsChangeExporter

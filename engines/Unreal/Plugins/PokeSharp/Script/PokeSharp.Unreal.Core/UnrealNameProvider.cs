@@ -1,8 +1,9 @@
-﻿using PokeSharp.Core.Unreal.Interop;
+﻿using PokeSharp.Core;
+using PokeSharp.Unreal.Core.Interop;
 using UnrealSharp.Core;
 using UnrealSharp.Core.Marshallers;
 
-namespace PokeSharp.Core.Unreal;
+namespace PokeSharp.Unreal.Core;
 
 internal unsafe class UnrealNameProvider : INameProvider
 {
@@ -23,6 +24,11 @@ internal unsafe class UnrealNameProvider : INameProvider
             );
             return (comparisonIndex, displayIndex, number);
         }
+    }
+
+    public bool IsValid(uint comparisonIndex, uint displayIndex)
+    {
+        return PokeSharpNameExporter.CallIsValid(comparisonIndex, displayIndex).ToManagedBool();
     }
 
     public bool Equals(uint comparisonIndex, uint displayIndex, int number, ReadOnlySpan<char> span)

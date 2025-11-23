@@ -95,7 +95,7 @@ public readonly struct Text : IEquatable<Text>
         _data = ITextProvider.Instance.FromSimpleString(name.ToString());
     }
 
-    private Text(ITextData data)
+    public Text(ITextData data)
     {
         _data = data;
     }
@@ -217,7 +217,7 @@ public interface ITextData
     /// <summary>
     /// Original source string (authoring-time text, typically in English).
     /// </summary>
-    string SourceString { get; }
+    string? SourceString { get; }
 
     /// <summary>
     /// Current display string, after localization / transformation.
@@ -263,17 +263,6 @@ public interface ITextData
     bool IsWhitespace { get; }
 
     /// <summary>
-    /// Returns a copy of this data with a different display string.
-    /// Useful for transformations like ToUpper/ToLower without losing the identity.
-    /// </summary>
-    ITextData WithDisplayString(string newDisplay);
-
-    /// <summary>
-    /// Returns a copy of this data with different namespace/key (for ChangeKey‑style operations).
-    /// </summary>
-    ITextData WithIdentity(string? @namespace, string? key);
-
-    /// <summary>
     /// Returns the display string as a read-only span. This typically can just get the span for <see cref="DisplayString"/>,
     /// but if your implementation stores the string in native memory, this can be used to avoid the costs of copying
     /// the string data to managed memory.
@@ -311,18 +300,6 @@ public sealed record BasicTextData(
     public bool IsWhitespace => string.IsNullOrWhiteSpace(DisplayString);
 
     /// <inheritdoc />
-    public ITextData WithDisplayString(string newDisplay)
-    {
-        return this with { DisplayString = newDisplay };
-    }
-
-    /// <inheritdoc />
-    public ITextData WithIdentity(string? @namespace, string? key)
-    {
-        return this with { Namespace = @namespace, Key = key };
-    }
-
-    /// <inheritdoc />
     public ReadOnlySpan<char> AsDisplaySpan()
     {
         return DisplayString.AsSpan();
@@ -348,6 +325,8 @@ public interface ITextProvider
     {
         Instance = provider;
     }
+    
+    static void ResetTextProvider() => Instance = new UnlocalizedTextProvider();
 
     /// <summary>
     /// Creates a new <see cref="ITextData"/> instance from the given text. This text will not have any localization

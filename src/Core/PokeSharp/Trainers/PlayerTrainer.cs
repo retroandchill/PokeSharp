@@ -3,6 +3,7 @@ using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
 using PokeSharp.Core.State;
+using PokeSharp.Data.Pbs;
 using PokeSharp.Settings;
 using PokeSharp.State;
 
@@ -48,7 +49,7 @@ public class PlayerTrainer(Text name, Name trainerType) : Trainer(name, trainerT
     {
         get;
         set => field = Math.Clamp(value, 0, GameGlobal.GameSettings.MaxMoney);
-    } = GameGlobal.GameSettings.StartMoney;
+    } = Metadata.Instance.StartMoney;
 
     public int Coins
     {

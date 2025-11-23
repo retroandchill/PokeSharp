@@ -83,6 +83,13 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     public Name(string name, FindName findType = FindName.Add)
         : this(name.AsSpan(), findType) { }
 
+    public Name(uint comparisonIndex, uint displayStringIndex, int number)
+    {
+        ComparisonIndex = comparisonIndex;
+        DisplayStringIndex = displayStringIndex;
+        Number = number;
+    }
+
     /// <summary>
     /// Gets a predefined, immutable <see cref="Name"/> instance representing a "none" or null-like state.
     /// </summary>
@@ -112,7 +119,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <threadsafety>
     /// This property is thread-safe due to the immutable nature of the <see cref="Name"/> struct.
     /// </threadsafety>
-    public bool IsValid => !IsNone;
+    public bool IsValid => INameProvider.Instance.IsValid(ComparisonIndex, DisplayStringIndex);
 
     /// <summary>
     /// Indicates whether the current <see cref="Name"/> instance represents a "none" or null-like state.
@@ -162,7 +169,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// <returns><c>true</c> if the instances are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(Name lhs, string? rhs)
     {
-        return INameProvider.Instance.Equals(lhs.ComparisonIndex, rhs);
+        return INameProvider.Instance.Equals(lhs.ComparisonIndex, lhs.DisplayStringIndex, lhs.Number, rhs);
     }
 
     /// <summary>
@@ -186,7 +193,7 @@ public readonly struct Name : IEquatable<Name>, IEquatable<string>, IEquatable<R
     /// </returns>
     public static bool operator ==(Name lhs, ReadOnlySpan<char> rhs)
     {
-        return INameProvider.Instance.Equals(lhs.ComparisonIndex, rhs);
+        return INameProvider.Instance.Equals(lhs.ComparisonIndex, lhs.DisplayStringIndex, lhs.Number, rhs);
     }
 
     /// <summary>
@@ -278,6 +285,8 @@ public interface INameProvider
     /// break existing name instances.
     /// </remarks>
     static void UseCustomProvider(INameProvider provider) => Instance = provider;
+    
+    static void ResetNameProvider() => Instance = new DefaultNameProvider();
 
     /// <summary>
     /// Gets the comparison and display string indices for the given name.
@@ -286,14 +295,18 @@ public interface INameProvider
     /// <param name="findType"></param>
     /// <returns>A tuple of the comparison and display index.</returns>
     (uint ComparisonIndex, uint DisplayIndex, int Number) GetOrAddEntry(ReadOnlySpan<char> value, FindName findType);
+    
+    bool IsValid(uint comparisonIndex, uint displayIndex);
 
     /// <summary>
     /// Checks whether the given span is equal to the name at the specified index.
     /// </summary>
     /// <param name="comparisonIndex">The comparison index</param>
+    /// <param name="displayIndex"></param>
+    /// <param name="number"></param>
     /// <param name="span">The character span to compare to.</param>
     /// <returns>Are the two equal.</returns>
-    bool Equals(uint comparisonIndex, ReadOnlySpan<char> span);
+    bool Equals(uint comparisonIndex, uint displayIndex, int number, ReadOnlySpan<char> span);
 
     /// <summary>
     /// Gets the display string for the given index.
@@ -325,7 +338,12 @@ internal class DefaultNameProvider : INameProvider
             : (0, 0, Name.NoNumber);
     }
 
-    public bool Equals(uint comparisonIndex, ReadOnlySpan<char> span)
+    public bool IsValid(uint comparisonIndex, uint displayIndex)
+    {
+        return _nameTable.IsValid(comparisonIndex, displayIndex);
+    }
+
+    public bool Equals(uint comparisonIndex, uint displayIndex, int number, ReadOnlySpan<char> span)
     {
         return _nameTable.EqualsComparison(comparisonIndex, span);
     }
@@ -526,6 +544,16 @@ internal class NameTable
         _displayIdToString.TryAdd(displayId, str);
 
         return new NameIndices(comparisonId, displayId);
+    }
+
+    public bool IsValid(uint comparisonId, uint displayId)
+    {
+        if (comparisonId == 0 || displayId == 0)
+        {
+            return comparisonId == displayId;
+        }
+        
+        return _comparisonIdToString.ContainsKey(comparisonId) && _displayIdToString.ContainsKey(displayId);
     }
 
     /// <summary>

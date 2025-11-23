@@ -893,6 +893,4 @@ public record GameSettings(string Version, int MechanicsGeneration = 8)
     public bool SmarterWildLegendaryPokemon { get; init; } = true;
 
     #endregion
-
-    public int StartMoney { get; init; } = 3000;
 }

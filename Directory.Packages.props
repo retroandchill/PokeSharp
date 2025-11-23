@@ -25,6 +25,5 @@
     <PackageVersion Include="Retro.SourceGeneratorUtilities" Version="0.1.5" />
     <PackageVersion Include="RhoMicro.CodeAnalysis.UtilityGenerators" Version="22.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
-    <PackageVersion Include="RhoMicro.CodeAnalysis.UtilityGenerators" Version="22.0.3" />
   </ItemGroup>
 </Project>

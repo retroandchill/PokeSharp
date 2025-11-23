@@ -9,7 +9,11 @@ namespace PokeSharp.Core.Data;
 /// A data loader that facilitates saving and loading entities using MessagePack serialization.
 /// </summary>
 [RegisterSingleton]
-public partial class MessagePackDataLoader(IFileSystem fileSystem, MessagePackSerializerOptions options) : IDataLoader
+public partial class MessagePackDataLoader(
+    IFileSystem fileSystem,
+    IDataFileSource dataFileSource,
+    MessagePackSerializerOptions options
+) : IDataLoader
 {
     /// <inheritdoc />
     [CreateSyncVersion]
@@ -24,7 +28,7 @@ public partial class MessagePackDataLoader(IFileSystem fileSystem, MessagePackSe
             Directory.CreateDirectory("Data");
         }
 
-        await using var fileStream = fileSystem.File.OpenWrite(fileSystem.Path.Join("Data", $"{outputPath}.pkdata"));
+        await using var fileStream = dataFileSource.OpenWrite(fileSystem.Path.Join("Data", $"{outputPath}.pkdata"));
         await MessagePackSerializer.SerializeAsync(fileStream, entities, options, cancellationToken);
     }
 
@@ -35,7 +39,7 @@ public partial class MessagePackDataLoader(IFileSystem fileSystem, MessagePackSe
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-        await using var fileStream = fileSystem.File.OpenRead(fileSystem.Path.Join("Data", $"{inputPath}.pkdata"));
+        await using var fileStream = dataFileSource.OpenRead(fileSystem.Path.Join("Data", $"{inputPath}.pkdata"));
         foreach (
             var entity in await MessagePackSerializer.DeserializeAsync<IEnumerable<T>>(
                 fileStream,

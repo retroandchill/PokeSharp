@@ -98,6 +98,6 @@ public static class PlayerTrainerExtensions
     [RegisterServices]
     public static void RegisterPlayerTrainer(this IServiceCollection services)
     {
-        services.AddGameState(_ => new PlayerTrainer(Text.None, Name.None));
+        services.AddGameState<PlayerTrainer>(_ => null!);
     }
 }

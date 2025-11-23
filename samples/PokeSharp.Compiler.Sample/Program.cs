@@ -19,6 +19,7 @@ var builder = new GameContextBuilder();
 builder
     .Services.AddLogging(logging => logging.AddConsole())
     .AddSingleton<IFileSystem, FileSystem>()
+    .AddSingleton<IDataFileSource, FileSystemDataFileSource>()
     .AddPokeSharpCore()
     .AddPokeSharpCompilerCore()
     .AddPokeSharp()

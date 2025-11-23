@@ -4,6 +4,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    <ItemGroup />
     <Import Project="..\..\..\UnrealSharp\UnrealSharp.Shared.props" />
+    <ItemGroup>
+        <Reference Include="UnrealSharp.Binds">
+            <HintPath>..\..\..\UnrealSharp\Binaries\Managed\net9.0\UnrealSharp.Binds.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 </Project>

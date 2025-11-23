@@ -8,6 +8,11 @@
         <ProjectReference Include="..\PokeSharp.Glue\PokeSharp.Glue.csproj" />
         <ProjectReference Include="..\PokeSharp.Unreal.Core\PokeSharp.Unreal.Core.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Reference Include="UnrealSharp.Binds">
+            <HintPath>$(UnrealSharpPluginDir)Binaries\Managed\$(TargetFramework)\UnrealSharp.Binds.dll</HintPath>
+        </Reference>
+    </ItemGroup>
     <ItemGroup Condition="'$(PokeSharpSlnDir)' != ''">
         <ProjectReference Include="$(PokeSharpProj)" />
     </ItemGroup>

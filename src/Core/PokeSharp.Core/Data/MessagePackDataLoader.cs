@@ -9,7 +9,7 @@ namespace PokeSharp.Core.Data;
 /// <summary>
 /// A data loader that facilitates saving and loading entities using MessagePack serialization.
 /// </summary>
-[RegisterSingleton(Tags = SerializerTags.MessagePack)]
+[RegisterSingleton]
 public partial class MessagePackDataLoader(MessagePackSerializerOptions options) : IDataLoader
 {
     /// <inheritdoc />

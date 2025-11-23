@@ -17,7 +17,7 @@ var builder = new GameContextBuilder();
 
 builder
     .Services.AddLogging(logging => logging.AddConsole())
-    .AddPokeSharpCore(SerializerTags.MessagePack)
+    .AddPokeSharpCore()
     .AddPokeSharpCompilerCore()
     .AddPokeSharp()
     .AddPokeSharpCompiler()

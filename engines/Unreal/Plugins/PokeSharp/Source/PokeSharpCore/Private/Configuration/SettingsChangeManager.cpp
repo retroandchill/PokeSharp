@@ -1,9 +1,36 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Configuration/SettingsChangeManager.h"
+#include "Containers/Ticker.h"
 #include "LogPokeSharpCore.h"
 
 TObjectPtr<USettingsChangeManager> USettingsChangeManager::Instance;
+
+void FDebouncedSettingsCallback::RequestExecution(const float DebounceSeconds)
+{
+    // Already scheduled – just mark dirty, no new ticker
+    if (bPendingExecution)
+    {
+        return;
+    }
+
+    bPendingExecution = true;
+
+    // Schedule a one–shot ticker
+    TickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+        FTickerDelegate::CreateRaw(this, &FDebouncedSettingsCallback::OnTick), DebounceSeconds);
+}
+
+bool FDebouncedSettingsCallback::OnTick(float)
+{
+    // Clear pending state before invoking, in case callback triggers new changes
+    bPendingExecution = false;
+    TickerHandle.Reset();
+
+    Callback->Invoke();
+    // Returning false so this ticker is not called again
+    return false;
+}
 
 void USettingsChangeManager::Initialize()
 {
@@ -27,11 +54,19 @@ void USettingsChangeManager::Shutdown()
 FGuid USettingsChangeManager::Bind(UDeveloperSettings *Settings, const FGCHandle &ManagedDelegate) noexcept
 {
     auto Guid = FGuid::NewGuid();
-    const auto &Binding = Callbacks.Emplace(Guid, MakeShared<FSettingsChangeDelegateCallback>(ManagedDelegate));
+    auto Callback = MakeShared<FSettingsChangeDelegateCallback>(ManagedDelegate);
+
+    constexpr float DebounceSeconds = 0.10f;
+    const auto &DebouncedEntry = Callbacks.Emplace(Guid, MakeShared<FDebouncedSettingsCallback>(Callback));
 
 #if WITH_EDITOR
-    Settings->OnSettingChanged().AddSPLambda(
-        &Binding.Get(), [&Binding = Binding.Get()](UObject *, FPropertyChangedEvent &) { Binding.Invoke(); });
+    Settings->OnSettingChanged().AddLambda(
+        [WeakBinding = DebouncedEntry.ToWeakPtr()](UObject *, FPropertyChangedEvent &) {
+            const auto Binding = WeakBinding.Pin();
+            if (Binding == nullptr)
+                return;
+            Binding->RequestExecution(DebounceSeconds);
+        });
 #endif
 
     return Guid;

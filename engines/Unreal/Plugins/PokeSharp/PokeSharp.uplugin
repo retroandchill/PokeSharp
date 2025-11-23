@@ -18,6 +18,11 @@
 			"Name": "PokeSharpCore",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "PokeSharp",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	]
 }

@@ -7,7 +7,7 @@
 
 #include "SettingsChangeManager.generated.h"
 
-struct FSettingsChangeDelegateCallback : TSharedFromThis<FSettingsChangeDelegateCallback>
+struct FSettingsChangeDelegateCallback
 {
     UE_NONCOPYABLE(FSettingsChangeDelegateCallback)
 
@@ -27,6 +27,23 @@ struct FSettingsChangeDelegateCallback : TSharedFromThis<FSettingsChangeDelegate
 
   private:
     FCSManagedDelegate Delegate;
+};
+
+struct FDebouncedSettingsCallback
+{
+    explicit FDebouncedSettingsCallback(const TSharedRef<FSettingsChangeDelegateCallback> &InCallback)
+        : Callback(InCallback)
+    {
+    }
+
+    void RequestExecution(float DebounceSeconds);
+
+  private:
+    bool OnTick(float /*DeltaTime*/);
+
+    TSharedRef<FSettingsChangeDelegateCallback> Callback;
+    bool bPendingExecution = false;
+    FTSTicker::FDelegateHandle TickerHandle;
 };
 
 /**
@@ -51,5 +68,5 @@ class POKESHARPCORE_API USettingsChangeManager : public UObject
 
   private:
     static TObjectPtr<USettingsChangeManager> Instance;
-    TMap<FGuid, TSharedRef<FSettingsChangeDelegateCallback>> Callbacks;
+    TMap<FGuid, TSharedRef<FDebouncedSettingsCallback>> Callbacks;
 };

@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Collections.Immutable;
+using System.IO.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PokeSharp;
@@ -17,6 +18,7 @@ var builder = new GameContextBuilder();
 
 builder
     .Services.AddLogging(logging => logging.AddConsole())
+    .AddSingleton<IFileSystem, FileSystem>()
     .AddPokeSharpCore()
     .AddPokeSharpCompilerCore()
     .AddPokeSharp()

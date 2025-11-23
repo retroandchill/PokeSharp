@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.IO.Abstractions;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
@@ -27,17 +28,23 @@ public partial class EncounterCompiler : IPbsCompiler
     private string _path;
     private readonly IMapMetadataRepository _mapMetadataRepository;
     private readonly ILogger<EncounterCompiler> _logger;
+    private readonly PbsSerializer _serializer;
+    private readonly IFileSystem _fileSystem;
 
     public EncounterCompiler(
         IMapMetadataRepository mapMetadataRepository,
         IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
-        ILogger<EncounterCompiler> logger
+        ILogger<EncounterCompiler> logger,
+        PbsSerializer serializer,
+        IFileSystem fileSystem
     )
     {
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "encounters.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "encounters.txt"));
         _mapMetadataRepository = mapMetadataRepository;
         _logger = logger;
+        _serializer = serializer;
+        _fileSystem = fileSystem;
     }
 
     [CreateSyncVersion]
@@ -50,7 +57,7 @@ public partial class EncounterCompiler : IPbsCompiler
         EncounterInfo? currentEncounter = null;
         Name? currentType = null;
         _logger.LogCompilingPbsFile(Path.GetFileName(_path));
-        await foreach (var (line, _, fileLineData) in PbsSerializer.ParsePreppedLinesAsync(_path, cancellationToken))
+        await foreach (var (line, _, fileLineData) in _serializer.ParsePreppedLinesAsync(_path, cancellationToken))
         {
             if (string.IsNullOrWhiteSpace(line))
                 continue;
@@ -231,7 +238,7 @@ public partial class EncounterCompiler : IPbsCompiler
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogWritingPbsFile(Path.GetFileName(_path));
-        await FileUtils.WriteFileWithBackupAsync(_path, FileWrite);
+        await _fileSystem.WriteFileWithBackupAsync(_path, FileWrite);
         return;
 
         async ValueTask FileWrite(StreamWriter fileWriter)

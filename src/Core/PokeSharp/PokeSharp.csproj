@@ -14,27 +14,19 @@
   <ItemGroup>
     <ProjectReference Include="$(PokeSharpAbstractionsProj)" />
     <ProjectReference Include="$(PokeSharpCoreProj)" />
-    <ProjectReference
-      Include="$(PokeSharpGeneratorProj)"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
+    <ProjectReference Include="$(PokeSharpGeneratorProj)" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference
       Include="$(PokeSharpCoreGeneratorProj)"
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
-    <ProjectReference
-      Include="$(PokeSharpCodeFixesProj)"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
+    <ProjectReference Include="$(PokeSharpCodeFixesProj)" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions"/>
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="System.Linq.Async" />
-    <PackageReference Include="ZLinq"/>
+    <PackageReference Include="ZLinq" />
     <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

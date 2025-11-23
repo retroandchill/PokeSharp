@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Pbs;
@@ -9,8 +10,11 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public class RibbonCompiler(ILogger<RibbonCompiler> logger, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompiler<Ribbon, RibbonInfo>(logger, pbsCompileSettings)
+public class RibbonCompiler(
+    ILogger<RibbonCompiler> logger,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
+) : PbsCompiler<Ribbon, RibbonInfo>(logger, pbsCompileSettings, serializer)
 {
     public override int Order => 12;
 

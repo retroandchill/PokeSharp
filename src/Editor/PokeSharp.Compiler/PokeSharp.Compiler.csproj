@@ -12,15 +12,11 @@
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
-    <ProjectReference
-      Include="$(PokeSharpCodeFixesProj)"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
+    <ProjectReference Include="$(PokeSharpCodeFixesProj)" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(PokeSharpProj)" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Riok.Mapperly"/>
+    <PackageReference Include="Riok.Mapperly" />
     <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

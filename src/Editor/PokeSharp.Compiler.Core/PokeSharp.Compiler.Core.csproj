@@ -9,8 +9,8 @@
     <ProjectReference Include="$(PokeSharpCoreProj)" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations"/>
-    <PackageReference Include="System.Linq.Async"/>
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
+using System.IO.Abstractions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Injectio.Attributes;
 using PokeSharp.Compiler.Core.Utils;
 using Zomp.SyncMethodGenerator;
 
@@ -18,7 +20,8 @@ public readonly record struct LineWithNumber(string Line, int LineNumber, FileLi
 
 public readonly record struct ModelWithLine<T>(T Model, FileLineData LineData);
 
-public static partial class PbsSerializer
+[RegisterSingleton]
+public partial class PbsSerializer(IFileSystem fileSystem)
 {
     [CreateSyncVersion]
     public static async IAsyncEnumerable<PbsSection> ParseFileSectionsAsync(
@@ -96,13 +99,14 @@ public static partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public static async IAsyncEnumerable<LineWithNumber> ParseFileLinesAsync(
+    public async IAsyncEnumerable<LineWithNumber> ParseFileLinesAsync(
         string filename,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         var fileLineData = new FileLineData(filename);
-        using var fileReader = new StreamReader(filename);
+        await using var fileStream = fileSystem.File.OpenRead(filename);
+        using var fileReader = new StreamReader(fileStream);
         var lineNumber = 1;
         while (await fileReader.ReadLineAsync(cancellationToken) is { } line)
         {
@@ -116,13 +120,14 @@ public static partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public static async IAsyncEnumerable<LineWithNumber> ParsePreppedLinesAsync(
+    public async IAsyncEnumerable<LineWithNumber> ParsePreppedLinesAsync(
         string filename,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         var fileLineData = new FileLineData(filename);
-        using var fileReader = new StreamReader(filename);
+        await using var fileStream = fileSystem.File.OpenRead(filename);
+        using var fileReader = new StreamReader(fileStream);
 
         var lineNumber = 1;
         while (await fileReader.ReadLineAsync(cancellationToken) is { } line)
@@ -144,7 +149,7 @@ public static partial class PbsSerializer
     private static partial Regex KeyValuePair { get; }
 
     [CreateSyncVersion]
-    public static async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
+    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
         string path,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
@@ -153,7 +158,8 @@ public static partial class PbsSerializer
         if (T.IsOptional && !File.Exists(path))
             yield break;
 
-        using var fileStream = new StreamReader(path);
+        await using var fileSystemStream = fileSystem.File.OpenRead(path);
+        using var fileStream = new StreamReader(fileSystemStream);
 
         var initialLineData = new FileLineData(path);
 
@@ -164,7 +170,7 @@ public static partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public static async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
+    public async IAsyncEnumerable<ModelWithLine<T>> ReadFromFileAsync<T>(
         string path,
         Func<string, T> factory,
         [EnumeratorCancellation] CancellationToken cancellationToken = default
@@ -174,7 +180,8 @@ public static partial class PbsSerializer
         if (T.IsOptional && !File.Exists(path))
             yield break;
 
-        using var fileStream = new StreamReader(path);
+        await using var fileSystemStream = fileSystem.File.OpenRead(path);
+        using var fileStream = new StreamReader(fileSystemStream);
 
         var initialLineData = new FileLineData(path);
         await foreach (var section in ParseFileSectionsAsync(fileStream, initialLineData, cancellationToken))
@@ -190,13 +197,13 @@ public static partial class PbsSerializer
     }
 
     [CreateSyncVersion]
-    public static async Task WritePbsFileAsync<T>(string path, IEnumerable<T> entities)
+    public async Task WritePbsFileAsync<T>(string path, IEnumerable<T> entities)
         where T : IPbsDataModel<T>
     {
         if (T.IsOptional && !File.Exists(path))
             return;
 
-        await FileUtils.WriteFileWithBackupAsync(path, WriteAction);
+        await fileSystem.WriteFileWithBackupAsync(path, WriteAction);
         return;
 
         async ValueTask WriteAction(StreamWriter fileWriter)

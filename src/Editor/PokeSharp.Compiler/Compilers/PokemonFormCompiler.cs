@@ -20,7 +20,8 @@ namespace PokeSharp.Compiler.Compilers;
 public sealed partial class PokemonFormCompiler(
     ILogger<PokemonCompiler> logger,
     IEnumerable<IEvolutionParameterParser> evolutionParameterParsers,
-    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
 ) : PbsCompilerBase<SpeciesFormInfo>(pbsCompileSettings)
 {
     public override int Order => 9;
@@ -31,7 +32,7 @@ public sealed partial class PokemonFormCompiler(
     public override async Task CompileAsync(CancellationToken cancellationToken = default)
     {
         logger.LogCompilingPbsFile(Path.GetFileName(FileName));
-        var entities = await PbsSerializer
+        var entities = await serializer
             .ReadFromFileAsync<SpeciesFormInfo>(
                 FileName,
                 name =>
@@ -58,7 +59,7 @@ public sealed partial class PokemonFormCompiler(
     public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         logger.LogWritingPbsFile(Path.GetFileName(FileName));
-        await PbsSerializer.WritePbsFileAsync(FileName, Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel));
+        await serializer.WritePbsFileAsync(FileName, Species.Entities.Where(s => s.Form > 0).Select(ConvertToModel));
     }
 
     private static Species ConvertToEntity(SpeciesFormInfo model)

@@ -325,7 +325,7 @@ public interface ITextProvider
     {
         Instance = provider;
     }
-    
+
     static void ResetTextProvider() => Instance = new UnlocalizedTextProvider();
 
     /// <summary>

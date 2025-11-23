@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,6 @@ using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core;
-using PokeSharp.Core.Data;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Services.Evolution;
 using Zomp.SyncMethodGenerator;
@@ -23,15 +23,21 @@ public partial class RegionalDexCompiler : IPbsCompiler
     private string _path;
     public IEnumerable<string> FileNames => [_path];
     private readonly ILogger<RegionalDexCompiler> _logger;
+    private readonly PbsSerializer _serializer;
+    private readonly IFileSystem _fileSystem;
 
     public RegionalDexCompiler(
         IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
-        ILogger<RegionalDexCompiler> logger
+        ILogger<RegionalDexCompiler> logger,
+        PbsSerializer serializer,
+        IFileSystem fileSystem
     )
     {
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "regional_dexes.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "regional_dexes.txt"));
         _logger = logger;
+        _serializer = serializer;
+        _fileSystem = fileSystem;
     }
 
     [CreateSyncVersion]
@@ -41,7 +47,7 @@ public partial class RegionalDexCompiler : IPbsCompiler
 
         int? section = null;
         _logger.LogCompilingPbsFile(Path.GetFileName(_path));
-        await foreach (var (line, _, fileLineData) in PbsSerializer.ParsePreppedLinesAsync(_path, cancellationToken))
+        await foreach (var (line, _, fileLineData) in _serializer.ParsePreppedLinesAsync(_path, cancellationToken))
         {
             var sectionMatch = SectionHeaderRegex.Match(line);
             if (sectionMatch.Success)
@@ -113,7 +119,7 @@ public partial class RegionalDexCompiler : IPbsCompiler
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogWritingPbsFile(Path.GetFileName(_path));
-        await FileUtils.WriteFileWithBackupAsync(_path, WriteAction);
+        await _fileSystem.WriteFileWithBackupAsync(_path, WriteAction);
         return;
 
         async ValueTask WriteAction(StreamWriter fileWriter)

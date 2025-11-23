@@ -285,7 +285,7 @@ public interface INameProvider
     /// break existing name instances.
     /// </remarks>
     static void UseCustomProvider(INameProvider provider) => Instance = provider;
-    
+
     static void ResetNameProvider() => Instance = new DefaultNameProvider();
 
     /// <summary>
@@ -295,7 +295,7 @@ public interface INameProvider
     /// <param name="findType"></param>
     /// <returns>A tuple of the comparison and display index.</returns>
     (uint ComparisonIndex, uint DisplayIndex, int Number) GetOrAddEntry(ReadOnlySpan<char> value, FindName findType);
-    
+
     bool IsValid(uint comparisonIndex, uint displayIndex);
 
     /// <summary>
@@ -552,7 +552,7 @@ internal class NameTable
         {
             return comparisonId == displayId;
         }
-        
+
         return _comparisonIdToString.ContainsKey(comparisonId) && _displayIdToString.ContainsKey(displayId);
     }
 

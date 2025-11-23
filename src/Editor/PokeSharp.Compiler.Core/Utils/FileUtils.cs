@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO.Abstractions;
+using System.Text;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Compiler.Core.Utils;
@@ -6,7 +7,11 @@ namespace PokeSharp.Compiler.Core.Utils;
 public static partial class FileUtils
 {
     [CreateSyncVersion]
-    public static async ValueTask WriteFileWithBackupAsync(string path, Func<StreamWriter, ValueTask> writeAction)
+    public static async ValueTask WriteFileWithBackupAsync(
+        this IFileSystem fileSystem,
+        string path,
+        Func<StreamWriter, ValueTask> writeAction
+    )
     {
         string? backupPath = null;
 
@@ -18,8 +23,9 @@ public static partial class FileUtils
 
         try
         {
-            await using var fileWriter = new StreamWriter(path, false, Encoding.UTF8);
-            await writeAction(fileWriter);
+            await using var fileWriter = fileSystem.File.OpenWrite(path);
+            await using var streamWriter = new StreamWriter(fileWriter, Encoding.UTF8);
+            await writeAction(streamWriter);
         }
         catch
         {

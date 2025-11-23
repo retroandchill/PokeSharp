@@ -20,8 +20,9 @@ namespace PokeSharp.Compiler.Compilers;
 public sealed class PokemonCompiler(
     ILogger<PokemonCompiler> logger,
     IEnumerable<IEvolutionParameterParser> evolutionParameterParsers,
-    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings
-) : PbsCompiler<Species, SpeciesInfo>(logger, pbsCompileSettings)
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
+) : PbsCompiler<Species, SpeciesInfo>(logger, pbsCompileSettings, serializer)
 {
     public override int Order => 8;
 
@@ -30,7 +31,7 @@ public sealed class PokemonCompiler(
     public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogWritingPbsFile(Path.GetFileName(FileName));
-        await PbsSerializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel));
+        await Serializer.WritePbsFileAsync(FileName, Species.AllSpecies.Select(ConvertToModel));
     }
 
     protected override Species ConvertToEntity(SpeciesInfo model) => model.ToGameData();

@@ -12,8 +12,11 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public class MoveCompiler(ILogger<MoveCompiler> logger, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompiler<Move, MoveInfo>(logger, pbsCompileSettings)
+public class MoveCompiler(
+    ILogger<MoveCompiler> logger,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
+) : PbsCompiler<Move, MoveInfo>(logger, pbsCompileSettings, serializer)
 {
     public override int Order => 5;
 

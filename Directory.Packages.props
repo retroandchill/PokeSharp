@@ -11,6 +11,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
     <PackageVersion Include="Retro.ReadOnlyParams" Version="1.0.1" />
     <PackageVersion Include="Semver" Version="3.0.0" />
+    <PackageVersion Include="System.IO.Abstractions" Version="22.1.0" />
     <PackageVersion Include="Zomp.SyncMethodGenerator" Version="1.6.17" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
+using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Data.Pbs;
@@ -9,8 +10,11 @@ using PokeSharp.Data.Pbs;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public class TownMapCompiler(ILogger<TownMapCompiler> logger, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompiler<TownMap, TownMapInfo>(logger, pbsCompileSettings)
+public class TownMapCompiler(
+    ILogger<TownMapCompiler> logger,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
+) : PbsCompiler<TownMap, TownMapInfo>(logger, pbsCompileSettings, serializer)
 {
     public override int Order => 1;
 

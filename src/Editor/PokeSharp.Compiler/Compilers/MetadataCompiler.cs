@@ -1,4 +1,5 @@
-﻿using Injectio.Attributes;
+﻿using System.IO.Abstractions;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.Compiler.Core;
@@ -18,10 +19,16 @@ public partial class MetadataCompiler : IPbsCompiler
     public int Order => 17;
     private string _path;
     public IEnumerable<string> FileNames => [_path];
-    private ILogger<MetadataCompiler> _logger;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger<MetadataCompiler> _logger;
 
-    public MetadataCompiler(IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings, ILogger<MetadataCompiler> logger)
+    public MetadataCompiler(
+        IFileSystem fileSystem,
+        IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+        ILogger<MetadataCompiler> logger
+    )
     {
+        _fileSystem = fileSystem;
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, $"{Metadata.DataPath}.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, $"{Metadata.DataPath}.txt"));
         _logger = logger;
@@ -34,7 +41,8 @@ public partial class MetadataCompiler : IPbsCompiler
         var playerMetadata = new OrderedDictionary<int, PlayerMetadata>();
         _logger.LogCompilingPbsFile(Path.GetFileName(_path));
         var fileLineData = new FileLineData(_path);
-        using var streamReader = new StreamReader(_path);
+        await using var fileStream = _fileSystem.File.OpenRead(_path);
+        using var streamReader = new StreamReader(fileStream);
         await foreach (
             var section in PbsSerializer.ParseFileSectionsAsync(streamReader, fileLineData, cancellationToken)
         )
@@ -80,7 +88,7 @@ public partial class MetadataCompiler : IPbsCompiler
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogWritingPbsFile(Path.GetFileName(_path));
-        await FileUtils.WriteFileWithBackupAsync(_path, WriteTask);
+        await _fileSystem.WriteFileWithBackupAsync(_path, WriteTask);
         return;
 
         async ValueTask WriteTask(StreamWriter fileWriter)

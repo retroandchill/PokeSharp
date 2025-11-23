@@ -19,8 +19,11 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public class TrainerCompiler(ILogger<TrainerCompiler> logger, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompiler<EnemyTrainer, EnemyTrainerInfo>(logger, pbsCompileSettings)
+public class TrainerCompiler(
+    ILogger<TrainerCompiler> logger,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
+) : PbsCompiler<EnemyTrainer, EnemyTrainerInfo>(logger, pbsCompileSettings, serializer)
 {
     public override int Order => 15;
 

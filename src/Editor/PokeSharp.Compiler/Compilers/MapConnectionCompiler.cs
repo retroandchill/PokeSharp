@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.IO.Abstractions;
 using System.Runtime.Serialization;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
@@ -35,17 +36,23 @@ public partial class MapConnectionCompiler : IPbsCompiler
     private string _path;
     private readonly IMapMetadataRepository _mapMetadataRepository;
     private readonly ILogger<MapConnectionCompiler> _logger;
+    private readonly PbsSerializer _serializer;
+    private readonly IFileSystem _fileSystem;
 
     public MapConnectionCompiler(
         IMapMetadataRepository mapMetadataRepository,
         IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
-        ILogger<MapConnectionCompiler> logger
+        ILogger<MapConnectionCompiler> logger,
+        PbsSerializer serializer,
+        IFileSystem fileSystem
     )
     {
         _path = Path.Join(pbsCompileSettings.CurrentValue.PbsFileBasePath, "map_connections.txt");
         pbsCompileSettings.OnChange(x => _path = Path.Join(x.PbsFileBasePath, "map_connections.txt"));
         _mapMetadataRepository = mapMetadataRepository;
         _logger = logger;
+        _serializer = serializer;
+        _fileSystem = fileSystem;
     }
 
     [CreateSyncVersion]
@@ -55,7 +62,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
 
         _logger.LogCompilingPbsFile(Path.GetFileName(_path));
         await foreach (
-            var (i, foundLine) in PbsSerializer
+            var (i, foundLine) in _serializer
                 .ParsePreppedLinesAsync(_path, cancellationToken)
                 .Index()
                 .WithCancellation(cancellationToken)
@@ -164,7 +171,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
     public async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogWritingPbsFile(Path.GetFileName(_path));
-        await FileUtils.WriteFileWithBackupAsync(_path, WriteOperations);
+        await _fileSystem.WriteFileWithBackupAsync(_path, WriteOperations);
         return;
 
         async ValueTask WriteOperations(StreamWriter fileWriter)

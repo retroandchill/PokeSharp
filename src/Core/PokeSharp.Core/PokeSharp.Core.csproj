@@ -12,13 +12,14 @@
     <DocumentationFile></DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Injectio"/>
-    <PackageReference Include="MessagePack"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
-    <PackageReference Include="Microsoft.Extensions.Options"/>
-    <PackageReference Include="Retro.ReadOnlyParams"/>
-    <PackageReference Include="Semver"/>
+    <PackageReference Include="Injectio" />
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Retro.ReadOnlyParams" />
+    <PackageReference Include="Semver" />
+    <PackageReference Include="System.IO.Abstractions" />
     <PackageReference Include="Zomp.SyncMethodGenerator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,10 +31,6 @@
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
-    <ProjectReference
-      Include="$(PokeSharpCodeFixesProj)"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
+    <ProjectReference Include="$(PokeSharpCodeFixesProj)" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

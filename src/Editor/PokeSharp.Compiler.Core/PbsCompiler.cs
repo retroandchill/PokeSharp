@@ -47,18 +47,20 @@ public abstract class PbsCompilerBase<TModel> : IPbsCompiler
 
 public abstract partial class PbsCompiler<TEntity, TModel>(
     ILogger<PbsCompiler<TEntity, TModel>> logger,
-    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
 ) : PbsCompilerBase<TModel>(pbsCompileSettings)
     where TEntity : ILoadedGameDataEntity<TEntity>
     where TModel : IPbsDataModel<TModel>
 {
     protected ILogger<PbsCompiler<TEntity, TModel>> Logger { get; } = logger;
+    protected PbsSerializer Serializer { get; } = serializer;
 
     [CreateSyncVersion]
     public override async Task CompileAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogCompilingPbsFile(Path.GetFileName(FileName));
-        var entities = await PbsSerializer
+        var entities = await Serializer
             .ReadFromFileAsync<TModel>(FileName, cancellationToken)
             .Select(x =>
             {
@@ -75,7 +77,7 @@ public abstract partial class PbsCompiler<TEntity, TModel>(
     public override async Task WriteToFileAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogWritingPbsFile(Path.GetFileName(FileName));
-        await PbsSerializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel));
+        await Serializer.WritePbsFileAsync(FileName, TEntity.Entities.Select(ConvertToModel));
     }
 
     protected abstract TEntity ConvertToEntity(TModel model);

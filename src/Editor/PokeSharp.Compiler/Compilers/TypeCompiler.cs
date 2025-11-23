@@ -14,8 +14,11 @@ using ZLinq;
 namespace PokeSharp.Compiler.Compilers;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class TypeCompiler(ILogger<TypeCompiler> logger, IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings)
-    : PbsCompiler<PokemonType, PokemonTypeInfo>(logger, pbsCompileSettings)
+public sealed class TypeCompiler(
+    ILogger<TypeCompiler> logger,
+    IOptionsMonitor<PbsCompilerSettings> pbsCompileSettings,
+    PbsSerializer serializer
+) : PbsCompiler<PokemonType, PokemonTypeInfo>(logger, pbsCompileSettings, serializer)
 {
     public override int Order => 3;
 

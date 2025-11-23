@@ -17,5 +17,9 @@
         <PackageReference Include="Injectio" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
         <PackageReference Include="Microsoft.Extensions.Logging" />
+        <PackageReference Include="Riok.Mapperly" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\PokeSharp.Glue\PokeSharp.Glue.csproj" />
     </ItemGroup>
 </Project>

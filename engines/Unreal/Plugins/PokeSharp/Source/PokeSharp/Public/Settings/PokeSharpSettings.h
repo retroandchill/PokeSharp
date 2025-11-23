@@ -49,7 +49,7 @@ struct FHiddenMoveBadgeRequirements
     int32 Waterfall = 8;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (NullableEnable))
 struct FRoamingAreasList
 {
     GENERATED_BODY()
@@ -68,7 +68,7 @@ enum class ERoamingEncounterType : uint8
     FishingAndWater,
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (NullableEnable))
 struct FRoamingSpecies
 {
     GENERATED_BODY()
@@ -92,7 +92,7 @@ struct FRoamingSpecies
     TMap<int32, FRoamingAreasList> RoamingAreas;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (NullableEnable))
 struct FBagPocket
 {
     GENERATED_BODY()
@@ -122,7 +122,7 @@ struct FBagPocket
     }
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (NullableEnable))
 struct FPokedexName
 {
     GENERATED_BODY()
@@ -144,7 +144,7 @@ struct FPokedexName
     }
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (NullableEnable))
 struct FRegionMapExtra
 {
     GENERATED_BODY()
@@ -201,7 +201,7 @@ struct FBadgeBoosts
 /**
  *
  */
-UCLASS(Config = Game, DefaultConfig)
+UCLASS(Config = Game, DefaultConfig, meta = (NullableEnable))
 class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
 {
     GENERATED_BODY()

@@ -18,8 +18,6 @@ public partial class GameSettingsMapper : IUnrealOptionsMapper<UPokeSharpSetting
 {
     // These warnings are pointless when the source file is generated and lacks nullability annotations. But we know
     // for a fact that the source object is never null.
-#pragma warning disable RMG089
-#pragma warning disable RMG090
     [MapperIgnoreTarget(nameof(GameSettings.Version))]
     public partial GameSettings Map(UPokeSharpSettings settings);
 
@@ -32,8 +30,6 @@ public partial class GameSettingsMapper : IUnrealOptionsMapper<UPokeSharpSetting
 
     [MapProperty(nameof(FPokedexName.Region), nameof(PokedexName.Region), Use = nameof(MapRegion))]
     private partial PokedexName Map(FPokedexName pokedexName);
-#pragma warning restore RMG090
-#pragma warning restore RMG089
 
     private static int? MapOptionalInt(TOptional<int> optional) => optional.HasValue ? optional.Value : null;
 

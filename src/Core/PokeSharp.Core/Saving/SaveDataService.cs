@@ -42,7 +42,7 @@ public sealed partial class SaveDataService(
     {
         await using var saveDataStream = saveSystem.OpenRead(filePath);
         return await MessagePackSerializer.DeserializeAsync<Dictionary<Name, object>>(
-            saveDataStream,
+            saveDataStream.Stream,
             messagePackSerializerOptions,
             cancellationToken
         );
@@ -59,13 +59,14 @@ public sealed partial class SaveDataService(
         if (saveData.Count <= 0 || !await RunConversionsAsync(saveData, cancellationToken))
             return saveData;
 
-        await using var saveDataStream = saveSystem.OpenWrite(filepath);
+        await using var saveDataStream = await saveSystem.OpenWriteAsync(filepath, cancellationToken);
         await MessagePackSerializer.SerializeAsync(
-            saveDataStream,
+            saveDataStream.Stream,
             saveData,
             messagePackSerializerOptions,
             cancellationToken
         );
+        await saveDataStream.CommitAsync(cancellationToken);
         return saveData;
     }
 
@@ -73,13 +74,14 @@ public sealed partial class SaveDataService(
     public async ValueTask SaveToFileAsync(string filepath, CancellationToken cancellationToken = default)
     {
         var saveData = CompileSaveDictionary();
-        await using var saveDataStream = saveSystem.OpenWrite(filepath);
+        await using var saveDataStream = await saveSystem.OpenWriteAsync(filepath, cancellationToken);
         await MessagePackSerializer.SerializeAsync(
-            saveDataStream,
+            saveDataStream.Stream,
             saveData,
             messagePackSerializerOptions,
             cancellationToken
         );
+        await saveDataStream.CommitAsync(cancellationToken);
     }
 
     [CreateSyncVersion]

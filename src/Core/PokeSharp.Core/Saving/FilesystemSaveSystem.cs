@@ -12,19 +12,35 @@ public partial class FilesystemSaveSystem(IFileSystem fileSystem, IOptionsMonito
         return fileSystem.File.Exists(Path.Join(config.CurrentValue.SaveFilePath, filePath));
     }
 
-    public Stream OpenRead(string filePath)
+    public ISaveReadHandle OpenRead(string filePath)
     {
-        return fileSystem.File.OpenRead(Path.Join(config.CurrentValue.SaveFilePath, filePath));
+        return new FileSystemSaveReadHandle(
+            fileSystem,
+            fileSystem.Path.Join(config.CurrentValue.SaveFilePath, filePath)
+        );
     }
 
-    public Stream OpenWrite(string filePath)
+    public ValueTask<ISaveReadHandle> OpenReadAsync(string filePath, CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(OpenRead(filePath));
+    }
+
+    public ISaveWriteHandle OpenWrite(string filePath)
     {
         if (!fileSystem.Directory.Exists(config.CurrentValue.SaveFilePath))
         {
             fileSystem.Directory.CreateDirectory(config.CurrentValue.SaveFilePath);
         }
 
-        return fileSystem.File.OpenWrite(fileSystem.Path.Join(config.CurrentValue.SaveFilePath, filePath));
+        return new FileSystemWriteReadHandle(
+            fileSystem,
+            fileSystem.Path.Join(config.CurrentValue.SaveFilePath, filePath)
+        );
+    }
+
+    public ValueTask<ISaveWriteHandle> OpenWriteAsync(string filePath, CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(OpenWrite(filePath));
     }
 
     [CreateSyncVersion]

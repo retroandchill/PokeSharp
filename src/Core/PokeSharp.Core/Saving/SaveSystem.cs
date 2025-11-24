@@ -13,9 +13,13 @@ public interface ISaveSystem
     /// <returns>Does the file exist?</returns>
     bool Exists(string filePath);
 
-    Stream OpenRead(string filePath);
+    ISaveReadHandle OpenRead(string filePath);
 
-    Stream OpenWrite(string filePath);
+    ValueTask<ISaveReadHandle> OpenReadAsync(string filePath, CancellationToken cancellationToken = default);
+
+    ISaveWriteHandle OpenWrite(string filePath);
+
+    ValueTask<ISaveWriteHandle> OpenWriteAsync(string filePath, CancellationToken cancellationToken = default);
 
     void Copy(string sourceFilePath, string destinationFilePath);
 

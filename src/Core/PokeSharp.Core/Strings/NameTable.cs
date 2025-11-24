@@ -167,7 +167,7 @@ internal class NameTable
     {
         if (comparisonId == 0 || displayId == 0)
         {
-            return comparisonId == displayId;
+            return false;
         }
 
         return _comparisonIdToString.ContainsKey(comparisonId) && _displayIdToString.ContainsKey(displayId);

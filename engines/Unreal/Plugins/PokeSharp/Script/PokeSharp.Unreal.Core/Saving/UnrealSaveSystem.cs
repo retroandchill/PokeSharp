@@ -15,15 +15,34 @@ public class UnrealSaveSystem : ISaveSystem
         return UGameplayStatics.DoesSaveGameExist(filePath, UserIndex);
     }
 
-    public Stream OpenRead(string filePath)
+    public ISaveReadHandle OpenRead(string filePath)
     {
-        return new UnrealSaveStream(filePath, UserIndex);
+        var saveData = UGameplayStatics.LoadGameFromSlot(filePath, UserIndex);
+        return saveData is UPokeSharpSaveGame pokeSharpSaveGame
+            ? new UnrealSaveReadHandle(pokeSharpSaveGame)
+            : throw new InvalidOperationException("Save data is not a PokeSharp save game");
     }
 
-    public Stream OpenWrite(string filePath)
+    public async ValueTask<ISaveReadHandle> OpenReadAsync(
+        string filePath,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var saveData = await UGameplayStatics.LoadGameFromSlotAsync(filePath, UserIndex);
+        return saveData is UPokeSharpSaveGame pokeSharpSaveGame
+            ? new UnrealSaveReadHandle(pokeSharpSaveGame)
+            : throw new InvalidOperationException("Save data is not a PokeSharp save game");
+    }
+
+    public ISaveWriteHandle OpenWrite(string filePath)
     {
         var saveData = UPokeSharpSaveGame.CreateSaveGame();
-        return new UnrealSaveStream(saveData, true);
+        return new UnrealSaveWriteHandle(saveData, filePath, UserIndex);
+    }
+
+    public ValueTask<ISaveWriteHandle> OpenWriteAsync(string filePath, CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(OpenWrite(filePath));
     }
 
     public void Copy(string sourceFilePath, string destinationFilePath)

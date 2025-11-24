@@ -7,12 +7,24 @@ public class PokeSharp : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(
-            ["Core", "DeveloperSettings", "UMG", "CommonUI", "UnrealSharpBinds", "UnrealSharpCore", "UnrealSharpAsync"]
-        );
+        PublicDependencyModuleNames.AddRange([
+            "Core",
+            "DeveloperSettings",
+            "UMG",
+            "CommonUI",
+            "UnrealSharpBinds",
+            "UnrealSharpCore",
+            "UnrealSharpAsync",
+        ]);
 
-        PrivateDependencyModuleNames.AddRange(
-            ["CoreUObject", "Engine", "Slate", "SlateCore", "CommonUtilities", "CommonInput", "GameplayTags"]
-        );
+        PrivateDependencyModuleNames.AddRange([
+            "CoreUObject",
+            "Engine",
+            "Slate",
+            "SlateCore",
+            "CommonUtilities",
+            "CommonInput",
+            "GameplayTags",
+        ]);
     }
 }

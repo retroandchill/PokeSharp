@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-using UnrealSharp.Core;
+﻿using UnrealSharp.Core;
 using UnrealSharp.UnrealSharpAsync;
 
 namespace UnrealSharp.PokeSharp;

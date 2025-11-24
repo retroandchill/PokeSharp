@@ -1,4 +1,6 @@
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
+using PokeSharp.Unreal.Core.Strings;
 using UnrealSharp.Engine.Core.Modules;
 
 namespace PokeSharp.Unreal.Core;

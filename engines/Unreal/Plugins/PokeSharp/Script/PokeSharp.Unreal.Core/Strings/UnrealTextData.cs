@@ -1,9 +1,9 @@
-﻿using PokeSharp.Core;
+﻿using PokeSharp.Core.Strings;
 using PokeSharp.Unreal.Core.Interop;
 using UnrealSharp.Core;
 using UnrealSharp.Core.Marshallers;
 
-namespace PokeSharp.Unreal.Core;
+namespace PokeSharp.Unreal.Core.Strings;
 
 internal sealed unsafe class UnrealTextData : ITextData
 {
@@ -108,6 +108,14 @@ internal sealed unsafe class UnrealTextData : ITextData
     ~UnrealTextData()
     {
         PokeSharpTextExporter.CallDestroy(ref _textData);
+    }
+
+    public FText ToUnrealText()
+    {
+        fixed (FTextData* textDataPtr = &_textData)
+        {
+            return TextMarshaller.FromNative((IntPtr)textDataPtr, 0);
+        }
     }
 
     public ReadOnlySpan<char> AsDisplaySpan()

@@ -1,9 +1,9 @@
-﻿using PokeSharp.Core;
+﻿using PokeSharp.Core.Strings;
 using PokeSharp.Unreal.Core.Interop;
 using UnrealSharp.Core;
 using UnrealSharp.Core.Marshallers;
 
-namespace PokeSharp.Unreal.Core;
+namespace PokeSharp.Unreal.Core.Strings;
 
 internal unsafe class UnrealNameProvider : INameProvider
 {

@@ -1,10 +1,13 @@
 ﻿using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Settings;
 using PokeSharp.Trainers;
 using PokeSharp.Unreal.Core;
 using PokeSharp.Unreal.Core.Configuration;
 using PokeSharp.Unreal.Core.Interop;
+using PokeSharp.Unreal.Core.Strings;
 using Riok.Mapperly.Abstractions;
 using UnrealSharp;
 using UnrealSharp.Core;
@@ -37,16 +40,9 @@ public partial class GameSettingsMapper : IUnrealOptionsMapper<UPokeSharpSetting
 
     private static string? MapOptionalString(TOptional<string> optional) => optional.HasValue ? optional.Value : null;
 
-    private static Name MapName(FName name)
-    {
-        PokeSharpNameExporter.CallFromUnrealName(name, out var comparisonIndex, out var displayIndex, out var number);
-        return new Name(comparisonIndex, displayIndex, number);
-    }
+    private static Name MapName(FName name) => name.ToPokeSharpName();
 
-    private static Text MapText(FText text)
-    {
-        return new Text(ITextData.FromUnrealText(text));
-    }
+    private static Text MapText(FText text) => text.ToPokeSharpText();
 
     private static ImmutableArray<int> MapRoamingAreasList(FRoamingAreasList roamingAreasList)
     {

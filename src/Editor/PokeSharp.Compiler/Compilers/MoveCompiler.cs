@@ -7,6 +7,7 @@ using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Compilers;

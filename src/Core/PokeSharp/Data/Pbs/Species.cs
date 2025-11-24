@@ -6,6 +6,7 @@ using MessagePack;
 using MessagePack.Formatters;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Core;
 using PokeSharp.Serialization.MessagePack;
 

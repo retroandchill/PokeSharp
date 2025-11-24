@@ -9,6 +9,7 @@ using PokeSharp.Compiler.Core.Logging;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Compiler.Core.Utils;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Services.Evolution;
 using Zomp.SyncMethodGenerator;

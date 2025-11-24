@@ -1,6 +1,7 @@
 ﻿using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Mappers;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;

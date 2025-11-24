@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Compiler.Core.Serialization;
 

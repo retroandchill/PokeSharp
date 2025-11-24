@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.BattleSystem.Challenge;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Items;
 using PokeSharp.Overworld;
 using PokeSharp.PokemonModel;

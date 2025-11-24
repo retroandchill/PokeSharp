@@ -4,6 +4,7 @@ using MessagePack.Resolvers;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Data;

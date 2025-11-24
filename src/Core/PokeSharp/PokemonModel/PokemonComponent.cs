@@ -3,6 +3,7 @@ using Injectio.Attributes;
 using MessagePack;
 using MessagePack.Formatters;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.PokemonModel;
 

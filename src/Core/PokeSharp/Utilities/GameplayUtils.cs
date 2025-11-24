@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Utilities;

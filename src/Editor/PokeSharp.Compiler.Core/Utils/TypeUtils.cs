@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Reflection;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Compiler.Core.Utils;
 

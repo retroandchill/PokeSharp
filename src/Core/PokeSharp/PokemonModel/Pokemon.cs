@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Core.Engine;
+using PokeSharp.Core.Strings;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
@@ -252,7 +253,7 @@ public partial class Pokemon
         if (IsEgg)
             return;
 
-        Status = Core.Name.None;
+        Status = Core.Strings.Name.None;
         StatusCount = 0;
     }
 
@@ -475,7 +476,7 @@ public partial class Pokemon
                 }
                 else
                 {
-                    _ability = Core.Name.None;
+                    _ability = Core.Strings.Name.None;
                 }
             }
 
@@ -612,7 +613,7 @@ public partial class Pokemon
     [IgnoreMember]
     public Item? Item
     {
-        get => Item.TryGet(ItemId ?? Core.Name.None, out var item) ? item : null;
+        get => Item.TryGet(ItemId ?? Core.Strings.Name.None, out var item) ? item : null;
         set => ItemId = value?.Id;
     }
 

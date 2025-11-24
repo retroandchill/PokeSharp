@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using PokeSharp.Core;
 using PokeSharp.Core.State;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Items;

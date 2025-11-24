@@ -1,4 +1,6 @@
-﻿namespace PokeSharp.Core.Engine;
+﻿using PokeSharp.Core.Strings;
+
+namespace PokeSharp.Core.Engine;
 
 [RegisterSingleton]
 [AutoServiceShortcut]

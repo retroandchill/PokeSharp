@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using MessagePack;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Items;

@@ -9,6 +9,7 @@ using PokeSharp.Compiler.Mappers;
 using PokeSharp.Compiler.Model;
 using PokeSharp.Compiler.Validators;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PokeSharp.BattleSystem;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.PokemonModel;
 using PokeSharp.Settings;
 using PokeSharp.UI;

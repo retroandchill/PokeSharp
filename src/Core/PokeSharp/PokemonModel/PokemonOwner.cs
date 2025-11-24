@@ -1,5 +1,6 @@
 ﻿using MessagePack;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Trainers;
 

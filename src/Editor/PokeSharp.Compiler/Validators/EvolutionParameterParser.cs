@@ -2,6 +2,7 @@
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Validators;

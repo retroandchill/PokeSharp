@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using MessagePack;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.State;
 using PokeSharp.Utilities;
 

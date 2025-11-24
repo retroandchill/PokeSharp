@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.PokemonModel;

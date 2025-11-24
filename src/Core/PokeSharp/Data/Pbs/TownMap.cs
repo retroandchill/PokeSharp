@@ -2,6 +2,7 @@
 using MessagePack;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Data.Pbs;
 

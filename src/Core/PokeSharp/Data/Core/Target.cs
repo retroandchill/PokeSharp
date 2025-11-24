@@ -1,6 +1,7 @@
 ﻿using Injectio.Attributes;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Data.Core;
 

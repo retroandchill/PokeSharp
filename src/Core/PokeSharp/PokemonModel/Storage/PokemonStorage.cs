@@ -4,6 +4,7 @@ using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core;
 using PokeSharp.Core.State;
+using PokeSharp.Core.Strings;
 using PokeSharp.Settings;
 using PokeSharp.Trainers;
 

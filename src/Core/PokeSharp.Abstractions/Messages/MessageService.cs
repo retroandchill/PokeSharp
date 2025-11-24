@@ -1,4 +1,5 @@
 ﻿using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.UI;
 
 namespace PokeSharp.Messages;

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Trainers;
 
 namespace PokeSharp.Settings;

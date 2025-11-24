@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.UI;
 

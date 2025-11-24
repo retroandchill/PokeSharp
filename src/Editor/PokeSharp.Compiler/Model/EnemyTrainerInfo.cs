@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Compiler.Core.Serialization;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 

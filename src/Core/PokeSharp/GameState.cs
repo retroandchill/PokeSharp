@@ -3,6 +3,7 @@ using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Saving;
 using PokeSharp.Core.State;
+using PokeSharp.Core.Strings;
 using PokeSharp.State;
 using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;

@@ -1,4 +1,5 @@
 ﻿using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Maps;
 using PokeSharp.RGSS.RPG;
 using Retro.ReadOnlyParams.Annotations;

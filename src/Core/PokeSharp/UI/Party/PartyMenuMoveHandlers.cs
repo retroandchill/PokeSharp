@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Injectio.Attributes;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.PokemonModel;
 
 namespace PokeSharp.UI.Party;

@@ -1,6 +1,7 @@
 ﻿using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.PokemonModel;
 using PokeSharp.State;
 using PokeSharp.UI;

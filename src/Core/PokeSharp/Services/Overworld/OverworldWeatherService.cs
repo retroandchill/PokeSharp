@@ -1,4 +1,5 @@
 ﻿using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Core;
 
 namespace PokeSharp.Services.Overworld;

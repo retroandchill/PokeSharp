@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Core.Serialization.Json;
 
@@ -16,15 +17,18 @@ namespace PokeSharp.Core.Serialization.Json;
 /// </threadsafety>
 /// <seealso cref="Name"/>
 /// <seealso cref="JsonConverter{T}"/>
-public class NameJsonConverter : JsonConverter<Name>
+public class NameJsonConverter<T> : JsonConverter<T>
+    where T : struct, IName<T>
 {
     /// <inheritdoc />
-    public override Name Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         try
         {
             var foundString = reader.GetString();
-            return foundString is not null ? new Name(foundString) : throw new JsonException("Name cannot be null.");
+            return foundString is not null
+                ? T.FromString(foundString)
+                : throw new JsonException("Name cannot be null.");
         }
         catch (InvalidOperationException ex)
         {
@@ -33,7 +37,7 @@ public class NameJsonConverter : JsonConverter<Name>
     }
 
     /// <inheritdoc />
-    public override void Write(Utf8JsonWriter writer, Name value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
     }

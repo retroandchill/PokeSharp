@@ -2,6 +2,7 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PokeSharp.Core.Strings;
 using PokeSharp.Core.Versioning;
 using Semver;
 using Zomp.SyncMethodGenerator;

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Core.Serialization.Json;
 

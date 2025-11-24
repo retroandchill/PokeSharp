@@ -1,5 +1,6 @@
 ﻿using PokeSharp.Compiler.Core.Schema;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Compiler.Model;

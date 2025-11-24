@@ -2,6 +2,7 @@
 using PokeSharp.Audio;
 using PokeSharp.Core;
 using PokeSharp.Core.State;
+using PokeSharp.Core.Strings;
 using PokeSharp.Items;
 using PokeSharp.Overworld;
 using PokeSharp.Services;

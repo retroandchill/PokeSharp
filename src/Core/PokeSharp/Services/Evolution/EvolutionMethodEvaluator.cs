@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
+using PokeSharp.Core.Strings;
 using PokeSharp.PokemonModel;
 
 namespace PokeSharp.Services.Evolution;

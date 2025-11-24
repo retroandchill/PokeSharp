@@ -1,5 +1,6 @@
 ﻿using PokeSharp.Audio;
 using PokeSharp.Core;
+using PokeSharp.Core.Strings;
 using Retro.ReadOnlyParams.Annotations;
 
 namespace PokeSharp.UI.Pause;

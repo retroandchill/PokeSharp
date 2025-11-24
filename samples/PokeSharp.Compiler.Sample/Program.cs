@@ -10,6 +10,7 @@ using PokeSharp.Compiler.Sample;
 using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Saving;
+using PokeSharp.Core.Strings;
 using PokeSharp.Maps;
 using PokeSharp.PokemonModel;
 using PokeSharp.Trainers;

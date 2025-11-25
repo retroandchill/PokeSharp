@@ -15,12 +15,12 @@ public class PokemonPauseScreen([ReadOnly] IPokemonPauseMenuScene scene) : IScre
 
     private void ShowInfo()
     {
-        GameGlobal.PauseMenuService.ShowInfo(this);
+        GameGlobal.PauseMenuService.ShowInfo(scene);
     }
 
     public async ValueTask StartPokemonMenu(CancellationToken cancellationToken = default)
     {
-        scene.StartScene();
+        await scene.StartScene(cancellationToken);
         ShowInfo();
         var commandList = new List<Text>();
         var commands = new List<PauseMenuOption>();

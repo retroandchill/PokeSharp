@@ -10,7 +10,7 @@ public sealed class PauseMenuService(IEnumerable<IPauseSceneInfoProvider> provid
 {
     private readonly ImmutableArray<IPauseSceneInfoProvider> _providers = [.. providers.OrderBy(x => x.Order)];
 
-    public void ShowInfo(PokemonPauseScreen pauseScreen)
+    public void ShowInfo(IPokemonPauseMenuScene pauseScreen)
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var provider in _providers)

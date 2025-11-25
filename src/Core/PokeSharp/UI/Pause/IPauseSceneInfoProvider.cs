@@ -4,5 +4,5 @@ public interface IPauseSceneInfoProvider
 {
     int Order { get; }
 
-    bool ShowInfo(PokemonPauseScreen pauseScreen);
+    bool ShowInfo(IPokemonPauseMenuScene pauseScreen);
 }

@@ -5,7 +5,7 @@ namespace PokeSharp.UI.Pause;
 
 public interface IPokemonPauseMenuScene : IScene
 {
-    void StartScene();
+    ValueTask StartScene(CancellationToken cancellationToken = default);
 
     void ShowInfo(Text text);
 

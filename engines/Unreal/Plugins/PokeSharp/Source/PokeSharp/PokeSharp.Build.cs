@@ -25,6 +25,7 @@ public class PokeSharp : ModuleRules
             "CommonUtilities",
             "CommonInput",
             "GameplayTags",
+            "EnhancedInput",
         ]);
     }
 }

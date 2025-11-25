@@ -1,23 +1,23 @@
-﻿using UnrealSharp.Core;
-using UnrealSharp.PokeSharpCore;
+﻿using UnrealSharp.PokeSharpCore;
 using UnrealSharp.UnrealSharpAsync;
 
+// ReSharper disable once CheckNamespace
 namespace UnrealSharp.PokeSharp;
 
-internal partial class UPlayDialogueBoxTextAsync
+internal partial class USelectOptionAsync
 {
-    private TaskCompletionSource _tcs = new();
+    private TaskCompletionSource<TOptional<int>> _tcs = new();
 
     private readonly Action _onAsyncCompleted;
 
-    internal UPlayDialogueBoxTextAsync()
+    internal USelectOptionAsync()
     {
         _onAsyncCompleted = OnAsyncCompleted;
     }
 
     private void OnAsyncCompleted()
     {
-        _tcs.SetResult();
+        _tcs.SetResult(SelectedIndex);
     }
 
     public override void Dispose()
@@ -26,16 +26,15 @@ internal partial class UPlayDialogueBoxTextAsync
         AsyncLoadUtilities.DisposeAsyncLoadTask(ref _tcs);
     }
 
-    public static Task PlayDialogueBoxTextAsync(
-        UDialogueBox dialogueBox,
-        FText text,
+    public static Task<TOptional<int>> SelectOptionAsync(
+        USelectableWidget selectableWidget,
         CancellationToken cancellationToken = default
     )
     {
-        var async = NewObject<UPlayDialogueBoxTextAsync>(dialogueBox);
+        var async = NewObject<USelectOptionAsync>(selectableWidget);
         NativeAsyncUtilities.InitializeAsyncAction(async, async._onAsyncCompleted);
-        async.PlayDialogueBoxText(dialogueBox, text);
-        cancellationToken.Register(dialogueBox.SkipToLineEnd);
+        async.SelectOption(selectableWidget);
+        cancellationToken.Register(selectableWidget.DeactivateWidget);
         return async._tcs.Task;
     }
 }

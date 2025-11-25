@@ -3,10 +3,10 @@
 #include "UI/Common/PokemonButtonBase.h"
 #include "CommonActionWidget.h"
 
-void UPokemonButtonBase::SetButtonText(const FText &InText)
+void UPokemonButtonBase::SetButtonText(FText InText)
 {
     bOverride_ButtonText = InText.IsEmpty();
-    ButtonText = InText;
+    ButtonText = MoveTemp(InText);
     RefreshButtonText();
 }
 

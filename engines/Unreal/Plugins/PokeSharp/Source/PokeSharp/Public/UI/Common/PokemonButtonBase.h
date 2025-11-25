@@ -17,7 +17,7 @@ class POKESHARP_API UPokemonButtonBase : public UCommonButtonBase
 
   public:
     UFUNCTION(BlueprintCallable)
-    void SetButtonText(const FText &InText);
+    void SetButtonText(FText InText);
 
   protected:
     void NativePreConstruct() override;

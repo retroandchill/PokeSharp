@@ -18,6 +18,17 @@ internal static class AsyncLoadUtilities
         }
     }
 
+    internal static void DisposeAsyncLoadTask(ref TaskCompletionSource tcs)
+    {
+        if (!tcs.Task.IsCompleted)
+        {
+            tcs.SetCanceled();
+        }
+
+        tcs.Task.Dispose();
+        tcs = null!;
+    }
+
     internal static void DisposeAsyncLoadTask<T>(ref TaskCompletionSource<T> tcs)
     {
         if (!tcs.Task.IsCompleted)

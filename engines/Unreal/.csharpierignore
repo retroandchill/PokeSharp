@@ -1,2 +1,7 @@
 ﻿/Plugins/UnrealSharp
 *.generated.cs
+
+AssetIds.cs
+AssetType.cs
+GameplayTags.cs
+TraceChannel.cs

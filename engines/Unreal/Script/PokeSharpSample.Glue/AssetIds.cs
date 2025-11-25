@@ -1,3 +1,5 @@
 using UnrealSharp.CoreUObject;
 
-public static class AssetIds { }
+public static class AssetIds
+{
+}

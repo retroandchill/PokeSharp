@@ -2,7 +2,7 @@
 
 #include "UI/PrimaryGameLayout.h"
 #include "Kismet/GameplayStatics.h"
-#include "LogPokeSharp.h"
+#include "LogPokeSharpCore.h"
 #include "OptionalPtr.h"
 #include "UI/GameUIManagerSubsystem.h"
 #include "UI/GameUIPolicy.h"
@@ -44,7 +44,7 @@ void UPrimaryGameLayout::SetIsDormant(bool bNewIsDormant)
         const auto NewDormancyStr = bNewIsDormant ? DormantString : NotDormantString;
         const auto PrimaryPlayerStr =
             LocalPlayer != nullptr && LocalPlayer->IsPrimaryPlayer() ? PrimaryString : NonPrimaryString;
-        UE_LOG(LogPokeSharp, Display, TEXT("%s PrimaryGameLayout Dormancy changed for [%d] from [%s] to [%s]"),
+        UE_LOG(LogPokeSharpCore, Display, TEXT("%s PrimaryGameLayout Dormancy changed for [%d] from [%s] to [%s]"),
                PrimaryPlayerStr, PlayerId, OldDormancyStr, NewDormancyStr);
 
         bIsDormant = bNewIsDormant;

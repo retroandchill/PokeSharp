@@ -20,9 +20,9 @@ class UGameUIManagerSubsystem : public UGameInstanceSubsystem
   public:
     UGameUIManagerSubsystem() = default;
 
-    POKESHARP_API void Initialize(FSubsystemCollectionBase &Collection) override;
-    POKESHARP_API void Deinitialize() override;
-    POKESHARP_API bool ShouldCreateSubsystem(UObject *Outer) const override;
+    POKESHARPCORE_API void Initialize(FSubsystemCollectionBase &Collection) override;
+    POKESHARPCORE_API void Deinitialize() override;
+    POKESHARPCORE_API bool ShouldCreateSubsystem(UObject *Outer) const override;
 
     UFUNCTION(meta = (ScriptMethod, WorldContext = WorldContextObject))
     static UGameUIManagerSubsystem *GetInstance(const UObject *WorldContextObject)
@@ -41,17 +41,17 @@ class UGameUIManagerSubsystem : public UGameInstanceSubsystem
     }
 
     UFUNCTION(BlueprintNativeEvent, Category = "UI Manager")
-    POKESHARP_API void NotifyPlayerAdded(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void NotifyPlayerAdded(ULocalPlayer *LocalPlayer);
 
     UFUNCTION(BlueprintNativeEvent, Category = "UI Manager")
-    POKESHARP_API void NotifyPlayerRemoved(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void NotifyPlayerRemoved(ULocalPlayer *LocalPlayer);
 
     UFUNCTION(BlueprintNativeEvent, Category = "UI Manager")
-    POKESHARP_API void NotifyPlayerDestroyed(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void NotifyPlayerDestroyed(ULocalPlayer *LocalPlayer);
 
   protected:
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
-    POKESHARP_API void SwitchToPolicy(UGameUIPolicy *NewPolicy);
+    POKESHARPCORE_API void SwitchToPolicy(UGameUIPolicy *NewPolicy);
 
     UFUNCTION(BlueprintNativeEvent, meta = (ScriptName = "ShouldCreateSubsystem"), Category = "Managed Subsystems")
     bool K2_ShouldCreateSubsystem(UObject *Outer) const;

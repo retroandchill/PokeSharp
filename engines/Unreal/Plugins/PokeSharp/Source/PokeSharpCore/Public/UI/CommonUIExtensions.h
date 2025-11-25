@@ -21,53 +21,53 @@ class UCommonUIExtensions : public UBlueprintFunctionLibrary
   public:
     UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "Global UI Extensions",
               meta = (WorldContext = "WidgetContextObject", ExtensionMethod))
-    static POKESHARP_API ECommonInputType GetOwningPlayerInputType(const UUserWidget *WidgetContextObject);
+    static POKESHARPCORE_API ECommonInputType GetOwningPlayerInputType(const UUserWidget *WidgetContextObject);
 
     UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "Global UI Extensions",
               meta = (WorldContext = "WidgetContextObject", ExtensionMethod))
-    static POKESHARP_API bool IsOwningPlayerUsingTouch(const UUserWidget *WidgetContextObject);
+    static POKESHARPCORE_API bool IsOwningPlayerUsingTouch(const UUserWidget *WidgetContextObject);
 
     UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "Global UI Extensions",
               meta = (WorldContext = "WidgetContextObject", ExtensionMethod))
-    static POKESHARP_API bool IsOwningPlayerUsingGamepad(const UUserWidget *WidgetContextObject);
+    static POKESHARPCORE_API bool IsOwningPlayerUsingGamepad(const UUserWidget *WidgetContextObject);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions",
               meta = (DeterminesOutputType = "WidgetClass", DynamicOutputParam = "ReturnValue", ExtensionMethod))
-    static POKESHARP_API UCommonActivatableWidget *PushContentToLayer(
+    static POKESHARPCORE_API UCommonActivatableWidget *PushContentToLayer(
         const ULocalPlayer *LocalPlayer, UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerName,
         UPARAM(meta = (AllowAbstract = false)) TSubclassOf<UCommonActivatableWidget> WidgetClass);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARP_API void PushStreamedContentToLayer(
+    static POKESHARPCORE_API void PushStreamedContentToLayer(
         const ULocalPlayer *LocalPlayer, UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerName,
         UPARAM(meta = (AllowAbstract = false)) TSoftClassPtr<UCommonActivatableWidget> WidgetClass);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARP_API void PopContentFromLayer(UCommonActivatableWidget *ActivatableWidget);
+    static POKESHARPCORE_API void PopContentFromLayer(UCommonActivatableWidget *ActivatableWidget);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARP_API ULocalPlayer *GetLocalPlayerFromController(APlayerController *PlayerController);
+    static POKESHARPCORE_API ULocalPlayer *GetLocalPlayerFromController(APlayerController *PlayerController);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARP_API FName SuspendInputForPlayer(APlayerController *PlayerController, FName SuspendReason);
+    static POKESHARPCORE_API FName SuspendInputForPlayer(APlayerController *PlayerController, FName SuspendReason);
 
-    static POKESHARP_API FName SuspendInputForPlayer(const ULocalPlayer *LocalPlayer, FName SuspendReason);
+    static POKESHARPCORE_API FName SuspendInputForPlayer(const ULocalPlayer *LocalPlayer, FName SuspendReason);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARP_API void ResumeInputForPlayer(APlayerController *PlayerController, FName SuspendToken);
+    static POKESHARPCORE_API void ResumeInputForPlayer(APlayerController *PlayerController, FName SuspendToken);
 
-    static POKESHARP_API void ResumeInputForPlayer(const ULocalPlayer *LocalPlayer, FName SuspendToken);
+    static POKESHARPCORE_API void ResumeInputForPlayer(const ULocalPlayer *LocalPlayer, FName SuspendToken);
 
     UFUNCTION(BlueprintPure, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARP_API UCommonActivatableWidget *GetTopWidgetForPlayer(APlayerController *PlayerController,
-                                                                         UPARAM(meta = (Categories = "UI.Layer"))
+    static POKESHARPCORE_API UCommonActivatableWidget *GetTopWidgetForPlayer(APlayerController *PlayerController,
+                                                                             UPARAM(meta = (Categories = "UI.Layer"))
+                                                                                 FGameplayTag LayerName);
+
+    static POKESHARPCORE_API UCommonActivatableWidget *GetTopWidgetForPlayer(const ULocalPlayer *LocalPlayer,
                                                                              FGameplayTag LayerName);
 
-    static POKESHARP_API UCommonActivatableWidget *GetTopWidgetForPlayer(const ULocalPlayer *LocalPlayer,
-                                                                         FGameplayTag LayerName);
-
     UFUNCTION(BlueprintPure, Category = "Global UI Extensions", meta = (WorldContext = "WorldContext"))
-    static POKESHARP_API APlayerController *GetPrimaryPlayerController(const UObject *WorldContext);
+    static POKESHARPCORE_API APlayerController *GetPrimaryPlayerController(const UObject *WorldContext);
 
   private:
     static int32 InputSuspensions;

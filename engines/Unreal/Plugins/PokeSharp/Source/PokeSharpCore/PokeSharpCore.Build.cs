@@ -13,8 +13,18 @@ public class PokeSharpCore : ModuleRules
             "UnrealSharpCore",
             "DeveloperSettings",
             "UnrealSharpAsync",
+            "CommonUI",
+            "CommonInput",
         ]);
 
-        PrivateDependencyModuleNames.AddRange(["CoreUObject", "Engine", "Slate", "SlateCore"]);
+        PrivateDependencyModuleNames.AddRange([
+            "CoreUObject",
+            "Engine",
+            "Slate",
+            "SlateCore",
+            "UMG",
+            "CommonUtilities",
+            "GameplayTags",
+        ]);
     }
 }

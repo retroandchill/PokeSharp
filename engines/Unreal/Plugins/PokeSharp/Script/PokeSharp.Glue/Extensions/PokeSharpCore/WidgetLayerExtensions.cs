@@ -2,7 +2,7 @@
 using UnrealSharp.Engine;
 using UnrealSharp.GameplayTags;
 
-namespace UnrealSharp.PokeSharp;
+namespace UnrealSharp.PokeSharpCore;
 
 /// <summary>
 /// Provides extension methods for managing widget layers in a user interface.

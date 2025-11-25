@@ -69,45 +69,45 @@ class UGameUIPolicy : public UObject
     UFUNCTION(meta = (WorldContext = "WorldContextObject", ScriptMethod))
     static UGameUIPolicy *GetInstance(const UObject *WorldContextObject);
 
-    POKESHARP_API UWorld *GetWorld() const override;
+    POKESHARPCORE_API UWorld *GetWorld() const override;
 
-    POKESHARP_API UGameUIManagerSubsystem *GetOwner() const;
+    POKESHARPCORE_API UGameUIManagerSubsystem *GetOwner() const;
 
-    POKESHARP_API UPrimaryGameLayout *GetRootLayout(const ULocalPlayer *Player) const;
+    POKESHARPCORE_API UPrimaryGameLayout *GetRootLayout(const ULocalPlayer *Player) const;
 
-    POKESHARP_API ELocalMultiplayerInteractionMode GetLocalMultiplayerInteractionMode() const
+    POKESHARPCORE_API ELocalMultiplayerInteractionMode GetLocalMultiplayerInteractionMode() const
     {
         return LocalMultiplayerInteractionMode;
     }
 
-    POKESHARP_API void RequestPrimaryControl(UPrimaryGameLayout *Layout);
+    POKESHARPCORE_API void RequestPrimaryControl(UPrimaryGameLayout *Layout);
 
   protected:
     UFUNCTION(meta = (ScriptMethod))
-    POKESHARP_API void AddLayoutToViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
+    POKESHARPCORE_API void AddLayoutToViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
 
     UFUNCTION(meta = (ScriptMethod))
-    POKESHARP_API void RemoveLayoutFromViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
+    POKESHARPCORE_API void RemoveLayoutFromViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
 
     UFUNCTION(BlueprintNativeEvent, Category = "UI Policy")
-    POKESHARP_API void OnRootLayoutAddedToViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
+    POKESHARPCORE_API void OnRootLayoutAddedToViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
 
     UFUNCTION(BlueprintNativeEvent, Category = "UI Policy")
-    POKESHARP_API void OnRootLayoutRemovedFromViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
+    POKESHARPCORE_API void OnRootLayoutRemovedFromViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
 
     UFUNCTION(BlueprintNativeEvent, Category = "UI Policy")
-    POKESHARP_API void OnRootLayoutReleased(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
+    POKESHARPCORE_API void OnRootLayoutReleased(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout);
 
     UFUNCTION(meta = (ScriptMethod))
-    POKESHARP_API void CreateLayoutWidget(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void CreateLayoutWidget(ULocalPlayer *LocalPlayer);
 
     UFUNCTION(meta = (ScriptMethod))
-    POKESHARP_API TSubclassOf<UPrimaryGameLayout> GetLayoutWidgetClass() const;
+    POKESHARPCORE_API TSubclassOf<UPrimaryGameLayout> GetLayoutWidgetClass() const;
 
   private:
-    POKESHARP_API void NotifyPlayerAdded(ULocalPlayer *LocalPlayer);
-    POKESHARP_API void NotifyPlayerRemoved(ULocalPlayer *LocalPlayer);
-    POKESHARP_API void NotifyPlayerDestroyed(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void NotifyPlayerAdded(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void NotifyPlayerRemoved(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API void NotifyPlayerDestroyed(ULocalPlayer *LocalPlayer);
 
     friend class UGameUIManagerSubsystem;
 

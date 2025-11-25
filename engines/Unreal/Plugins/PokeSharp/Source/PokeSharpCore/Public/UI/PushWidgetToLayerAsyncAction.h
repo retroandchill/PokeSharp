@@ -24,13 +24,13 @@ class UPushWidgetToLayerAsyncAction : public UCancellableAsyncAction
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, BlueprintInternalUseOnly,
               meta = (DefaultToSelf = "OwningPlayer", DeterminesOutputType = "InWidgetClass",
                       DynamicOutputParam = "UserWidget"))
-    static POKESHARP_API UPushWidgetToLayerAsyncAction *PushWidgetToLayerAsync(
+    static POKESHARPCORE_API UPushWidgetToLayerAsyncAction *PushWidgetToLayerAsync(
         APlayerController *OwningPlayer,
         UPARAM(meta = (AllowAbstract = false)) TSoftClassPtr<UCommonActivatableWidget> InWidgetClass,
         UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag InLayerName, bool bSuspendInputUntilComplete = true);
 
-    POKESHARP_API void Activate() override;
-    POKESHARP_API void Cancel() override;
+    POKESHARPCORE_API void Activate() override;
+    POKESHARPCORE_API void Cancel() override;
 
   private:
     UPROPERTY(BlueprintAssignable)

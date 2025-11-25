@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/GameUIPolicy.h"
-#include "LogPokeSharp.h"
+#include "LogPokeSharpCore.h"
 #include "OptionalPtr.h"
 #include "UI/GameUIManagerSubsystem.h"
 #include "UI/PrimaryGameLayout.h"
@@ -17,6 +17,14 @@ UGameUIPolicy *UGameUIPolicy::GetInstance(const UObject *WorldContextObject)
 
 UWorld *UGameUIPolicy::GetWorld() const
 {
+#if WITH_EDITOR
+    // If we're in the editor, we want to avoid crashing when we edit a Blueprint class.
+    if (IsTemplate())
+    {
+        return Super::GetWorld();
+    }
+#endif
+
     return GetOwner()->GetGameInstance()->GetWorld();
 }
 
@@ -51,7 +59,7 @@ void UGameUIPolicy::RequestPrimaryControl(UPrimaryGameLayout *Layout)
 
 void UGameUIPolicy::AddLayoutToViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout)
 {
-    UE_LOG(LogPokeSharp, Log, TEXT("[%s] is adding player [%s]'s root layout [%s] to the viewport"), *GetName(),
+    UE_LOG(LogPokeSharpCore, Log, TEXT("[%s] is adding player [%s]'s root layout [%s] to the viewport"), *GetName(),
            *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));
 
     Layout->SetPlayerContext(FLocalPlayerContext(LocalPlayer));
@@ -68,13 +76,13 @@ void UGameUIPolicy::RemoveLayoutFromViewport(ULocalPlayer *LocalPlayer, UPrimary
         return;
     }
 
-    UE_LOG(LogPokeSharp, Log, TEXT("[%s] is removing player [%s]'s root layout [%s] from the viewport"), *GetName(),
+    UE_LOG(LogPokeSharpCore, Log, TEXT("[%s] is removing player [%s]'s root layout [%s] from the viewport"), *GetName(),
            *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));
 
     Layout->RemoveFromParent();
     if (LayoutSlateWidget.IsValid())
     {
-        UE_LOG(LogPokeSharp, Log,
+        UE_LOG(LogPokeSharpCore, Log,
                TEXT("Player [%s]'s root layout [%s] has been removed from the viewport, but other references to its "
                     "underlying Slate widget still exist. Noting in case we leak it."),
                *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));

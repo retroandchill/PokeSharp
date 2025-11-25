@@ -3,7 +3,7 @@ using UnrealSharp.Engine;
 using UnrealSharp.GameplayTags;
 using UnrealSharp.UnrealSharpAsync;
 
-namespace UnrealSharp.PokeSharp;
+namespace UnrealSharp.PokeSharpCore;
 
 internal partial class UCSPushWidgetToLayerAsync
 {

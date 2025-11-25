@@ -35,15 +35,15 @@ class UPrimaryGameLayout : public UCommonUserWidget
   public:
     UPrimaryGameLayout() = default;
 
-    POKESHARP_API static UPrimaryGameLayout *GetInstance(const UObject *WorldContextObject);
-    POKESHARP_API static UPrimaryGameLayout *GetInstance(const APlayerController *PlayerController);
-    POKESHARP_API static UPrimaryGameLayout *GetInstance(ULocalPlayer *LocalPlayer);
+    POKESHARPCORE_API static UPrimaryGameLayout *GetInstance(const UObject *WorldContextObject);
+    POKESHARPCORE_API static UPrimaryGameLayout *GetInstance(const APlayerController *PlayerController);
+    POKESHARPCORE_API static UPrimaryGameLayout *GetInstance(ULocalPlayer *LocalPlayer);
 
     bool IsDormant() const
     {
         return bIsDormant;
     }
-    POKESHARP_API void SetIsDormant(bool bNewIsDormant);
+    POKESHARPCORE_API void SetIsDormant(bool bNewIsDormant);
 
     template <std::derived_from<UCommonActivatableWidget> ActivatableWidgetT = UCommonActivatableWidget>
     TSharedPtr<FStreamableHandle> PushWidgetToLayerStackAsync(
@@ -112,19 +112,20 @@ class UPrimaryGameLayout : public UCommonUserWidget
                    : nullptr;
     }
 
-    POKESHARP_API void FindAndRemoveWidgetFromLayer(UCommonActivatableWidget *WidgetToRemove);
+    POKESHARPCORE_API void FindAndRemoveWidgetFromLayer(UCommonActivatableWidget *WidgetToRemove);
 
-    POKESHARP_API UCommonActivatableWidgetContainerBase *GetLayerWidget(FGameplayTag LayerName) const;
+    POKESHARPCORE_API UCommonActivatableWidgetContainerBase *GetLayerWidget(FGameplayTag LayerName) const;
 
   protected:
     UFUNCTION(BlueprintCallable, Category = "Layer")
-    POKESHARP_API void RegisterLayer(UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerTag,
-                                     UCommonActivatableWidgetContainerBase *LayerWidget);
+    POKESHARPCORE_API void RegisterLayer(UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerTag,
+                                         UCommonActivatableWidgetContainerBase *LayerWidget);
 
     UFUNCTION(BlueprintNativeEvent, Category = "Layer")
-    POKESHARP_API void OnIsDormantChanged();
+    POKESHARPCORE_API void OnIsDormantChanged();
 
-    POKESHARP_API void OnWidgetStackTransitioning(UCommonActivatableWidgetContainerBase *Widget, bool bIsTransitioning);
+    POKESHARPCORE_API void OnWidgetStackTransitioning(UCommonActivatableWidgetContainerBase *Widget,
+                                                      bool bIsTransitioning);
 
   private:
     bool bIsDormant = false;

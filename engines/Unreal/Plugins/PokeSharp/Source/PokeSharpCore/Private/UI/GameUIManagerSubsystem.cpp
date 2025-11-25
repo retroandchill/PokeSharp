@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/GameUIManagerSubsystem.h"
-#include "LogPokeSharp.h"
+#include "LogPokeSharpCore.h"
 #include "UI/GameUIPolicy.h"
 
 void UGameUIManagerSubsystem::Initialize(FSubsystemCollectionBase &Collection)
@@ -17,7 +17,7 @@ void UGameUIManagerSubsystem::Initialize(FSubsystemCollectionBase &Collection)
     GameInstance->OnLocalPlayerAddedEvent.AddWeakLambda(this, [this](ULocalPlayer *NewPlayer) {
         if (!PrimaryPlayer.IsValid())
         {
-            UE_LOG(LogPokeSharp, Log, TEXT("AddLocalPlayer: Set %s to Primary Player"), *NewPlayer->GetName());
+            UE_LOG(LogPokeSharpCore, Log, TEXT("AddLocalPlayer: Set %s to Primary Player"), *NewPlayer->GetName());
             PrimaryPlayer = NewPlayer;
         }
 
@@ -29,7 +29,7 @@ void UGameUIManagerSubsystem::Initialize(FSubsystemCollectionBase &Collection)
         {
             // TODO: do we want to fall back to another player?
             PrimaryPlayer.Reset();
-            UE_LOG(LogPokeSharp, Log, TEXT("RemoveLocalPlayer: Unsetting Primary Player from %s"),
+            UE_LOG(LogPokeSharpCore, Log, TEXT("RemoveLocalPlayer: Unsetting Primary Player from %s"),
                    *ExistingPlayer->GetName());
         }
 

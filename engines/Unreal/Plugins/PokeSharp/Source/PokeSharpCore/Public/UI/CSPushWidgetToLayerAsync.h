@@ -25,7 +25,7 @@ enum class EAsyncLoadSuccessState : uint8
  *
  */
 UCLASS(meta = (InternalType))
-class POKESHARP_API UCSPushWidgetToLayerAsync : public UCSAsyncActionBase
+class POKESHARPCORE_API UCSPushWidgetToLayerAsync : public UCSAsyncActionBase
 {
     GENERATED_BODY()
 

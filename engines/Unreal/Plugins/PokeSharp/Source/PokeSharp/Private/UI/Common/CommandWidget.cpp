@@ -11,6 +11,12 @@ void UCommandWidget::SetCommands(TArray<FCommandData> InCommands)
     RefreshCommands();
 }
 
+void UCommandWidget::NativePreConstruct()
+{
+    Super::NativePreConstruct();
+    RefreshCommands();
+}
+
 void UCommandWidget::RefreshCommands()
 {
     for (int32 i = 0; i < GetButtons()->GetButtonCount(); i++)

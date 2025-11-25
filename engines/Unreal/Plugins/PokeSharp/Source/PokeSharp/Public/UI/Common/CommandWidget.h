@@ -39,6 +39,8 @@ class POKESHARP_API UCommandWidget : public USelectableWidget
     void SetCommands(TArray<FCommandData> InCommands);
 
   protected:
+    void NativePreConstruct() override;
+
     UFUNCTION(BlueprintImplementableEvent, Category = "Display")
     void SlotWidget(UPokemonButtonBase *Button, int32 Index);
 

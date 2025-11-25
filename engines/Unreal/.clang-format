@@ -1,0 +1,44 @@
+---
+Language: Cpp
+BasedOnStyle: Microsoft
+ColumnLimit: 120
+MaxEmptyLinesToKeep: 1
+TabWidth: 4
+IndentWidth: 4
+SortIncludes: CaseInsensitive
+AllowShortFunctionsOnASingleLine: None
+NamespaceIndentation: All
+IncludeBlocks: Regroup
+IncludeCategories:
+    - Regex: 'CoreMinimal.h'
+      Priority: 0
+      SortPriority: 0
+      CaseSensitive: false
+    - Regex:           '.*.generated.h'
+      Priority:        1000
+      SortPriority:    1000
+    - Regex:           '.*'
+      Priority:        0
+      SortPriority:    1
+BreakBeforeConceptDeclarations: true
+AlwaysBreakTemplateDeclarations : Yes
+ForEachMacros: 
+    - TRIPLE_LOOP
+Macros:
+    - check(x)={assert(x);}
+    - verify(x)=x;
+    - ABSTRACT_METHOD={}
+    - SLATE_BEGIN_ARGS(InWidgetType)=struct FArguments { typedef FArguments WidgetArgsType; typedef InWidgetType WidgetType; FORCENOINLINE FArguments()
+    - SLATE_END_ARGS()=};
+    - SLATE_ATTRIBUTE(AttrType, AttrName) AttrType AttrName;
+    - SLATE_ARGUMENT(AttrType, AttrName) AttrType AttrName;
+---
+Language: CSharp
+ColumnLimit: 120
+MaxEmptyLinesToKeep: 1
+TabWidth: 4
+IndentWidth: 4
+SortIncludes: CaseInsensitive
+AllowShortFunctionsOnASingleLine: None
+NamespaceIndentation: All
+IncludeBlocks: Regroup

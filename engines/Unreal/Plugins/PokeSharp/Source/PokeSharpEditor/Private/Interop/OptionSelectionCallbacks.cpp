@@ -1,9 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Interop/OptionSelectionCallbacks.h"
 
-FOptionSelectionManager & FOptionSelectionManager::Get()
+FOptionSelectionManager &FOptionSelectionManager::Get()
 {
     static FOptionSelectionManager Instance;
     return Instance;

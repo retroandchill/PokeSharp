@@ -16,10 +16,13 @@ public partial class UPokeSharpBlueprintLibrary : UBlueprintFunctionLibrary
     {
         GameGlobal.GameState.StartNew();
     }
-    
+
     [UFunction(FunctionFlags.BlueprintCallable, Category = "Pokémon")]
     [UMetaData("DisplayName", "Add Pokémon To Party")]
-    public static void AddPokemonToParty([UMetaData("GetOptions", "OptionSelectionSourceFunctions.GetSpecies")] FName species, int level = 5)
+    public static void AddPokemonToParty(
+        [UMetaData("GetOptions", "OptionSelectionSourceFunctions.GetSpecies")] FName species,
+        int level = 5
+    )
     {
         // TODO: We're going to eventually add a new method on the main library that this will call to instead.
         GameGlobal.PlayerTrainer.Party.Add(new Pokemon(species.ToPokeSharpName(), level));

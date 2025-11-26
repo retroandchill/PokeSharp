@@ -4,14 +4,12 @@
 
 void FPokeSharpEditorModule::StartupModule()
 {
-    
 }
 
 void FPokeSharpEditorModule::ShutdownModule()
 {
-    
 }
 
 #undef LOCTEXT_NAMESPACE
-    
+
 IMPLEMENT_MODULE(FPokeSharpEditorModule, PokeSharpEditor)

@@ -10,8 +10,5 @@ public class FPokeSharpUnrealEditorModule : IModuleInterface
         PokeSharpEditorCallbacksExporter.CallSetOptionSelectionCallbacks(OptionSelectionCallbacks.Create());
     }
 
-    public void ShutdownModule()
-    {
-
-    }
+    public void ShutdownModule() { }
 }

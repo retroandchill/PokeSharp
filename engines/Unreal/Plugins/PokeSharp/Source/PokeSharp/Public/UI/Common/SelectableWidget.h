@@ -61,7 +61,7 @@ class POKESHARP_API USelectableWidget : public UCommonActivatableWidget
     }
 
   protected:
-    void NativeOnInitialized() override;
+    void NativePreConstruct() override;
 
     UWidget *NativeGetDesiredFocusTarget() const override;
 

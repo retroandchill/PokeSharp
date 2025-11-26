@@ -17,9 +17,14 @@ void USelectableWidget::SetDesiredFocusIndex(const int32 Index)
     OnDesiredFocusIndexChanged.Broadcast(Index);
 }
 
-void USelectableWidget::NativeOnInitialized()
+void USelectableWidget::NativePreConstruct()
 {
-    Super::NativeOnInitialized();
+    Super::NativePreConstruct();
+
+#if WITH_EDITOR
+    if (Buttons != nullptr)
+        return;
+#endif
 
     Buttons = NewObject<UCommonButtonGroupBase>(this);
     Buttons->NativeOnHoveredButtonBaseChanged.AddWeakLambda(

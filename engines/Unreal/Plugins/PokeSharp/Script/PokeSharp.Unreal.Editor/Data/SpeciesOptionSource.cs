@@ -10,10 +10,8 @@ public class SpeciesOptionSource : INameOptionsSource
     {
         get
         {
-            var speciesKeys = Species.Keys.Where(x => x.Form == 0)
-                .Select(x => x.Species.ToUnrealName())
-                .ToArray();
-            
+            var speciesKeys = Species.Keys.Where(x => x.Form == 0).Select(x => x.Species.ToUnrealName()).ToArray();
+
             return (speciesKeys.Length, speciesKeys);
         }
     }

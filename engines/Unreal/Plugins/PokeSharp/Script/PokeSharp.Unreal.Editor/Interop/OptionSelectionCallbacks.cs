@@ -13,10 +13,7 @@ public unsafe struct OptionSelectionCallbacks
 
     public static OptionSelectionCallbacks Create()
     {
-        return new OptionSelectionCallbacks
-        {
-            GetNamesList = &OptionSelectionMethods.GetNamesList
-        };
+        return new OptionSelectionCallbacks { GetNamesList = &OptionSelectionMethods.GetNamesList };
     }
 }
 

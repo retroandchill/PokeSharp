@@ -10,7 +10,8 @@ internal interface INameOptionsSource
     (int Count, IEnumerable<FName> Names) Options { get; }
 }
 
-internal sealed class NameOptionsSource<T> : INameOptionsSource where T : IGameDataEntity<Name, T>
+internal sealed class NameOptionsSource<T> : INameOptionsSource
+    where T : IGameDataEntity<Name, T>
 {
     public (int Count, IEnumerable<FName> Names) Options => (T.Count, T.Keys.Select(x => x.ToUnrealName()));
 }

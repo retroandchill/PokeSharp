@@ -3,21 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OptionSelectionCallbacks.h"
 #include "CSBindsManager.h"
+#include "OptionSelectionCallbacks.h"
 #include "UObject/Object.h"
+
 #include "PokeSharpEditorCallbacksExporter.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class POKESHARPEDITOR_API UPokeSharpEditorCallbacksExporter : public UObject
 {
     GENERATED_BODY()
 
-public:
+  public:
     UNREALSHARP_FUNCTION()
     static void SetOptionSelectionCallbacks(FOptionSelectionCallbacks Callbacks);
-
 };

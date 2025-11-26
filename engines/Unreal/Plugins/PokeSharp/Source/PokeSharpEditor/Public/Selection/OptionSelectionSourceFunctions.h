@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "OptionSelectionSourceFunctions.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class POKESHARPEDITOR_API UOptionSelectionSourceFunctions : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
-public:
+  public:
     UFUNCTION(BlueprintPure, BlueprintInternalUseOnly)
     static TArray<FName> GetSpecies();
-    
+
     UFUNCTION(BlueprintPure, BlueprintInternalUseOnly)
     static TArray<FName> GetTrainerTypes();
-
 };

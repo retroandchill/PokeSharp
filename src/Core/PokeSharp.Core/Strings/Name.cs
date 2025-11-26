@@ -78,16 +78,16 @@ public readonly struct Name
     public uint ComparisonIndex { get; }
 
     /// <summary>
-    /// Gets the display string index for this <see cref="Name"/>. This is the way in which Name is able to get back
-    /// the correct case-sensitive string representation of the name.
-    /// </summary>
-    public uint DisplayStringIndex { get; }
-
-    /// <summary>
     /// Gets the number of the name. A number that is greater than 0 indicates that the name is a numbered name, which
     /// means calles to <see cref="ToString"/> will return the one less than the number as a suffix.
     /// </summary>
     public int Number { get; }
+
+    /// <summary>
+    /// Gets the display string index for this <see cref="Name"/>. This is the way in which Name is able to get back
+    /// the correct case-sensitive string representation of the name.
+    /// </summary>
+    public uint DisplayStringIndex { get; }
 
     /// <summary>
     /// Construct a new <see cref="Name"/> from a <see cref="ReadOnlySpan{char}"/>

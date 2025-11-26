@@ -3,7 +3,7 @@
     "UnrealSharp": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Binaries\\Win64\\UnrealEditor.exe",
-      "commandLineArgs": "\"D:\\dev\\PokeSharpPlugin\\PokeSharpPlugin.uproject\""
+      "commandLineArgs": "\"D:\\dev\\PokeSharpPlugin\\PokeSharpSample.uproject\""
     }
   }
 }

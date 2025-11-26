@@ -23,6 +23,11 @@
 			"Name": "PokeSharp",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "PokeSharpEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	]
 }

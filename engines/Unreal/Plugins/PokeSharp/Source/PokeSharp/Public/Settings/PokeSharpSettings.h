@@ -12,7 +12,7 @@ struct FRivalName
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (GetOptions = "OptionSelectionSourceFunctions.GetTrainerTypes"))
     FName TrainerType;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -73,7 +73,7 @@ struct FRoamingSpecies
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (GetOptions = "OptionSelectionSourceFunctions.GetSpecies"))
     FName Species;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1, ClampMin = 1))

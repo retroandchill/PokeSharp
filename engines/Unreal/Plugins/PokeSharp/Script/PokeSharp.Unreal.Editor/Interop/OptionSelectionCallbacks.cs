@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using PokeSharp.Unreal.Editor.Data;
+using PokeSharp.Editor.Data;
+using PokeSharp.Unreal.Core.Strings;
 using UnrealSharp.Core;
 
 namespace PokeSharp.Unreal.Editor.Interop;
@@ -22,12 +23,12 @@ internal static unsafe class OptionSelectionMethods
     [UnmanagedCallersOnly]
     public static void GetNamesList(FName self, UnmanagedArray* namesList)
     {
-        var (count, names) = DataOptionsManager.GetNameOptions(self);
+        var (count, names) = DataOptionsManager.GetNameOptions(self.ToPokeSharpName());
         OptionSelectionExporter.CallSetArraySize(ref *namesList, count);
         var optionsSpan = new Span<FName>((FName*)namesList->Data, count);
         foreach (var (i, name) in names.Index())
         {
-            optionsSpan[i] = name;
+            optionsSpan[i] = name.ToUnrealName();
         }
     }
 }

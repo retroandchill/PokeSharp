@@ -10,5 +10,6 @@
     <PokeSharpCompilerGeneratorProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.Compiler.SourceGenerator\PokeSharp.Compiler.SourceGenerator.csproj</PokeSharpCompilerGeneratorProj>
     <PokeSharpCompilerProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Compiler\PokeSharp.Compiler.csproj</PokeSharpCompilerProj>
     <PokeSharpRgssProj>$(MSBuildThisFileDirectory)src\Interop\PokeSharp.RGSS\PokeSharp.RGSS.csproj</PokeSharpRgssProj>
+    <PokeSharpEditorProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Editor\PokeSharp.Editor.csproj</PokeSharpEditorProj>
   </PropertyGroup>
 </Project>

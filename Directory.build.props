@@ -1,5 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
+    <LangVersion>14</LangVersion>
     <PokeSharpCoreProj>$(MSBuildThisFileDirectory)src\Core\PokeSharp.Core\PokeSharp.Core.csproj</PokeSharpCoreProj>
     <PokeSharpAbstractionsProj>$(MSBuildThisFileDirectory)src\Core\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj</PokeSharpAbstractionsProj>
     <PokeSharpProj>$(MSBuildThisFileDirectory)src\Core\PokeSharp\PokeSharp.csproj</PokeSharpProj>
@@ -11,5 +12,7 @@
     <PokeSharpCompilerProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Compiler\PokeSharp.Compiler.csproj</PokeSharpCompilerProj>
     <PokeSharpRgssProj>$(MSBuildThisFileDirectory)src\Interop\PokeSharp.RGSS\PokeSharp.RGSS.csproj</PokeSharpRgssProj>
     <PokeSharpEditorProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Editor\PokeSharp.Editor.csproj</PokeSharpEditorProj>
+    <PokeSharpEditorCoreProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Editor.Core\PokeSharp.Editor.Core.csproj</PokeSharpEditorCoreProj>
+    <PokeSharpEditorGeneratorProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.Editor.SourceGenerator\PokeSharp.Editor.SourceGenerator.csproj</PokeSharpEditorGeneratorProj>
   </PropertyGroup>
 </Project>

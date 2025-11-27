@@ -1,8 +1,9 @@
 ﻿using PokeSharp.Core.Strings;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
+using PokeSharp.Editor.Data;
 
-namespace PokeSharp.Editor.Data;
+namespace PokeSharp.Editor.Core.Data;
 
 public static class DataOptionsManager
 {

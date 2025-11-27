@@ -8,7 +8,7 @@
     <DefineConstants>$(DefineConstants);POKESHARP_GENERATOR</DefineConstants>
     <ImplicitUsings>true</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>PokeSharp.SourceGenerator</RootNamespace>
+    <RootNamespace>PokeSharp.Editor.SourceGenerator</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Handlebars.Net" GeneratePathProperty="true" PrivateAssets="all" />

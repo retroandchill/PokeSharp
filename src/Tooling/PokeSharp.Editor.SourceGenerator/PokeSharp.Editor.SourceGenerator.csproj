@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
-    <DefineConstants>$(DefineConstants);POKESHARP_CORE_GENERATOR</DefineConstants>
+    <DefineConstants>$(DefineConstants);POKESHARP_EDITOR_GENERATOR</DefineConstants>
     <ImplicitUsings>true</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -45,18 +45,5 @@
       PackagePath="analyzers/roslyn$(ROSLYN_VERSION)/dotnet/cs"
       Visible="false"
     />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\SourceTemplates.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SourceTemplates.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Properties\SourceTemplates.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>SourceTemplates.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
 </Project>

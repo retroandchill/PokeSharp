@@ -7,10 +7,5 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="$(PokeSharpCoreProj)" />
-    <ProjectReference
-      Include="$(PokeSharpEditorGeneratorProj)"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
-namespace PokeSharp.Editor.Core.PokeEdit;
+﻿namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
-public enum PropertyKind
+public enum PrimitiveKind
 {
     Bool,
     Int8,
@@ -16,10 +16,4 @@ public enum PropertyKind
     Name,
     String,
     Text,
-    Enum,
-    Object,
-    Record,
-    List,
-    Dictionary,
-    Nullable,
 }

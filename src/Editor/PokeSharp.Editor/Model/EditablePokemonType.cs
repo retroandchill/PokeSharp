@@ -1,10 +1,12 @@
 ﻿using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
-using PokeSharp.Editor.Core.PokeEdit;
+using PokeSharp.Editor.Core;
+using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace PokeSharp.Editor.Model;
 
-public sealed class EditableType
+[EditableType]
+public sealed partial class EditablePokemonType
 {
     public required Name Id { get; init; }
 

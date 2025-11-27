@@ -1,9 +1,25 @@
 using PokeSharp.Core.Strings;
-using PokeSharp.Editor.Core.PokeEdit;
+using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace {{Namespace}};
 
 partial class {{ClassName}} : IEditableEntity<{{ClassName}}>
 {
-
+    public static IEditableType Type { get; } = new EditableType
+    {
+        Name = "{{Identifier}}",
+        Properties = [
+            {{#Properties}}
+            new {{PropertyClass}}<{{../ClassName}}{{#IsDictionary}}, {{KeyType}}{{/IsDictionary}}, {{ValueType}}>("{{Identifier}}", {{TypeRef}}, x => x.{{Name}}){{^IsReadOnly}},{{/IsReadOnly}}
+            {{#IsReadOnly}}
+            {
+                {{#HasDefaultValue}}
+                DefaultValue => () => {{DefaultValue}},
+                {{/HasDefaultValue}}
+                Setter = (x, v) => x.{{Name}} = v
+            },
+            {{/IsReadOnly}}
+            {{/Properties}}
+        ]
+    };
 }

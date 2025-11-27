@@ -12,4 +12,7 @@ namespace PokeSharp.Editor.Core;
 #if POKESHARP_EDITOR_GENERATOR
 [IncludeFile]
 #endif
-internal class EditableTypeAttribute : Attribute;
+internal class EditableTypeAttribute(string? name = null) : Attribute
+{
+    public string? Name { get; } = name;
+}

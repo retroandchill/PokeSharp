@@ -46,4 +46,17 @@
       Visible="false"
     />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\SourceTemplates.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SourceTemplates.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\SourceTemplates.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SourceTemplates.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

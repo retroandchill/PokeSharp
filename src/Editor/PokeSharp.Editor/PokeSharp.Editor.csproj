@@ -7,5 +7,10 @@
   <ItemGroup>
     <ProjectReference Include="$(PokeSharpProj)" />
     <ProjectReference Include="$(PokeSharpEditorCoreProj)" />
+    <ProjectReference
+      Include="$(PokeSharpEditorGeneratorProj)"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
 </Project>

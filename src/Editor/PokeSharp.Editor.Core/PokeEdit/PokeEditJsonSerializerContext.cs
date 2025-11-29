@@ -3,6 +3,6 @@ using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace PokeSharp.Editor.Core.PokeEdit;
 
-[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(FieldDefinition))]
 public partial class PokeEditJsonSerializerContext : JsonSerializerContext;

@@ -1,7 +1,18 @@
-﻿using PokeSharp.Core.Strings;
+﻿using System.Text.Json.Serialization;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
+[JsonPolymorphic]
+[JsonDerivedType(typeof(BoolFieldDefinition), "Bool")]
+[JsonDerivedType(typeof(TextFieldDefinition), "Text")]
+[JsonDerivedType(typeof(IntFieldDefinition), "Int")]
+[JsonDerivedType(typeof(FloatFieldDefinition), "Float")]
+[JsonDerivedType(typeof(ChoiceFieldDefinition), "Choice")]
+[JsonDerivedType(typeof(ObjectFieldDefinition), "Object")]
+[JsonDerivedType(typeof(ListFieldDefinition), "List")]
+[JsonDerivedType(typeof(DictionaryFieldDefinition), "Dictionary")]
+[JsonDerivedType(typeof(OptionalFieldDefinition), "Optional")]
 public abstract record FieldDefinition
 {
     public required Name FieldId { get; init; }
@@ -17,7 +28,8 @@ public sealed record TextFieldDefinition : FieldDefinition
     public int? MaxLength { get; init; }
     public string? Regex { get; init; }
     public bool AllowEmpty { get; init; } = true;
-    public bool IsLocalizable { get; init; } = false;
+    public bool AllowMultiline { get; init; }
+    public bool IsLocalizable { get; init; }
 }
 
 public sealed record IntFieldDefinition : FieldDefinition
@@ -25,6 +37,11 @@ public sealed record IntFieldDefinition : FieldDefinition
     public int? MinValue { get; init; }
     public int? MaxValue { get; init; }
     public int? Step { get; init; }
+    
+    /// <summary>
+    /// Setting this indicates that the field should be interpreted as a fixed-point number.
+    /// </summary>
+    public int? DecimalPlaces { get; init; }
 }
 
 public sealed record FloatFieldDefinition : FieldDefinition

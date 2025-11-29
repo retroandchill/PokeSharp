@@ -1,8 +1,14 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
+public record OptionItemDefinition(Name Key, Text Label);
+
+[JsonPolymorphic]
+[JsonDerivedType(typeof(StaticOptionSourceDefinition), "Static")]
+[JsonDerivedType(typeof(DynamicOptionSourceDefinition), "Dynamic")]
 public abstract record OptionSourceDefinition;
 
 public sealed record StaticOptionSourceDefinition : OptionSourceDefinition

@@ -7,8 +7,8 @@ public class PokeSharpEditor : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "UnrealSharpBinds", "UnrealSharpCore" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "UnrealSharpBinds", "UnrealSharpCore", "CommonUtilities" });
 
-        PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "Slate", "SlateCore" });
+        PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "Slate", "SlateCore", "Json" });
     }
 }

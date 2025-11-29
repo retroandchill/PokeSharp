@@ -11,25 +11,33 @@ namespace PokeEdit
     {
         FName Key;
         FText Label;
+        
+        FOptionItemDefinition(const FName InKey, FText InLabel) : Key(InKey), Label(MoveTemp(InLabel)) {}
 
-        static constexpr auto JsonSchema = TJsonObjectType(std::in_place_type<FOptionItemDefinition>, TJsonField<&FOptionItemDefinition::Key>(TEXT("key")),
-                                                           TJsonField<&FOptionItemDefinition::Label>(TEXT("label")));
+        static constexpr auto JsonSchema = TJsonObjectType(std::in_place_type<FOptionItemDefinition>, 
+            std::make_tuple(TJsonField<&FOptionItemDefinition::Key>(TEXT("key")),
+                TJsonField<&FOptionItemDefinition::Label>(TEXT("label"))));
     };
 
     struct FStaticOptionSourceDefinition final
     {
         TArray<FOptionItemDefinition> Options;
 
+        explicit FStaticOptionSourceDefinition(TArray<FOptionItemDefinition> InOptions) : Options(MoveTemp(InOptions)) {}
+
         static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FStaticOptionSourceDefinition>, TJsonField<&FStaticOptionSourceDefinition::Options>(TEXT("options")));
+            TJsonObjectType(std::in_place_type<FStaticOptionSourceDefinition>, 
+                std::make_tuple(TJsonField<&FStaticOptionSourceDefinition::Options>(TEXT("options"))));
     };
 
     struct FDynamicOptionSourceDefinition final
     {
         FName SourceId;
+        
+        explicit FDynamicOptionSourceDefinition(const FName InSourceId) : SourceId(InSourceId) {}
 
         static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FDynamicOptionSourceDefinition>, TJsonField<&FDynamicOptionSourceDefinition::SourceId>(TEXT("sourceId")));
+            TJsonObjectType(std::in_place_type<FDynamicOptionSourceDefinition>, std::make_tuple(TJsonField<&FDynamicOptionSourceDefinition::SourceId>(TEXT("sourceId"))));
     };
 
     using FOptionSourceDefinition = TVariant<FStaticOptionSourceDefinition, FDynamicOptionSourceDefinition>;

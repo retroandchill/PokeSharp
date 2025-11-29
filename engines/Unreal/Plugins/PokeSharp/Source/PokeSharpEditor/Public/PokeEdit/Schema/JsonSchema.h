@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "JsonSerializer.h"
+#include "Misc/AsciiSet.h"
 
 namespace PokeEdit
 {
@@ -36,10 +37,9 @@ namespace PokeEdit
         using MemberType = TMemberInfo<Member>::MemberType;
 
         FStringView Name;
-        bool Required;
 
-        constexpr explicit TJsonField(const FStringView InName, const bool InRequired = false)
-            : Name(InName), Required(InRequired)
+        constexpr explicit TJsonField(const FStringView InName)
+            : Name(InName)
         {
         }
 
@@ -87,35 +87,54 @@ namespace PokeEdit
     template <auto Member>
     using TOwnerOf = TMemberInfo<Member>::OwnerType;
     
-    template <typename T, auto... Members>
+    template <typename>
+    struct TIsMembersTuple : std::false_type { };
+    
+    template <auto... Members>
         requires (TJsonFieldMember<Members> && ...)
+    struct TIsMembersTuple<std::tuple<TJsonField<Members>...>> : std::true_type { };
+    
+    template <typename T>
+    concept TMembersTuple = TIsMembersTuple<std::remove_cvref_t<T>>::value;
+    
+    template <typename T, TMembersTuple Required = std::tuple<>, TMembersTuple Optional = std::tuple<>>
     struct TJsonObjectType
     {
         using OwnerType = T;
-        std::tuple<TJsonField<Members>...> Fields;
-
-        explicit constexpr TJsonObjectType(std::in_place_type_t<T>, TJsonField<Members>... InMembers)
-            : Fields(InMembers...)
-        {
-        }
         
-        constexpr TJsonObjectType(std::in_place_type_t<T>, const std::tuple<TJsonField<Members>...>& InMembers)
-            : Fields(InMembers)
-        {
-        }
+        Required RequiredFields;
+        Optional OptionalFields;
         
-        constexpr TJsonObjectType(std::in_place_type_t<T>, std::tuple<TJsonField<Members>...>&& InMembers)
-            : Fields(MoveTemp(InMembers))
+        constexpr TJsonObjectType(std::in_place_type_t<T>, const Required& InRequired, const Optional& InOptional = {})
+            : RequiredFields(InRequired), OptionalFields(InOptional)
         {
         }
 
         template <typename F>
-            requires (std::invocable<F, const TJsonField<Members> &> && ...)
         constexpr void ForEachField(const F &Func) const
         {
             std::apply([&](const auto &... Field) {
                 (std::invoke(Func, Field), ...);
-            }, Fields);
+            }, RequiredFields);
+            std::apply([&](const auto &... Field) {
+                (std::invoke(Func, Field), ...);
+            }, OptionalFields);
+        }
+        
+        template <typename F>
+        constexpr auto ForEachRequiredField(const F &Func) const
+        {
+            return std::apply([&](const auto &... Field) {
+                return std::make_tuple(std::invoke(Func, Field)...);
+            }, RequiredFields);
+        }
+        
+        template <typename F>
+        constexpr void ForEachOptionalField(const F &Func) const
+        {
+            std::apply([&](const auto &... Field) {
+                (std::invoke(Func, Field), ...);
+            }, OptionalFields);
         }
     };
 
@@ -124,8 +143,8 @@ namespace PokeEdit
     {
     };
 
-    template <typename T, auto... Members>
-    struct TIsJsonObjectType<TJsonObjectType<T, Members...>> : std::true_type
+    template <typename T, TMembersTuple Required, TMembersTuple Optional>
+    struct TIsJsonObjectType<TJsonObjectType<T, Required, Optional>> : std::true_type
     {
     };
 
@@ -167,9 +186,10 @@ namespace PokeEdit
         using ObjectType = T;
         static constexpr auto JsonSchema = TJsonObjectTraits<T>::JsonSchema;
 
-        static T CreateObject()
+        template <typename... A>
+        static T CreateObject(A&&... Args)
         {
-            return T();
+            return T(Forward<A>(Args)...);
         }
 
         static T &GetMutableObjectRef(T &Obj)
@@ -190,9 +210,10 @@ namespace PokeEdit
         using ObjectType = T;
         static constexpr auto JsonSchema = TJsonObjectTraits<T>::JsonSchema;
 
-        static TSharedRef<T> CreateObject()
+        template <typename... A>
+        static TSharedRef<T> CreateObject(A&&... Args)
         {
-            return MakeShared<T>();
+            return MakeShared<T>(Forward<A>(Args)...);
         }
 
         static T &GetMutableObjectRef(const TSharedRef<T> &Obj)
@@ -222,21 +243,43 @@ namespace PokeEdit
             {
                 return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
-            auto Result = TJsonObjectContainer<T>::CreateObject();
-
             TArray<FString> Errors;
-            TJsonObjectContainer<T>::JsonSchema.ForEachField(
-                [&Errors, &Result, &JsonObject]<typename F>(const F &Field) {
+            
+            auto RequiredMembers = TJsonObjectContainer<T>::JsonSchema.ForEachRequiredField(
+                [&Errors, &JsonObject]<typename F>(const F &Field) {
                     const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
                     if (FieldValue == nullptr)
                     {
-                        if (Field.Required)
-                        {
-                            Errors.Add(FString::Format(TEXT("Field '{0}' is required"), {Field.Name}));
-                        }
-
-                        return;
+                        Errors.Add(FString::Format(TEXT("Field '{0}' is required"), {Field.Name}));
+                        return TOptional<typename F::MemberType>();
                     }
+
+                    TValueOrError<typename F::MemberType, FString> Deserialized =
+                        TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
+
+                    if (const auto *Error = Deserialized.TryGetError(); Error != nullptr)
+                    {
+                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Error}));
+                        return TOptional<typename F::MemberType>();
+                    }
+                    
+                    return TOptional<typename F::MemberType>(Deserialized.GetValue());
+                });
+            
+            if (Errors.Num() > 0)
+            {
+                return MakeError(FString::Join(Errors, TEXT("\n")));
+            }
+                        
+            auto Result = std::apply([](const auto &... Field) {
+                return TJsonObjectContainer<T>::CreateObject(MoveTempIfPossible(Field.GetValue())...);
+            }, RequiredMembers);
+
+            
+            TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField(
+                [&Errors, &Result, &JsonObject]<typename F>(const F &Field) {
+                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
+                    if (FieldValue == nullptr) return;
 
                     TValueOrError<typename F::MemberType, FString> Deserialized =
                         TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
@@ -273,7 +316,7 @@ namespace PokeEdit
     };
 
     template <TJsonObject T>
-    struct TJsonObjectConverter<TSharedPtr<T>>
+    struct TJsonConverter<TSharedPtr<T>>
     {
         static TValueOrError<TSharedPtr<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {

@@ -12,7 +12,7 @@
     </ItemGroup>
     <ItemGroup Condition="'$(PokeSharpSlnDir)' != ''">
         <ProjectReference Include="$(PokeSharpProj)" />
-        <ProjectReference Include="$(PokeSharpEditorProj)"/>
+        <ProjectReference Include="$(PokeSharpEditorProj)" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\PokeSharp.Unreal.Core\PokeSharp.Unreal.Core.csproj" />

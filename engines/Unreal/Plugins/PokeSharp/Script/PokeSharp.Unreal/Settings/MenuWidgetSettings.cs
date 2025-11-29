@@ -9,6 +9,9 @@ namespace PokeSharp.Unreal.Settings;
 [UClass(ClassFlags.DefaultConfig, ConfigCategory = "Game")]
 public partial class UMenuWidgetSettings : UCSDeveloperSettings
 {
-    [UProperty(PropertyFlags.EditDefaultsOnly | PropertyFlags.BlueprintReadOnly | PropertyFlags.Config, Category = "Widgets Classes")]
+    [UProperty(
+        PropertyFlags.EditDefaultsOnly | PropertyFlags.BlueprintReadOnly | PropertyFlags.Config,
+        Category = "Widgets Classes"
+    )]
     public partial TSoftClassPtr<UPauseMenuWidget> PauseMenuWidgetClass { get; }
 }

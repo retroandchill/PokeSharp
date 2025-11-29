@@ -2,13 +2,15 @@
 
 public class PokeSharpEditor : ModuleRules
 {
-    public PokeSharpEditor(ReadOnlyTargetRules Target)
-        : base(Target)
+    public PokeSharpEditor(ReadOnlyTargetRules target)
+        : base(target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "UnrealSharpBinds", "UnrealSharpCore", "CommonUtilities" });
+        PublicDependencyModuleNames.AddRange(
+            ["Core", "UnrealSharpBinds", "UnrealSharpCore", "CommonUtilities"]
+        );
 
-        PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "Slate", "SlateCore", "Json" });
+        PrivateDependencyModuleNames.AddRange(["CoreUObject", "Engine", "Slate", "SlateCore", "Json"]);
     }
 }

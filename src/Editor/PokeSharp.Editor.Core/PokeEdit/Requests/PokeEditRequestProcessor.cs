@@ -1,10 +1,12 @@
 ﻿using Injectio.Attributes;
+using PokeSharp.Core;
 using PokeSharp.Core.Strings;
 using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 [RegisterSingleton]
+[AutoServiceShortcut]
 public sealed partial class PokeEditRequestProcessor(IEnumerable<IHandlerWrapper> handlers)
 {
     private readonly Dictionary<Name, IHandlerWrapper> _handlers = handlers.ToDictionary(x => x.Name);

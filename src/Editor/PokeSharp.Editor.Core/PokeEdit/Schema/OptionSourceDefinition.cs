@@ -4,7 +4,7 @@ using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
-public record OptionItemDefinition(Name Key, Text Label);
+public readonly record struct OptionItemDefinition(Name Key, Text Label);
 
 [JsonPolymorphic]
 [JsonDerivedType(typeof(StaticOptionSourceDefinition), "Static")]

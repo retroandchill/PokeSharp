@@ -37,7 +37,7 @@ public sealed record IntFieldDefinition : FieldDefinition
     public int? MinValue { get; init; }
     public int? MaxValue { get; init; }
     public int? Step { get; init; }
-    
+
     /// <summary>
     /// Setting this indicates that the field should be interpreted as a fixed-point number.
     /// </summary>
@@ -54,7 +54,7 @@ public sealed record FloatFieldDefinition : FieldDefinition
 public sealed record ChoiceFieldDefinition : FieldDefinition
 {
     public bool AllowNone { get; init; }
-    
+
     public required OptionSourceDefinition Options { get; init; }
 }
 

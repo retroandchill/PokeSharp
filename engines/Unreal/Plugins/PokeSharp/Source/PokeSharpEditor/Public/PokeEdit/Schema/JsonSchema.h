@@ -18,8 +18,7 @@ namespace PokeEdit
     };
 
     template <auto Member>
-    concept TJsonFieldMember = requires
-    {
+    concept TJsonFieldMember = requires {
         typename TMemberInfo<Member>::OwnerType;
         typename TMemberInfo<Member>::MemberType;
     };
@@ -30,7 +29,7 @@ namespace PokeEdit
 
     /**
      * Represents a fields in the serialized JSON representation.
-     * 
+     *
      * @tparam Member The member pointer used to retrieve and set the value.
      * @note This type stores an FStringView to the name, as this type is supposed to be instantiated in a constexpr
      *       context and point to a compile-time literal.
@@ -47,8 +46,7 @@ namespace PokeEdit
          */
         FStringView Name;
 
-        constexpr explicit TJsonField(const FStringView InName)
-            : Name(InName)
+        constexpr explicit TJsonField(const FStringView InName) : Name(InName)
         {
         }
 
@@ -58,8 +56,8 @@ namespace PokeEdit
         {
             return Forward<T>(Owner).*Member;
         }
-        
-        static constexpr decltype(auto) GetMember(const TSharedRef<OwnerType>& Owner)
+
+        static constexpr decltype(auto) GetMember(const TSharedRef<OwnerType> &Owner)
         {
             return GetMember(*Owner);
         }
@@ -70,24 +68,24 @@ namespace PokeEdit
         {
             Owner.*Member = Forward<T>(Value);
         }
-        
+
         template <typename T>
             requires std::convertible_to<T, MemberType>
-        static constexpr void SetMember(const TSharedRef<OwnerType>& Owner, T &&Value)
+        static constexpr void SetMember(const TSharedRef<OwnerType> &Owner, T &&Value)
         {
             SetMember(*Owner, Forward<T>(Value));
         }
 
         template <typename... A>
             requires std::constructible_from<MemberType, A...>
-        static constexpr void EmplaceMember(OwnerType &Owner, A &&... Args)
+        static constexpr void EmplaceMember(OwnerType &Owner, A &&...Args)
         {
             Owner.*Member = MemberType(Forward<A>(Args)...);
         }
-        
+
         template <typename... A>
             requires std::constructible_from<MemberType, A...>
-        static constexpr void EmplaceMember(const TSharedRef<OwnerType>& Owner, A &&... Args)
+        static constexpr void EmplaceMember(const TSharedRef<OwnerType> &Owner, A &&...Args)
         {
             EmplaceMember(*Owner, Forward<A>(Args)...);
         }
@@ -95,26 +93,30 @@ namespace PokeEdit
 
     template <auto Member>
     using TOwnerOf = TMemberInfo<Member>::OwnerType;
-    
+
     template <typename>
-    struct TIsMembersTuple : std::false_type { };
-    
+    struct TIsMembersTuple : std::false_type
+    {
+    };
+
     template <auto... Members>
-        requires (TJsonFieldMember<Members> && ...)
-    struct TIsMembersTuple<std::tuple<TJsonField<Members>...>> : std::true_type { };
-    
+        requires(TJsonFieldMember<Members> && ...)
+    struct TIsMembersTuple<std::tuple<TJsonField<Members>...>> : std::true_type
+    {
+    };
+
     template <typename T>
     concept TMembersTuple = TIsMembersTuple<std::remove_cvref_t<T>>::value;
 
     /**
      * Represents a serializable JSON object type.
-     * 
+     *
      * @tparam T The target type of serialization. May also represent a TSharedRef-wrapped object.
-     * @tparam Required The tuple containing all-of-the required serialization members. If any of these members are 
+     * @tparam Required The tuple containing all-of-the required serialization members. If any of these members are
      *                  not found, deserialization fails. These members should correspond directly to members that are
      *                  set via the types constructor, which must take a value convertable to that type in the order
      *                  that is specified.
-     * @tparam Optional Tuple containing all-of-the additional parameters that do not need to be set during 
+     * @tparam Optional Tuple containing all-of-the additional parameters that do not need to be set during
      *                  deserialization. Each of these must be publically settable, as they are set on the object after
      *                  it is created.
      */
@@ -122,11 +124,11 @@ namespace PokeEdit
     struct TJsonObjectType
     {
         using OwnerType = T;
-        
+
         Required RequiredFields;
         Optional OptionalFields;
-        
-        constexpr TJsonObjectType(std::in_place_type_t<T>, const Required& InRequired, const Optional& InOptional = {})
+
+        constexpr TJsonObjectType(std::in_place_type_t<T>, const Required &InRequired, const Optional &InOptional = {})
             : RequiredFields(InRequired), OptionalFields(InOptional)
         {
         }
@@ -134,28 +136,21 @@ namespace PokeEdit
         template <typename F>
         constexpr void ForEachField(const F &Func) const
         {
-            std::apply([&](const auto &... Field) {
-                (std::invoke(Func, Field), ...);
-            }, RequiredFields);
-            std::apply([&](const auto &... Field) {
-                (std::invoke(Func, Field), ...);
-            }, OptionalFields);
+            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, RequiredFields);
+            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, OptionalFields);
         }
-        
+
         template <typename F>
         constexpr auto ForEachRequiredField(const F &Func) const
         {
-            return std::apply([&](const auto &... Field) {
-                return std::make_tuple(std::invoke(Func, Field)...);
-            }, RequiredFields);
+            return std::apply([&](const auto &...Field) { return std::make_tuple(std::invoke(Func, Field)...); },
+                              RequiredFields);
         }
-        
+
         template <typename F>
         constexpr void ForEachOptionalField(const F &Func) const
         {
-            std::apply([&](const auto &... Field) {
-                (std::invoke(Func, Field), ...);
-            }, OptionalFields);
+            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, OptionalFields);
         }
     };
 
@@ -177,8 +172,7 @@ namespace PokeEdit
     struct TJsonObjectTraits;
 
     template <typename T>
-    concept TInlineJsonObjectType = requires
-    {
+    concept TInlineJsonObjectType = requires {
         { T::JsonSchema } -> TValidJsonObjectType<T>;
     };
 
@@ -189,8 +183,7 @@ namespace PokeEdit
     };
 
     template <typename T>
-    concept TJsonObject = requires
-    {
+    concept TJsonObject = requires {
         { TJsonObjectTraits<T>::JsonSchema } -> TValidJsonObjectType<T>;
     };
 
@@ -208,7 +201,7 @@ namespace PokeEdit
         static constexpr auto JsonSchema = TJsonObjectTraits<T>::JsonSchema;
 
         template <typename... A>
-        static T CreateObject(A&&... Args)
+        static T CreateObject(A &&...Args)
         {
             return T(Forward<A>(Args)...);
         }
@@ -232,7 +225,7 @@ namespace PokeEdit
         static constexpr auto JsonSchema = TJsonObjectTraits<T>::JsonSchema;
 
         template <typename... A>
-        static TSharedRef<T> CreateObject(A&&... Args)
+        static TSharedRef<T> CreateObject(A &&...Args)
         {
             return MakeShared<T>(Forward<A>(Args)...);
         }
@@ -255,11 +248,11 @@ namespace PokeEdit
      * Template meta-type used to define if an object type can be converted either to or from JSON.<br>
      * This is similar to TJsonConverter, but is distinct to allow for the conversion symbols to be defined only one
      * and then linked.<br>
-     * To define a custom converter, create a template specialization for the target type and implement the 
+     * To define a custom converter, create a template specialization for the target type and implement the
      * following two methods:
      * - static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue>& Value);
      * - static TSharedRef<FJsonValue> Deserialize(const T& Value);
-     * 
+     *
      * @tparam T The type convert.
      */
     template <typename T>
@@ -270,7 +263,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -282,7 +275,7 @@ namespace PokeEdit
                 return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
             TArray<FString> Errors;
-            
+
             // We first need to gather a tuple of all the required members, and so long as they are all set (which would
             // also mean no-errors), we can then apply that transformation to construct the object.
             auto RequiredMembers = TJsonObjectContainer<T>::JsonSchema.ForEachRequiredField(
@@ -302,25 +295,28 @@ namespace PokeEdit
                         Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Error}));
                         return TOptional<typename F::MemberType>();
                     }
-                    
+
                     return TOptional<typename F::MemberType>(Deserialized.GetValue());
                 });
-            
+
             if (Errors.Num() > 0)
             {
                 return MakeError(FString::Join(Errors, TEXT("\n")));
             }
-                        
-            auto Result = std::apply([](const auto &... Field) {
-                return TJsonObjectContainer<T>::CreateObject(MoveTempIfPossible(Field.GetValue())...);
-            }, RequiredMembers);
+
+            auto Result = std::apply(
+                [](const auto &...Field) {
+                    return TJsonObjectContainer<T>::CreateObject(MoveTempIfPossible(Field.GetValue())...);
+                },
+                RequiredMembers);
 
             // Now that we constructed the object from the required fields, loop through all the others and set those
             // If any get found.
             TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField(
                 [&Errors, &Result, &JsonObject]<typename F>(const F &Field) {
                     const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
-                    if (FieldValue == nullptr) return;
+                    if (FieldValue == nullptr)
+                        return;
 
                     TValueOrError<typename F::MemberType, FString> Deserialized =
                         TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
@@ -346,7 +342,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -361,19 +357,19 @@ namespace PokeEdit
             return MakeShared<FJsonValueObject>(JsonObject);
         }
     };
-    
+
     /**
-     * JSON Serializer for handling TSharedPtr instances. This will conceptually be the same as the TSharedRef 
+     * JSON Serializer for handling TSharedPtr instances. This will conceptually be the same as the TSharedRef
      * serialization, except that a null value will not cause a serialization error.
-     * 
-     * @tparam T The type of variable that is pointed to 
+     *
+     * @tparam T The type of variable that is pointed to
      */
     template <TJsonObject T>
     struct TJsonConverter<TSharedPtr<T>>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -389,7 +385,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -414,8 +410,7 @@ namespace PokeEdit
         FStringView KeyName;
         static constexpr DiscriminatorType DiscriminatorValue = V;
 
-        explicit constexpr TJsonUnionKey(const FStringView InKeyName)
-            : KeyName(InKeyName)
+        explicit constexpr TJsonUnionKey(const FStringView InKeyName) : KeyName(InKeyName)
         {
         }
     };
@@ -443,8 +438,8 @@ namespace PokeEdit
         using OwnerType = C;
         using MemberType = std::decay_t<V>;
     };
-    
-    template <typename C, typename V, V (*Ptr)(const C&)>
+
+    template <typename C, typename V, V (*Ptr)(const C &)>
     struct TJsonKeySourceTraits<Ptr>
     {
         using OwnerType = C;
@@ -459,8 +454,7 @@ namespace PokeEdit
     };
 
     template <auto Ptr>
-    concept TJsonKeySource = requires
-    {
+    concept TJsonKeySource = requires {
         typename TJsonKeySourceTraits<Ptr>::OwnerType;
         typename TJsonKeySourceTraits<Ptr>::MemberType;
     };
@@ -471,13 +465,14 @@ namespace PokeEdit
     {
         using ObjectType = TJsonKeySourceTraits<Ptr>::OwnerType;
         using DiscriminatorType = TJsonKeySourceTraits<Ptr>::MemberType;
-        
-        FStringView KeyName;
-        
-        constexpr TJsonDiscriminator() : KeyName(TEXT("$type")) { }
 
-        constexpr explicit TJsonDiscriminator(const FStringView InKeyName)
-            : KeyName(InKeyName)
+        FStringView KeyName;
+
+        constexpr TJsonDiscriminator() : KeyName(TEXT("$type"))
+        {
+        }
+
+        constexpr explicit TJsonDiscriminator(const FStringView InKeyName) : KeyName(InKeyName)
         {
         }
     };
@@ -485,13 +480,17 @@ namespace PokeEdit
     template <auto Ptr>
         requires TJsonKeySource<Ptr>
     constexpr auto JsonDiscriminator = TJsonDiscriminator<Ptr>();
-    
+
     template <typename>
-    struct TIsVariant : std::false_type { };
-    
+    struct TIsVariant : std::false_type
+    {
+    };
+
     template <typename... T>
-    struct TIsVariant<TVariant<T...>> : std::true_type { };
-    
+    struct TIsVariant<TVariant<T...>> : std::true_type
+    {
+    };
+
     template <typename T>
     concept TVariantType = TIsVariant<T>::value;
 
@@ -500,7 +499,7 @@ namespace PokeEdit
                  ((TValidJsonUnionKey<Members> &&
                    std::same_as<typename Members::DiscriminatorType,
                                 typename TJsonKeySourceTraits<Discriminator>::MemberType>) &&
-                     ...)
+                  ...)
     struct TJsonUnionType
     {
         using OwnerType = TJsonKeySourceTraits<Discriminator>::OwnerType;
@@ -509,42 +508,44 @@ namespace PokeEdit
         TJsonDiscriminator<Discriminator> DiscriminatorMember;
         std::tuple<Members...> Fields;
 
-        constexpr explicit TJsonUnionType(const TJsonDiscriminator<Discriminator> InDiscriminator,
-                                          Members... Fields)
+        constexpr explicit TJsonUnionType(const TJsonDiscriminator<Discriminator> InDiscriminator, Members... Fields)
             : DiscriminatorMember(InDiscriminator), Fields(Fields...)
         {
         }
-        
-        constexpr DiscriminatorType GetDiscriminatorValue(const OwnerType& Owner) const
+
+        constexpr DiscriminatorType GetDiscriminatorValue(const OwnerType &Owner) const
         {
             return std::invoke(Discriminator, Owner);
         }
-        
-        constexpr DiscriminatorType GetDiscriminatorValue(const TSharedRef<OwnerType>& Owner) const
+
+        constexpr DiscriminatorType GetDiscriminatorValue(const TSharedRef<OwnerType> &Owner) const
         {
             return GetDiscriminatorValue(*Owner);
         }
-        
-        template <typename F, typename T = std::decay_t<std::invoke_result_t<F, const std::tuple_element_t<0, std::tuple<Members...>> &>>>
-            requires ((std::invocable<F, const Members &> && std::same_as<std::invoke_result_t<F, const Members &>, T> ) && ...)
+
+        template <typename F, typename T = std::decay_t<
+                                  std::invoke_result_t<F, const std::tuple_element_t<0, std::tuple<Members...>> &>>>
+            requires((std::invocable<F, const Members &> &&
+                      std::same_as<std::invoke_result_t<F, const Members &>, T>) &&
+                     ...)
         constexpr T ForEachField(const F &Func) const
         {
-            // A precondition of this method is that T represents TOptional of some value. What we will do is call 
-            // invoke, and if we get a value, set that into result. Once the value gets set, all other 
-            // operations become a no-op. Ideally this would best be refactored to use a template for, once 
+            // A precondition of this method is that T represents TOptional of some value. What we will do is call
+            // invoke, and if we get a value, set that into result. Once the value gets set, all other
+            // operations become a no-op. Ideally this would best be refactored to use a template for, once
             // C++ 26 is supported.
             T Result;
-            std::apply([&](const auto &... Field) {
-                (..., (
-                    Result.IsSet() ? void() : [&] {
-                        if (auto IntermediateResult = std::invoke(Func, Field); IntermediateResult.IsSet())
-                        {
-                            Result = IntermediateResult.GetValue();
-                        }
-                    }()
-                ));
-            }, Fields);
-            
+            std::apply(
+                [&](const auto &...Field) {
+                    (..., (Result.IsSet() ? void() : [&] {
+                         if (auto IntermediateResult = std::invoke(Func, Field); IntermediateResult.IsSet())
+                         {
+                             Result = IntermediateResult.GetValue();
+                         }
+                     }()));
+                },
+                Fields);
+
             return Result;
         }
     };
@@ -567,8 +568,7 @@ namespace PokeEdit
     struct TJsonUnionTraits;
 
     template <typename T>
-    concept TInlineJsonUnionType = requires
-    {
+    concept TInlineJsonUnionType = requires {
         { T::JsonSchema } -> TValidJsonObjectType<T>;
     };
 
@@ -579,21 +579,20 @@ namespace PokeEdit
     };
 
     template <typename T>
-    concept TJsonUnion = requires
-    {
+    concept TJsonUnion = requires {
         { TJsonUnionTraits<T>::JsonSchema } -> TValidJsonUnionType<T>;
     };
-    
+
     /**
     /**
      * Template meta-type used to define if a discriminated union type can be converted either to or from JSON.<br>
      * This is similar to TJsonConverter, but is distinct to allow for the conversion symbols to be defined only one
      * and then linked.<br>
-     * To define a custom converter, create a template specialization for the target type and implement the 
+     * To define a custom converter, create a template specialization for the target type and implement the
      * following two methods:
      * - static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue>& Value);
      * - static TSharedRef<FJsonValue> Deserialize(const T& Value);
-     * 
+     *
      * @tparam T The type convert.
      */
     template <typename T>
@@ -601,189 +600,207 @@ namespace PokeEdit
 
     /**
      * JSON converter for discriminated unions that are represented by TVariant.
-     * 
+     *
      * @tparam T The variant type
      */
     template <typename T>
-        requires TJsonUnion<T> && TVariantType<T> && std::same_as<typename std::decay_t<decltype(TJsonUnionTraits<T>::JsonSchema)>::DiscriminatorType, SIZE_T>
+        requires TJsonUnion<T> && TVariantType<T> &&
+                 std::same_as<typename std::decay_t<decltype(TJsonUnionTraits<T>::JsonSchema)>::DiscriminatorType,
+                              SIZE_T>
     struct TJsonUnionConverter<T>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue>& Value)
+        static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {
             TSharedPtr<FJsonObject> *JsonObject;
             if (!Value->TryGetObject(JsonObject))
             {
                 return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
-            
+
             auto KeyField = (*JsonObject)->TryGetField(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName);
             if (KeyField == nullptr)
             {
-                return MakeError(FString::Format(TEXT("Field '{0}' is missing from object '{1}'"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
+                return MakeError(FString::Format(
+                    TEXT("Field '{0}' is missing from object '{1}'"),
+                    {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
             }
-            
+
             auto KeyString = TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef());
             if (const auto *Error = KeyString.TryGetError())
             {
-                return MakeError(FString::Format(TEXT("Field '{0}': {1}"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error}));
+                return MakeError(FString::Format(
+                    TEXT("Field '{0}': {1}"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error}));
             }
-            
-            // We are going to scan through all the discriminators and find the first once that matches. 
+
+            // We are going to scan through all the discriminators and find the first once that matches.
             // Once a set optional is returned, we end up skipping all other calls to the callback.
-            auto& Discriminator = KeyString.GetValue();
-            TOptional<TValueOrError<T, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField([&Value, &Discriminator]<typename F>(const F &Field) {
-               if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
-               {
-                   auto Deserialized = TJsonConverter<typename F::ObjectType>::Deserialize(Value);
-                   if (auto *Error = Deserialized.TryGetError(); Error != nullptr)
-                   {
-                       return TOptional<TValueOrError<T, FString>>(MakeError(MoveTemp(*Error)));
-                   }
-                   
-                   return TOptional<TValueOrError<T, FString>>(MakeValue(T(TInPlaceType<typename F::ObjectType>(), MoveTempIfPossible(Deserialized.GetValue()))));
-               }
-                
-                return TOptional<TValueOrError<T, FString>>();
-            });
-            
+            auto &Discriminator = KeyString.GetValue();
+            TOptional<TValueOrError<T, FString>> Result =
+                TJsonUnionTraits<T>::JsonSchema.ForEachField([&Value, &Discriminator]<typename F>(const F &Field) {
+                    if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                    {
+                        auto Deserialized = TJsonConverter<typename F::ObjectType>::Deserialize(Value);
+                        if (auto *Error = Deserialized.TryGetError(); Error != nullptr)
+                        {
+                            return TOptional<TValueOrError<T, FString>>(MakeError(MoveTemp(*Error)));
+                        }
+
+                        return TOptional<TValueOrError<T, FString>>(MakeValue(
+                            T(TInPlaceType<typename F::ObjectType>(), MoveTempIfPossible(Deserialized.GetValue()))));
+                    }
+
+                    return TOptional<TValueOrError<T, FString>>();
+                });
+
             if (Result.IsSet())
             {
                 return Result.GetValue();
             }
-            
+
             return MakeError(FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
         }
-        
+
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
         static TSharedRef<FJsonValue> Serialize(const T &Value)
         {
-            // We are going to scan through all the discriminators and find the first once that matches. 
+            // We are going to scan through all the discriminators and find the first once that matches.
             // Once a set optional is returned, we end up skipping all other calls to the callback.
             auto CurrentDiscriminator = TJsonUnionTraits<T>::JsonSchema.GetDiscriminatorValue(Value);
-            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField([&CurrentDiscriminator, &Value]<typename F>(const F &Field) 
-                {
+            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                [&CurrentDiscriminator, &Value]<typename F>(const F &Field) {
                     if (Field.DiscriminatorValue == CurrentDiscriminator)
                     {
-                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(std::make_pair(TJsonConverter<typename F::ObjectType>::Serialize(Value.template Get<typename F::ObjectType>()), FString(Field.KeyName)));
+                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(
+                            std::make_pair(TJsonConverter<typename F::ObjectType>::Serialize(
+                                               Value.template Get<typename F::ObjectType>()),
+                                           FString(Field.KeyName)));
                     }
-                    
+
                     return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>();
                 });
             check(Result.IsSet());
-            
+
             auto [DiscriminatorValue, KeyName] = MoveTemp(Result.GetValue());
 
             const auto JsonObject = Result->first->AsObject();
-            JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName), MakeShared<FJsonValueString>(MoveTemp(KeyName)));
-            
+            JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName),
+                                 MakeShared<FJsonValueString>(MoveTemp(KeyName)));
+
             return DiscriminatorValue;
-            
         }
     };
-    
+
     /**
      * JSON converter for discriminated unions that are represented by TSharedRef.
-     * 
+     *
      * @tparam T The variant type
      */
     template <typename T>
         requires TJsonUnion<T> && !TVariantType<T>
-    struct TJsonUnionConverter<TSharedRef<T>>
+                              struct TJsonUnionConverter<TSharedRef<T>>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<TSharedRef<T>, FString> Deserialize(const TSharedRef<FJsonValue>& Value)
+        static TValueOrError<TSharedRef<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {
             TSharedPtr<FJsonObject> *JsonObject;
             if (!Value->TryGetObject(JsonObject))
             {
                 return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
-            
+
             auto KeyField = (*JsonObject)->TryGetField(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName);
             if (KeyField == nullptr)
             {
-                return MakeError(FString::Format(TEXT("Field '{0}' is missing from object '{1}'"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
+                return MakeError(FString::Format(
+                    TEXT("Field '{0}' is missing from object '{1}'"),
+                    {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
             }
-            
+
             auto KeyString = TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef());
             if (const auto *Error = KeyString.TryGetError())
             {
-                return MakeError(FString::Format(TEXT("Field '{0}': {1}"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error}));
+                return MakeError(FString::Format(
+                    TEXT("Field '{0}': {1}"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error}));
             }
-            
-            // We are going to scan through all the discriminators and find the first once that matches. 
+
+            // We are going to scan through all the discriminators and find the first once that matches.
             // Once a set optional is returned, we end up skipping all other calls to the callback.
-            auto& Discriminator = KeyString.GetValue();
-            TOptional<TValueOrError<TSharedRef<T>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField([&Value, &Discriminator]<typename F>(const F &Field) {
-               if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
-               {
-                   auto Deserialized = TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value);
-                   if (auto *Error = Deserialized.TryGetError(); Error != nullptr)
-                   {
-                       return TOptional<TValueOrError<TSharedRef<T>, FString>>(MakeError(MoveTemp(*Error)));
-                   }
-                   
-                   return TOptional<TValueOrError<TSharedRef<T>, FString>>(MakeValue(MoveTempIfPossible(Deserialized.GetValue())));
-               }
-                
-                return TOptional<TValueOrError<TSharedRef<T>, FString>>();
-            });
-            
+            auto &Discriminator = KeyString.GetValue();
+            TOptional<TValueOrError<TSharedRef<T>, FString>> Result =
+                TJsonUnionTraits<T>::JsonSchema.ForEachField([&Value, &Discriminator]<typename F>(const F &Field) {
+                    if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                    {
+                        auto Deserialized = TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value);
+                        if (auto *Error = Deserialized.TryGetError(); Error != nullptr)
+                        {
+                            return TOptional<TValueOrError<TSharedRef<T>, FString>>(MakeError(MoveTemp(*Error)));
+                        }
+
+                        return TOptional<TValueOrError<TSharedRef<T>, FString>>(
+                            MakeValue(MoveTempIfPossible(Deserialized.GetValue())));
+                    }
+
+                    return TOptional<TValueOrError<TSharedRef<T>, FString>>();
+                });
+
             if (Result.IsSet())
             {
                 return Result.GetValue();
             }
-            
+
             return MakeError(FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
         }
-        
+
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
-        static TSharedRef<FJsonValue> Serialize(const TSharedRef<T>& Value)
+        static TSharedRef<FJsonValue> Serialize(const TSharedRef<T> &Value)
         {
             auto CurrentDiscriminator = TJsonUnionTraits<T>::JsonSchema.GetDiscriminatorValue(Value);
-            
-            // We are going to scan through all the discriminators and find the first once that matches. 
+
+            // We are going to scan through all the discriminators and find the first once that matches.
             // Once a set optional is returned, we end up skipping all other calls to the callback.
-            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField([&CurrentDiscriminator, &Value]<typename F>(const F &Field) 
-                {
+            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                [&CurrentDiscriminator, &Value]<typename F>(const F &Field) {
                     if (Field.DiscriminatorValue == CurrentDiscriminator)
                     {
-                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(std::make_pair(TJsonConverter<TSharedRef<typename F::ObjectType>>::Serialize(StaticCastSharedRef<typename F::ObjectType>(Value)), FString(Field.KeyName)));
+                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(
+                            std::make_pair(TJsonConverter<TSharedRef<typename F::ObjectType>>::Serialize(
+                                               StaticCastSharedRef<typename F::ObjectType>(Value)),
+                                           FString(Field.KeyName)));
                     }
-                    
+
                     return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>();
                 });
             check(Result.IsSet());
-            
+
             auto [DiscriminatorValue, KeyName] = MoveTemp(Result.GetValue());
 
             const auto JsonObject = Result->first->AsObject();
-            JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName), MakeShared<FJsonValueString>(MoveTemp(KeyName)));
-            
+            JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName),
+                                 MakeShared<FJsonValueString>(MoveTemp(KeyName)));
+
             return DiscriminatorValue;
         }
     };
-    
 
 } // namespace PokeEdit

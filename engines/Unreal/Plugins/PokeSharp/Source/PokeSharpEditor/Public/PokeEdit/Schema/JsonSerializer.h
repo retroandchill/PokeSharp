@@ -7,9 +7,9 @@
 namespace PokeEdit
 {
     /**
-     * Convert a JSON value to its serialized String representation. Used primarily for printing the value on in 
+     * Convert a JSON value to its serialized String representation. Used primarily for printing the value on in
      * debug/error logs.
-     * 
+     *
      * @param Value The JSON value to convert.
      * @return The serialized string.
      */
@@ -17,11 +17,11 @@ namespace PokeEdit
 
     /**
      * Template meta-type used to define if a type can be converted either to or from JSON.<br>
-     * To define a custom converter, create a template specialization for the target type and implement the 
+     * To define a custom converter, create a template specialization for the target type and implement the
      * following two methods:
      * - static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue>& Value);
      * - static TSharedRef<FJsonValue> Deserialize(const T& Value);
-     * 
+     *
      * @tparam T The type convert.
      */
     template <typename T>
@@ -29,17 +29,17 @@ namespace PokeEdit
 
     /**
      * Defines if a type can be deserialized from a JSON value.
-     * 
+     *
      * @tparam T The output type
      */
     template <typename T>
-    concept TJsonDeserializable = requires(const TSharedRef<FJsonValue> &Value) {
+    concept TJsonDeserializable = requires(const FJsonStringReader &Value) {
         { TJsonConverter<T>::Deserialize(Value) } -> std::same_as<TValueOrError<T, FString>>;
     };
 
     /**
      * Defines if a type can serialized to JSON.
-     * 
+     *
      * @tparam T The input type
      */
     template <typename T>
@@ -49,7 +49,7 @@ namespace PokeEdit
 
     /**
      * Defines if a type can be converted both to and from JSON.
-     * 
+     *
      * @tparam T The target type
      */
     template <typename T>
@@ -63,7 +63,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -76,10 +76,10 @@ namespace PokeEdit
 
             return MakeError(FString::Format(TEXT("Value '{0}' is not a boolean"), {WriteAsString(Value)}));
         }
-        
+
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -91,7 +91,7 @@ namespace PokeEdit
 
     /**
      * Converter for handling numeric values.
-     * 
+     *
      * @tparam T The type of value, must represent either an integer or floating point number.
      */
     template <typename T>
@@ -100,7 +100,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -116,7 +116,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -134,7 +134,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -150,7 +150,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -168,7 +168,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -184,7 +184,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -195,7 +195,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -206,7 +206,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -218,7 +218,7 @@ namespace PokeEdit
 
     /**
      * Converter for handling the JSON serialization of Text values.
-     * 
+     *
      * @note This type will serialize/deserialize from the full localized string (i.e. NSLOCTEXT) form if possible
      */
     template <>
@@ -226,7 +226,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -247,7 +247,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -261,7 +261,7 @@ namespace PokeEdit
 
     /**
      * Determines if a type is an Enum that can be converted to a string value.
-     * 
+     *
      * @tparam T The source enum type
      */
     template <typename T>
@@ -270,9 +270,9 @@ namespace PokeEdit
     };
 
     /**
-     * Determines if a type is an Enum that can be parsed from a string value, 
+     * Determines if a type is an Enum that can be parsed from a string value,
      * represented by a null-terminated character array.
-     * 
+     *
      * @tparam T The destination type
      */
     template <typename T>
@@ -281,9 +281,9 @@ namespace PokeEdit
     };
 
     /**
-     * Determines if a type is an Enum that can be parsed from a string value, 
+     * Determines if a type is an Enum that can be parsed from a string value,
      * represented by string-view object
-     * 
+     *
      * @tparam T The destination type
      */
     template <typename T>
@@ -293,7 +293,7 @@ namespace PokeEdit
 
     /**
      * Determines if a type is an Enum that can be parsed from a string value, represented by string object.
-     * 
+     *
      * @tparam T The destination type
      */
     template <typename T>
@@ -303,7 +303,7 @@ namespace PokeEdit
 
     /**
      * Determines if a type is an Enum that can be parsed from a string value.
-     * 
+     *
      * @tparam T The destination type
      */
     template <typename T>
@@ -311,8 +311,8 @@ namespace PokeEdit
 
     /**
      * Attempt to parse a string object into an nnum value.
-     * 
-     * @tparam T The destination type 
+     *
+     * @tparam T The destination type
      * @param Lex The source string object
      * @return The enum value if a matching literal was found, otherwise an empty optional.
      */
@@ -336,7 +336,7 @@ namespace PokeEdit
 
     /**
      * Converter for handling converting enums to and from JSON.
-     * 
+     *
      * @tparam T The target enum type
      */
     template <typename T>
@@ -345,7 +345,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -367,7 +367,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -380,7 +380,7 @@ namespace PokeEdit
 
     /**
      * Converter for the JSON representation of list/array values.
-     * 
+     *
      * @tparam T The inner type of the array.
      */
     template <typename T>
@@ -389,7 +389,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -428,7 +428,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -448,7 +448,7 @@ namespace PokeEdit
 
     /**
      * Converter for the JSON representation of optional JSON values.
-     * 
+     *
      * @tparam T The inner type of the array.
      */
     template <typename T>
@@ -457,7 +457,7 @@ namespace PokeEdit
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
-         * 
+         *
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
@@ -480,7 +480,7 @@ namespace PokeEdit
 
         /**
          * Serializes a value to the target type.
-         * 
+         *
          * @param Value The input value
          * @return The serialized JSON value
          */
@@ -493,7 +493,7 @@ namespace PokeEdit
 
     /**
      * Attempts to deserialize a JSON value to the target type.
-     * 
+     *
      * @tparam T The target type
      * @param Value The input JSON value
      * @return Either the deserialized value, or an error message explaining why serialization failed.
@@ -506,7 +506,7 @@ namespace PokeEdit
 
     /**
      * Serializes a value to the target type.
-     * 
+     *
      * @tparam T The target type to serialize to.
      * @param Value The input value
      * @return The serialized JSON value

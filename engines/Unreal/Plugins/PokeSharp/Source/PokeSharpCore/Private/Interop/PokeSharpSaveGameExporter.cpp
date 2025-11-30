@@ -13,6 +13,7 @@ void UPokeSharpSaveGameExporter::GetDataReadBuffer(const UPokeSharpSaveGame *Sav
 
 void UPokeSharpSaveGameExporter::WriteToDataBuffer(UPokeSharpSaveGame *SaveGame, const uint8 *Buffer, const int32 Size)
 {
+    // ReSharper disable once CppTemplateArgumentsCanBeDeduced
     const auto ArrayView = TConstArrayView<uint8>(Buffer, Size);
     SaveGame->WriteData(ArrayView);
 }

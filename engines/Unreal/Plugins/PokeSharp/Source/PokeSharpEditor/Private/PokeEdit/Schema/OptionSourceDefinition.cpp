@@ -38,8 +38,9 @@ namespace PokeEdit
     {
         return TJsonObjectConverter<FDynamicOptionSourceDefinition>::Serialize(Value);
     }
-    
-    TValueOrError<FOptionSourceDefinition, FString> TJsonConverter<FOptionSourceDefinition>::Deserialize(const TSharedRef<FJsonValue> &Value)
+
+    TValueOrError<FOptionSourceDefinition, FString> TJsonConverter<FOptionSourceDefinition>::Deserialize(
+        const TSharedRef<FJsonValue> &Value)
     {
         return TJsonUnionConverter<FOptionSourceDefinition>::Deserialize(Value);
     }

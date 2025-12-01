@@ -7,23 +7,17 @@ namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public sealed partial class PokeEditRequestProcessor(IEnumerable<IHandlerWrapper> handlers)
+public sealed partial class PokeEditRequestProcessor(IEnumerable<IRequestHandler> handlers)
 {
-    private readonly Dictionary<Name, IHandlerWrapper> _handlers = handlers.ToDictionary(x => x.Name);
+    private readonly Dictionary<Name, IRequestHandler> _handlers = handlers.ToDictionary(x => x.Name);
 
-    [CreateSyncVersion]
-    public async ValueTask ProcessRequestAsync(
-        Name requestName,
-        Stream requestStream,
-        Stream responseStream,
-        CancellationToken cancellationToken = default
-    )
+    public void ProcessRequest(Name requestName, Stream requestStream, Stream responseStream)
     {
         if (!_handlers.TryGetValue(requestName, out var handler))
         {
             throw new InvalidOperationException($"Handler for {requestName} not found");
         }
 
-        await handler.ProcessAsync(requestStream, responseStream, cancellationToken);
+        handler.Process(requestStream, responseStream);
     }
 }

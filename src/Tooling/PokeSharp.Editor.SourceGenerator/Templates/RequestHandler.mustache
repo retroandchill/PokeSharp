@@ -1,0 +1,29 @@
+#nullable enable
+using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Requests;
+using PokeSharp.Editor.Core.PokeEdit.Serialization;
+
+namespace {{Namespace}};
+
+public sealed class {{ClassName}}({{ServiceClass}} service, IPokeEditSerializer serializer) : IRequestHandler
+{
+    private static readonly Name RequestName = "{{RequestName}}";
+    public Name Name => RequestName;
+    
+    public void Process(Stream requestStream, Stream responseStream)
+    {
+        {{#HasRequestBody}}
+        var request = serializer.Deserialize<{{RequestType}}>(requestStream);
+        {{#RequestTypeNotNull}}
+        if (request is null) throw new InvalidOperationException("Request body was null");
+        {{/RequestTypeNotNull}}
+        {{/HasRequestBody}}
+        {{#HasResponseBody}}var response = {{/HasResponseBody}}service.{{MethodName}}({{#HasRequestBody}}request{{/HasRequestBody}});
+        {{#HasResponseBody}}
+        {{#ResponseNotNull}}
+        if (response is null) throw new InvalidOperationException("Response was null");    
+        {{/ResponseNotNull}}
+        serializer.Serialize(responseStream, response);
+        {{/HasResponseBody}}
+    }
+}

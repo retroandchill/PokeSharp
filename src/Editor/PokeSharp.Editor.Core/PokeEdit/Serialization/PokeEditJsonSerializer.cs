@@ -8,17 +8,17 @@ namespace PokeSharp.Editor.Core.PokeEdit.Serialization;
 public sealed partial class PokeEditJsonSerializer : IPokeEditSerializer
 {
     [CreateSyncVersion]
-    public async ValueTask<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
+    public async ValueTask<T?> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
     {
         return await JsonSerializer.DeserializeAsync<T>(
-                stream,
-                PokeEditJsonSerializerContext.Default.Options,
-                cancellationToken
-            ) ?? throw new InvalidOperationException("Deserialization failed");
+            stream,
+            PokeEditJsonSerializerContext.Default.Options,
+            cancellationToken
+        );
     }
 
     [CreateSyncVersion]
-    public async ValueTask SerializeAsync<T>(Stream stream, T value, CancellationToken cancellationToken = default)
+    public async ValueTask SerializeAsync<T>(Stream stream, T? value, CancellationToken cancellationToken = default)
     {
         await JsonSerializer.SerializeAsync(
             stream,

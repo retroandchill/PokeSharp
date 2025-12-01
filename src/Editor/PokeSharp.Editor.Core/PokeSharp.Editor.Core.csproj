@@ -8,9 +8,14 @@
   <ItemGroup>
     <ProjectReference Include="$(PokeSharpCoreProj)" />
     <ProjectReference
-            Include="$(PokeSharpCoreGeneratorProj)"
-            OutputItemType="Analyzer"
-            ReferenceOutputAssembly="false"
+      Include="$(PokeSharpCoreGeneratorProj)"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
+    <ProjectReference
+      Include="$(PokeSharpEditorGeneratorProj)"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
     />
   </ItemGroup>
   <ItemGroup>

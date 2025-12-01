@@ -69,14 +69,36 @@ namespace PokeSharp.Editor.SourceGenerator.Properties {
         ///{
         ///    public static IEditableType Type { get; } = new EditableType
         ///    {
-        ///        Name = {{Identifier}},
+        ///        Name = &quot;{{Identifier}}&quot;,
         ///        Properties = [
         ///            {{#Properties}}
-        ///            new {{PropertyClass}}&lt;{{../ClassName}}{{#IsDictionary}}, {{KeyType}}{{/IsDictionary}}, {{ValueType}}&gt;(&quot;{{Identifier}}&quot;, {{TypeRef}}, x =&gt; x.{{Name}}){{^IsReadOnly}},{{/Is [rest of string was truncated]&quot;;.
+        ///            new {{PropertyClass}}&lt;{{../ClassName}}{{#IsDictionary}}, {{KeyType}}{{/IsDictionary}}, {{ValueType}}&gt;(&quot;{{Identifier}}&quot;, {{TypeRef}}, x =&gt; x.{{Name}}){{^IsReadOnly}},{{/ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string EditableEntityTemplate {
             get {
                 return ResourceManager.GetString("EditableEntityTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using PokeSharp.Core.Strings;
+        ///using PokeSharp.Editor.Core.PokeEdit.Serialization;
+        ///
+        ///namespace {{Namespace}};
+        ///
+        ///public sealed class {{ClassName}}({{ServiceClass}} service, IPokeEditSerializer serializer) : IRequestHandler&lt;{{RequestType}}, {{ResponseType}}&gt;
+        ///{
+        ///    private static readonly Name RequestName = nameof(PokeEditService.GetEditorTabs);
+        ///    public Name Name =&gt; RequestName;
+        ///    
+        ///    public void Process(Stream requestStream, Stream responseStream)
+        ///    {
+        ///        {{#HasRequestBody}}
+        ///        var  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string RequestHandlerTemplate {
+            get {
+                return ResourceManager.GetString("RequestHandlerTemplate", resourceCulture);
             }
         }
     }

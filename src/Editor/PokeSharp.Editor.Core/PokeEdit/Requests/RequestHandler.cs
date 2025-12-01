@@ -2,11 +2,9 @@
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
-public interface IRequestHandler<in TRequest, TResponse>
+public interface IRequestHandler
 {
     Name Name { get; }
 
-    TResponse Handle(TRequest request);
-
-    ValueTask<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
+    void Process(Stream requestStream, Stream responseStream);
 }

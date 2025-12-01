@@ -11,13 +11,14 @@ public sealed partial class PokeEditRequestProcessor(IEnumerable<IRequestHandler
 {
     private readonly Dictionary<Name, IRequestHandler> _handlers = handlers.ToDictionary(x => x.Name);
 
-    public void ProcessRequest(Name requestName, Stream requestStream, Stream responseStream)
+    [CreateSyncVersion]
+    public async ValueTask ProcessRequestAsync(Name requestName, Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default)
     {
         if (!_handlers.TryGetValue(requestName, out var handler))
         {
             throw new InvalidOperationException($"Handler for {requestName} not found");
         }
 
-        handler.Process(requestStream, responseStream);
+        await handler.ProcessAsync(requestStream, responseStream, cancellationToken);
     }
 }

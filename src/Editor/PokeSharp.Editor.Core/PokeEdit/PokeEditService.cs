@@ -3,11 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
+using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Editor.Core.PokeEdit;
 
 [RegisterSingleton]
-public sealed class PokeEditService
+public sealed partial class PokeEditService
 {
     private readonly OrderedDictionary<Name, IEntityEditor> _editors = new();
 
@@ -18,18 +19,22 @@ public sealed class PokeEditService
             _editors.Add(editor.Id, editor);
         }
     }
-
+    
+    [CreateSyncVersion]
     [PokeEditRequest]
-    public IEnumerable<OptionItemDefinition> GetEditorTabs()
+    public ValueTask<IEnumerable<OptionItemDefinition>> GetEditorTabsAsync(CancellationToken cancellationToken = default)
     {
-        return _editors.Values.Select(x => new OptionItemDefinition(x.Id, x.Name));
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(_editors.Values.Select(x => new OptionItemDefinition(x.Id, x.Name)));
     }
-
+    
+    [CreateSyncVersion]
     [PokeEditRequest]
-    public TypeDefinition GetTypeSchema(Name editorId)
+    public ValueTask<TypeDefinition> GetTypeSchemaAsync(Name editorId, CancellationToken cancellationToken = default)
     {
-        return _editors.GetValueOrDefault(editorId)?.Type
-            ?? throw new InvalidOperationException($"No editor found for {editorId}");
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(_editors.GetValueOrDefault(editorId)?.Type
+                                    ?? throw new InvalidOperationException($"No editor found for {editorId}"));
     }
 }
 

@@ -32,30 +32,37 @@ public class RequestHandlerGenerator : IIncrementalGenerator
     {
         var info = method.GetPokeEditRequestInfo();
         var type = method.ContainingType;
-        if (method.Parameters.Length > 1)
+        if (method.Parameters.Length > 2)
         {
             // TODO: Report error
             return;
         }
+        var methodName = method.Name.EndsWith("Async") ? method.Name[..^5] : method.Name;
 
-        var requestType = method.Parameters.FirstOrDefault()?.Type;
+        var requestType = method.Parameters.Length switch
+        {
+            > 0 when method.Parameters[0].Type.Name != "CancellationToken" => method.Parameters[0].Type,
+            _ => null
+        };
         var responseType = method.ReturnsVoid ? null : method.ReturnType;
+        var hasCancellationToken = method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken";
 
         var templateParameters = new
         {
             Namespace = type.ContainingNamespace.ToDisplayString(),
-            ClassName = $"{type.Name}{method.Name}Handler",
+            ClassName = $"{type.Name}{methodName}Handler",
             ServiceClass = type.ToDisplayString(),
-            MethodName = method.Name,
-            RequestName = info.Name ?? method.Name,
+            MethodName = methodName,
+            RequestName = info.Name ?? methodName,
             RequestType = requestType?.ToDisplayString() ?? "object?",
             RequestTypeNotNull = requestType
                 is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
             ResponseType = responseType?.ToDisplayString() ?? "object?",
             ResponseNotNull = responseType
                 is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
-            HasRequestBody = method.Parameters.Length > 0,
+            HasRequestBody = requestType is not null,
             HasResponseBody = !method.ReturnsVoid,
+            HasCancellationToken = hasCancellationToken
         };
 
         var handlebars = Handlebars.Create();

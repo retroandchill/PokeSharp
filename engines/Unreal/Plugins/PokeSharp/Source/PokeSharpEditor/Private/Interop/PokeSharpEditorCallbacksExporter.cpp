@@ -6,3 +6,8 @@ void UPokeSharpEditorCallbacksExporter::SetOptionSelectionCallbacks(const FOptio
 {
     FOptionSelectionManager::Get().SetCallbacks(Callbacks);
 }
+
+void UPokeSharpEditorCallbacksExporter::SetPokeEditCallbacks(const FPokeEditCallbacks Callbacks)
+{
+    FPokeEditManager::Get().SetCallbacks(Callbacks);
+}

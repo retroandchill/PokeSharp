@@ -33,7 +33,7 @@ namespace PokeEdit
      * @tparam T The output type
      */
     template <typename T>
-    concept TJsonDeserializable = requires(const FJsonStringReader &Value) {
+    concept TJsonDeserializable = requires(const TSharedRef<FJsonValue> &Value) {
         { TJsonConverter<T>::Deserialize(Value) } -> std::same_as<TValueOrError<T, FString>>;
     };
 

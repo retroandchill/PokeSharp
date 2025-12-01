@@ -8,6 +8,7 @@ public class FPokeSharpUnrealEditorModule : IModuleInterface
     public void StartupModule()
     {
         PokeSharpEditorCallbacksExporter.CallSetOptionSelectionCallbacks(OptionSelectionCallbacks.Create());
+        PokeSharpEditorCallbacksExporter.CallSetPokeEditCallbacks(PokeEditCallbacks.Create());
     }
 
     public void ShutdownModule() { }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CSBindsManager.h"
 #include "OptionSelectionCallbacks.h"
+#include "PokeEditCallbacks.h"
 #include "UObject/Object.h"
 
 #include "PokeSharpEditorCallbacksExporter.generated.h"
@@ -20,4 +21,7 @@ class POKESHARPEDITOR_API UPokeSharpEditorCallbacksExporter : public UObject
   public:
     UNREALSHARP_FUNCTION()
     static void SetOptionSelectionCallbacks(FOptionSelectionCallbacks Callbacks);
+
+    UNREALSHARP_FUNCTION()
+    static void SetPokeEditCallbacks(FPokeEditCallbacks Callbacks);
 };

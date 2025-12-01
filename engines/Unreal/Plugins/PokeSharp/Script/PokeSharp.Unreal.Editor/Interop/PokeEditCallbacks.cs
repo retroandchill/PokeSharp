@@ -41,12 +41,16 @@ internal static unsafe class PokeEditRequestMethods
         {
             using var requestStream = new ArchiveStream(ref *request);
             using var responseStream = new ArchiveStream(ref *response);
-            GameGlobal.PokeEditRequestProcessor.ProcessRequest(requestName.ToPokeSharpName(), requestStream, responseStream);
+            GameGlobal.PokeEditRequestProcessor.ProcessRequest(
+                requestName.ToPokeSharpName(),
+                requestStream,
+                responseStream
+            );
             return NativeBool.True;
         }
         catch (Exception e)
         {
-            StringMarshaller.ToNative((IntPtr) error, 0, e.ToString());
+            StringMarshaller.ToNative((IntPtr)error, 0, e.ToString());
             return NativeBool.False;
         }
     }

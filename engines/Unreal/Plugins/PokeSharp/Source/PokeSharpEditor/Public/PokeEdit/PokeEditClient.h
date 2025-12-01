@@ -7,9 +7,8 @@
 /**
  *
  */
-class POKESHARPEDITOR_API FPokeEditClient
+namespace PokeEdit
 {
-  public:
-    TValueOrError<TSharedRef<FJsonValue>, FString> SendRequest(FName RequestName,
-                                                               const TSharedRef<FJsonValue> &Payload);
-};
+    POKESHARPEDITOR_API TValueOrError<TSharedRef<FJsonValue>, FString> SendRequest(
+        FName RequestName, const TSharedRef<FJsonValue> &Payload);
+}

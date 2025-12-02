@@ -151,7 +151,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
         {
             return true;
         }
-        
+
         return typeSymbol.SpecialType != SpecialType.None;
     }
 }

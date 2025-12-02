@@ -1,5 +1,7 @@
 ﻿#if POKESHARP_EDITOR_GENERATOR
 using RhoMicro.CodeAnalysis;
+#else
+using PokeSharp.Core.Data;
 #endif
 
 // ReSharper disable once CheckNamespace
@@ -12,7 +14,7 @@ namespace PokeSharp.Editor.Core;
 #if POKESHARP_EDITOR_GENERATOR
 [IncludeFile]
 #endif
-internal class EditableTypeAttribute(string? name = null) : Attribute
+internal class EditableTypeAttribute<T>(string? name = null) : Attribute
 {
     public string? Name { get; } = name;
 }

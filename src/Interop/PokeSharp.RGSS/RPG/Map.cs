@@ -21,5 +21,5 @@ public record Map(int Width, int Height)
 
     public Table Data { get; init; } = new(Width, Height, 3);
 
-    public IReadOnlyDictionary<int, Event> Events { get; init; } = new Dictionary<int, Event>();
+    public ImmutableDictionary<int, Event> Events { get; init; } = ImmutableDictionary<int, Event>.Empty;
 }

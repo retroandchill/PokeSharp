@@ -1,4 +1,6 @@
-﻿namespace PokeSharp.Core.Utils;
+﻿using System.Collections.Immutable;
+
+namespace PokeSharp.Core.Utils;
 
 /// <summary>
 /// Extension methods for collections.
@@ -99,5 +101,35 @@ public static class CollectionExtensions
         }
 
         return false;
+    }
+
+    public static ImmutableArray<T> Swap<T>(this ImmutableArray<T> array, int index1, int index2)
+    {
+        if (index1 < 0 || index1 >= array.Length || index2 < 0 || index2 >= array.Length)
+        {
+            throw new IndexOutOfRangeException();
+        }
+
+        if (index1 == index2)
+            return array;
+
+        var builder = ImmutableArray.CreateBuilder<T>();
+        for (var i = 0; i < array.Length; i++)
+        {
+            if (i == index1)
+            {
+                builder.Add(array[index2]);
+            }
+            else if (i == index2)
+            {
+                builder.Add(array[index1]);
+            }
+            else
+            {
+                builder.Add(array[i]);
+            }
+        }
+
+        return builder.MoveToImmutable();
     }
 }

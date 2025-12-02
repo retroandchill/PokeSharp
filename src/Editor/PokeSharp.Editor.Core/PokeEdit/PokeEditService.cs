@@ -19,22 +19,50 @@ public sealed partial class PokeEditService
             _editors.Add(editor.Id, editor);
         }
     }
-    
+
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask<IEnumerable<OptionItemDefinition>> GetEditorTabsAsync(CancellationToken cancellationToken = default)
+    public ValueTask<IEnumerable<OptionItemDefinition>> GetEditorTabsAsync(
+        CancellationToken cancellationToken = default
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult(_editors.Values.Select(x => new OptionItemDefinition(x.Id, x.Name)));
     }
-    
+
     [CreateSyncVersion]
     [PokeEditRequest]
     public ValueTask<TypeDefinition> GetTypeSchemaAsync(Name editorId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(_editors.GetValueOrDefault(editorId)?.Type
-                                    ?? throw new InvalidOperationException($"No editor found for {editorId}"));
+        return ValueTask.FromResult(
+            _editors.GetValueOrDefault(editorId)?.Type
+                ?? throw new InvalidOperationException($"No editor found for {editorId}")
+        );
+    }
+
+    [CreateSyncVersion]
+    [PokeEditRequest]
+    public ValueTask ProcessFieldEditAsync(FieldEdit edit, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (edit.Path.Segments.Length == 0)
+        {
+            throw new ArgumentException("Path must have at least one segment");
+        }
+
+        if (edit.Path.Segments[0] is not PropertySegment propertySegment)
+        {
+            throw new ArgumentException("First segment must be a property");
+        }
+
+        if (!_editors.TryGetValue(propertySegment.Name, out var editor))
+        {
+            throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
+        }
+
+        editor.ApplyEdit(edit);
+        return ValueTask.CompletedTask;
     }
 }
 

@@ -40,7 +40,7 @@ public static partial class SpeciesMapper
 
     private static Name MapToName(SpeciesForm form) => form.Species;
 
-    private static IReadOnlyDictionary<Name, int> MapBaseStats(List<int> stats)
+    private static ImmutableDictionary<Name, int> MapBaseStats(List<int> stats)
     {
         return Stat
             .AllMain.Where(s => s.PbsOrder >= 0)
@@ -48,7 +48,7 @@ public static partial class SpeciesMapper
             .ToImmutableDictionary(s => s.Id, s => s.Value);
     }
 
-    private static IReadOnlyDictionary<Name, int> MapEVs(List<EVYieldInfo> stats)
+    private static ImmutableDictionary<Name, int> MapEVs(List<EVYieldInfo> stats)
     {
         var statsDictionary = stats.ToDictionary(s => s.Stat, s => s.Amount);
 
@@ -57,15 +57,15 @@ public static partial class SpeciesMapper
             statsDictionary.TryAdd(stat.Id, 0);
         }
 
-        return statsDictionary;
+        return statsDictionary.ToImmutableDictionary();
     }
 
-    private static List<int> MapStats(IReadOnlyDictionary<Name, int> stats)
+    private static List<int> MapStats(ImmutableDictionary<Name, int> stats)
     {
         return [.. stats.OrderBy(s => Stat.Get(s.Key).PbsOrder).Select(x => x.Value)];
     }
 
-    private static List<EVYieldInfo> MapEVs(IReadOnlyDictionary<Name, int> stats)
+    private static List<EVYieldInfo> MapEVs(ImmutableDictionary<Name, int> stats)
     {
         return [.. stats.Select(x => new EVYieldInfo(x.Key, x.Value)).Where(x => x.Amount > 0)];
     }

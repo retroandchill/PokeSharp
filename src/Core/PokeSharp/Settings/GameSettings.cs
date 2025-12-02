@@ -38,7 +38,7 @@ public readonly record struct RoamingSpecies(
     int GameSwitch,
     RoamingEncounterType EncounterType,
     string? BattleMusic = null,
-    IReadOnlyDictionary<int, ImmutableArray<int>>? RoamingAreas = null
+    ImmutableDictionary<int, ImmutableArray<int>>? RoamingAreas = null
 );
 
 public readonly record struct PokedexName(Text Name, int Region = Pokedex.NationalDex);
@@ -295,7 +295,7 @@ public record GameSettings(string Version, int MechanicsGeneration = 8)
     /// <summary>
     /// A list of maps used by roaming Pokémon. Each map has an array of other maps it can lead to.
     /// </summary>
-    public IReadOnlyDictionary<int, ImmutableArray<int>> RoamingAreas { get; init; } =
+    public ImmutableDictionary<int, ImmutableArray<int>> RoamingAreas { get; init; } =
         new Dictionary<int, ImmutableArray<int>>
         {
             [5]  = [ 21, 28, 31, 39, 41, 44, 47, 66, 69],
@@ -308,7 +308,7 @@ public record GameSettings(string Version, int MechanicsGeneration = 8)
             [47] = [5, 21, 28, 31, 39, 41, 44, 66, 69],
             [66] = [5, 21, 28, 31, 39, 41, 44, 47, 69],
             [69] = [5, 21, 28, 31, 39, 41, 44, 47, 66 ]
-        };
+        }.ToImmutableDictionary();
 
     public ImmutableArray<RoamingSpecies> RoamingSpecies { get; init; } =
     [
@@ -321,7 +321,7 @@ public record GameSettings(string Version, int MechanicsGeneration = 8)
                 [21] = [2,     31, 69],
                 [31] = [2, 21,     69],
                 [69] = [   21, 31    ]
-            }),
+            }.ToImmutableDictionary()),
         new("ENTEI", 40, 55, RoamingEncounterType.LandOnly)
     ];
     // csharpier-ignore-end

@@ -1,24 +1,24 @@
 ﻿namespace PokeSharp.Editor.SourceGenerator.Model;
 
+public enum PropertyType
+{
+    Scalar,
+    List,
+    Dictionary,
+}
+
 public record EditablePropertyInfo
 {
-    public required string PropertyClass { get; init; }
-
-    public required string? KeyType { get; init; }
-    public required string ValueType { get; init; }
-    public bool IsDictionary => KeyType is not null;
-
     public required string Name { get; init; }
-
-    public string Identifier
+    public required string Type { get; init; }
+    public required PropertyType PropertyType { get; init; }
+    public string? KeyType { get; init; }
+    public string ValueType
     {
-        get => field ?? Name;
+        get => field ?? Type;
         init;
     }
 
-    public required string TypeRef { get; init; }
-    public required bool IsReadOnly { get; init; }
-
-    public string? DefaultValue { get; init; }
-    public bool HasDefaultValue => DefaultValue is not null;
+    public bool IsList => PropertyType == PropertyType.List;
+    public bool IsDictionary => PropertyType == PropertyType.Dictionary;
 }

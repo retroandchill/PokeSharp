@@ -42,10 +42,11 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         var requestType = method.Parameters.Length switch
         {
             > 0 when method.Parameters[0].Type.Name != "CancellationToken" => method.Parameters[0].Type,
-            _ => null
+            _ => null,
         };
         var responseType = method.ReturnsVoid ? null : method.ReturnType;
-        var hasCancellationToken = method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken";
+        var hasCancellationToken =
+            method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken";
 
         var templateParameters = new
         {
@@ -61,8 +62,8 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             ResponseNotNull = responseType
                 is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
             HasRequestBody = requestType is not null,
-            HasResponseBody = !method.ReturnsVoid,
-            HasCancellationToken = hasCancellationToken
+            HasResponseBody = method is { ReturnsVoid: false, ReturnType.Name: not "Task" and not "ValueTask" },
+            HasCancellationToken = hasCancellationToken,
         };
 
         var handlebars = Handlebars.Create();

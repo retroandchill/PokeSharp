@@ -26,9 +26,9 @@ public partial record Encounter
 
     public int Version => Id.Version;
 
-    public required IReadOnlyDictionary<Name, int> StepChances { get; init; }
+    public required ImmutableDictionary<Name, int> StepChances { get; init; }
 
-    public required IReadOnlyDictionary<Name, ImmutableArray<EncounterEntry>> Types { get; init; }
+    public required ImmutableDictionary<Name, ImmutableArray<EncounterEntry>> Types { get; init; }
 
     public static bool Exists(int mapId, int mapVersion = 0) => Exists(new EncounterId(mapId, mapVersion));
 

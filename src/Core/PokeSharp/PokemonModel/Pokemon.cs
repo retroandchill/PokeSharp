@@ -1059,7 +1059,7 @@ public partial class Pokemon
     [IgnoreMember]
     public IReadOnlyDictionary<Name, int> BaseStats => SpeciesData.BaseStats;
 
-    private IReadOnlyDictionary<Name, int> CalcIV()
+    private ImmutableDictionary<Name, int> CalcIV()
     {
         return Stat.AllMain.ToImmutableDictionary(
             s => s.Id,

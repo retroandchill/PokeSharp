@@ -12,7 +12,12 @@ public sealed partial class PokeEditRequestProcessor(IEnumerable<IRequestHandler
     private readonly Dictionary<Name, IRequestHandler> _handlers = handlers.ToDictionary(x => x.Name);
 
     [CreateSyncVersion]
-    public async ValueTask ProcessRequestAsync(Name requestName, Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default)
+    public async ValueTask ProcessRequestAsync(
+        Name requestName,
+        Stream requestStream,
+        Stream responseStream,
+        CancellationToken cancellationToken = default
+    )
     {
         if (!_handlers.TryGetValue(requestName, out var handler))
         {

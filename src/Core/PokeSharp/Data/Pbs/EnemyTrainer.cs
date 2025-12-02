@@ -35,9 +35,9 @@ public record TrainerPokemon
 
     public Name? Nature { get; init; }
 
-    public IReadOnlyDictionary<Name, int>? IVs { get; init; }
+    public ImmutableDictionary<Name, int>? IVs { get; init; }
 
-    public IReadOnlyDictionary<Name, int>? EVs { get; init; }
+    public ImmutableDictionary<Name, int>? EVs { get; init; }
 
     public int? Happiness { get; init; }
 

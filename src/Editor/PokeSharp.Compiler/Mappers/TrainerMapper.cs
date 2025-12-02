@@ -29,7 +29,7 @@ public static partial class TrainerMapper
     private static TrainerPokemonKey MapTrainerPokemonKey(TrainerPokemon pokemon) =>
         new(pokemon.Species, pokemon.Level);
 
-    private static IReadOnlyDictionary<Name, int> MapStats(List<int> stats)
+    private static ImmutableDictionary<Name, int> MapStats(List<int> stats)
     {
         return Stat
             .AllMain.Where(s => s.PbsOrder >= 0)
@@ -37,7 +37,7 @@ public static partial class TrainerMapper
             .ToImmutableDictionary(s => s.Id, s => s.Value);
     }
 
-    private static List<int> MapStats(IReadOnlyDictionary<Name, int> stats)
+    private static List<int> MapStats(ImmutableDictionary<Name, int> stats)
     {
         return stats.OrderBy(s => Stat.Get(s.Key).PbsOrder).Select(x => x.Value).ToList();
     }

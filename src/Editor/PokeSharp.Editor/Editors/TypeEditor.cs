@@ -1,22 +1,29 @@
-﻿using Injectio.Attributes;
+﻿using System.Collections.Immutable;
+using System.Text.Json;
+using Injectio.Attributes;
+using Microsoft.Extensions.Options;
 using PokeSharp.Core.Strings;
+using PokeSharp.Data.Pbs;
 using PokeSharp.Editor.Core.PokeEdit;
+using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
-using PokeSharp.Editor.Model;
+using PokeSharp.Editor.Schemas;
 
 namespace PokeSharp.Editor.Editors;
 
 [RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
-public sealed class TypeEditor : IEntityEditor
+public sealed class TypeEditor(IOptions<JsonSerializerOptions> options) : EntityEditor<PokemonType>(options)
 {
     private static readonly Name TypeId = "Type";
     private static readonly Text TypeName = Text.Localized("EntityEditor", "Type", "Type");
 
-    public Name Id => TypeId;
-    public Text Name => TypeName;
-    public int Order => 0;
+    public override Name Id => TypeId;
+    public override Text Name => TypeName;
+    public override int Order => 0;
 
-    public TypeDefinition Type { get; } =
+    public override IEditableType<PokemonType> Properties => PokemonTypeEditRegistry.Properties;
+
+    public override TypeDefinition Type { get; } =
         new()
         {
             Id = "Type",
@@ -90,6 +97,4 @@ public sealed class TypeEditor : IEntityEditor
                 },
             ],
         };
-
-    public Type ClrType => typeof(EditablePokemonType);
 }

@@ -96,9 +96,9 @@ public partial record Species
 
     public required ImmutableArray<Name> Types { get; init; }
 
-    public required IReadOnlyDictionary<Name, int> BaseStats { get; init; }
+    public required ImmutableDictionary<Name, int> BaseStats { get; init; }
 
-    public required IReadOnlyDictionary<Name, int> EVs { get; init; }
+    public required ImmutableDictionary<Name, int> EVs { get; init; }
 
     public required int BaseExp { get; init; }
 

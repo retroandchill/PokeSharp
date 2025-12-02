@@ -1,25 +1,78 @@
+using System.Collections.Immutable;
 using PokeSharp.Core.Strings;
+using PokeSharp.Core.Utils;
+using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace {{Namespace}};
 
-partial class {{ClassName}} : IEditableEntity<{{ClassName}}>
+static partial class {{ClassName}}
 {
-    public static IEditableType Type { get; } = new EditableType
-    {
-        Name = "{{Identifier}}",
-        Properties = [
+    public static readonly IEditableType<{{TargetType}}> Properties = new EditableType<{{TargetType}}>(
+        "{{TargetTypeName}}",
+        new Dictionary<Name, IEditableProperty<{{TargetType}}>>
+        {
             {{#Properties}}
-            new {{PropertyClass}}<{{../ClassName}}{{#IsDictionary}}, {{KeyType}}{{/IsDictionary}}, {{ValueType}}>("{{Identifier}}", {{TypeRef}}, x => x.{{Name}}){{^IsReadOnly}},{{/IsReadOnly}}
-            {{#IsReadOnly}}
-            {
-                {{#HasDefaultValue}}
-                DefaultValue => () => {{DefaultValue}},
-                {{/HasDefaultValue}}
-                Setter = (x, v) => x.{{Name}} = v
-            },
-            {{/IsReadOnly}}
+            ["{{Name}}"] = new {{../TargetTypeName}}{{Name}}Property(),
             {{/Properties}}
-        ]
-    };
+        }.ToImmutableDictionary()
+    );
+
+    {{#Properties}}
+    
+    private sealed class {{../TargetTypeName}}{{Name}}Property : Editable{{PropertyType}}Property<{{../TargetType}},{{#IsDictionary}} {{KeyType}},{{/IsDictionary}} {{ValueType}}>
+    {
+        private static readonly Name StaticName = "{{Name}}";
+        public override Name Name => StaticName;
+        {{#IsList}}
+        public override IEditableType<{{ValueType}}>? ItemType => null;
+        {{/IsList}}
+        {{#IsDictionary}}
+        public override IEditableType<{{ValueType}}>? ValueType => null;
+        {{/IsDictionary}}
+        
+        public override {{Type}} Get({{../TargetType}} root) => root.{{Name}};
+
+        public override {{../TargetType}} With({{../TargetType}} root, {{Type}} value) => root with { {{Name}} = value };
+        {{#IsList}}
+        
+        public override {{../TargetType}} SetItem({{../TargetType}} root, int index, {{ValueType}} item) 
+        {
+            return root with { {{Name}} = root.{{Name}}.SetItem(index, item) };
+        }
+
+        public override {{../TargetType}} Add({{../TargetType}} root, {{ValueType}} item)
+        {
+            return root with { {{Name}} = root.{{Name}}.Add(item) };
+        }
+
+        public override {{../TargetType}} Insert({{../TargetType}} root, int index, {{ValueType}} item) 
+        {
+            return root with { {{Name}} = root.{{Name}}.Insert(index, item) };
+        }
+
+        public override {{../TargetType}} Swap({{../TargetType}} root, int indexA, int indexB)
+        {
+            return root with { {{Name}} = root.{{Name}}.Swap(indexA, indexB) };
+        }
+
+        public override {{../TargetType}} RemoveAt({{../TargetType}} root, int index)
+        {
+            return root with { {{Name}} = root.{{Name}}.RemoveAt(index) };
+        }
+        {{/IsList}}
+        {{#IsDictionary}}
+        
+        public override {{../TargetType}} SetEntry({{../TargetType}} root, {{KeyType}} key, {{ValueType}} value)
+        {
+            return root with { {{Name}} = root.{{Name}}.SetItem(key, value) };
+        }
+        
+        public override {{../TargetType}} RemoveEntry({{../TargetType}} root, {{KeyType}} key)
+        {
+            return root with { {{Name}} = root.{{Name}}.Remove(key) };
+        }
+        {{/IsDictionary}}
+    }
+    {{/Properties}}
 }

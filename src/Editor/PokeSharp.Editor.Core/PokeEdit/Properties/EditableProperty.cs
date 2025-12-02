@@ -26,6 +26,11 @@ public interface IEditableProperty<TRoot, TValue> : IEditableProperty<TRoot>
     TRoot With(TRoot root, TValue value);
 }
 
+public interface IEditableObjectProperty<TRoot, TValue> : IEditableProperty<TRoot, TValue>
+{
+    IEditableType<TValue> Type { get; }
+}
+
 public interface IEditableListProperty<TRoot, TItem> : IEditableProperty<TRoot, ImmutableArray<TItem>>
 {
     IEditableType<TItem>? ItemType { get; }
@@ -69,6 +74,27 @@ public abstract class EditableScalarProperty<TRoot, TValue> : IEditableProperty<
             ? With(root, set.NewValue.Deserialize<TValue>(options)!)
             : throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}");
     }
+}
+
+public abstract class EditableObjectProperty<TRoot, TValue> : IEditableObjectProperty<TRoot, TValue>
+{
+    public abstract Name Name { get; }
+    public abstract IEditableType<TValue> Type { get; }
+    public abstract TValue Get(TRoot root);
+    public abstract TRoot With(TRoot root, TValue value);
+    
+    public TRoot ApplyEdit(TRoot root, ReadOnlySpan<FieldPathSegment> path, FieldEdit edit, JsonSerializerOptions? options = null)
+    {
+        if (path.Length != 0)
+        {
+            return With(root, Type.ApplyEdit(Get(root), path, edit, options));
+        }
+
+        return edit is SetValueEdit set
+            ? With(root, set.NewValue.Deserialize<TValue>(options)!)
+            : throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}");
+    }
+
 }
 
 public abstract class EditableListProperty<TRoot, TItem> : IEditableListProperty<TRoot, TItem>

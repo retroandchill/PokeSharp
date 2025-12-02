@@ -82,8 +82,13 @@ public abstract class EditableObjectProperty<TRoot, TValue> : IEditableObjectPro
     public abstract IEditableType<TValue> Type { get; }
     public abstract TValue Get(TRoot root);
     public abstract TRoot With(TRoot root, TValue value);
-    
-    public TRoot ApplyEdit(TRoot root, ReadOnlySpan<FieldPathSegment> path, FieldEdit edit, JsonSerializerOptions? options = null)
+
+    public TRoot ApplyEdit(
+        TRoot root,
+        ReadOnlySpan<FieldPathSegment> path,
+        FieldEdit edit,
+        JsonSerializerOptions? options = null
+    )
     {
         if (path.Length != 0)
         {
@@ -94,7 +99,6 @@ public abstract class EditableObjectProperty<TRoot, TValue> : IEditableObjectPro
             ? With(root, set.NewValue.Deserialize<TValue>(options)!)
             : throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}");
     }
-
 }
 
 public abstract class EditableListProperty<TRoot, TItem> : IEditableListProperty<TRoot, TItem>

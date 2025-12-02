@@ -7,4 +7,5 @@ namespace PokeSharp.Editor.Core.PokeEdit;
 [JsonSerializable(typeof(FieldDefinition))]
 [JsonSerializable(typeof(FieldPath))]
 [JsonSerializable(typeof(FieldEdit))]
+[JsonSerializable(typeof(EditorTabOption))]
 public partial class PokeEditJsonSerializerContext : JsonSerializerContext;

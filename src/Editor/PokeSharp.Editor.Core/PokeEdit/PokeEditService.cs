@@ -23,12 +23,10 @@ public sealed partial class PokeEditService
 
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask<IEnumerable<OptionItemDefinition>> GetEditorTabsAsync(
-        CancellationToken cancellationToken = default
-    )
+    public ValueTask<IEnumerable<EditorTabOption>> GetEditorTabsAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(_editors.Values.Select(x => new OptionItemDefinition(x.Id, x.Name)));
+        return ValueTask.FromResult(_editors.Values.Select(x => new EditorTabOption(x.Id, x.Name)));
     }
 
     [CreateSyncVersion]
@@ -57,7 +55,9 @@ public sealed partial class PokeEditService
             throw new ArgumentException("First segment must be a property");
         }
 
-        return _editors.TryGetValue(propertySegment.Name, out var editor) ? ValueTask.FromResult(editor.ApplyEdit(edit)) : throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
+        return _editors.TryGetValue(propertySegment.Name, out var editor)
+            ? ValueTask.FromResult(editor.ApplyEdit(edit))
+            : throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
     }
 }
 

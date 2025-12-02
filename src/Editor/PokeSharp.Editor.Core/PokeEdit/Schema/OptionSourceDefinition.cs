@@ -1,10 +1,11 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
-public readonly record struct OptionItemDefinition(Name Key, Text Label);
+public readonly record struct OptionItemDefinition(JsonNode Value, Text Label);
 
 [JsonPolymorphic]
 [JsonDerivedType(typeof(StaticOptionSourceDefinition), "Static")]

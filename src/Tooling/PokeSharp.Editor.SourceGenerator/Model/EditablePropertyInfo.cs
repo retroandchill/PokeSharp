@@ -3,6 +3,7 @@
 public enum PropertyType
 {
     Scalar,
+    Object,
     List,
     Dictionary,
 }
@@ -18,7 +19,9 @@ public record EditablePropertyInfo
         get => field ?? Type;
         init;
     }
+    public string? ObjectType { get; init; }
 
+    public bool IsObject => PropertyType == PropertyType.Object;
     public bool IsList => PropertyType == PropertyType.List;
     public bool IsDictionary => PropertyType == PropertyType.Dictionary;
 }

@@ -113,7 +113,7 @@ public static class CollectionExtensions
         if (index1 == index2)
             return array;
 
-        var builder = ImmutableArray.CreateBuilder<T>();
+        var builder = ImmutableArray.CreateBuilder<T>(array.Length);
         for (var i = 0; i < array.Length; i++)
         {
             if (i == index1)

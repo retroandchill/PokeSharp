@@ -62,7 +62,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             ResponseNotNull = responseType
                 is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
             HasRequestBody = requestType is not null,
-            HasResponseBody = method is { ReturnsVoid: false, ReturnType.Name: not "Task" and not "ValueTask" },
+            HasResponseBody = method is { ReturnsVoid: false, ReturnType: INamedTypeSymbol { IsGenericType: true } },
             HasCancellationToken = hasCancellationToken,
         };
 

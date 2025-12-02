@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Strings;
@@ -21,7 +22,7 @@ public interface IEntityEditor
 
     public void SyncFromSource();
 
-    public void ApplyEdit(FieldEdit edit);
+    public JsonNode? ApplyEdit(FieldEdit edit);
 }
 
 public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) : IEntityEditor
@@ -42,12 +43,11 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
         Interlocked.Exchange(ref _entries, [.. T.Entities]);
     }
 
-    public void ApplyEdit(FieldEdit edit)
+    public JsonNode? ApplyEdit(FieldEdit edit)
     {
         if (edit.Path.Segments.Length == 0)
         {
-            ApplyEditToCollection(edit);
-            return;
+            return ApplyEditToCollection(edit);
         }
 
         if (edit.Path.Segments[0] is not ListIndexSegment indexSegment)
@@ -75,16 +75,17 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
             }
 
             Interlocked.Exchange(ref _entries, _entries.SetItem(indexSegment.Index, newValue));
-            return;
+            return JsonSerializer.SerializeToNode(newValue, _options);
         }
 
         Interlocked.Exchange(
             ref _entries,
             _entries.SetItem(index, Properties.ApplyEdit(current, remaining, edit, _options))
         );
+        return JsonSerializer.SerializeToNode(current, _options);
     }
 
-    private void ApplyEditToCollection(FieldEdit edit)
+    private JsonNode? ApplyEditToCollection(FieldEdit edit)
     {
         switch (edit)
         {
@@ -99,7 +100,8 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
                 }
 
                 Interlocked.Exchange(ref _entries, _entries.Add(newEntry));
-                break;
+
+                return JsonSerializer.SerializeToNode(_entries[^1], _options);
             }
             case ListInsertEdit listInsertEdit:
             {
@@ -112,14 +114,15 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
                 }
 
                 Interlocked.Exchange(ref _entries, _entries.Insert(listInsertEdit.Index, newEntry));
-                break;
+
+                return JsonSerializer.SerializeToNode(_entries[listInsertEdit.Index], _options);
             }
             case ListRemoveAtEdit listRemoveAtEdit:
                 Interlocked.Exchange(ref _entries, _entries.RemoveAt(listRemoveAtEdit.Index));
-                break;
+                return null;
             case ListSwapEdit listSwapEdit:
                 Interlocked.Exchange(ref _entries, _entries.Swap(listSwapEdit.IndexA, listSwapEdit.IndexB));
-                break;
+                return null;
             default:
                 throw new InvalidOperationException($"Cannot perform edit {edit} on a collection.");
         }

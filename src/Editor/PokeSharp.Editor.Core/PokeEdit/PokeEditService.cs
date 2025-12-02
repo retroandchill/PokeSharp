@@ -1,4 +1,5 @@
-﻿using Injectio.Attributes;
+﻿using System.Text.Json.Nodes;
+using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
@@ -43,7 +44,7 @@ public sealed partial class PokeEditService
 
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask ProcessFieldEditAsync(FieldEdit edit, CancellationToken cancellationToken = default)
+    public ValueTask<JsonNode?> ProcessFieldEditAsync(FieldEdit edit, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (edit.Path.Segments.Length == 0)
@@ -56,13 +57,7 @@ public sealed partial class PokeEditService
             throw new ArgumentException("First segment must be a property");
         }
 
-        if (!_editors.TryGetValue(propertySegment.Name, out var editor))
-        {
-            throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
-        }
-
-        editor.ApplyEdit(edit);
-        return ValueTask.CompletedTask;
+        return _editors.TryGetValue(propertySegment.Name, out var editor) ? ValueTask.FromResult(editor.ApplyEdit(edit)) : throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
     }
 }
 

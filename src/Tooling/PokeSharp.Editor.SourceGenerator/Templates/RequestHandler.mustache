@@ -35,7 +35,7 @@ public sealed class {{ClassName}}({{ServiceClass}} service, IPokeEditSerializer 
         if (request is null) throw new InvalidOperationException("Request body was null");
         {{/RequestTypeNotNull}}
         {{/HasRequestBody}}
-        {{#HasResponseBody}}var response = await {{/HasResponseBody}}service.{{MethodName}}Async({{#HasRequestBody}}request{{/HasRequestBody}}{{#HasCancellationToken}}{{#HasRequestBody}}, {{/HasRequestBody}}cancellationToken{{/HasCancellationToken}});
+        {{#HasResponseBody}}var response = {{/HasResponseBody}}await service.{{MethodName}}Async({{#HasRequestBody}}request{{/HasRequestBody}}{{#HasCancellationToken}}{{#HasRequestBody}}, {{/HasRequestBody}}cancellationToken{{/HasCancellationToken}});
         {{#HasResponseBody}}
         {{#ResponseNotNull}}
         if (response is null) throw new InvalidOperationException("Response was null");    

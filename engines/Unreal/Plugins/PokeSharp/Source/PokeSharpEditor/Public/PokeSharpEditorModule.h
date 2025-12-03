@@ -18,5 +18,11 @@ class FPokeSharpEditorModule : public IModuleInterface
     static void ExportPbsData();
     static void EditData();
 
+    static void RegisterTabSpawner();
+    static void UnregisterTabSpawner();
+
+    static TSharedRef<SDockTab> SpawnPokeSharpEditorTab(const FSpawnTabArgs &SpawnTabArgs);
+
+    static FName PokeSharpEditorTabName;
     TSharedPtr<FUICommandList> PokeSharpCommands;
 };

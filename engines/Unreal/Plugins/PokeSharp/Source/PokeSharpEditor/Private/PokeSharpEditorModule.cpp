@@ -1,20 +1,25 @@
-﻿#include "PokeSharpEditor.h"
+﻿#include "PokeSharpEditorModule.h"
 #include "LevelEditor.h"
+#include "UI/PokeSharpEditor.h"
 #include "UI/PokeSharpEditorCommands.h"
 #include "UI/PokeSharpStyle.h"
 
 #define LOCTEXT_NAMESPACE "FPokeSharpEditorModule"
+
+FName FPokeSharpEditorModule::PokeSharpEditorTabName(TEXT("PokeSharpEditorTab"));
 
 void FPokeSharpEditorModule::StartupModule()
 {
     FPokeSharpStyle::Initialize();
     RegisterCommands();
     RegisterMenu();
+    RegisterTabSpawner();
 }
 
 void FPokeSharpEditorModule::ShutdownModule()
 {
     FPokeSharpStyle::Shutdown();
+    UnregisterTabSpawner();
 }
 
 void FPokeSharpEditorModule::RegisterCommands()
@@ -79,7 +84,27 @@ void FPokeSharpEditorModule::ExportPbsData()
 
 void FPokeSharpEditorModule::EditData()
 {
-    // TODO: Implement me
+    FGlobalTabmanager::Get()->TryInvokeTab(PokeSharpEditorTabName);
+}
+
+void FPokeSharpEditorModule::RegisterTabSpawner()
+{
+    FGlobalTabmanager::Get()
+        ->RegisterNomadTabSpawner(PokeSharpEditorTabName,
+                                  FOnSpawnTab::CreateStatic(&FPokeSharpEditorModule::SpawnPokeSharpEditorTab))
+        .SetDisplayName(LOCTEXT("PokeSharpEditorTabTitle", "PokeSharp Data Editor"))
+        .SetTooltipText(LOCTEXT("PokeSharpEditorTabTooltip", "Edit PokeSharp data"))
+        .SetIcon(FSlateIcon(FPokeSharpStyle::GetStyleSetName(), "PokeSharp.Toolbar"));
+}
+
+void FPokeSharpEditorModule::UnregisterTabSpawner()
+{
+    FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(PokeSharpEditorTabName);
+}
+
+TSharedRef<SDockTab> FPokeSharpEditorModule::SpawnPokeSharpEditorTab(const FSpawnTabArgs &SpawnTabArgs)
+{
+    return SNew(SDockTab).TabRole(NomadTab)[SNew(SPokeSharpEditor)];
 }
 
 #undef LOCTEXT_NAMESPACE

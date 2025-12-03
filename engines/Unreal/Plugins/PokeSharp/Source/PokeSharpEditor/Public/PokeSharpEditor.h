@@ -8,4 +8,15 @@ class FPokeSharpEditorModule : public IModuleInterface
   public:
     void StartupModule() override;
     void ShutdownModule() override;
+
+  private:
+    void RegisterCommands();
+    void RegisterMenu() const;
+    TSharedRef<SWidget> GeneratePokeSharpMenu() const;
+
+    static void ImportPbsData();
+    static void ExportPbsData();
+    static void EditData();
+
+    TSharedPtr<FUICommandList> PokeSharpCommands;
 };

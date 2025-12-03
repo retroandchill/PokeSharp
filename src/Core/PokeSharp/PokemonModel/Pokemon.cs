@@ -2,9 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using MessagePack;
 using PokeSharp.Core;
+using PokeSharp.Core.Collections;
 using PokeSharp.Core.Engine;
 using PokeSharp.Core.Strings;
-using PokeSharp.Core.Utils;
 using PokeSharp.Data.Core;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Items;

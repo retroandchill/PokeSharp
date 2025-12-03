@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace PokeSharp.Core.Utils;
+namespace PokeSharp.Core.Collections;
 
 /// <summary>
 /// Extension methods for collections.

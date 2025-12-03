@@ -24,4 +24,5 @@ public record EditablePropertyInfo
     public bool IsObject => PropertyType == PropertyType.Object;
     public bool IsList => PropertyType == PropertyType.List;
     public bool IsDictionary => PropertyType == PropertyType.Dictionary;
+    public bool IsLast { get; init; }
 }

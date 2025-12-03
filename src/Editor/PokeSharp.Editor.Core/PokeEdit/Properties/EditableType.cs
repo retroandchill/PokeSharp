@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using PokeSharp.Core.Collections.Immutable;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
@@ -31,7 +32,7 @@ public interface IEditableType<T> : IEditableType
     T ApplyEdit(T root, ReadOnlySpan<FieldPathSegment> path, FieldEdit edit, JsonSerializerOptions? options = null);
 }
 
-public sealed class EditableType<T>(Name name, ImmutableDictionary<Name, IEditableProperty<T>> properties)
+public sealed class EditableType<T>(Name name, ImmutableOrderedDictionary<Name, IEditableProperty<T>> properties)
     : IEditableType<T>
 {
     public Name Name { get; } = name;

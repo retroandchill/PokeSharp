@@ -60,22 +60,26 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             if (existingRegistry is not null)
                 continue;
 
+            var properties = targetType
+                .GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(x =>
+                    x
+                        is {
+                            IsStatic: false,
+                            GetMethod.DeclaredAccessibility: Accessibility.Public,
+                            SetMethod.DeclaredAccessibility: Accessibility.Public
+                        }
+                )
+                .ToImmutableArray();
+
             var templateParameters = new
             {
                 Namespace = targetType.ContainingNamespace.ToDisplayString(),
                 ClassName = targetType.Name,
                 Identifier = name ?? targetType.Name,
-                Properties = targetType
-                    .GetPublicProperties()
-                    .Where(x =>
-                        x
-                            is {
-                                IsStatic: false,
-                                GetMethod: not null,
-                                SetMethod.DeclaredAccessibility: Accessibility.Public
-                            }
-                    )
-                    .Select(x => CreateEditablePropertyInfo(x, explore, explored))
+                Properties = properties
+                    .Select((x, i) => CreateEditablePropertyInfo(x, explore, explored, i == properties.Length - 1))
                     .ToImmutableArray(),
             };
 
@@ -93,7 +97,8 @@ public class TypeSchemaGenerator : IIncrementalGenerator
     private static EditablePropertyInfo CreateEditablePropertyInfo(
         IPropertySymbol property,
         Queue<EditableTypeInfo> explore,
-        HashSet<ITypeSymbol> explored
+        HashSet<ITypeSymbol> explored,
+        bool isLast
     )
     {
         switch (property)
@@ -107,6 +112,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     Type = immutableArrayType.ToDisplayString(),
                     PropertyType = PropertyType.List,
                     ValueType = immutableArrayType.TypeArguments[0].ToDisplayString(),
+                    IsLast = isLast,
                 };
             case { Type: INamedTypeSymbol { IsGenericType: true, MetadataName: "Dictionary`2" } dictionaryType }:
                 return new EditablePropertyInfo
@@ -116,6 +122,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     PropertyType = PropertyType.Dictionary,
                     KeyType = dictionaryType.TypeArguments[0].ToDisplayString(),
                     ValueType = dictionaryType.TypeArguments[1].ToDisplayString(),
+                    IsLast = isLast,
                 };
             case var _ when !IsSimpleType(property.Type):
                 if (!explored.Contains(property.Type))
@@ -129,6 +136,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Object,
                     ObjectType = property.Type.ToDisplayString(NullableFlowState.NotNull),
+                    IsLast = isLast,
                 };
             default:
                 return new EditablePropertyInfo
@@ -136,6 +144,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     Name = property.Name,
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Scalar,
+                    IsLast = isLast,
                 };
         }
     }

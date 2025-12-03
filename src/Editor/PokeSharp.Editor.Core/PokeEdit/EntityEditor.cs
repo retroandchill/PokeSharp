@@ -2,9 +2,9 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
+using PokeSharp.Core.Collections;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Strings;
-using PokeSharp.Core.Utils;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 

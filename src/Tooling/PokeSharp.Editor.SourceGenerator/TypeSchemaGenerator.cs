@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PokeSharp.Editor.Core;
 using PokeSharp.Editor.SourceGenerator.Formatters;
@@ -16,20 +17,16 @@ public class TypeSchemaGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var dataTypes = context
-            .SyntaxProvider.ForAttributeWithMetadataName(
-                typeof(EditableTypeAttribute<>).FullName!,
-                (n, _) => n is TypeDeclarationSyntax,
-                (ctx, _) =>
-                {
-                    var type = (TypeDeclarationSyntax)ctx.TargetNode;
-                    return ctx.SemanticModel.GetDeclaredSymbol(type) as INamedTypeSymbol;
-                }
+        var forCalls = context
+            .SyntaxProvider.CreateSyntaxProvider(
+                (node, _) => node is InvocationExpressionSyntax,
+                (ctx, _) => GetForCallInfo(ctx)
             )
-            .Where(t => t is not null)
+            .Where(info => info is not null)
+            .Select((info, _) => info!.Value)
             .Collect();
 
-        var combined = dataTypes.Combine(context.CompilationProvider);
+        var combined = forCalls.Combine(context.CompilationProvider);
 
         context.RegisterSourceOutput(
             combined,
@@ -40,19 +37,66 @@ public class TypeSchemaGenerator : IIncrementalGenerator
         );
     }
 
+    private static ForCallInfo? GetForCallInfo(GeneratorSyntaxContext ctx)
+    {
+        if (ctx.Node is not InvocationExpressionSyntax invocation)
+            return null;
+
+        var symbol = ctx.SemanticModel.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
+        if (symbol is null || symbol.Name != "For")
+            return null;
+
+        // Ensure it's your EditorModelBuilder.For<T>
+        var editorModelBuilderType = ctx.SemanticModel.Compilation.GetTypeByMetadataName(
+            "PokeSharp.Editor.Core.PokeEdit.Properties.EditorModelBuilder"
+        );
+
+        if (!SymbolEqualityComparer.Default.Equals(symbol.ContainingType, editorModelBuilderType))
+            return null;
+
+        // Get the type argument T
+        if (symbol.TypeArguments.Length != 1)
+            return null;
+
+        if (symbol.TypeArguments[0] is not INamedTypeSymbol t)
+            return null;
+
+        var location = ctx.SemanticModel.GetInterceptableLocation(invocation);
+        if (location is null)
+        {
+            return null;
+        }
+
+        return new ForCallInfo(t, location.Version, location.Data);
+    }
+
+    private readonly record struct ForCallInfo(INamedTypeSymbol TargetType, int Version, string Data);
+
     private static void Execute(
         SourceProductionContext context,
-        ImmutableArray<INamedTypeSymbol> types,
+        ImmutableArray<ForCallInfo> types,
         Compilation compilation
     )
     {
+        var forCallInfos = new Dictionary<INamedTypeSymbol, List<ForCallInfo>>(SymbolEqualityComparer.Default);
+        foreach (var info in types)
+        {
+            if (!forCallInfos.TryGetValue(info.TargetType, out var list))
+            {
+                list = [];
+                forCallInfos.Add(info.TargetType, list);
+            }
+
+            list.Add(info);
+        }
+
         // We're going to start with the explicitly defined types, and if we find any complex types in the hierarchy,
         // then we need to explore those types as well.
-        var explore = new Queue<EditableTypeInfo>(types.Select(t => t.GetEditableTypeInfo()));
+        var explore = new Queue<INamedTypeSymbol>(types.Select(x => x.TargetType));
         var explored = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
         while (explore.Count > 0)
         {
-            var (targetType, name) = explore.Dequeue();
+            var targetType = explore.Dequeue();
             explored.Add(targetType);
 
             // We're looking for an edit registry in another assembly, and if we find one, we don't need to generate one.
@@ -77,10 +121,12 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             {
                 Namespace = targetType.ContainingNamespace.ToDisplayString(),
                 ClassName = targetType.Name,
-                Identifier = name ?? targetType.Name,
+                Identifier = targetType.Name,
                 Properties = properties
                     .Select((x, i) => CreateEditablePropertyInfo(x, explore, explored, i == properties.Length - 1))
                     .ToImmutableArray(),
+                HasForCalls = forCallInfos.TryGetValue(targetType, out var forCallsInfo) && forCallsInfo.Count > 0,
+                ForCalls = forCallsInfo,
             };
 
             var handlebars = Handlebars.Create();
@@ -96,7 +142,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
 
     private static EditablePropertyInfo CreateEditablePropertyInfo(
         IPropertySymbol property,
-        Queue<EditableTypeInfo> explore,
+        Queue<INamedTypeSymbol> explore,
         HashSet<ITypeSymbol> explored,
         bool isLast
     )
@@ -124,10 +170,10 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     ValueType = dictionaryType.TypeArguments[1].ToDisplayString(),
                     IsLast = isLast,
                 };
-            case var _ when !IsSimpleType(property.Type):
-                if (!explored.Contains(property.Type))
+            case { Type: INamedTypeSymbol complexType } when !IsSimpleType(complexType):
+                if (!explored.Contains(complexType))
                 {
-                    explore.Enqueue(new EditableTypeInfo(property.Type));
+                    explore.Enqueue(complexType);
                 }
 
                 return new EditablePropertyInfo

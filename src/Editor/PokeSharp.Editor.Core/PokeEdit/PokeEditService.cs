@@ -1,7 +1,9 @@
 ﻿using System.Text.Json.Nodes;
 using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.Core.Collections.Immutable;
 using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 using Zomp.SyncMethodGenerator;
@@ -11,14 +13,16 @@ namespace PokeSharp.Editor.Core.PokeEdit;
 [RegisterSingleton]
 public sealed partial class PokeEditService
 {
-    private readonly OrderedDictionary<Name, IEntityEditor> _editors = new();
+    private readonly ImmutableOrderedDictionary<Name, IEntityEditor> _editors;
 
-    public PokeEditService(IEnumerable<IEntityEditor> editors)
+    public PokeEditService(IEnumerable<IEditorModelCustomizer> customizers)
     {
-        foreach (var editor in editors.OrderBy(x => x.Order))
+        var builder = new EditorModelBuilder();
+        foreach (var customizer in customizers.OrderBy(x => x.Priority))
         {
-            _editors.Add(editor.Id, editor);
+            customizer.OnModelCreating(builder);
         }
+        _editors = builder.Build();
     }
 
     [CreateSyncVersion]

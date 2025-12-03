@@ -1,0 +1,20 @@
+﻿using Injectio.Attributes;
+using PokeSharp.Core.Strings;
+using PokeSharp.Data.Pbs;
+using PokeSharp.Editor.Core.PokeEdit.Properties;
+
+namespace PokeSharp.Editor.PokeEdit;
+
+[RegisterSingleton(Duplicate = DuplicateStrategy.Append)]
+public class DefaultEditorModel : IEditorModelCustomizer
+{
+    public int Priority => int.MinValue;
+
+    public void OnModelCreating(EditorModelBuilder modelBuilder)
+    {
+        modelBuilder.For<PokemonType>(type =>
+            type.DisplayName(Text.Localized("PokeEdit", "PokemonType", "Types"))
+                .Property(x => x.Name, prop => prop.DisplayName(Text.Localized("PokeEdit", "Name", "Name")))
+        );
+    }
+}

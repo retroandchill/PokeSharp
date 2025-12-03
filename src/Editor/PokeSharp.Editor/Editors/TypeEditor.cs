@@ -7,6 +7,7 @@ using PokeSharp.Editor.Core;
 using PokeSharp.Editor.Core.PokeEdit;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
+using PokeSharp.Editor.Generated;
 
 namespace PokeSharp.Editor.Editors;
 

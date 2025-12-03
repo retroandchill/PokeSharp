@@ -1,18 +1,19 @@
 ﻿<Project>
   <PropertyGroup>
     <LangVersion>14</LangVersion>
-    <PokeSharpCoreProj>$(MSBuildThisFileDirectory)src\Core\PokeSharp.Core\PokeSharp.Core.csproj</PokeSharpCoreProj>
-    <PokeSharpAbstractionsProj>$(MSBuildThisFileDirectory)src\Core\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj</PokeSharpAbstractionsProj>
-    <PokeSharpProj>$(MSBuildThisFileDirectory)src\Core\PokeSharp\PokeSharp.csproj</PokeSharpProj>
-    <PokeSharpCoreGeneratorProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.Core.SourceGenerator\PokeSharp.Core.SourceGenerator.csproj</PokeSharpCoreGeneratorProj>
-    <PokeSharpGeneratorProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj</PokeSharpGeneratorProj>
-    <PokeSharpCodeFixesProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.CodeFixes\PokeSharp.CodeFixes.csproj</PokeSharpCodeFixesProj>
-    <PokeSharpCompilerCoreProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj</PokeSharpCompilerCoreProj>
-    <PokeSharpCompilerGeneratorProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.Compiler.SourceGenerator\PokeSharp.Compiler.SourceGenerator.csproj</PokeSharpCompilerGeneratorProj>
-    <PokeSharpCompilerProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Compiler\PokeSharp.Compiler.csproj</PokeSharpCompilerProj>
-    <PokeSharpRgssProj>$(MSBuildThisFileDirectory)src\Interop\PokeSharp.RGSS\PokeSharp.RGSS.csproj</PokeSharpRgssProj>
-    <PokeSharpEditorProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Editor\PokeSharp.Editor.csproj</PokeSharpEditorProj>
-    <PokeSharpEditorCoreProj>$(MSBuildThisFileDirectory)src\Editor\PokeSharp.Editor.Core\PokeSharp.Editor.Core.csproj</PokeSharpEditorCoreProj>
-    <PokeSharpEditorGeneratorProj>$(MSBuildThisFileDirectory)src\Tooling\PokeSharp.Editor.SourceGenerator\PokeSharp.Editor.SourceGenerator.csproj</PokeSharpEditorGeneratorProj>
+    <PokeSharpSlnDir>$(MSBuildThisFileDirectory)</PokeSharpSlnDir>
+    <PokeSharpCoreProj>$(PokeSharpSlnDir)src\Core\PokeSharp.Core\PokeSharp.Core.csproj</PokeSharpCoreProj>
+    <PokeSharpAbstractionsProj>$(PokeSharpSlnDir)src\Core\PokeSharp.Abstractions\PokeSharp.Abstractions.csproj</PokeSharpAbstractionsProj>
+    <PokeSharpProj>$(PokeSharpSlnDir)src\Core\PokeSharp\PokeSharp.csproj</PokeSharpProj>
+    <PokeSharpCoreGeneratorProj>$(PokeSharpSlnDir)src\Tooling\PokeSharp.Core.SourceGenerator\PokeSharp.Core.SourceGenerator.csproj</PokeSharpCoreGeneratorProj>
+    <PokeSharpGeneratorProj>$(PokeSharpSlnDir)src\Tooling\PokeSharp.SourceGenerator\PokeSharp.SourceGenerator.csproj</PokeSharpGeneratorProj>
+    <PokeSharpCodeFixesProj>$(PokeSharpSlnDir)src\Tooling\PokeSharp.CodeFixes\PokeSharp.CodeFixes.csproj</PokeSharpCodeFixesProj>
+    <PokeSharpCompilerCoreProj>$(PokeSharpSlnDir)src\Editor\PokeSharp.Compiler.Core\PokeSharp.Compiler.Core.csproj</PokeSharpCompilerCoreProj>
+    <PokeSharpCompilerGeneratorProj>$(PokeSharpSlnDir)src\Tooling\PokeSharp.Compiler.SourceGenerator\PokeSharp.Compiler.SourceGenerator.csproj</PokeSharpCompilerGeneratorProj>
+    <PokeSharpCompilerProj>$(PokeSharpSlnDir)src\Editor\PokeSharp.Compiler\PokeSharp.Compiler.csproj</PokeSharpCompilerProj>
+    <PokeSharpRgssProj>$(PokeSharpSlnDir)src\Interop\PokeSharp.RGSS\PokeSharp.RGSS.csproj</PokeSharpRgssProj>
+    <PokeSharpEditorProj>$(PokeSharpSlnDir)src\Editor\PokeSharp.Editor\PokeSharp.Editor.csproj</PokeSharpEditorProj>
+    <PokeSharpEditorCoreProj>$(PokeSharpSlnDir)src\Editor\PokeSharp.Editor.Core\PokeSharp.Editor.Core.csproj</PokeSharpEditorCoreProj>
+    <PokeSharpEditorGeneratorProj>$(PokeSharpSlnDir)src\Tooling\PokeSharp.Editor.SourceGenerator\PokeSharp.Editor.SourceGenerator.csproj</PokeSharpEditorGeneratorProj>
   </PropertyGroup>
 </Project>

@@ -1,7 +1,0 @@
-﻿<Project>
-    <PropertyGroup>
-        <PokeSharpSlnDir>$(MSBuildThisFileDirectory)../../PokeSharp</PokeSharpSlnDir>
-        <PokeSharpCoreProj>$(PokeSharpSlnDir)\src\Core\PokeSharp.Core\PokeSharp.Core.csproj</PokeSharpCoreProj>
-        <PokeSharpProj>$(PokeSharpSlnDir)\src\Core\PokeSharp\PokeSharp.csproj</PokeSharpProj>
-    </PropertyGroup>
-</Project>

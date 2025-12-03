@@ -3,12 +3,10 @@ using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PokeSharp.Editor.Core;
 using PokeSharp.Editor.SourceGenerator.Formatters;
 using PokeSharp.Editor.SourceGenerator.Model;
 using PokeSharp.Editor.SourceGenerator.Properties;
 using PokeSharp.Editor.SourceGenerator.Utilities;
-using Retro.SourceGeneratorUtilities.Utilities.Members;
 
 namespace PokeSharp.Editor.SourceGenerator;
 
@@ -32,7 +30,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             combined,
             (ctx, data) =>
             {
-                Execute(ctx, data.Left!, data.Right);
+                Execute(ctx, data.Left, data.Right);
             }
         );
     }
@@ -42,8 +40,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
         if (ctx.Node is not InvocationExpressionSyntax invocation)
             return null;
 
-        var symbol = ctx.SemanticModel.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
-        if (symbol is null || symbol.Name != "For")
+        if (ctx.SemanticModel.GetSymbolInfo(invocation).Symbol is not IMethodSymbol { Name: "For" } symbol)
             return null;
 
         // Ensure it's your EditorModelBuilder.For<T>
@@ -61,16 +58,29 @@ public class TypeSchemaGenerator : IIncrementalGenerator
         if (symbol.TypeArguments[0] is not INamedTypeSymbol t)
             return null;
 
+        var lambda = invocation
+            .ArgumentList.Arguments.Select(a => a.Expression)
+            .OfType<LambdaExpressionSyntax>()
+            .FirstOrDefault();
+
+        if (lambda is null)
+            return null;
+
         var location = ctx.SemanticModel.GetInterceptableLocation(invocation);
         if (location is null)
         {
             return null;
         }
 
-        return new ForCallInfo(t, location.Version, location.Data);
+        return new ForCallInfo(t, lambda, location.Version, location.Data);
     }
 
-    private readonly record struct ForCallInfo(INamedTypeSymbol TargetType, int Version, string Data);
+    private readonly record struct ForCallInfo(
+        INamedTypeSymbol TargetType,
+        LambdaExpressionSyntax Lambda,
+        int Version,
+        string Data
+    );
 
     private static void Execute(
         SourceProductionContext context,
@@ -99,10 +109,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             var targetType = explore.Dequeue();
             explored.Add(targetType);
 
-            // We're looking for an edit registry in another assembly, and if we find one, we don't need to generate one.
-            var existingRegistry = compilation.GetTypeByMetadataName($"{targetType.ToDisplayString()}EditRegistry");
-            if (existingRegistry is not null)
-                continue;
+            var forCalls = forCallInfos.TryGetValue(targetType, out var infos) ? infos : [];
 
             var properties = targetType
                 .GetMembers()
@@ -115,6 +122,8 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                             SetMethod.DeclaredAccessibility: Accessibility.Public
                         }
                 )
+                .Select(x => CreateEditablePropertyInfo(x, explore, explored, forCalls, compilation))
+                .OfType<EditablePropertyInfo>()
                 .ToImmutableArray();
 
             var templateParameters = new
@@ -122,11 +131,9 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 Namespace = targetType.ContainingNamespace.ToDisplayString(),
                 ClassName = targetType.Name,
                 Identifier = targetType.Name,
-                Properties = properties
-                    .Select((x, i) => CreateEditablePropertyInfo(x, explore, explored, i == properties.Length - 1))
-                    .ToImmutableArray(),
-                HasForCalls = forCallInfos.TryGetValue(targetType, out var forCallsInfo) && forCallsInfo.Count > 0,
-                ForCalls = forCallsInfo,
+                Properties = properties.SetItem(properties.Length - 1, properties[^1] with { IsLast = true }),
+                HasForCalls = forCalls.Count > 0,
+                ForCalls = forCalls,
             };
 
             var handlebars = Handlebars.Create();
@@ -140,13 +147,32 @@ public class TypeSchemaGenerator : IIncrementalGenerator
         }
     }
 
-    private static EditablePropertyInfo CreateEditablePropertyInfo(
+    private static EditablePropertyInfo? CreateEditablePropertyInfo(
         IPropertySymbol property,
         Queue<INamedTypeSymbol> explore,
         HashSet<ITypeSymbol> explored,
-        bool isLast
+        IReadOnlyList<ForCallInfo> forCalls,
+        Compilation compilation
     )
     {
+        var displayName = $"\"{property.Name}\"";
+        foreach (var (invocation, semanticModel) in forCalls.SelectMany(x => GetPropertyCalls(x.Lambda, compilation)))
+        {
+            var symbol = semanticModel.GetSymbolInfo(invocation).Symbol;
+
+            if (symbol is not IMethodSymbol methodSymbol)
+                continue;
+
+            switch (methodSymbol.Name)
+            {
+                case "Ignore":
+                    return null;
+                case "DisplayName":
+                    displayName = invocation.ArgumentList.Arguments[0].Expression.ToString();
+                    break;
+            }
+        }
+
         switch (property)
         {
             case {
@@ -155,20 +181,20 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
+                    DisplayName = displayName,
                     Type = immutableArrayType.ToDisplayString(),
                     PropertyType = PropertyType.List,
                     ValueType = immutableArrayType.TypeArguments[0].ToDisplayString(),
-                    IsLast = isLast,
                 };
             case { Type: INamedTypeSymbol { IsGenericType: true, MetadataName: "Dictionary`2" } dictionaryType }:
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
+                    DisplayName = displayName,
                     Type = dictionaryType.ToDisplayString(),
                     PropertyType = PropertyType.Dictionary,
                     KeyType = dictionaryType.TypeArguments[0].ToDisplayString(),
                     ValueType = dictionaryType.TypeArguments[1].ToDisplayString(),
-                    IsLast = isLast,
                 };
             case { Type: INamedTypeSymbol complexType } when !IsSimpleType(complexType):
                 if (!explored.Contains(complexType))
@@ -179,20 +205,28 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
+                    DisplayName = displayName,
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Object,
                     ObjectType = property.Type.ToDisplayString(NullableFlowState.NotNull),
-                    IsLast = isLast,
                 };
             default:
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
+                    DisplayName = displayName,
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Scalar,
-                    IsLast = isLast,
                 };
         }
+    }
+
+    private static IEnumerable<(InvocationExpressionSyntax Invocation, SemanticModel semanticModel)> GetPropertyCalls(
+        LambdaExpressionSyntax lambda,
+        Compilation compilation
+    )
+    {
+        return [];
     }
 
     private static bool IsSimpleType(ITypeSymbol typeSymbol)

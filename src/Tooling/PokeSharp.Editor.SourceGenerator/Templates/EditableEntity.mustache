@@ -10,8 +10,15 @@ using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace {{Namespace}} {
 
-    public static class {{ClassName}}EditRegistry
+    internal static class {{ClassName}}EditRegistry
     {
+        public static readonly {{ClassName}} Default = new()
+        {
+            {{#Properties}}
+            {{Name}} = {{DefaultValue}},
+            {{/Properties}}
+        };
+
         public static readonly IEditableType<{{ClassName}}> Properties = new EditableType<{{ClassName}}>(
             "{{ClassName}}",
             ImmutableOrderedDictionary.CreateRange(

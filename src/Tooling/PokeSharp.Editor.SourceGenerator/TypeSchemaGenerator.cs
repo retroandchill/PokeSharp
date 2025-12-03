@@ -156,6 +156,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
     )
     {
         var displayName = $"\"{property.Name}\"";
+        var defaultValue = GetDefaultValue(property);
         foreach (var (invocation, semanticModel) in forCalls.SelectMany(x => GetPropertyCalls(x.Lambda, compilation)))
         {
             var symbol = semanticModel.GetSymbolInfo(invocation).Symbol;
@@ -169,6 +170,9 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     return null;
                 case "DisplayName":
                     displayName = invocation.ArgumentList.Arguments[0].Expression.ToString();
+                    break;
+                case "DefaultValue":
+                    defaultValue = invocation.ArgumentList.Arguments[0].Expression.ToString();
                     break;
             }
         }
@@ -185,8 +189,11 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     Type = immutableArrayType.ToDisplayString(),
                     PropertyType = PropertyType.List,
                     ValueType = immutableArrayType.TypeArguments[0].ToDisplayString(),
+                    DefaultValue = defaultValue,
                 };
-            case { Type: INamedTypeSymbol { IsGenericType: true, MetadataName: "Dictionary`2" } dictionaryType }:
+            case {
+                Type: INamedTypeSymbol { IsGenericType: true, MetadataName: "ImmutableDictionary`2" } dictionaryType
+            }:
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
@@ -195,6 +202,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     PropertyType = PropertyType.Dictionary,
                     KeyType = dictionaryType.TypeArguments[0].ToDisplayString(),
                     ValueType = dictionaryType.TypeArguments[1].ToDisplayString(),
+                    DefaultValue = defaultValue,
                 };
             case { Type: INamedTypeSymbol complexType } when !IsSimpleType(complexType):
                 if (!explored.Contains(complexType))
@@ -209,6 +217,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Object,
                     ObjectType = property.Type.ToDisplayString(NullableFlowState.NotNull),
+                    DefaultValue = defaultValue,
                 };
             default:
                 return new EditablePropertyInfo
@@ -217,6 +226,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                     DisplayName = displayName,
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Scalar,
+                    DefaultValue = defaultValue,
                 };
         }
     }
@@ -241,6 +251,56 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             return true;
         }
 
-        return typeSymbol.SpecialType != SpecialType.None;
+        return typeSymbol.SpecialType
+            is SpecialType.System_Boolean
+                or SpecialType.System_String
+                or SpecialType.System_SByte
+                or SpecialType.System_Int16
+                or SpecialType.System_Int32
+                or SpecialType.System_Int64
+                or SpecialType.System_Byte
+                or SpecialType.System_UInt16
+                or SpecialType.System_UInt32
+                or SpecialType.System_UInt64
+                or SpecialType.System_Single
+                or SpecialType.System_Double;
+    }
+
+    private static string GetDefaultValue(IPropertySymbol propertySymbol)
+    {
+        var syntax = propertySymbol
+            .DeclaringSyntaxReferences.Select(x => x.GetSyntax())
+            .OfType<PropertyDeclarationSyntax>()
+            .Select(x => x.Initializer)
+            .FirstOrDefault(x => x is not null);
+        if (syntax is not null)
+        {
+            return syntax.Value.ToString();
+        }
+
+        return propertySymbol.Type switch
+        {
+            INamedTypeSymbol { IsGenericType: true, MetadataName: "ImmutableArray`1" } => "[]",
+            INamedTypeSymbol { IsGenericType: true, MetadataName: "ImmutableDictionary`2" } dictionaryType =>
+                $"{dictionaryType}.Empty",
+            { IsValueType: false } or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" } => "null",
+            { SpecialType: SpecialType.System_Boolean } => "false",
+            { SpecialType: SpecialType.System_String } => "string.Empty",
+            {
+                SpecialType: SpecialType.System_SByte
+                    or SpecialType.System_Int16
+                    or SpecialType.System_Int32
+                    or SpecialType.System_Int64
+                    or SpecialType.System_Byte
+                    or SpecialType.System_UInt16
+                    or SpecialType.System_UInt32
+                    or SpecialType.System_UInt64
+                    or SpecialType.System_Single
+                    or SpecialType.System_Double
+            } => "0",
+            _ when propertySymbol.Type.ToDisplayString() is GeneratorConstants.Name or GeneratorConstants.Text =>
+                $"{propertySymbol.Type.ToDisplayString()}.None",
+            _ => "default",
+        };
     }
 }

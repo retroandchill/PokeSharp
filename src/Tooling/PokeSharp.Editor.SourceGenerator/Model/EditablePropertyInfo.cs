@@ -21,6 +21,7 @@ public record EditablePropertyInfo
         init;
     }
     public string? ObjectType { get; init; }
+    public required string DefaultValue { get; init; }
 
     public bool IsObject => PropertyType == PropertyType.Object;
     public bool IsList => PropertyType == PropertyType.List;

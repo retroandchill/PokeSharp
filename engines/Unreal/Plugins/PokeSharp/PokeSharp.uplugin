@@ -1,4 +1,4 @@
-﻿{
+{
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
@@ -28,6 +28,17 @@
 			"Name": "PokeSharpEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
+		}
+	],
+	"SupportURL": "",
+	"Plugins": [
+		{
+			"Name": "UnrealSharp",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUtilities",
+			"Enabled": true
 		}
 	]
 }

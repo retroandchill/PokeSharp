@@ -34,13 +34,14 @@ public sealed class FileSystemWriteReadHandle : ISaveWriteHandle
 
     public void Commit()
     {
+        Stream.Dispose();
         _fileSystem.File.Move(_tempPath, _destinationPath, true);
     }
 
-    public ValueTask CommitAsync(CancellationToken cancellationToken = default)
+    public async ValueTask CommitAsync(CancellationToken cancellationToken = default)
     {
-        Commit();
-        return ValueTask.CompletedTask;
+        await Stream.DisposeAsync();
+        _fileSystem.File.Move(_tempPath, _destinationPath, true);
     }
 
     public void Dispose()

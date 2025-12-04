@@ -130,7 +130,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             {
                 Namespace = targetType.ContainingNamespace.ToDisplayString(),
                 ClassName = targetType.Name,
-                Identifier = targetType.Name,
+                Identifier = $"\"{targetType.Name}\"",
                 Properties = properties.SetItem(properties.Length - 1, properties[^1] with { IsLast = true }),
                 HasForCalls = forCalls.Count > 0,
                 ForCalls = forCalls,

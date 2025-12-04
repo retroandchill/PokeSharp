@@ -1,6 +1,8 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using PokeSharp.Core.Collections.Immutable;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
@@ -17,9 +19,12 @@ public sealed partial class PokeEditService
 
     public int EditorCount => _editors.Count;
 
-    public PokeEditService(IEnumerable<IEditorModelCustomizer> customizers)
+    public PokeEditService(
+        IEnumerable<IEditorModelCustomizer> customizers,
+        IOptions<JsonSerializerOptions> jsonSerializerOptions
+    )
     {
-        var builder = new EditorModelBuilder();
+        var builder = new EditorModelBuilder(jsonSerializerOptions.Value);
         foreach (var customizer in customizers.OrderBy(x => x.Priority))
         {
             customizer.OnModelCreating(builder);
@@ -74,5 +79,6 @@ public static class PokeEditServiceExtensions
     {
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEditorTabsHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceGetTypeSchemaHandler>();
+        services.AddSingleton<IRequestHandler, PokeEditServiceProcessFieldEditHandler>();
     }
 }

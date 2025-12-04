@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/PokeSharpEditor.h"
+#include "LogPokeSharpEditor.h"
 #include "PokeEdit/PokeEditApi.h"
 #include "SlateOptMacros.h"
 
@@ -8,32 +9,58 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SPokeSharpEditor::Construct(const FArguments &InArgs)
 {
-    if (auto EditorTabs = PokeEdit::GetEditorTabs(); EditorTabs.HasError())
+    // clang-format off
+    ChildSlot
+    [
+        SNew(SVerticalBox)
+            +SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(TabBar, SHorizontalBox)
+                ]
+            + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew(SSeparator)
+                ]
+    ];
+    // clang-format on
+
+    RefreshTabs();
+}
+
+void SPokeSharpEditor::RefreshTabs()
+{
+    auto EditorTabs = PokeEdit::GetEditorTabs();
+    if (const auto *Error = EditorTabs.TryGetError(); Error != nullptr)
     {
-        // clang-format off
-        ChildSlot
-        [
-            SNew(SBorder)
-            .Padding(8.0f)
-            [
-                SNew(STextBlock)
-                    .Text(FText::FromString(EditorTabs.StealError()))
-            ]
-        ];
-        // clang-format on
+        UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching tabs: %s"), **Error)
+        return;
     }
-    else
+
+    auto &Tabs = EditorTabs.GetValue();
+    if (!Tabs.IsEmpty())
+    {
+        CurrentTab = Tabs[0].Id;
+    }
+
+    for (const auto &[Id, Name] : Tabs)
     {
         // clang-format off
-        ChildSlot
-        [
-            SNew(SBorder)
-            .Padding(8.0f)
+        TabBar->AddSlot()
+            .AutoWidth()
             [
-                SNew(STextBlock)
-                    .Text(FText::FromString(TEXT("Successfully got the tabs")))
-            ]
-        ];
+                SNew(SButton)
+                    .IsEnabled_Lambda([this, Id] { return CurrentTab != Id; })
+                    .OnClicked_Lambda([this, Id]
+                    {
+                        CurrentTab = Id;
+                        return FReply::Handled();
+                    })
+                    [
+                        SNew(STextBlock).Text(Name)
+                    ]
+            ];
         // clang-format on
     }
 }

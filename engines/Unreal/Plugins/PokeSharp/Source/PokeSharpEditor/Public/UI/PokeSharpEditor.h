@@ -14,9 +14,14 @@ class POKESHARPEDITOR_API SPokeSharpEditor : public SCompoundWidget
     SLATE_BEGIN_ARGS(SPokeSharpEditor)
         {
         }
+    SLATE_END_ARGS()
 
-        SLATE_END_ARGS()
+    /** Constructs this widget with InArgs */
+    void Construct(const FArguments &InArgs);
 
-        /** Constructs this widget with InArgs */
-        void Construct(const FArguments &InArgs);
-    };
+    void RefreshTabs();
+
+  private:
+    FName CurrentTab;
+    TSharedPtr<SHorizontalBox> TabBar;
+};

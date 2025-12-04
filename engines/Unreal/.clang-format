@@ -27,11 +27,10 @@ ForEachMacros:
 Macros:
     - check(x)={assert(x);}
     - verify(x)=x;
-    - ABSTRACT_METHOD={}
-    - SLATE_BEGIN_ARGS(InWidgetType)=struct FArguments { typedef FArguments WidgetArgsType; typedef InWidgetType WidgetType; FORCENOINLINE FArguments()
-    - SLATE_END_ARGS()=};
     - SLATE_ATTRIBUTE(AttrType, AttrName) AttrType AttrName;
     - SLATE_ARGUMENT(AttrType, AttrName) AttrType AttrName;
+MacroBlockBegin: "SLATE_BEGIN_ARGS"
+MacroBlockEnd: "SLATE_END_ARGS()"
 ---
 Language: CSharp
 ColumnLimit: 120

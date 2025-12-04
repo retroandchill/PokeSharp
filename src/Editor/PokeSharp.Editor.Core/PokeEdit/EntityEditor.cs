@@ -12,31 +12,36 @@ namespace PokeSharp.Editor.Core.PokeEdit;
 
 public interface IEntityEditor
 {
-    public Name Id { get; }
-    public Text Name { get; }
+    Name Id { get; }
+    Text Name { get; }
 
-    public int Order { get; }
+    TypeDefinition Type { get; }
+    IEditableType Properties { get; }
 
-    public TypeDefinition Type { get; }
-    public IEditableType Properties { get; }
+    JsonNode GetDefaultValue();
 
-    public void SyncFromSource();
+    void SyncFromSource();
 
-    public JsonNode? ApplyEdit(FieldEdit edit);
+    JsonNode? ApplyEdit(FieldEdit edit);
 }
 
-public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) : IEntityEditor
+public abstract class EntityEditor<T>(JsonSerializerOptions options) : IEntityEditor
     where T : ILoadedGameDataEntity<T>
 {
     public abstract Name Id { get; }
     public abstract Text Name { get; }
-    public abstract int Order { get; }
     public abstract TypeDefinition Type { get; }
     IEditableType IEntityEditor.Properties => Properties;
-    public abstract IEditableType<T> Properties { get; }
+    protected abstract IEditableType<T> Properties { get; }
 
-    private readonly JsonSerializerOptions _options = options.Value;
+    protected abstract T DefaultEntry { get; }
+
     private ImmutableArray<T> _entries = [];
+
+    public JsonNode GetDefaultValue()
+    {
+        return JsonSerializer.SerializeToNode(DefaultEntry, options) ?? throw new InvalidOperationException();
+    }
 
     public void SyncFromSource()
     {
@@ -66,7 +71,7 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
                 throw new InvalidOperationException($"Must be performing a set operation, found {edit}");
             }
 
-            var newValue = setValueEdit.NewValue.Deserialize<T>(_options);
+            var newValue = setValueEdit.NewValue.Deserialize<T>(options);
             if (newValue is null)
             {
                 throw new InvalidOperationException(
@@ -75,14 +80,14 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
             }
 
             Interlocked.Exchange(ref _entries, _entries.SetItem(indexSegment.Index, newValue));
-            return JsonSerializer.SerializeToNode(newValue, _options);
+            return JsonSerializer.SerializeToNode(newValue, options);
         }
 
         Interlocked.Exchange(
             ref _entries,
-            _entries.SetItem(index, Properties.ApplyEdit(current, remaining, edit, _options))
+            _entries.SetItem(index, Properties.ApplyEdit(current, remaining, edit, options))
         );
-        return JsonSerializer.SerializeToNode(current, _options);
+        return JsonSerializer.SerializeToNode(current, options);
     }
 
     private JsonNode? ApplyEditToCollection(FieldEdit edit)
@@ -91,7 +96,7 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
         {
             case ListAddEdit listAddEdit:
             {
-                var newEntry = listAddEdit.NewItem.Deserialize<T>(_options);
+                var newEntry = listAddEdit.NewItem.Deserialize<T>(options);
                 if (newEntry is null)
                 {
                     throw new InvalidOperationException(
@@ -101,11 +106,11 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
 
                 Interlocked.Exchange(ref _entries, _entries.Add(newEntry));
 
-                return JsonSerializer.SerializeToNode(_entries[^1], _options);
+                return JsonSerializer.SerializeToNode(_entries[^1], options);
             }
             case ListInsertEdit listInsertEdit:
             {
-                var newEntry = listInsertEdit.NewItem.Deserialize<T>(_options);
+                var newEntry = listInsertEdit.NewItem.Deserialize<T>(options);
                 if (newEntry is null)
                 {
                     throw new InvalidOperationException(
@@ -115,7 +120,7 @@ public abstract class EntityEditor<T>(IOptions<JsonSerializerOptions> options) :
 
                 Interlocked.Exchange(ref _entries, _entries.Insert(listInsertEdit.Index, newEntry));
 
-                return JsonSerializer.SerializeToNode(_entries[listInsertEdit.Index], _options);
+                return JsonSerializer.SerializeToNode(_entries[listInsertEdit.Index], options);
             }
             case ListRemoveAtEdit listRemoveAtEdit:
                 Interlocked.Exchange(ref _entries, _entries.RemoveAt(listRemoveAtEdit.Index));

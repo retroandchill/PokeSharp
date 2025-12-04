@@ -16,8 +16,8 @@ namespace PokeEdit
         FText Name;
 
         static constexpr auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FEditorTabOption>, std::make_tuple(TJsonField<&FEditorTabOption::Id>(TEXT("key")),
-                                                                  TJsonField<&FEditorTabOption::Name>(TEXT("label"))));
+            std::in_place_type<FEditorTabOption>, std::make_tuple(TJsonField<&FEditorTabOption::Id>(TEXT("id")),
+                                                                  TJsonField<&FEditorTabOption::Name>(TEXT("name"))));
     };
 
     template <>

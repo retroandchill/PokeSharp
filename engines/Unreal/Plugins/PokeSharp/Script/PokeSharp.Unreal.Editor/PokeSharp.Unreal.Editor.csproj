@@ -18,7 +18,4 @@
     <ItemGroup>
         <ProjectReference Include="..\PokeSharp.Unreal.Core\PokeSharp.Unreal.Core.csproj" />
     </ItemGroup>
-    <ItemGroup>
-        <Folder Include="PokeEdit\Serialization\" />
-    </ItemGroup>
 </Project>

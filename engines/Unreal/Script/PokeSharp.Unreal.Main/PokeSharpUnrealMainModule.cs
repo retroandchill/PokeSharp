@@ -14,7 +14,9 @@ public class FPokeSharpUnrealMainModule : IModuleInterface
             .AddPokeSharpAbstractions()
             .AddPokeSharp()
             .AddPokeSharpUnrealCore()
-            .AddPokeSharpUnreal();
+            .AddPokeSharpUnreal()
+            .AddPokeSharpEditorCore()
+            .AddPokeSharpEditor();
 
         var context = builder.Build();
         GameContext.Initialize(context);

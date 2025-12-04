@@ -16,7 +16,7 @@ public static unsafe partial class ArchiveStreamExporter
     private static readonly delegate* unmanaged<IntPtr, long> GetPosition;
     private static readonly delegate* unmanaged<IntPtr, long, NativeBool> SetPosition;
     private static readonly delegate* unmanaged<IntPtr, void> Flush;
-    private static readonly delegate* unmanaged<IntPtr, IntPtr, long, out int, NativeBool> Read;
+    private static readonly delegate* unmanaged<IntPtr, IntPtr, int, out int, NativeBool> Read;
     private static readonly delegate* unmanaged<IntPtr, long, SeekOrigin, out long, NativeBool> Seek;
     private static readonly delegate* unmanaged<IntPtr, IntPtr, int, NativeBool> Write;
 }

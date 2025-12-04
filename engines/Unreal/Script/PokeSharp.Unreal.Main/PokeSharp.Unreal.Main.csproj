@@ -11,5 +11,7 @@
     <ItemGroup Condition="'$(PokeSharpSlnDir)' != ''">
         <ProjectReference Include="$(PokeSharpProj)" />
         <ProjectReference Include="$(PokeSharpCompilerProj)" />
+        <ProjectReference Include="$(PokeSharpEditorCoreProj)" />
+        <ProjectReference Include="$(PokeSharpEditorProj)" />
     </ItemGroup>
 </Project>

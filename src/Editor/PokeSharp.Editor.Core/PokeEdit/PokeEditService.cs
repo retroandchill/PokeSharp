@@ -15,6 +15,8 @@ public sealed partial class PokeEditService
 {
     private readonly ImmutableOrderedDictionary<Name, IEntityEditor> _editors;
 
+    public int EditorCount => _editors.Count;
+
     public PokeEditService(IEnumerable<IEditorModelCustomizer> customizers)
     {
         var builder = new EditorModelBuilder();

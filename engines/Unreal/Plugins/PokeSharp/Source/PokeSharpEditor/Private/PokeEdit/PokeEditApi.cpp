@@ -5,9 +5,9 @@
 
 namespace PokeEdit
 {
-    const TSharedRef<FJsonValue> NoBodyJsonValue = MakeShared<FJsonValueNull>();
+    const TSharedRef<FJsonValue> NoBodyJsonValue = MakeShared<FJsonValueObject>(MakeShared<FJsonObject>());
 
-    TValueOrError<TArray<FOptionItemDefinition>, FString> GetEditorTabs()
+    TValueOrError<TArray<FEditorTabOption>, FString> GetEditorTabs()
     {
         static FName RequestName = "GetEditorTabs";
 
@@ -17,6 +17,6 @@ namespace PokeEdit
             return MakeError(JsonResult.StealError());
         }
 
-        return DeserializeFromJson<TArray<FOptionItemDefinition>>(JsonResult.GetValue());
+        return DeserializeFromJson<TArray<FEditorTabOption>>(JsonResult.GetValue());
     }
 } // namespace PokeEdit

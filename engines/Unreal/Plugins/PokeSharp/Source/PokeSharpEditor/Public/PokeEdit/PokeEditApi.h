@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Schema/OptionSourceDefinition.h"
+#include "Schema/EditorTabOption.h"
 
 namespace PokeEdit
 {
     POKESHARPEDITOR_API extern const TSharedRef<FJsonValue> NoBodyJsonValue;
 
-    POKESHARPEDITOR_API TValueOrError<TArray<FOptionItemDefinition>, FString> GetEditorTabs();
+    POKESHARPEDITOR_API TValueOrError<TArray<FEditorTabOption>, FString> GetEditorTabs();
 } // namespace PokeEdit

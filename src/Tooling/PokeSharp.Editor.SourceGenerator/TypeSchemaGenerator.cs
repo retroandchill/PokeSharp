@@ -140,10 +140,12 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             handlebars.Configuration.TextEncoder = null;
             handlebars.Configuration.FormatterProviders.Add(new EnumStringFormatter());
 
+            /*
             context.AddSource(
                 $"{templateParameters.ClassName}.g.cs",
                 handlebars.Compile(SourceTemplates.EditableEntityTemplate)(templateParameters)
             );
+            */
         }
     }
 

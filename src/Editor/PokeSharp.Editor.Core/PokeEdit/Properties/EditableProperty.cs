@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
+using PokeSharp.Core.Collections;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
@@ -8,9 +9,13 @@ namespace PokeSharp.Editor.Core.PokeEdit.Properties;
 public interface IEditableProperty
 {
     Name Name { get; }
+    Text DisplayName { get; }
+
+    FieldDefinition Definition { get; }
 }
 
 public interface IEditableProperty<TRoot> : IEditableProperty
+    where TRoot : notnull
 {
     TRoot ApplyEdit(
         TRoot root,
@@ -21,17 +26,22 @@ public interface IEditableProperty<TRoot> : IEditableProperty
 }
 
 public interface IEditableProperty<TRoot, TValue> : IEditableProperty<TRoot>
+    where TRoot : notnull
 {
     TValue Get(TRoot root);
     TRoot With(TRoot root, TValue value);
 }
 
 public interface IEditableObjectProperty<TRoot, TValue> : IEditableProperty<TRoot, TValue>
+    where TRoot : notnull
+    where TValue : notnull
 {
     IEditableType<TValue> Type { get; }
 }
 
 public interface IEditableListProperty<TRoot, TItem> : IEditableProperty<TRoot, ImmutableArray<TItem>>
+    where TRoot : notnull
+    where TItem : notnull
 {
     IEditableType<TItem>? ItemType { get; }
     TRoot SetItem(TRoot root, int index, TItem item);
@@ -43,20 +53,43 @@ public interface IEditableListProperty<TRoot, TItem> : IEditableProperty<TRoot, 
 
 public interface IEditableDictionaryProperty<TRoot, TKey, TValue>
     : IEditableProperty<TRoot, ImmutableDictionary<TKey, TValue>>
+    where TRoot : notnull
     where TKey : notnull
+    where TValue : notnull
 {
     IEditableType<TValue>? ValueType { get; }
     TRoot SetEntry(TRoot root, TKey key, TValue value);
     TRoot RemoveEntry(TRoot root, TKey key);
 }
 
-public abstract class EditableScalarProperty<TRoot, TValue> : IEditableProperty<TRoot, TValue>
+public abstract class EditablePropertyBase<TRoot, TValue>(EditablePropertyBuilder<TRoot, TValue> builder)
+    : IEditableProperty<TRoot, TValue>
+    where TRoot : notnull
 {
-    public abstract Name Name { get; }
-    public abstract TValue Get(TRoot root);
-    public abstract TRoot With(TRoot root, TValue value);
+    public Name Name { get; } = builder.TargetName;
+    public Text DisplayName { get; } = builder.TargetDisplayName;
+    private readonly Func<TRoot, TValue> _get = builder.TargetGet;
+    private readonly Func<TRoot, TValue, TRoot> _with = builder.TargetWith;
 
-    public TRoot ApplyEdit(
+    public FieldDefinition Definition { get; } = builder.BuildFieldDefinition();
+
+    public TValue Get(TRoot root) => _get(root);
+
+    public TRoot With(TRoot root, TValue value) => _with(root, value);
+
+    public abstract TRoot ApplyEdit(
+        TRoot root,
+        ReadOnlySpan<FieldPathSegment> path,
+        FieldEdit edit,
+        JsonSerializerOptions? options = null
+    );
+}
+
+public sealed class EditableScalarProperty<TRoot, TValue>(EditableScalarPropertyBuilder<TRoot, TValue> builder)
+    : EditablePropertyBase<TRoot, TValue>(builder)
+    where TRoot : notnull
+{
+    public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
         FieldEdit edit,
@@ -76,14 +109,16 @@ public abstract class EditableScalarProperty<TRoot, TValue> : IEditableProperty<
     }
 }
 
-public abstract class EditableObjectProperty<TRoot, TValue> : IEditableObjectProperty<TRoot, TValue>
+public sealed class EditableObjectProperty<TRoot, TValue>(
+    EditableObjectPropertyBuilder<TRoot, TValue> builder,
+    ModelBuildCache cache
+) : EditablePropertyBase<TRoot, TValue>(builder), IEditableObjectProperty<TRoot, TValue>
+    where TRoot : notnull
+    where TValue : notnull
 {
-    public abstract Name Name { get; }
-    public abstract IEditableType<TValue> Type { get; }
-    public abstract TValue Get(TRoot root);
-    public abstract TRoot With(TRoot root, TValue value);
+    public IEditableType<TValue> Type { get; } = cache.GetOrBuildType(builder.TargetType);
 
-    public TRoot ApplyEdit(
+    public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
         FieldEdit edit,
@@ -101,19 +136,48 @@ public abstract class EditableObjectProperty<TRoot, TValue> : IEditableObjectPro
     }
 }
 
-public abstract class EditableListProperty<TRoot, TItem> : IEditableListProperty<TRoot, TItem>
+public sealed class EditableListProperty<TRoot, TItem>(
+    EditableListPropertyBuilder<TRoot, TItem> builder,
+    ModelBuildCache cache
+) : EditablePropertyBase<TRoot, ImmutableArray<TItem>>(builder), IEditableListProperty<TRoot, TItem>
+    where TRoot : notnull
+    where TItem : notnull
 {
-    public abstract Name Name { get; }
-    public abstract IEditableType<TItem>? ItemType { get; }
-    public abstract ImmutableArray<TItem> Get(TRoot root);
-    public abstract TRoot With(TRoot root, ImmutableArray<TItem> value);
-    public abstract TRoot SetItem(TRoot root, int index, TItem item);
-    public abstract TRoot Add(TRoot root, TItem item);
-    public abstract TRoot Insert(TRoot root, int index, TItem item);
-    public abstract TRoot Swap(TRoot root, int index1, int index2);
-    public abstract TRoot RemoveAt(TRoot root, int index);
+    public IEditableType<TItem>? ItemType { get; } = cache.GetOrBuildType(builder.TargetItemType);
 
-    public TRoot ApplyEdit(
+    public TRoot SetItem(TRoot root, int index, TItem item)
+    {
+        var list = Get(root);
+        return index >= 0 && index < list.Length
+            ? With(root, list.SetItem(index, item))
+            : throw new InvalidOperationException($"Cannot find index {index} in list.");
+    }
+
+    public TRoot Add(TRoot root, TItem item)
+    {
+        var list = Get(root);
+        return With(root, list.Add(item));
+    }
+
+    public TRoot Insert(TRoot root, int index, TItem item)
+    {
+        var list = Get(root);
+        return With(root, list.Insert(index, item));
+    }
+
+    public TRoot Swap(TRoot root, int index1, int index2)
+    {
+        var list = Get(root);
+        return With(root, list.Swap(index1, index2));
+    }
+
+    public TRoot RemoveAt(TRoot root, int index)
+    {
+        var list = Get(root);
+        return With(root, list.RemoveAt(index));
+    }
+
+    public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
         FieldEdit edit,
@@ -166,17 +230,31 @@ public abstract class EditableListProperty<TRoot, TItem> : IEditableListProperty
     }
 }
 
-public abstract class EditableDictionaryProperty<TRoot, TKey, TValue> : IEditableDictionaryProperty<TRoot, TKey, TValue>
+public sealed class EditableDictionaryProperty<TRoot, TKey, TValue>(
+    EditableDictionaryPropertyBuilder<TRoot, TKey, TValue> builder,
+    ModelBuildCache cache
+)
+    : EditablePropertyBase<TRoot, ImmutableDictionary<TKey, TValue>>(builder),
+        IEditableDictionaryProperty<TRoot, TKey, TValue>
+    where TRoot : notnull
     where TKey : notnull
+    where TValue : notnull
 {
-    public abstract Name Name { get; }
-    public abstract IEditableType<TValue>? ValueType { get; }
-    public abstract ImmutableDictionary<TKey, TValue> Get(TRoot root);
-    public abstract TRoot With(TRoot root, ImmutableDictionary<TKey, TValue> value);
-    public abstract TRoot SetEntry(TRoot root, TKey key, TValue value);
-    public abstract TRoot RemoveEntry(TRoot root, TKey key);
+    public IEditableType<TValue>? ValueType { get; } = cache.GetOrBuildType(builder.TargetValueType);
 
-    public TRoot ApplyEdit(
+    public TRoot SetEntry(TRoot root, TKey key, TValue value)
+    {
+        var dictionary = Get(root);
+        return With(root, dictionary.SetItem(key, value));
+    }
+
+    public TRoot RemoveEntry(TRoot root, TKey key)
+    {
+        var dictionary = Get(root);
+        return With(root, dictionary.Remove(key));
+    }
+
+    public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
         FieldEdit edit,

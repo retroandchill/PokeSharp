@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Collections;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Strings;
@@ -15,7 +15,6 @@ public interface IEntityEditor
     Name Id { get; }
     Text Name { get; }
 
-    TypeDefinition Type { get; }
     IEditableType Properties { get; }
 
     JsonNode GetDefaultValue();
@@ -25,22 +24,20 @@ public interface IEntityEditor
     JsonNode? ApplyEdit(FieldEdit edit);
 }
 
-public abstract class EntityEditor<T>(JsonSerializerOptions options) : IEntityEditor
+public sealed class EntityEditor<T>(JsonSerializerOptions options, PokeEditTypeRepository repository) : IEntityEditor
     where T : ILoadedGameDataEntity<T>
 {
-    public abstract Name Id { get; }
-    public abstract Text Name { get; }
-    public abstract TypeDefinition Type { get; }
-    IEditableType IEntityEditor.Properties => Properties;
-    protected abstract IEditableType<T> Properties { get; }
+    private readonly IEditableType<T> _type = repository.GetRequiredType<T>();
+    public Name Id => _type.Name;
+    public Text Name => _type.DisplayName;
 
-    protected abstract T DefaultEntry { get; }
+    IEditableType IEntityEditor.Properties => _type;
 
     private ImmutableArray<T> _entries = [];
 
     public JsonNode GetDefaultValue()
     {
-        return JsonSerializer.SerializeToNode(DefaultEntry, options) ?? throw new InvalidOperationException();
+        throw new NotImplementedException();
     }
 
     public void SyncFromSource()
@@ -83,10 +80,7 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options) : IEntityEd
             return JsonSerializer.SerializeToNode(newValue, options);
         }
 
-        Interlocked.Exchange(
-            ref _entries,
-            _entries.SetItem(index, Properties.ApplyEdit(current, remaining, edit, options))
-        );
+        Interlocked.Exchange(ref _entries, _entries.SetItem(index, _type.ApplyEdit(current, remaining, edit, options)));
         return JsonSerializer.SerializeToNode(current, options);
     }
 
@@ -131,5 +125,14 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options) : IEntityEd
             default:
                 throw new InvalidOperationException($"Cannot perform edit {edit} on a collection.");
         }
+    }
+}
+
+public static class EntityEditorExtensions
+{
+    public static IServiceCollection AddEntityEditor<T>(this IServiceCollection services)
+        where T : ILoadedGameDataEntity<T>
+    {
+        return services.AddSingleton<IEntityEditor, EntityEditor<T>>();
     }
 }

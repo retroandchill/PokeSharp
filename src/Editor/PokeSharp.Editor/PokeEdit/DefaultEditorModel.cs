@@ -1,6 +1,8 @@
 ﻿using Injectio.Attributes;
+using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
+using PokeSharp.Editor.Core.PokeEdit;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
 
 namespace PokeSharp.Editor.PokeEdit;
@@ -12,9 +14,15 @@ public class DefaultEditorModel : IEditorModelCustomizer
 
     public void OnModelCreating(EditorModelBuilder modelBuilder)
     {
-        modelBuilder.For<PokemonType>(type =>
-            type.DisplayName(Text.Localized("PokeEdit", "PokemonType", "Types"))
-                .Property(x => x.Name, prop => prop.DisplayName(Text.Localized("PokeEdit", "Name", "Name")))
-        );
+        modelBuilder.For<PokemonType>(type => type.DisplayName(Text.Localized("PokeEdit", "PokemonType", "Types")));
+    }
+}
+
+public static class DefaultEditorModelExtensions
+{
+    [RegisterServices]
+    public static void AddDefaultEntities(this IServiceCollection services)
+    {
+        services.AddEntityEditor<PokemonType>();
     }
 }

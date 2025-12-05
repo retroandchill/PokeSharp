@@ -132,4 +132,63 @@ public static class CollectionExtensions
 
         return builder.MoveToImmutable();
     }
+
+    public static OrderedDictionary<TKey, TValue> ToOrderedDictionary<TKey, TValue>(
+        this IEnumerable<KeyValuePair<TKey, TValue>> items
+    )
+        where TKey : notnull
+    {
+        OrderedDictionary<TKey, TValue> dictionary = new();
+        if (items.TryGetNonEnumeratedCount(out var count))
+        {
+            dictionary.EnsureCapacity(count);
+        }
+
+        foreach (var item in items)
+        {
+            dictionary.Add(item.Key, item.Value);
+        }
+
+        return dictionary;
+    }
+
+    extension<TSource>(IEnumerable<TSource> items)
+    {
+        public OrderedDictionary<TKey, TSource> ToOrderedDictionary<TKey>(Func<TSource, TKey> keySelector)
+            where TKey : notnull
+        {
+            OrderedDictionary<TKey, TSource> dictionary = new();
+            if (items.TryGetNonEnumeratedCount(out var count))
+            {
+                dictionary.EnsureCapacity(count);
+            }
+
+            foreach (var item in items)
+            {
+                dictionary.Add(keySelector(item), item);
+            }
+
+            return dictionary;
+        }
+
+        public OrderedDictionary<TKey, TValue> ToOrderedDictionary<TKey, TValue>(
+            Func<TSource, TKey> keySelector,
+            Func<TSource, TValue> valueSelector
+        )
+            where TKey : notnull
+        {
+            OrderedDictionary<TKey, TValue> dictionary = new();
+            if (items.TryGetNonEnumeratedCount(out var count))
+            {
+                dictionary.EnsureCapacity(count);
+            }
+
+            foreach (var item in items)
+            {
+                dictionary.Add(keySelector(item), valueSelector(item));
+            }
+
+            return dictionary;
+        }
+    }
 }

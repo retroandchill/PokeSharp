@@ -1,28 +1,79 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Immutable;
 using System.Text.Json;
-using PokeSharp.Core.Collections.Immutable;
 using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Properties;
 
-public sealed class EditorModelBuilder(JsonSerializerOptions jsonSerializerOptions)
+public sealed class EditorModelBuilder
 {
-    private readonly ImmutableOrderedDictionary<Name, IEntityEditor>.Builder _builder =
-        ImmutableOrderedDictionary.CreateBuilder<Name, IEntityEditor>();
+    private readonly Dictionary<Type, IEditableTypeBuilder> _types = [];
 
-    public JsonSerializerOptions JsonSerializerOptions { get; } = jsonSerializerOptions;
-
-    public EditorModelBuilder For<T>(Expression<Action<IEditableTypeBuilder<T>>> configure)
+    public EditorModelBuilder For<T>(Action<EditableTypeBuilder<T>>? configure = null)
         where T : notnull
     {
+        var builder = GetOrCreateBuilder<T>();
+        configure?.Invoke(builder);
+        _types.Add(typeof(T), builder);
         return this;
     }
 
-    public EditorModelBuilder Add(IEntityEditor editor)
+    public EditorModelBuilder Add<T>(IEditableTypeBuilder type)
     {
-        _builder.Add(editor.Id, editor);
+        _types.Add(typeof(T), type);
         return this;
     }
 
-    public ImmutableOrderedDictionary<Name, IEntityEditor> Build() => _builder.ToImmutable();
+    internal EditableTypeBuilder<T>? GetBuildIfPossible<T>()
+        where T : notnull
+    {
+        if (
+            typeof(T).IsPrimitive
+            || typeof(T) == typeof(string)
+            || typeof(T).IsEnum
+            || typeof(T) == typeof(Name)
+            || typeof(T) == typeof(Text)
+            || (
+                typeof(T).IsGenericType
+                && (
+                    typeof(T).GetGenericTypeDefinition() == typeof(ImmutableArray<>)
+                    || typeof(T).GetGenericTypeDefinition() == typeof(ImmutableDictionary<,>)
+                )
+            )
+        )
+        {
+            return null;
+        }
+
+        return GetOrCreateBuilder<T>();
+    }
+
+    internal EditableTypeBuilder<T> GetOrCreateBuilder<T>()
+        where T : notnull
+    {
+        if (_types.TryGetValue(typeof(T), out var typeBuilder))
+        {
+            return (EditableTypeBuilder<T>)typeBuilder;
+        }
+
+        var builder = new EditableTypeBuilder<T>(this);
+        foreach (
+            var property in typeof(T)
+                .GetProperties()
+                .Where(x => x is { CanRead: true, CanWrite: true, SetMethod.IsPublic: true })
+        )
+        {
+            builder.Property(property);
+        }
+        return builder;
+    }
+
+    public ImmutableDictionary<Type, IEditableType> Build()
+    {
+        var cache = new ModelBuildCache();
+        foreach (var (_, builder) in _types)
+        {
+            cache.GetOrBuildType(builder);
+        }
+        return cache.ExportToImmutable();
+    }
 }

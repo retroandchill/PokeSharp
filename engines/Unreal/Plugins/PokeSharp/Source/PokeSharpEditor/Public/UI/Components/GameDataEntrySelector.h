@@ -4,6 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Views/SListView.h"
+
+class SSearchBox;
+class STableViewBase;
+class ITableRow;
 
 struct FEntryRowData
 {
@@ -56,8 +61,8 @@ class POKESHARPEDITOR_API SGameDataEntrySelector : public SCompoundWidget
     bool IsFiltering() const;
 
   private:
-    static TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FEntryRowData> Item,
-                                               const TSharedRef<STableViewBase> &OwnerTable);
+    TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FEntryRowData> Item,
+                                        const TSharedRef<STableViewBase> &OwnerTable) const;
     void OnSearchTextChanged(const FText &InSearchText);
     void OnSelectionChanged(TSharedPtr<FEntryRowData> Item, ESelectInfo::Type SelectType) const;
 

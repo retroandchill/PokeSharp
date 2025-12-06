@@ -70,7 +70,8 @@ bool UArchiveStreamExporter::Read(FArchive &Archive, uint8 *Buffer, const int32 
     const auto Remaining = Size - Pos;
     if (Remaining <= 0)
     {
-        return 0;
+        OutRead = 0;
+        return true;
     }
 
     int32 ToRead = Length;

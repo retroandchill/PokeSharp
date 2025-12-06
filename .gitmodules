@@ -1,3 +1,6 @@
 [submodule "engines/Unreal/Plugins/UnrealSharp"]
 	path = engines/Unreal/Plugins/UnrealSharp
 	url = https://github.com/retroandchill/UnrealSharp.git
+[submodule "engines/Unreal/Plugins/Mcro"]
+	path = engines/Unreal/Plugins/Mcro
+	url = https://github.com/retroandchill/mcro-dist.git

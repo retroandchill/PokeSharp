@@ -1,12 +1,15 @@
 ﻿#include "PokeSharpEditorModule.h"
 #include "LevelEditor.h"
+#include "ToolMenuEntry.h"
+#include "ToolMenus.h"
 #include "UI/PokeSharpEditor.h"
 #include "UI/PokeSharpEditorCommands.h"
 #include "UI/PokeSharpStyle.h"
+#include "Widgets/Docking/SDockTab.h"
 
 #define LOCTEXT_NAMESPACE "FPokeSharpEditorModule"
 
-FName FPokeSharpEditorModule::PokeSharpEditorTabName(TEXT("PokeSharpEditorTab"));
+const FName FPokeSharpEditorModule::PokeSharpEditorTabName(TEXT("PokeSharpEditorTab"));
 
 void FPokeSharpEditorModule::StartupModule()
 {
@@ -104,7 +107,14 @@ void FPokeSharpEditorModule::UnregisterTabSpawner()
 
 TSharedRef<SDockTab> FPokeSharpEditorModule::SpawnPokeSharpEditorTab(const FSpawnTabArgs &SpawnTabArgs)
 {
-    return SNew(SDockTab).TabRole(NomadTab)[SNew(SPokeSharpEditor)];
+    // clang-format off
+    auto DockTab = SNew(SDockTab)
+        .TabRole(NomadTab);
+    
+    DockTab->SetContent(SNew(SPokeSharpEditor)
+        .Owner(DockTab));
+    // clang-format on
+    return DockTab;
 }
 
 #undef LOCTEXT_NAMESPACE

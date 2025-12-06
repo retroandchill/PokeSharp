@@ -6,18 +6,26 @@ public class PokeSharpEditor : ModuleRules
         : base(target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp23;
 
-        PublicDependencyModuleNames.AddRange(["Core", "UnrealSharpBinds", "UnrealSharpCore", "CommonUtilities"]);
+        PublicDependencyModuleNames.AddRange([
+            "Core",
+            "UnrealSharpBinds",
+            "UnrealSharpCore",
+            "CommonUtilities",
+            "Json",
+            "Slate",
+        ]);
 
         PrivateDependencyModuleNames.AddRange([
             "CoreUObject",
             "Engine",
             "Slate",
             "SlateCore",
-            "Json",
             "ToolMenus",
             "Projects",
             "InputCore",
+            "Mcro",
         ]);
     }
 }

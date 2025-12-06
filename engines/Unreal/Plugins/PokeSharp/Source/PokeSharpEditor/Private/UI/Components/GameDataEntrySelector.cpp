@@ -1,8 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "UI/Components/GameDataEntrySelector.h"
-
 #include "SlateOptMacros.h"
 #include "Widgets/Input/SSearchBox.h"
 
@@ -31,7 +29,7 @@ void SGameDataEntrySelector::Construct(const FArguments &InArgs)
                 [
                     SAssignNew(EntriesList, SListView<TSharedPtr<FEntryRowData>>)
                         .ListItemsSource(&FilteredEntries)
-                        .OnGenerateRow_Static(&SGameDataEntrySelector::OnGenerateRow)
+                        .OnGenerateRow(this, &SGameDataEntrySelector::OnGenerateRow)
                         .OnSelectionChanged(this, &SGameDataEntrySelector::OnSelectionChanged)
                         .SelectionMode(ESelectionMode::Single)
                 ]
@@ -40,8 +38,6 @@ void SGameDataEntrySelector::Construct(const FArguments &InArgs)
 
     RefreshList();
 }
-
-
 
 void SGameDataEntrySelector::RefreshList()
 {
@@ -73,18 +69,35 @@ bool SGameDataEntrySelector::IsFiltering() const
 
 // ReSharper disable once CppPassValueParameterByConstReference
 TSharedRef<ITableRow> SGameDataEntrySelector::OnGenerateRow(TSharedPtr<FEntryRowData> Item,
-                                                            const TSharedRef<STableViewBase> &OwnerTable)
+                                                            const TSharedRef<STableViewBase> &OwnerTable) const
 {
-    return SNew(
-        STableRow<TSharedPtr<FEntryRowData>>,
-        OwnerTable)[SNew(SHorizontalBox)
+    const int32 TotalDigits = FMath::Max(AllEntries.Num() / 10 + 1, 1);
+    FNumberFormattingOptions NumberOptions;
+    NumberOptions.MinimumIntegralDigits = TotalDigits;
 
-                    // Index column
-                    + SHorizontalBox::Slot().AutoWidth().Padding(5)[SNew(STextBlock).Text(FText::AsNumber(Item->Index))]
+    // clang-format off
+    return SNew(STableRow<TSharedPtr<FEntryRowData>>, OwnerTable)
+        [
+            SNew(SHorizontalBox)
+                // Index column
+                + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding(5)
+                    [
+                        SNew(STextBlock)
+                            .Text(FText::AsNumber(Item->Index + 1, &NumberOptions))
+                    ]
 
-                    // Name column
-                    + SHorizontalBox::Slot().FillWidth(1.0f).Padding(
-                          5)[SNew(STextBlock).Text(Item->Label)]];
+                // Name column
+                + SHorizontalBox::Slot()
+                    .FillWidth(1.0f)
+                    .Padding(5)
+                    [
+                        SNew(STextBlock)
+                            .Text(Item->Label)
+                    ]
+        ];
+    // clang-format on
 }
 
 void SGameDataEntrySelector::OnSearchTextChanged(const FText &InSearchText)

@@ -3,6 +3,9 @@
 #include "PokeEdit/PokeEditClient.h"
 #include "Interop/PokeEditCallbacks.h"
 #include "Serialization/ArrayWriter.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
+#include "Serialization/MemoryReader.h"
 
 namespace PokeEdit
 {

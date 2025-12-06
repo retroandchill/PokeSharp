@@ -1,12 +1,24 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/PokeSharpEditor.h"
+#include "Components/VerticalBox.h"
+#include "Framework/Commands/UICommandList.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LogPokeSharpEditor.h"
 #include "PokeEdit/PokeEditApi.h"
 #include "SlateOptMacros.h"
+#include "Styling/AppStyle.h"
+#include "UI/Components/DefaultEditorPage.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SSeparator.h"
+#include "Widgets/Layout/SUniformWrapPanel.h"
+#include "Widgets/Text/STextBlock.h"
 
 void SPokeSharpEditor::Construct(const FArguments &InArgs)
 {
+    Owner = InArgs._Owner;
+
     // clang-format off
     ChildSlot
     [
@@ -90,10 +102,22 @@ void SPokeSharpEditor::RefreshTabs()
             ];
         // clang-format on
     }
+
+    RebuildCurrentTabContent();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void SPokeSharpEditor::RebuildCurrentTabContent()
 {
+    if (!ensure(!CurrentTab.IsNone()))
+    {
+        ContentArea->SetContent(SNullWidget::NullWidget);
+        return;
+    }
+
+    // In the future: ask C# what kind of page this tab wants (dockable vs simple).
+    // For now: always build the default data editor page.
+    ContentArea->SetContent(SNew(SDefaultEditorPage).TabId(CurrentTab).OuterTab(Owner));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

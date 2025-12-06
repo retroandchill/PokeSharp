@@ -3,6 +3,11 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+class FUICommandList;
+class FSpawnTabArgs;
+class SDockTab;
+class SWidget;
+
 class FPokeSharpEditorModule : public IModuleInterface
 {
   public:
@@ -23,6 +28,6 @@ class FPokeSharpEditorModule : public IModuleInterface
 
     static TSharedRef<SDockTab> SpawnPokeSharpEditorTab(const FSpawnTabArgs &SpawnTabArgs);
 
-    static FName PokeSharpEditorTabName;
+    static const FName PokeSharpEditorTabName;
     TSharedPtr<FUICommandList> PokeSharpCommands;
 };

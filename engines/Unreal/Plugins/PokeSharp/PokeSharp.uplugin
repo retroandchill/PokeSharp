@@ -39,6 +39,14 @@
 		{
 			"Name": "CommonUtilities",
 			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "Mcro",
+			"Enabled": true
 		}
 	]
 }

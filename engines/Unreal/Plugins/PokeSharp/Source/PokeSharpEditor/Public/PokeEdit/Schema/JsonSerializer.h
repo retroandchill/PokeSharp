@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Dom/JsonValue.h"
+#include "Templates/ValueOrError.h"
 
 namespace PokeEdit
 {

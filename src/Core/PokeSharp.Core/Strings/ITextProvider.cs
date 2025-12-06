@@ -55,4 +55,8 @@ public interface ITextProvider
     /// <param name="value">The value of the string.</param>
     /// <returns>The text data that can be polled.</returns>
     ITextData FromLocalized(ReadOnlySpan<char> ns, ReadOnlySpan<char> key, ReadOnlySpan<char> value);
+    
+    ITextData FromLocText(string locString);
+    
+    ITextData FromLocText(ReadOnlySpan<char> locString);
 }

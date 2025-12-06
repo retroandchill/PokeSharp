@@ -16,6 +16,8 @@ public static unsafe partial class PokeSharpTextExporter
         int,
         out FTextData,
         void> FromLocalized;
+    private static readonly delegate* unmanaged<IntPtr, int, out FTextData, void> FromLocText;
+    private static readonly delegate* unmanaged<ref FTextData, out UnmanagedArray, void> ToLocText;
     private static readonly delegate* unmanaged<ref FTextData, IntPtr> GetSourceString;
     private static readonly delegate* unmanaged<ref FTextData, IntPtr> GetDisplayString;
     private static readonly delegate* unmanaged<ref FTextData, ref UnmanagedArray, NativeBool> GetNamespace;

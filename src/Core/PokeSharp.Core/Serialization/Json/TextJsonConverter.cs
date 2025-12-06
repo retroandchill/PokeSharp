@@ -26,7 +26,7 @@ public class TextJsonConverter : JsonConverter<Text>
         try
         {
             var foundString = reader.GetString();
-            return foundString is not null ? new Text(foundString) : throw new JsonException("Name cannot be null.");
+            return foundString is not null ? Text.FromLocText(foundString) : throw new JsonException("Name cannot be null.");
         }
         catch (InvalidOperationException ex)
         {
@@ -37,6 +37,6 @@ public class TextJsonConverter : JsonConverter<Text>
     /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Text value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.ToString());
+        writer.WriteStringValue(value.ToLocString());
     }
 }

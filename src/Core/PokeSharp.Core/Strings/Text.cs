@@ -126,6 +126,16 @@ public readonly struct Text : IEquatable<Text>
         return new Text(ITextProvider.Instance.FromLocalized(ns, key, value));
     }
 
+    public static Text FromLocText(ReadOnlySpan<char> locString)
+    {
+        return new Text(ITextProvider.Instance.FromLocText(locString));
+    }
+
+    public static Text FromLocText(string locString)
+    {
+        return new Text(ITextProvider.Instance.FromLocText(locString));
+    }
+
     public static Text Format([StringSyntax(StringSyntaxAttribute.CompositeFormat)] Text format, params object[] args)
     {
         return new Text(string.Format(format, args));
@@ -153,6 +163,11 @@ public readonly struct Text : IEquatable<Text>
     public override string ToString()
     {
         return Data?.DisplayString ?? string.Empty;
+    }
+
+    public string ToLocString()
+    {
+        return Data?.ToLocString() ?? string.Empty;
     }
 
     /// <summary>

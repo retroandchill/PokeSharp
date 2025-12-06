@@ -25,6 +25,12 @@ class POKESHARPCORE_API UPokeSharpTextExporter : public UObject
                               int32 KeyLength, const UTF16CHAR *StrBuffer, int32 StrLength, FText &OutText);
 
     UNREALSHARP_FUNCTION()
+    static void FromLocText(const TCHAR *StrBuffer, int32 StrLength, FText &OutText);
+
+    UNREALSHARP_FUNCTION()
+    static void ToLocText(const FText &Text, FString &OutStr);
+
+    UNREALSHARP_FUNCTION()
     static const FString *GetSourceString(const FText &Text);
 
     UNREALSHARP_FUNCTION()

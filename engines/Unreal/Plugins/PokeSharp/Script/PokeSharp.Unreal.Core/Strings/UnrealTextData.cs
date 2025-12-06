@@ -110,6 +110,15 @@ internal sealed unsafe class UnrealTextData : ITextData
         PokeSharpTextExporter.CallDestroy(ref _textData);
     }
 
+    public static UnrealTextData FromLocText(ReadOnlySpan<char> locString)
+    {
+        fixed (char* locStringPtr = locString)
+        {
+            PokeSharpTextExporter.CallFromLocText((IntPtr)locStringPtr, locString.Length, out var textData);
+            return new UnrealTextData(textData);
+        }
+    }
+
     public FText ToUnrealText()
     {
         fixed (FTextData* textDataPtr = &_textData)
@@ -122,6 +131,20 @@ internal sealed unsafe class UnrealTextData : ITextData
     {
         PokeSharpTextExporter.CallAsDisplaySpan(ref _textData, out var buffer, out var length);
         return new ReadOnlySpan<char>((char*)buffer, length);
+    }
+
+    public string ToLocString()
+    {
+        PokeSharpTextExporter.CallToLocText(ref _textData, out var buffer);
+        var bufferPtr = &buffer;
+        try
+        {
+            return StringMarshaller.FromNative((IntPtr)bufferPtr, 0);
+        }
+        finally
+        {
+            StringMarshaller.DestructInstance((IntPtr)bufferPtr, 0);
+        }
     }
 }
 

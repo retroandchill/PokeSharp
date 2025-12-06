@@ -1,9 +1,11 @@
-﻿namespace PokeSharp.Core.Strings;
+﻿using System.Text.RegularExpressions;
+
+namespace PokeSharp.Core.Strings;
 
 /// <summary>
 /// A simple text provider that does not perform any localization.
 /// </summary>
-public sealed class UnlocalizedTextProvider : ITextProvider
+public sealed partial class UnlocalizedTextProvider : ITextProvider
 {
     /// <inheritdoc />
     public ITextData FromSimpleString(string text)
@@ -30,4 +32,26 @@ public sealed class UnlocalizedTextProvider : ITextProvider
         var valueAsString = value.ToString();
         return new BasicTextData(valueAsString, valueAsString, ns.ToString(), key.ToString());
     }
+
+    public ITextData FromLocText(string locString)
+    {
+        var match = NsLocTextPattern.Match(locString);
+        if (!match.Success)
+        {
+            return new BasicTextData(locString, locString);
+        }
+        
+        var escapedNs     = match.Groups["ns"].Value.Unescape();
+        var escapedKey    = match.Groups["key"].Value.Unescape();
+        var escapedSource = match.Groups["src"].Value.Unescape();
+        return new BasicTextData(escapedSource, escapedSource, escapedNs, escapedKey);
+    }
+
+    public ITextData FromLocText(ReadOnlySpan<char> locString)
+    {
+        throw new NotImplementedException();
+    }
+    
+    [GeneratedRegex("""NSLOCTEXT\(\s*"(?<ns>(?:\\.|[^"\\])*)"\s*,\s*"(?<key>(?:\\.|[^"\\])*)"\s*,\s*"(?<src>(?:\\.|[^"\\])*)"\s*\)""")]
+    private static partial Regex NsLocTextPattern { get; }
 }

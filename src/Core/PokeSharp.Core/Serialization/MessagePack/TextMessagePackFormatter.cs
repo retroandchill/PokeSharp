@@ -25,13 +25,13 @@ public class TextMessagePackFormatter : IMessagePackFormatter<Text>
     /// <inheritdoc />
     public void Serialize(ref MessagePackWriter writer, Text value, MessagePackSerializerOptions options)
     {
-        writer.Write(value.ToString());
+        writer.Write(value.ToLocString());
     }
 
     /// <inheritdoc />
     public Text Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
     {
         var readString = reader.ReadString();
-        return !string.IsNullOrEmpty(readString) ? readString : Text.None;
+        return !string.IsNullOrEmpty(readString) ? Text.FromLocText(readString) : Text.None;
     }
 }

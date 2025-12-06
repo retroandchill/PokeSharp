@@ -23,4 +23,14 @@ internal class UnrealTextProvider : ITextProvider
     {
         return new UnrealTextData(ns, key, value);
     }
+
+    public ITextData FromLocText(string locString)
+    {
+        return FromLocText(locString.AsSpan());
+    }
+
+    public ITextData FromLocText(ReadOnlySpan<char> locString)
+    {
+        return UnrealTextData.FromLocText(locString);
+    }
 }

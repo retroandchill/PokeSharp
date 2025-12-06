@@ -8,19 +8,21 @@
 namespace PokeEdit
 {
     /**
-     * 
+     *
      */
     struct FEditorLabelRequest
     {
-        explicit(false) FEditorLabelRequest(const FName InEditorId) : EditorId(InEditorId) { }
-        
+        explicit(false) FEditorLabelRequest(const FName InEditorId) : EditorId(InEditorId)
+        {
+        }
+
         FName EditorId;
-        
+
         static constexpr auto JsonSchema =
             TJsonObjectType(std::in_place_type<FEditorLabelRequest>,
                             std::make_tuple(TJsonField<&FEditorLabelRequest::EditorId>(TEXT("editorId"))));
     };
-    
+
     template <>
     struct POKESHARPEDITOR_API TJsonConverter<FEditorLabelRequest>
     {
@@ -28,4 +30,4 @@ namespace PokeEdit
 
         static TSharedRef<FJsonValue> Serialize(const FEditorLabelRequest &Value);
     };
-}
+} // namespace PokeEdit

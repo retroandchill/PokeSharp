@@ -51,7 +51,8 @@ public class ImmutableOrderedDictionary<TKey, TValue>
             arrayBuilder.Add(item.Key);
         }
         _dictionary = dictionaryBuilder.ToImmutable();
-        Keys = arrayBuilder.MoveToImmutable();
+        Keys =
+            arrayBuilder.Count == arrayBuilder.Capacity ? arrayBuilder.MoveToImmutable() : arrayBuilder.ToImmutable();
     }
 
     internal ImmutableOrderedDictionary(
@@ -68,7 +69,8 @@ public class ImmutableOrderedDictionary<TKey, TValue>
             arrayBuilder.Add(item.Key);
         }
         _dictionary = dictionaryBuilder.ToImmutable();
-        Keys = arrayBuilder.MoveToImmutable();
+        Keys =
+            arrayBuilder.Count == arrayBuilder.Capacity ? arrayBuilder.MoveToImmutable() : arrayBuilder.ToImmutable();
     }
 
     internal ImmutableOrderedDictionary(
@@ -460,7 +462,10 @@ public class ImmutableOrderedDictionary<TKey, TValue>
             keyBuilder.Add(key);
         }
 
-        return new ImmutableOrderedDictionary<TKey, TValue>(newDictionary, keyBuilder.MoveToImmutable());
+        return new ImmutableOrderedDictionary<TKey, TValue>(
+            newDictionary,
+            keyBuilder.Count == keyBuilder.Capacity ? keyBuilder.MoveToImmutable() : keyBuilder.ToImmutable()
+        );
     }
 
     public ImmutableOrderedDictionary<TKey, TValue> WithComparers(IEqualityComparer<TKey>? keyComparer)

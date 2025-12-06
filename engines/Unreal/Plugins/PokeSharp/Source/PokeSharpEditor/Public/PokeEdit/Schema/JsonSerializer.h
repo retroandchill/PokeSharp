@@ -448,7 +448,7 @@ namespace PokeEdit
             return Value.IsSet() ? TJsonConverter<T>::Serialize(Value.GetValue()) : MakeShared<FJsonValueNull>();
         }
     };
-    
+
     template <>
     struct TJsonConverter<TSharedRef<FJsonValue>>
     {
@@ -456,13 +456,13 @@ namespace PokeEdit
         {
             return MakeValue(Value);
         }
-        
-        static const TSharedRef<FJsonValue>& Serialize(const TSharedRef<FJsonValue> &Value)
+
+        static const TSharedRef<FJsonValue> &Serialize(const TSharedRef<FJsonValue> &Value)
         {
             return Value;
         }
     };
-    
+
     template <typename T>
         requires TJsonDeserializable<TSharedRef<T>> || TJsonSerializable<TSharedRef<T>>
     struct TJsonConverter<TSharedPtr<T>>
@@ -486,7 +486,7 @@ namespace PokeEdit
             {
                 return MakeError(Result.StealError());
             }
-            
+
             return MakeValue(Result.GetValue().ToSharedPtr());
         }
 
@@ -499,7 +499,8 @@ namespace PokeEdit
         static TSharedPtr<FJsonValue> Serialize(const TSharedPtr<T> &Value)
             requires TJsonSerializable<TSharedRef<T>>
         {
-            return Value != nullptr ? TJsonConverter<TSharedRef<T>>::Serialize(Value.ToSharedRef()) : MakeShared<FJsonValueNull>();
+            return Value != nullptr ? TJsonConverter<TSharedRef<T>>::Serialize(Value.ToSharedRef())
+                                    : MakeShared<FJsonValueNull>();
         }
     };
 

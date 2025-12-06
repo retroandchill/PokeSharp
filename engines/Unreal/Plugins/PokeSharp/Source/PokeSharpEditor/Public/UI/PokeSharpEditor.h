@@ -22,6 +22,11 @@ class POKESHARPEDITOR_API SPokeSharpEditor : public SCompoundWidget
     void RefreshTabs();
 
   private:
+    void RebuildCurrentTabContent();
+    void RebuildToolbar();
+
     FName CurrentTab;
-    TSharedPtr<SHorizontalBox> TabBar;
+    TSharedPtr<SBorder> ToolbarContainer;
+    TSharedPtr<SUniformWrapPanel> TabBar;
+    TSharedPtr<SBorder> ContentArea;
 };

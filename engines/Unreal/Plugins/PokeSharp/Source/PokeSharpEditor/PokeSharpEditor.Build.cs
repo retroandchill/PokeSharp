@@ -17,6 +17,7 @@ public class PokeSharpEditor : ModuleRules
             "Json",
             "ToolMenus",
             "Projects",
+            "InputCore",
         ]);
     }
 }

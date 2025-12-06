@@ -37,7 +37,7 @@ namespace PokeEdit
         FText Label;
         FText Tooltip;
         FText Category;
-        
+
         bool IsDefaultValue = false;
 
       protected:
@@ -51,14 +51,14 @@ namespace PokeEdit
 
         constexpr static auto BaseFieldsOptional =
             std::make_tuple(TJsonField<&FFieldDefinition::Tooltip>(TEXT("tooltip")),
-            TJsonField<&FFieldDefinition::Category>(TEXT("category")),
-            TJsonField<&FFieldDefinition::IsDefaultValue>(TEXT("isDefaultValue")));
+                            TJsonField<&FFieldDefinition::Category>(TEXT("category")),
+                            TJsonField<&FFieldDefinition::IsDefaultValue>(TEXT("isDefaultValue")));
     };
 
     struct FBoolFieldDefinition final : FFieldDefinition
     {
         bool CurrentValue = false;
-        
+
         FBoolFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
         {
         }
@@ -68,10 +68,10 @@ namespace PokeEdit
             return EFieldKind::Bool;
         }
 
-        constexpr static auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FBoolFieldDefinition>, BaseFieldsRequired, 
-                std::tuple_cat(BaseFieldsOptional, 
-                    std::make_tuple(TJsonField<&FBoolFieldDefinition::CurrentValue>(TEXT("currentValue")))));
+        constexpr static auto JsonSchema = TJsonObjectType(
+            std::in_place_type<FBoolFieldDefinition>, BaseFieldsRequired,
+            std::tuple_cat(BaseFieldsOptional,
+                           std::make_tuple(TJsonField<&FBoolFieldDefinition::CurrentValue>(TEXT("currentValue")))));
     };
 
     struct FTextFieldDefinition final : FFieldDefinition
@@ -134,7 +134,8 @@ namespace PokeEdit
 
     struct FChoiceFieldDefinition final : FFieldDefinition
     {
-        FChoiceFieldDefinition(const FName InFieldId, FText InLabel, FOptionSourceDefinition InOptions, const TSharedRef<FJsonValue>& InCurrentValue)
+        FChoiceFieldDefinition(const FName InFieldId, FText InLabel, FOptionSourceDefinition InOptions,
+                               const TSharedRef<FJsonValue> &InCurrentValue)
             : FFieldDefinition(InFieldId, MoveTemp(InLabel)), Options(MoveTemp(InOptions)), CurrentValue(InCurrentValue)
         {
         }
@@ -152,15 +153,14 @@ namespace PokeEdit
             std::in_place_type<FChoiceFieldDefinition>,
             std::tuple_cat(BaseFieldsRequired,
                            std::make_tuple(TJsonField<&FChoiceFieldDefinition::Options>(TEXT("options")),
-                               TJsonField<&FChoiceFieldDefinition::CurrentValue>(TEXT("currentValue")))),
+                                           TJsonField<&FChoiceFieldDefinition::CurrentValue>(TEXT("currentValue")))),
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FChoiceFieldDefinition::AllowNone>(TEXT("allowNone")))));
     };
 
     struct FObjectFieldDefinition final : FFieldDefinition
     {
-        FObjectFieldDefinition(const FName InFieldId, FText InLabel)
-            : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FObjectFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
         {
         }
 
@@ -172,8 +172,7 @@ namespace PokeEdit
         TArray<TSharedRef<FFieldDefinition>> Fields;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FObjectFieldDefinition>,
-            BaseFieldsRequired,
+            std::in_place_type<FObjectFieldDefinition>, BaseFieldsRequired,
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FObjectFieldDefinition::Fields>(TEXT("fields")))));
     };
@@ -212,25 +211,26 @@ namespace PokeEdit
         TArray<TSharedRef<FFieldDefinition>> ItemFields;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FListFieldDefinition>,
-            BaseFieldsRequired,
+            std::in_place_type<FListFieldDefinition>, BaseFieldsRequired,
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FListFieldDefinition::ItemFields>(TEXT("itemFields")))));
     };
-    
+
     struct FDictionaryFieldPair
     {
-        FDictionaryFieldPair(const TSharedRef<FFieldDefinition> &InKeyField, const TSharedRef<FFieldDefinition>& InValueField) : KeyField(InKeyField), ValueField(InValueField) 
+        FDictionaryFieldPair(const TSharedRef<FFieldDefinition> &InKeyField,
+                             const TSharedRef<FFieldDefinition> &InValueField)
+            : KeyField(InKeyField), ValueField(InValueField)
         {
-            
         }
-        
+
         TSharedRef<FFieldDefinition> KeyField;
         TSharedRef<FFieldDefinition> ValueField;
-        
-        constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FDictionaryFieldPair>,
-            std::make_tuple(TJsonField<&FDictionaryFieldPair::KeyField>(TEXT("keyField")), TJsonField<&FDictionaryFieldPair::KeyField>(TEXT("valueField"))));
+
+        constexpr static auto JsonSchema =
+            TJsonObjectType(std::in_place_type<FDictionaryFieldPair>,
+                            std::make_tuple(TJsonField<&FDictionaryFieldPair::KeyField>(TEXT("keyField")),
+                                            TJsonField<&FDictionaryFieldPair::KeyField>(TEXT("valueField"))));
     };
 
     struct FDictionaryFieldDefinition final : FCollectionFieldDefinition
@@ -248,17 +248,14 @@ namespace PokeEdit
         TArray<FDictionaryFieldPair> Pairs;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FDictionaryFieldDefinition>,
-            BaseFieldsRequired,
+            std::in_place_type<FDictionaryFieldDefinition>, BaseFieldsRequired,
             std::tuple_cat(BaseFieldsOptional,
-                           std::make_tuple(TJsonField<&FDictionaryFieldDefinition::Pairs>(TEXT("pairs"))))
-            );
+                           std::make_tuple(TJsonField<&FDictionaryFieldDefinition::Pairs>(TEXT("pairs")))));
     };
 
     struct FOptionalFieldDefinition final : FFieldDefinition
     {
-        FOptionalFieldDefinition(const FName InFieldId, FText InLabel)
-            : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FOptionalFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
         {
         }
 
@@ -270,10 +267,9 @@ namespace PokeEdit
         TSharedPtr<FFieldDefinition> ValueField;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FOptionalFieldDefinition>,
-            BaseFieldsRequired,
-            std::tuple_cat(BaseFieldsOptional,
-                           std::make_tuple(TJsonField<&FOptionalFieldDefinition::ValueField>(TEXT("valueDefinition")))));
+            std::in_place_type<FOptionalFieldDefinition>, BaseFieldsRequired,
+            std::tuple_cat(BaseFieldsOptional, std::make_tuple(TJsonField<&FOptionalFieldDefinition::ValueField>(
+                                                   TEXT("valueDefinition")))));
     };
 
     template <>
@@ -308,7 +304,7 @@ namespace PokeEdit
 
         POKESHARPEDITOR_API static TSharedRef<FJsonValue> Serialize(const TSharedRef<FFieldDefinition> &Value);
     };
-    
+
     template <>
     struct TJsonConverter<FDictionaryFieldPair>
     {

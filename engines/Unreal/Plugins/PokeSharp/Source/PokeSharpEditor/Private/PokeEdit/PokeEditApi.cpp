@@ -31,7 +31,7 @@ namespace PokeEdit
         {
             return MakeError(JsonResult.StealError());
         }
-        
+
         return DeserializeFromJson<TArray<FText>>(JsonResult.GetValue());
     }
 } // namespace PokeEdit

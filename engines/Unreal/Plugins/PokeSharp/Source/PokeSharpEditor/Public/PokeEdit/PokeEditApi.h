@@ -10,6 +10,6 @@ namespace PokeEdit
     POKESHARPEDITOR_API extern const TSharedRef<FJsonValue> NoBodyJsonValue;
 
     POKESHARPEDITOR_API TValueOrError<TArray<FEditorTabOption>, FString> GetEditorTabs();
-    
+
     POKESHARPEDITOR_API TValueOrError<TArray<FText>, FString> GetEntryLabels(FName EditorId);
 } // namespace PokeEdit

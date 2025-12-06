@@ -3,6 +3,7 @@ using PokeSharp.RGSS.RPG;
 
 namespace PokeSharp.RGSS.Serialization;
 
+[RegisterSingleton(Factory = nameof(Default))]
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Metadata,
     WriteIndented = true,

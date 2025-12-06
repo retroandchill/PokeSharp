@@ -12,7 +12,8 @@ namespace PokeEdit
         TSharedRef<FJsonValue> Value;
         FText Label;
 
-        FOptionItemDefinition(const TSharedRef<FJsonValue>& InKey, FText InLabel) : Value(InKey), Label(MoveTemp(InLabel))
+        FOptionItemDefinition(const TSharedRef<FJsonValue> &InKey, FText InLabel)
+            : Value(InKey), Label(MoveTemp(InLabel))
         {
         }
 

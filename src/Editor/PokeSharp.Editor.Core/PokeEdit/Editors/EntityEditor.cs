@@ -13,11 +13,11 @@ public interface IEntityEditor
 {
     Name Id { get; }
     Text Name { get; }
-    
+
     IEnumerable<Text> SelectionLabels { get; }
 
     IEditableType Type { get; }
-    
+
     bool DisplayAsSingleton { get; }
 
     void SyncFromSource();
@@ -33,7 +33,7 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
     private readonly IEditableType<T> _type = repository.GetRequiredType<T>();
     public Name Id => _type.Name;
     public Text Name => _type.DisplayName;
-    
+
     public abstract IEnumerable<Text> SelectionLabels { get; }
 
     IEditableType IEntityEditor.Type => _type;

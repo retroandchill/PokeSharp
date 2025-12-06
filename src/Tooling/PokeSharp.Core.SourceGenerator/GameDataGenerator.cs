@@ -62,7 +62,8 @@ public class GameDataGenerator : IIncrementalGenerator
             EntityType = info.DataPath is not null ? "Loaded" : "Registered",
             IsReferenceType = !type.IsValueType,
             IsLoaded = info.DataPath is not null,
-            HasName = type.GetPublicProperties().SingleOrDefault(p => p.Name == "Name" && p.Type.Name == "Text") is not null,
+            HasName = type.GetPublicProperties().SingleOrDefault(p => p.Name == "Name" && p.Type.Name == "Text")
+                is not null,
             info.DataPath,
             info.IsOptional,
             Identifiers = type.GetMembers()

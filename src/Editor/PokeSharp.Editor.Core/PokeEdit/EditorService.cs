@@ -26,7 +26,8 @@ public class EditorService
 
     public IEnumerable<Text> GetEntryLabels(Name editorId)
     {
-        return _editors.GetValueOrDefault(editorId)?.SelectionLabels ?? throw new InvalidOperationException($"No editor found for {editorId}");
+        return _editors.GetValueOrDefault(editorId)?.SelectionLabels
+            ?? throw new InvalidOperationException($"No editor found for {editorId}");
     }
 
     public FieldDefinition GetFieldDefinition(FieldPath path)

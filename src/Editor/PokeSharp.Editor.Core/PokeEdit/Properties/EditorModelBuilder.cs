@@ -17,9 +17,9 @@ public sealed class EditorModelBuilder
         return this;
     }
 
-    public EditorModelBuilder Add<T>(IEditableTypeBuilder type)
+    public EditorModelBuilder Add(IEditableTypeBuilder type)
     {
-        _types.Add(typeof(T), type);
+        _types.Add(type.ClrType, type);
         return this;
     }
 

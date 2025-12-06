@@ -47,9 +47,9 @@ public sealed class EditableType<T>(EditableTypeBuilder<T> builder, ModelBuildCa
     public Text DisplayName { get; } = builder.TargetDisplayName;
     public Text Tooltip { get; } = builder.TargetTooltip;
     public Text Category { get; } = builder.TargetCategory;
-    
+
     private readonly ImmutableDictionary<string, string> _metadata = builder.TargetMetadata.ToImmutableDictionary();
-    
+
     public bool HasMetadata(string key)
     {
         return _metadata.ContainsKey(key);

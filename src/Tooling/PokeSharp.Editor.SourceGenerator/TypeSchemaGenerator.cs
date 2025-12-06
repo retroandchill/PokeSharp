@@ -72,15 +72,10 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             return null;
         }
 
-        return new ForCallInfo(t, lambda, location.Version, location.Data);
+        return new ForCallInfo(t, location.Version, location.Data);
     }
 
-    private readonly record struct ForCallInfo(
-        INamedTypeSymbol TargetType,
-        LambdaExpressionSyntax Lambda,
-        int Version,
-        string Data
-    );
+    private readonly record struct ForCallInfo(INamedTypeSymbol TargetType, int Version, string Data);
 
     private static void Execute(
         SourceProductionContext context,
@@ -122,7 +117,7 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                             SetMethod.DeclaredAccessibility: Accessibility.Public
                         }
                 )
-                .Select(x => CreateEditablePropertyInfo(x, explore, explored, forCalls, compilation))
+                .Select(x => CreateEditablePropertyInfo(x, explore, explored))
                 .OfType<EditablePropertyInfo>()
                 .ToImmutableArray();
 
@@ -140,45 +135,20 @@ public class TypeSchemaGenerator : IIncrementalGenerator
             handlebars.Configuration.TextEncoder = null;
             handlebars.Configuration.FormatterProviders.Add(new EnumStringFormatter());
 
-            /*
             context.AddSource(
                 $"{templateParameters.ClassName}.g.cs",
                 handlebars.Compile(SourceTemplates.EditableEntityTemplate)(templateParameters)
             );
-            */
         }
     }
 
     private static EditablePropertyInfo? CreateEditablePropertyInfo(
         IPropertySymbol property,
         Queue<INamedTypeSymbol> explore,
-        HashSet<ITypeSymbol> explored,
-        IReadOnlyList<ForCallInfo> forCalls,
-        Compilation compilation
+        HashSet<ITypeSymbol> explored
     )
     {
-        var displayName = $"\"{property.Name}\"";
         var defaultValue = GetDefaultValue(property);
-        foreach (var (invocation, semanticModel) in forCalls.SelectMany(x => GetPropertyCalls(x.Lambda, compilation)))
-        {
-            var symbol = semanticModel.GetSymbolInfo(invocation).Symbol;
-
-            if (symbol is not IMethodSymbol methodSymbol)
-                continue;
-
-            switch (methodSymbol.Name)
-            {
-                case "Ignore":
-                    return null;
-                case "DisplayName":
-                    displayName = invocation.ArgumentList.Arguments[0].Expression.ToString();
-                    break;
-                case "DefaultValue":
-                    defaultValue = invocation.ArgumentList.Arguments[0].Expression.ToString();
-                    break;
-            }
-        }
-
         switch (property)
         {
             case {
@@ -187,7 +157,6 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
-                    DisplayName = displayName,
                     Type = immutableArrayType.ToDisplayString(),
                     PropertyType = PropertyType.List,
                     ValueType = immutableArrayType.TypeArguments[0].ToDisplayString(),
@@ -199,7 +168,6 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
-                    DisplayName = displayName,
                     Type = dictionaryType.ToDisplayString(),
                     PropertyType = PropertyType.Dictionary,
                     KeyType = dictionaryType.TypeArguments[0].ToDisplayString(),
@@ -215,7 +183,6 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
-                    DisplayName = displayName,
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Object,
                     ObjectType = property.Type.ToDisplayString(NullableFlowState.NotNull),
@@ -225,7 +192,6 @@ public class TypeSchemaGenerator : IIncrementalGenerator
                 return new EditablePropertyInfo
                 {
                     Name = property.Name,
-                    DisplayName = displayName,
                     Type = property.Type.ToDisplayString(),
                     PropertyType = PropertyType.Scalar,
                     DefaultValue = defaultValue,

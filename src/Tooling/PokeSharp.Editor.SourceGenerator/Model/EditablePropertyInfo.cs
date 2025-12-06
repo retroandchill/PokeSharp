@@ -11,7 +11,6 @@ public enum PropertyType
 public record EditablePropertyInfo
 {
     public required string Name { get; init; }
-    public required string DisplayName { get; init; }
     public required string Type { get; init; }
     public required PropertyType PropertyType { get; init; }
     public string? KeyType { get; init; }

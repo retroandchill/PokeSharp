@@ -12,12 +12,20 @@ public interface IEditableTypeBuilder
     IEditableType Build(ModelBuildCache cache);
 }
 
-public sealed class EditableTypeBuilder<TOwner>(EditorModelBuilder builder) : EditableMemberBuilder<EditableTypeBuilder<TOwner>>(typeof(TOwner).Name), IEditableTypeBuilder
+public sealed class EditableTypeBuilder<TOwner>(EditorModelBuilder builder)
+    : EditableMemberBuilder<EditableTypeBuilder<TOwner>>(typeof(TOwner).Name),
+        IEditableTypeBuilder
     where TOwner : notnull
 {
     internal EditorModelBuilder ModelBuilder { get; } = builder;
     internal readonly OrderedDictionary<Name, IEditablePropertyBuilder<TOwner>> Properties = new();
     public Type ClrType => typeof(TOwner);
+
+    public EditableTypeBuilder<TOwner> Property<TValue>(EditablePropertyBuilder<TOwner, TValue> builder)
+    {
+        Properties.Add(builder.TargetId, builder);
+        return this;
+    }
 
     public EditableTypeBuilder<TOwner> Property<TValue>(
         Expression<Func<TOwner, TValue>> propertyGetter,
@@ -28,17 +36,16 @@ public sealed class EditableTypeBuilder<TOwner>(EditorModelBuilder builder) : Ed
         return Property(property, customize);
     }
 
-    internal EditableTypeBuilder<TOwner> Property(PropertyInfo property)
+    internal void Property(PropertyInfo property)
     {
         if (Properties.ContainsKey(property.Name))
         {
-            return this;
+            return;
         }
 
         var createMethod = GetType().GetMethod(nameof(CreateProperty), BindingFlags.NonPublic)!;
         var specialized = createMethod.MakeGenericMethod(property.PropertyType);
         Properties.Add(property.Name, (IEditablePropertyBuilder<TOwner>)specialized.Invoke(this, [property, null])!);
-        return this;
     }
 
     private EditableTypeBuilder<TOwner> Property<TValue>(

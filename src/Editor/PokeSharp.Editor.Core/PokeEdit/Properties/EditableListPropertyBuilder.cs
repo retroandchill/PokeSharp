@@ -5,7 +5,7 @@ namespace PokeSharp.Editor.Core.PokeEdit.Properties;
 
 public sealed class EditableListPropertyBuilder<TOwner, TItem>(
     EditableTypeBuilder<TOwner> typeBuilder,
-    Name name,
+    string name,
     Func<TOwner, ImmutableArray<TItem>> get,
     Func<TOwner, ImmutableArray<TItem>, TOwner> with,
     ImmutableArray<TItem> defaultValue

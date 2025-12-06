@@ -18,19 +18,24 @@ public sealed partial class PokeEditService(EditorService editorService)
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult(editorService.GetEditorTabOptions());
     }
-    
+
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask<IEnumerable<Text>> GetEntryLabelsAsync(EditorLabelRequest editorId,
-        CancellationToken cancellationToken = default)
+    public ValueTask<IEnumerable<Text>> GetEntryLabelsAsync(
+        EditorLabelRequest editorId,
+        CancellationToken cancellationToken = default
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult(editorService.GetEntryLabels(editorId.EditorId));
     }
-    
+
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask<FieldDefinition> GetFieldDefinitionAsync(FieldPath path, CancellationToken cancellationToken = default)
+    public ValueTask<FieldDefinition> GetFieldDefinitionAsync(
+        FieldPath path,
+        CancellationToken cancellationToken = default
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult(editorService.GetFieldDefinition(path));

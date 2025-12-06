@@ -216,7 +216,8 @@ internal static class EditableProperty
             return TValue.TryParse(outer.GetMetadata(key), null, out var result) ? result : null;
         }
 
-        public FieldDefinition CreateValueField<TValue>(IEditableType<TValue>? innerType,
+        public FieldDefinition CreateValueField<TValue>(
+            IEditableType<TValue>? innerType,
             TValue currentValue,
             TValue? defaultValue,
             FieldPathSegment fieldId,

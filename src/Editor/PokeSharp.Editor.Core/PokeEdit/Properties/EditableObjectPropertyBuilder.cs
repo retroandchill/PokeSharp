@@ -4,7 +4,7 @@ namespace PokeSharp.Editor.Core.PokeEdit.Properties;
 
 public sealed class EditableObjectPropertyBuilder<TOwner, TValue>(
     EditableTypeBuilder<TOwner> typeBuilder,
-    Name name,
+    string name,
     Func<TOwner, TValue> get,
     Func<TOwner, TValue, TOwner> with,
     TValue? defaultValue

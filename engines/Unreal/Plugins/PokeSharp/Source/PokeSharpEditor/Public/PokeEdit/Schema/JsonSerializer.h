@@ -34,7 +34,7 @@ namespace PokeEdit
      */
     template <typename T>
     concept TJsonDeserializable = requires(const TSharedRef<FJsonValue> &Value) {
-        { TJsonConverter<T>::Deserialize(Value) } -> std::same_as<TValueOrError<T, FString>>;
+        { TJsonConverter<T>::Deserialize(Value) } -> std::convertible_to<TValueOrError<T, FString>>;
     };
 
     /**
@@ -44,7 +44,7 @@ namespace PokeEdit
      */
     template <typename T>
     concept TJsonSerializable = requires(const T &Value) {
-        { TJsonConverter<T>::Serialize(Value) } -> std::same_as<TSharedRef<FJsonValue>>;
+        { TJsonConverter<T>::Serialize(Value) } -> std::convertible_to<TSharedRef<FJsonValue>>;
     };
 
     /**
@@ -59,7 +59,7 @@ namespace PokeEdit
      * Converter for JSON representation of boolean values.
      */
     template <>
-    struct TJsonConverter<bool>
+    struct POKESHARPEDITOR_API TJsonConverter<bool>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -67,15 +67,7 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<bool, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
-        {
-            if (bool Result; Value->TryGetBool(Result))
-            {
-                return MakeValue(Result);
-            }
-
-            return MakeError(FString::Format(TEXT("Value '{0}' is not a boolean"), {WriteAsString(Value)}));
-        }
+        static TValueOrError<bool, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
 
         /**
          * Serializes a value to the target type.
@@ -130,7 +122,7 @@ namespace PokeEdit
      * Converter for handling the JSON serialization of Name values.
      */
     template <>
-    struct TJsonConverter<FName>
+    struct POKESHARPEDITOR_API TJsonConverter<FName>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -138,15 +130,7 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<FName, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
-        {
-            if (FString Result; Value->TryGetString(Result))
-            {
-                return MakeValue(FName(Result));
-            }
-
-            return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
-        }
+        static TValueOrError<FName, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
 
         /**
          * Serializes a value to the target type.
@@ -164,7 +148,7 @@ namespace PokeEdit
      * Converter for handling the JSON serialization of String values.
      */
     template <>
-    struct TJsonConverter<FString>
+    struct POKESHARPEDITOR_API TJsonConverter<FString>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -172,15 +156,7 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<FString, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
-        {
-            if (FString Result; Value->TryGetString(Result))
-            {
-                return MakeValue(Result);
-            }
-
-            return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
-        }
+        static TValueOrError<FString, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
 
         /**
          * Serializes a value to the target type.
@@ -222,7 +198,7 @@ namespace PokeEdit
      * @note This type will serialize/deserialize from the full localized string (i.e. NSLOCTEXT) form if possible
      */
     template <>
-    struct TJsonConverter<FText>
+    struct POKESHARPEDITOR_API TJsonConverter<FText>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -230,20 +206,7 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<FText, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
-        {
-            if (FString Result; Value->TryGetString(Result))
-            {
-                FText LocalizedText;
-                if (!FTextStringHelper::ReadFromBuffer(Result.GetCharArray().GetData(), LocalizedText))
-                {
-                    LocalizedText = FText::FromString(Result);
-                }
-                return MakeValue(MoveTemp(LocalizedText));
-            }
-
-            return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
-        }
+        static TValueOrError<FText, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
 
         /**
          * Serializes a value to the target type.
@@ -251,12 +214,7 @@ namespace PokeEdit
          * @param Value The input value
          * @return The serialized JSON value
          */
-        static TSharedRef<FJsonValue> Serialize(const FText &Value)
-        {
-            FString Buffer;
-            FTextStringHelper::WriteToBuffer(Buffer, Value);
-            return MakeShared<FJsonValueString>(MoveTemp(Buffer));
-        }
+        static TSharedRef<FJsonValue> Serialize(const FText &Value);
     };
 
     /**
@@ -488,6 +446,60 @@ namespace PokeEdit
             requires TJsonSerializable<T>
         {
             return Value.IsSet() ? TJsonConverter<T>::Serialize(Value.GetValue()) : MakeShared<FJsonValueNull>();
+        }
+    };
+    
+    template <>
+    struct TJsonConverter<TSharedRef<FJsonValue>>
+    {
+        static TValueOrError<TSharedRef<FJsonValue>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+        {
+            return MakeValue(Value);
+        }
+        
+        static const TSharedRef<FJsonValue>& Serialize(const TSharedRef<FJsonValue> &Value)
+        {
+            return Value;
+        }
+    };
+    
+    template <typename T>
+        requires TJsonDeserializable<TSharedRef<T>> || TJsonSerializable<TSharedRef<T>>
+    struct TJsonConverter<TSharedPtr<T>>
+    {
+        /**
+         * Attempts to deserialize a JSON value to the target type.
+         *
+         * @param Value The input JSON value
+         * @return Either the deserialized value, or an error message explaining why serialization failed.
+         */
+        static TValueOrError<TSharedPtr<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+            requires TJsonDeserializable<TSharedRef<T>>
+        {
+            if (Value->IsNull())
+            {
+                return MakeValue(nullptr);
+            }
+
+            auto Result = TJsonConverter<TSharedRef<T>>::Deserialize(Value);
+            if (Result.HasError())
+            {
+                return MakeError(Result.StealError());
+            }
+            
+            return MakeValue(Result.GetValue().ToSharedPtr());
+        }
+
+        /**
+         * Serializes a value to the target type.
+         *
+         * @param Value The input value
+         * @return The serialized JSON value
+         */
+        static TSharedPtr<FJsonValue> Serialize(const TSharedPtr<T> &Value)
+            requires TJsonSerializable<TSharedRef<T>>
+        {
+            return Value != nullptr ? TJsonConverter<TSharedRef<T>>::Serialize(Value.ToSharedRef()) : MakeShared<FJsonValueNull>();
         }
     };
 

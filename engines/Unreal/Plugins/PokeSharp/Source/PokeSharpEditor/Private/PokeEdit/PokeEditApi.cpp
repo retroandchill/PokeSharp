@@ -2,6 +2,7 @@
 
 #include "PokeEdit/PokeEditApi.h"
 #include "PokeEdit/PokeEditClient.h"
+#include "PokeEdit/Schema/EditorLabelRequest.h"
 
 namespace PokeEdit
 {
@@ -18,5 +19,19 @@ namespace PokeEdit
         }
 
         return DeserializeFromJson<TArray<FEditorTabOption>>(JsonResult.GetValue());
+    }
+
+    TValueOrError<TArray<FText>, FString> GetEntryLabels(const FName EditorId)
+    {
+        static FName RequestName = "GetEntryLabels";
+
+        const auto JsonRequest = SerializeToJson(FEditorLabelRequest(EditorId));
+        auto JsonResult = SendRequest(RequestName, JsonRequest);
+        if (JsonResult.HasError())
+        {
+            return MakeError(JsonResult.StealError());
+        }
+        
+        return DeserializeFromJson<TArray<FText>>(JsonResult.GetValue());
     }
 } // namespace PokeEdit

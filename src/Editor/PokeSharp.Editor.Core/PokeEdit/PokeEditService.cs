@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Strings;
@@ -10,23 +9,31 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Editor.Core.PokeEdit;
 
 [RegisterSingleton]
-public sealed partial class PokeEditService
+public sealed partial class PokeEditService(EditorService editorService)
 {
-    private readonly ImmutableDictionary<Name, IEntityEditor> _editors;
-
-    public int EditorCount => _editors.Count;
-
-    public PokeEditService(IEnumerable<IEntityEditor> editors)
-    {
-        _editors = editors.ToImmutableDictionary(x => x.Id);
-    }
-
     [CreateSyncVersion]
     [PokeEditRequest]
     public ValueTask<IEnumerable<EditorTabOption>> GetEditorTabsAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(_editors.Values.Select(x => new EditorTabOption(x.Id, x.Name)));
+        return ValueTask.FromResult(editorService.GetEditorTabOptions());
+    }
+    
+    [CreateSyncVersion]
+    [PokeEditRequest]
+    public ValueTask<IEnumerable<Text>> GetEntryLabelsAsync(EditorLabelRequest editorId,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(editorService.GetEntryLabels(editorId.EditorId));
+    }
+    
+    [CreateSyncVersion]
+    [PokeEditRequest]
+    public ValueTask<FieldDefinition> GetFieldDefinitionAsync(FieldPath path, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(editorService.GetFieldDefinition(path));
     }
 
     [CreateSyncVersion]
@@ -34,19 +41,7 @@ public sealed partial class PokeEditService
     public ValueTask<JsonNode?> ProcessFieldEditAsync(FieldEdit edit, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (edit.Path.Segments.Length == 0)
-        {
-            throw new ArgumentException("Path must have at least one segment");
-        }
-
-        if (edit.Path.Segments[0] is not PropertySegment propertySegment)
-        {
-            throw new ArgumentException("First segment must be a property");
-        }
-
-        return _editors.TryGetValue(propertySegment.Name, out var editor)
-            ? ValueTask.FromResult(editor.ApplyEdit(edit))
-            : throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
+        return ValueTask.FromResult(editorService.ProcessFieldEdit(edit));
     }
 }
 
@@ -56,6 +51,8 @@ public static class PokeEditServiceExtensions
     public static void RegisterRequestHandlers(this IServiceCollection services)
     {
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEditorTabsHandler>();
+        services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryLabelsHandler>();
+        services.AddSingleton<IRequestHandler, PokeEditServiceGetFieldDefinitionHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceProcessFieldEditHandler>();
     }
 }

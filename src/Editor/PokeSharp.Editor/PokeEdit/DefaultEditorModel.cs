@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Strings;
 using PokeSharp.Data.Pbs;
 using PokeSharp.Editor.Core.PokeEdit;
+using PokeSharp.Editor.Core.PokeEdit.Editors;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
 
 namespace PokeSharp.Editor.PokeEdit;

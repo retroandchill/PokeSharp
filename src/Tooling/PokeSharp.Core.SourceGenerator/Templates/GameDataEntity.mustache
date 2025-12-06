@@ -6,7 +6,7 @@ using PokeSharp.Core.Data;
 
 namespace {{Namespace}};
 
-partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}> 
+partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{ClassName}}>{{#HasName}}, INamedGameDataEntity{{/HasName}}
 {
     private static CachedService<{{EntityType}}GameDataSet<{{ClassName}}, {{Key}}>> _data = new();
 

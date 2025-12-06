@@ -9,16 +9,16 @@ namespace PokeEdit
 {
     struct FOptionItemDefinition
     {
-        FName Key;
+        TSharedRef<FJsonValue> Value;
         FText Label;
 
-        FOptionItemDefinition(const FName InKey, FText InLabel) : Key(InKey), Label(MoveTemp(InLabel))
+        FOptionItemDefinition(const TSharedRef<FJsonValue>& InKey, FText InLabel) : Value(InKey), Label(MoveTemp(InLabel))
         {
         }
 
         static constexpr auto JsonSchema =
             TJsonObjectType(std::in_place_type<FOptionItemDefinition>,
-                            std::make_tuple(TJsonField<&FOptionItemDefinition::Key>(TEXT("key")),
+                            std::make_tuple(TJsonField<&FOptionItemDefinition::Value>(TEXT("value")),
                                             TJsonField<&FOptionItemDefinition::Label>(TEXT("label"))));
     };
 

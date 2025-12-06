@@ -1,65 +1,97 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Collections;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
-namespace PokeSharp.Editor.Core.PokeEdit;
+namespace PokeSharp.Editor.Core.PokeEdit.Editors;
 
 public interface IEntityEditor
 {
     Name Id { get; }
     Text Name { get; }
+    
+    IEnumerable<Text> SelectionLabels { get; }
 
-    IEditableType Properties { get; }
-
-    JsonNode GetDefaultValue();
+    IEditableType Type { get; }
+    
+    bool DisplayAsSingleton { get; }
 
     void SyncFromSource();
 
-    JsonNode? ApplyEdit(FieldEdit edit);
+    FieldDefinition GetField(FieldPathSegment outer, ReadOnlySpan<FieldPathSegment> path);
+
+    JsonNode? ApplyEdit(FieldEdit edit, ReadOnlySpan<FieldPathSegment> path);
 }
 
-public sealed class EntityEditor<T>(JsonSerializerOptions options, PokeEditTypeRepository repository) : IEntityEditor
+public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTypeRepository repository) : IEntityEditor
     where T : ILoadedGameDataEntity<T>
 {
     private readonly IEditableType<T> _type = repository.GetRequiredType<T>();
     public Name Id => _type.Name;
     public Text Name => _type.DisplayName;
+    
+    public abstract IEnumerable<Text> SelectionLabels { get; }
 
-    IEditableType IEntityEditor.Properties => _type;
+    IEditableType IEntityEditor.Type => _type;
+
+    public bool DisplayAsSingleton
+    {
+        get => field && _entries.Length == 1;
+        protected init;
+    }
 
     private ImmutableArray<T> _entries = [];
-
-    public JsonNode GetDefaultValue()
-    {
-        throw new NotImplementedException();
-    }
 
     public void SyncFromSource()
     {
         Interlocked.Exchange(ref _entries, [.. T.Entities]);
     }
 
-    public JsonNode? ApplyEdit(FieldEdit edit)
+    public FieldDefinition GetField(FieldPathSegment outer, ReadOnlySpan<FieldPathSegment> path)
     {
-        if (edit.Path.Segments.Length == 0)
+        if (path.Length == 0)
+        {
+            return new ListFieldDefinition
+            {
+                FieldId = outer,
+                Label = Name,
+                ItemFields =
+                [
+                    .. _entries.Select((x, i) => _type.GetDefinition(x, new ListIndexSegment(i), _type, [], options)),
+                ],
+            };
+        }
+
+        if (path[0] is not ListIndexSegment indexSegment)
+        {
+            throw new InvalidOperationException($"Must be a list index segment, found {path[0]}");
+        }
+
+        var index = indexSegment.Index;
+        return index < _entries.Length && index > 0
+            ? _type.GetDefinition(_entries[index], indexSegment, _type, path[1..], options)
+            : throw new InvalidOperationException($"Cannot find index {index} in collection.");
+    }
+
+    public JsonNode? ApplyEdit(FieldEdit edit, ReadOnlySpan<FieldPathSegment> path)
+    {
+        if (path.Length == 0)
         {
             return ApplyEditToCollection(edit);
         }
 
-        if (edit.Path.Segments[0] is not ListIndexSegment indexSegment)
+        if (path[0] is not ListIndexSegment indexSegment)
         {
-            throw new InvalidOperationException($"Must be a list index segment, found {edit.Path.Segments[0]}");
+            throw new InvalidOperationException($"Must be a list index segment, found {path[0]}");
         }
 
         var index = indexSegment.Index;
         var current = _entries[index];
-        var remaining = edit.Path.Segments.AsSpan()[1..];
+        var remaining = path[1..];
 
         if (remaining.Length == 0)
         {
@@ -125,14 +157,5 @@ public sealed class EntityEditor<T>(JsonSerializerOptions options, PokeEditTypeR
             default:
                 throw new InvalidOperationException($"Cannot perform edit {edit} on a collection.");
         }
-    }
-}
-
-public static class EntityEditorExtensions
-{
-    public static IServiceCollection AddEntityEditor<T>(this IServiceCollection services)
-        where T : ILoadedGameDataEntity<T>
-    {
-        return services.AddSingleton<IEntityEditor, EntityEditor<T>>();
     }
 }

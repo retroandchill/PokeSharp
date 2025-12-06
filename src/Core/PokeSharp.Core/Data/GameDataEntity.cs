@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Core.Data;
 
@@ -13,6 +14,11 @@ public interface IGameDataEntity
     /// Represents the count of elements stored in the underlying data structure.
     /// </summary>
     static abstract int Count { get; }
+}
+
+public interface INamedGameDataEntity : IGameDataEntity
+{
+    Text Name { get; }
 }
 
 /// <summary>

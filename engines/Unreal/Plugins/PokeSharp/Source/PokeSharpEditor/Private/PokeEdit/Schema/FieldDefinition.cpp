@@ -60,6 +60,17 @@ namespace PokeEdit
         return TJsonUnionConverter<TSharedRef<FFieldDefinition>>::Serialize(Value);
     }
 
+    TValueOrError<FDictionaryFieldPair, FString> TJsonConverter<FDictionaryFieldPair>::Deserialize(
+        const TSharedRef<FJsonValue> &Value)
+    {
+        return TJsonObjectConverter<FDictionaryFieldPair>::Deserialize(Value);
+    }
+
+    TSharedRef<FJsonValue> TJsonConverter<FDictionaryFieldPair>::Serialize(const FDictionaryFieldPair &Value)
+    {
+        return TJsonObjectConverter<FDictionaryFieldPair>::Serialize(Value);
+    }
+
     template <std::derived_from<FFieldDefinition> T>
         requires(!std::same_as<T, FFieldDefinition>)
     TValueOrError<TSharedRef<T>, FString> TJsonConverter<TSharedRef<T>>::Deserialize(
@@ -77,8 +88,16 @@ namespace PokeEdit
 
     template struct TJsonConverter<TSharedRef<FBoolFieldDefinition>>;
     template struct TJsonConverter<TSharedRef<FTextFieldDefinition>>;
-    template struct TJsonConverter<TSharedRef<FIntFieldDefinition>>;
-    template struct TJsonConverter<TSharedRef<FFloatFieldDefinition>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<int8>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<int16>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<int32>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<int64>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<uint8>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<uint16>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<uint32>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<uint64>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<float>>>;
+    template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<double>>>;
     template struct TJsonConverter<TSharedRef<FChoiceFieldDefinition>>;
     template struct TJsonConverter<TSharedRef<FObjectFieldDefinition>>;
     template struct TJsonConverter<TSharedRef<FListFieldDefinition>>;

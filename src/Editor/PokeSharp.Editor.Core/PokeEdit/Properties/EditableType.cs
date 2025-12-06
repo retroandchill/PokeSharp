@@ -1,17 +1,14 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using PokeSharp.Core.Collections.Immutable;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Properties;
 
-public interface IEditableType
+public interface IEditableType : IEditableMember
 {
-    Name Name { get; }
-    Text DisplayName { get; }
     IEnumerable<IEditableProperty> Properties { get; }
 
     IEditableProperty GetProperty(Name name);
@@ -19,8 +16,6 @@ public interface IEditableType
     IEditableProperty? TryGetProperty(Name name);
 
     bool TryGetProperty(Name name, [NotNullWhen(true)] out IEditableProperty? property);
-
-    TypeDefinition GetTypeDefinition(JsonObject obj, JsonSerializerOptions? options = null);
 }
 
 public interface IEditableType<T> : IEditableType
@@ -34,6 +29,14 @@ public interface IEditableType<T> : IEditableType
 
     bool TryGetProperty(Name name, [NotNullWhen(true)] out IEditableProperty<T>? property);
 
+    FieldDefinition GetDefinition(
+        T root,
+        FieldPathSegment fieldId,
+        IEditableMember outer,
+        ReadOnlySpan<FieldPathSegment> path,
+        JsonSerializerOptions? options = null
+    );
+
     T ApplyEdit(T root, ReadOnlySpan<FieldPathSegment> path, FieldEdit edit, JsonSerializerOptions? options = null);
 }
 
@@ -42,6 +45,20 @@ public sealed class EditableType<T>(EditableTypeBuilder<T> builder, ModelBuildCa
 {
     public Name Name { get; } = builder.TargetId;
     public Text DisplayName { get; } = builder.TargetDisplayName;
+    public Text Tooltip { get; } = builder.TargetTooltip;
+    public Text Category { get; } = builder.TargetCategory;
+    
+    private readonly ImmutableDictionary<string, string> _metadata = builder.TargetMetadata.ToImmutableDictionary();
+    
+    public bool HasMetadata(string key)
+    {
+        return _metadata.ContainsKey(key);
+    }
+
+    public string? GetMetadata(string key)
+    {
+        return _metadata.GetValueOrDefault(key);
+    }
 
     private readonly ImmutableOrderedDictionary<Name, IEditableProperty<T>> _properties = builder
         .Properties.Values.Select(p => p.Build(cache))
@@ -56,6 +73,36 @@ public sealed class EditableType<T>(EditableTypeBuilder<T> builder, ModelBuildCa
     public bool TryGetProperty(Name name, [NotNullWhen(true)] out IEditableProperty<T>? property)
     {
         return _properties.TryGetValue(name, out property);
+    }
+
+    public FieldDefinition GetDefinition(
+        T root,
+        FieldPathSegment fieldId,
+        IEditableMember outer,
+        ReadOnlySpan<FieldPathSegment> path,
+        JsonSerializerOptions? options = null
+    )
+    {
+        if (path.Length == 0)
+        {
+            return new ObjectFieldDefinition
+            {
+                FieldId = fieldId,
+                Label = outer.DisplayName,
+                Tooltip = outer.Tooltip,
+                Category = outer.Category,
+                Fields = [.. Properties.Select(p => p.GetDefinition(root, [], options))],
+            };
+        }
+
+        if (path[0] is not PropertySegment propertySegment)
+        {
+            throw new InvalidOperationException($"Expected property segment, got {path[0]}");
+        }
+
+        return TryGetProperty(propertySegment.Name, out var prop)
+            ? prop.GetDefinition(root, path[1..], options)
+            : throw new InvalidOperationException($"No property {propertySegment.Name} on {typeof(T).Name}");
     }
 
     public T ApplyEdit(
@@ -91,17 +138,5 @@ public sealed class EditableType<T>(EditableTypeBuilder<T> builder, ModelBuildCa
         var result = TryGetProperty(name, out var intermediate);
         property = intermediate;
         return result;
-    }
-
-    public TypeDefinition GetTypeDefinition(JsonObject obj, JsonSerializerOptions? options = null)
-    {
-        var entity = obj.Deserialize<T>(options);
-        ArgumentNullException.ThrowIfNull(entity);
-        return new TypeDefinition
-        {
-            Id = Name,
-            Name = DisplayName,
-            Fields = [.. _properties.Values.Select(x => x.Definition)],
-        };
     }
 }

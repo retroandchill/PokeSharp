@@ -12,6 +12,7 @@ namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 [JsonDerivedType(typeof(ListSwapEdit), "ListSwap")]
 [JsonDerivedType(typeof(DictionarySetEntryEdit), "DictionarySetEntry")]
 [JsonDerivedType(typeof(DictionaryRemoveEntryEdit), "DictionaryRemoveEntry")]
+[JsonDerivedType(typeof(OptionalResetEdit), "OptionalResetEdit")]
 public abstract record FieldEdit
 {
     public required FieldPath Path { get; init; }
@@ -61,5 +62,10 @@ public sealed record DictionarySetEntryEdit : FieldEdit
 public sealed record DictionaryRemoveEntryEdit : FieldEdit
 {
     public required JsonNode Key { get; init; }
+    public JsonNode? OriginalValue { get; init; }
+}
+
+public sealed record OptionalResetEdit : FieldEdit
+{
     public JsonNode? OriginalValue { get; init; }
 }

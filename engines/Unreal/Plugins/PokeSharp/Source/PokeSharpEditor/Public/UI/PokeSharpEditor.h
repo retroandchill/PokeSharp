@@ -18,12 +18,10 @@ class POKESHARPEDITOR_API SPokeSharpEditor : public SCompoundWidget
         {
         }
 
-        SLATE_ARGUMENT(TWeakPtr<SDockTab>, Owner)
-
     SLATE_END_ARGS()
 
     /** Constructs this widget with InArgs */
-    void Construct(const FArguments &InArgs);
+    void Construct(const FArguments &InArgs, const TSharedRef<SDockTab> &InOwner);
 
     void RefreshTabs();
 

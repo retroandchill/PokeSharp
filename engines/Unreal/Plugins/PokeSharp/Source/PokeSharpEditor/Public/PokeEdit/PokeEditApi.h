@@ -8,6 +8,7 @@
 namespace PokeEdit
 {
     struct FFieldDefinition;
+    struct FFieldPath;
 
     POKESHARPEDITOR_API extern const TSharedRef<FJsonValue> NoBodyJsonValue;
 

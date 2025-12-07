@@ -48,6 +48,11 @@ namespace PokeEdit
     {
         if (FString Result; Value->TryGetString(Result))
         {
+            if (Result.IsEmpty())
+            {
+                return FText::GetEmpty();
+            }
+
             FText LocalizedText;
             if (!FTextStringHelper::ReadFromBuffer(Result.GetCharArray().GetData(), LocalizedText))
             {

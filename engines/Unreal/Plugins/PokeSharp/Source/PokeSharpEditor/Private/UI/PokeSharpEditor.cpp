@@ -6,7 +6,6 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LogPokeSharpEditor.h"
 #include "PokeEdit/PokeEditApi.h"
-#include "SlateOptMacros.h"
 #include "Styling/AppStyle.h"
 #include "UI/Components/DefaultEditorPage.h"
 #include "Widgets/Input/SButton.h"
@@ -15,10 +14,9 @@
 #include "Widgets/Layout/SUniformWrapPanel.h"
 #include "Widgets/Text/STextBlock.h"
 
-void SPokeSharpEditor::Construct(const FArguments &InArgs)
+void SPokeSharpEditor::Construct(const FArguments &InArgs, const TSharedRef<SDockTab> &InOwner)
 {
-    Owner = InArgs._Owner;
-
+    Owner = InOwner;
     // clang-format off
     ChildSlot
     [
@@ -117,7 +115,7 @@ void SPokeSharpEditor::RebuildCurrentTabContent()
 
     // In the future: ask C# what kind of page this tab wants (dockable vs simple).
     // For now: always build the default data editor page.
-    ContentArea->SetContent(SNew(SDefaultEditorPage).TabId(CurrentTab).OuterTab(Owner));
+    ContentArea->SetContent(SNew(SDefaultEditorPage, Owner.Pin().ToSharedRef()).TabId(CurrentTab));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

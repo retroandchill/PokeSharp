@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h"
 #include "JsonSerializer.h"
+#include <bit>
 
 namespace PokeEdit
 {
@@ -67,14 +68,11 @@ namespace PokeEdit
             requires std::convertible_to<T, MemberType>
         static constexpr void SetMember(OwnerType &Owner, T &&Value)
         {
+            const auto BaseAddr = reinterpret_cast<std::uintptr_t>(&Owner);
+            const auto FieldAddr = reinterpret_cast<std::uintptr_t>(&(Owner.*Member));
+            const auto Offset = FieldAddr - BaseAddr;
+            UE_LOG(LogTemp, Warning, TEXT("Offset is %llu"), Offset)
             Owner.*Member = Forward<T>(Value);
-        }
-
-        template <typename T>
-            requires std::convertible_to<T, MemberType>
-        static constexpr void SetMember(const TSharedRef<OwnerType> &Owner, T &&Value)
-        {
-            SetMember(*Owner, Forward<T>(Value));
         }
 
         template <typename... A>
@@ -82,13 +80,6 @@ namespace PokeEdit
         static constexpr void EmplaceMember(OwnerType &Owner, A &&...Args)
         {
             Owner.*Member = MemberType(Forward<A>(Args)...);
-        }
-
-        template <typename... A>
-            requires std::constructible_from<MemberType, A...>
-        static constexpr void EmplaceMember(const TSharedRef<OwnerType> &Owner, A &&...Args)
-        {
-            EmplaceMember(*Owner, Forward<A>(Args)...);
         }
     };
 
@@ -309,7 +300,7 @@ namespace PokeEdit
                     TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
                 if (Deserialized.has_value())
                 {
-                    F::SetMember(TJsonObjectContainer<T>::GetMutableObjectRef(Result), MoveTemp(Deserialized.value()));
+                    F::SetMember(TJsonObjectContainer<T>::GetMutableObjectRef(Result), MoveTemp(Deserialized).value());
                 }
                 else
                 {
@@ -656,7 +647,7 @@ namespace PokeEdit
                 });
             check(Result.IsSet());
 
-            auto [DiscriminatorValue, KeyName] = MoveTemp(Result.GetValue());
+            auto &[DiscriminatorValue, KeyName] = Result.GetValue();
 
             const auto JsonObject = Result->first->AsObject();
             JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName),

@@ -5,7 +5,7 @@ using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
-[JsonPolymorphic]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(PropertySegment), "Property")]
 [JsonDerivedType(typeof(ListIndexSegment), "ListIndex")]
 [JsonDerivedType(typeof(DictionaryKeySegment), "DictionaryKey")]

@@ -44,7 +44,7 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
         protected init;
     }
 
-    private ImmutableArray<T> _entries = [];
+    private ImmutableArray<T> _entries = [.. T.Entities];
 
     public void SyncFromSource()
     {
@@ -72,7 +72,7 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
         }
 
         var index = indexSegment.Index;
-        return index < _entries.Length && index > 0
+        return index < _entries.Length && index >= 0
             ? _type.GetDefinition(_entries[index], indexSegment, _type, path[1..], options)
             : throw new InvalidOperationException($"Cannot find index {index} in collection.");
     }

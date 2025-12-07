@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FieldPath.h"
 #include "JsonSerializer.h"
 #include "OptionSourceDefinition.h"
 
@@ -41,7 +42,7 @@ namespace PokeEdit
         virtual ~FFieldDefinition() = default;
         virtual EFieldKind GetKind() const = 0;
 
-        FName FieldId;
+        FFieldPathSegment FieldId;
         FText Label;
         FText Tooltip;
         FText Category;
@@ -49,25 +50,28 @@ namespace PokeEdit
         bool IsDefaultValue = false;
 
       protected:
-        FFieldDefinition(const FName InFieldId, FText InLabel) : FieldId(InFieldId), Label(MoveTemp(InLabel))
+        FFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FieldId(MoveTemp(InFieldId)), Label(MoveTemp(InLabel))
         {
         }
-
-        constexpr static auto BaseFieldsRequired =
-            std::make_tuple(TJsonField<&FFieldDefinition::FieldId>(TEXT("fieldId")),
-                            TJsonField<&FFieldDefinition::Label>(TEXT("label")));
-
-        constexpr static auto BaseFieldsOptional =
-            std::make_tuple(TJsonField<&FFieldDefinition::Tooltip>(TEXT("tooltip")),
-                            TJsonField<&FFieldDefinition::Category>(TEXT("category")),
-                            TJsonField<&FFieldDefinition::IsDefaultValue>(TEXT("isDefaultValue")));
     };
+
+    // There's some strange behavior when defining these in the body of a class that has a VTable where all the offsets
+    // are off by 8, so moving this here fixes that
+    constexpr static auto FieldDefinitionRequired = std::make_tuple(
+        TJsonField<&FFieldDefinition::FieldId>(TEXT("fieldId")), TJsonField<&FFieldDefinition::Label>(TEXT("label")));
+
+    constexpr static auto FieldDefinitionOptional =
+        std::make_tuple(TJsonField<&FFieldDefinition::Tooltip>(TEXT("tooltip")),
+                        TJsonField<&FFieldDefinition::Category>(TEXT("category")),
+                        TJsonField<&FFieldDefinition::IsDefaultValue>(TEXT("isDefaultValue")));
 
     struct FBoolFieldDefinition final : FFieldDefinition
     {
         bool CurrentValue = false;
 
-        FBoolFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FBoolFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -77,14 +81,15 @@ namespace PokeEdit
         }
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FBoolFieldDefinition>, BaseFieldsRequired,
-            std::tuple_cat(BaseFieldsOptional,
+            std::in_place_type<FBoolFieldDefinition>, FieldDefinitionRequired,
+            std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FBoolFieldDefinition::CurrentValue>(TEXT("currentValue")))));
     };
 
     struct FTextFieldDefinition final : FFieldDefinition
     {
-        FTextFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FTextFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -101,8 +106,8 @@ namespace PokeEdit
         FString CurrentValue;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FTextFieldDefinition>, BaseFieldsRequired,
-            std::tuple_cat(BaseFieldsOptional,
+            std::in_place_type<FTextFieldDefinition>, FieldDefinitionRequired,
+            std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FTextFieldDefinition::MaxLength>(TEXT("maxLength")),
                                            TJsonField<&FTextFieldDefinition::Regex>(TEXT("regex")),
                                            TJsonField<&FTextFieldDefinition::AllowEmpty>(TEXT("allowEmpty")),
@@ -115,7 +120,8 @@ namespace PokeEdit
         requires std::is_arithmetic_v<T>
     struct TNumberFieldDefinition final : FFieldDefinition
     {
-        TNumberFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        TNumberFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -175,8 +181,8 @@ namespace PokeEdit
         T CurrentValue = 0;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<TNumberFieldDefinition>, BaseFieldsRequired,
-            std::tuple_cat(BaseFieldsOptional,
+            std::in_place_type<TNumberFieldDefinition>, FieldDefinitionRequired,
+            std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&TNumberFieldDefinition::MinValue>(TEXT("minValue")),
                                            TJsonField<&TNumberFieldDefinition::MaxValue>(TEXT("maxValue")),
                                            TJsonField<&TNumberFieldDefinition::Step>(TEXT("step")),
@@ -186,9 +192,10 @@ namespace PokeEdit
 
     struct FChoiceFieldDefinition final : FFieldDefinition
     {
-        FChoiceFieldDefinition(const FName InFieldId, FText InLabel, FOptionSourceDefinition InOptions,
+        FChoiceFieldDefinition(FFieldPathSegment InFieldId, FText InLabel, FOptionSourceDefinition InOptions,
                                const TSharedRef<FJsonValue> &InCurrentValue)
-            : FFieldDefinition(InFieldId, MoveTemp(InLabel)), Options(MoveTemp(InOptions)), CurrentValue(InCurrentValue)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel)), Options(MoveTemp(InOptions)),
+              CurrentValue(InCurrentValue)
         {
         }
 
@@ -203,16 +210,17 @@ namespace PokeEdit
 
         constexpr static auto JsonSchema = TJsonObjectType(
             std::in_place_type<FChoiceFieldDefinition>,
-            std::tuple_cat(BaseFieldsRequired,
+            std::tuple_cat(FieldDefinitionRequired,
                            std::make_tuple(TJsonField<&FChoiceFieldDefinition::Options>(TEXT("options")),
                                            TJsonField<&FChoiceFieldDefinition::CurrentValue>(TEXT("currentValue")))),
-            std::tuple_cat(BaseFieldsOptional,
+            std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FChoiceFieldDefinition::AllowNone>(TEXT("allowNone")))));
     };
 
     struct FObjectFieldDefinition final : FFieldDefinition
     {
-        FObjectFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FObjectFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -224,8 +232,8 @@ namespace PokeEdit
         TArray<TSharedRef<FFieldDefinition>> Fields;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FObjectFieldDefinition>, BaseFieldsRequired,
-            std::tuple_cat(BaseFieldsOptional,
+            std::in_place_type<FObjectFieldDefinition>, FieldDefinitionRequired,
+            std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FObjectFieldDefinition::Fields>(TEXT("fields")))));
     };
 
@@ -236,13 +244,13 @@ namespace PokeEdit
         TOptional<int32> MaxSize;
 
       protected:
-        FCollectionFieldDefinition(const FName InFieldId, FText InLabel)
-            : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FCollectionFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
         constexpr static auto BaseFieldsOptional =
-            std::tuple_cat(FFieldDefinition::BaseFieldsOptional,
+            std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FCollectionFieldDefinition::FixedSize>(TEXT("fixedSize")),
                                            TJsonField<&FCollectionFieldDefinition::MinSize>(TEXT("minSize")),
                                            TJsonField<&FCollectionFieldDefinition::MaxSize>(TEXT("maxSize"))));
@@ -250,8 +258,8 @@ namespace PokeEdit
 
     struct FListFieldDefinition final : FCollectionFieldDefinition
     {
-        FListFieldDefinition(const FName InFieldId, FText InLabel)
-            : FCollectionFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FListFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FCollectionFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -263,7 +271,7 @@ namespace PokeEdit
         TArray<TSharedRef<FFieldDefinition>> ItemFields;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FListFieldDefinition>, BaseFieldsRequired,
+            std::in_place_type<FListFieldDefinition>, FieldDefinitionRequired,
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FListFieldDefinition::ItemFields>(TEXT("itemFields")))));
     };
@@ -282,13 +290,13 @@ namespace PokeEdit
         constexpr static auto JsonSchema =
             TJsonObjectType(std::in_place_type<FDictionaryFieldPair>,
                             std::make_tuple(TJsonField<&FDictionaryFieldPair::KeyField>(TEXT("keyField")),
-                                            TJsonField<&FDictionaryFieldPair::KeyField>(TEXT("valueField"))));
+                                            TJsonField<&FDictionaryFieldPair::ValueField>(TEXT("valueField"))));
     };
 
     struct FDictionaryFieldDefinition final : FCollectionFieldDefinition
     {
-        FDictionaryFieldDefinition(const FName InFieldId, FText InLabel)
-            : FCollectionFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FDictionaryFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FCollectionFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -300,14 +308,15 @@ namespace PokeEdit
         TArray<FDictionaryFieldPair> Pairs;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FDictionaryFieldDefinition>, BaseFieldsRequired,
+            std::in_place_type<FDictionaryFieldDefinition>, FieldDefinitionRequired,
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FDictionaryFieldDefinition::Pairs>(TEXT("pairs")))));
     };
 
     struct FOptionalFieldDefinition final : FFieldDefinition
     {
-        FOptionalFieldDefinition(const FName InFieldId, FText InLabel) : FFieldDefinition(InFieldId, MoveTemp(InLabel))
+        FOptionalFieldDefinition(FFieldPathSegment InFieldId, FText InLabel)
+            : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel))
         {
         }
 
@@ -319,9 +328,9 @@ namespace PokeEdit
         TSharedPtr<FFieldDefinition> ValueField;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FOptionalFieldDefinition>, BaseFieldsRequired,
-            std::tuple_cat(BaseFieldsOptional, std::make_tuple(TJsonField<&FOptionalFieldDefinition::ValueField>(
-                                                   TEXT("valueDefinition")))));
+            std::in_place_type<FOptionalFieldDefinition>, FieldDefinitionRequired,
+            std::tuple_cat(FieldDefinitionOptional, std::make_tuple(TJsonField<&FOptionalFieldDefinition::ValueField>(
+                                                        TEXT("valueDefinition")))));
     };
 
     template <>
@@ -329,23 +338,23 @@ namespace PokeEdit
     {
         static constexpr auto JsonSchema =
             TJsonUnionType(TJsonDiscriminator<&FFieldDefinition::GetKind>(),
-                           TJsonUnionKey<FBoolFieldDefinition, EFieldKind::Text>(TEXT("Bool")),
+                           TJsonUnionKey<FBoolFieldDefinition, EFieldKind::Bool>(TEXT("Bool")),
                            TJsonUnionKey<FTextFieldDefinition, EFieldKind::Text>(TEXT("Text")),
-                           TJsonUnionKey<TNumberFieldDefinition<int8>, EFieldKind::Text>(TEXT("Int8")),
-                           TJsonUnionKey<TNumberFieldDefinition<int16>, EFieldKind::Text>(TEXT("Int16")),
-                           TJsonUnionKey<TNumberFieldDefinition<int32>, EFieldKind::Text>(TEXT("Int32")),
-                           TJsonUnionKey<TNumberFieldDefinition<int64>, EFieldKind::Text>(TEXT("Int64")),
-                           TJsonUnionKey<TNumberFieldDefinition<uint8>, EFieldKind::Text>(TEXT("UInt8")),
-                           TJsonUnionKey<TNumberFieldDefinition<uint16>, EFieldKind::Text>(TEXT("UInt16")),
-                           TJsonUnionKey<TNumberFieldDefinition<uint32>, EFieldKind::Text>(TEXT("UInt32")),
-                           TJsonUnionKey<TNumberFieldDefinition<uint64>, EFieldKind::Text>(TEXT("UInt64")),
-                           TJsonUnionKey<TNumberFieldDefinition<float>, EFieldKind::Text>(TEXT("Float")),
-                           TJsonUnionKey<TNumberFieldDefinition<double>, EFieldKind::Text>(TEXT("Double")),
-                           TJsonUnionKey<FChoiceFieldDefinition, EFieldKind::Text>(TEXT("Choice")),
-                           TJsonUnionKey<FObjectFieldDefinition, EFieldKind::Text>(TEXT("Object")),
-                           TJsonUnionKey<FListFieldDefinition, EFieldKind::Text>(TEXT("List")),
-                           TJsonUnionKey<FDictionaryFieldDefinition, EFieldKind::Text>(TEXT("Dictionary")),
-                           TJsonUnionKey<FOptionalFieldDefinition, EFieldKind::Text>(TEXT("Optional")));
+                           TJsonUnionKey<TNumberFieldDefinition<int8>, EFieldKind::Int8>(TEXT("Int8")),
+                           TJsonUnionKey<TNumberFieldDefinition<int16>, EFieldKind::Int16>(TEXT("Int16")),
+                           TJsonUnionKey<TNumberFieldDefinition<int32>, EFieldKind::Int32>(TEXT("Int32")),
+                           TJsonUnionKey<TNumberFieldDefinition<int64>, EFieldKind::Int64>(TEXT("Int64")),
+                           TJsonUnionKey<TNumberFieldDefinition<uint8>, EFieldKind::UInt8>(TEXT("UInt8")),
+                           TJsonUnionKey<TNumberFieldDefinition<uint16>, EFieldKind::UInt16>(TEXT("UInt16")),
+                           TJsonUnionKey<TNumberFieldDefinition<uint32>, EFieldKind::UInt32>(TEXT("UInt32")),
+                           TJsonUnionKey<TNumberFieldDefinition<uint64>, EFieldKind::UInt64>(TEXT("UInt64")),
+                           TJsonUnionKey<TNumberFieldDefinition<float>, EFieldKind::Float>(TEXT("Float")),
+                           TJsonUnionKey<TNumberFieldDefinition<double>, EFieldKind::Double>(TEXT("Double")),
+                           TJsonUnionKey<FChoiceFieldDefinition, EFieldKind::Choice>(TEXT("Choice")),
+                           TJsonUnionKey<FObjectFieldDefinition, EFieldKind::Object>(TEXT("Object")),
+                           TJsonUnionKey<FListFieldDefinition, EFieldKind::List>(TEXT("List")),
+                           TJsonUnionKey<FDictionaryFieldDefinition, EFieldKind::Dictionary>(TEXT("Dictionary")),
+                           TJsonUnionKey<FOptionalFieldDefinition, EFieldKind::Optional>(TEXT("Optional")));
     };
 
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FFieldDefinition>>;

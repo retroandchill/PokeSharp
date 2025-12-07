@@ -5,15 +5,16 @@
 #include "LogPokeSharpEditor.h"
 #include "Mcro/CommonCore.h"
 #include "PokeEdit/PokeEditApi.h"
+#include "UI/Components/GameDataEntryDetails.h"
 #include "UI/Components/GameDataEntrySelector.h"
 #include "Widgets/Docking/SDockTab.h"
 
-void SDefaultEditorPage::Construct(const FArguments &InArgs)
+void SDefaultEditorPage::Construct(const FArguments &InArgs, const TSharedRef<SDockTab> &InOuterTab)
 {
     TabId = InArgs._TabId.Get();
-    OuterTab = InArgs._OuterTab;
+    OuterTab = InOuterTab;
 
-    InnerTabManager = FGlobalTabmanager::Get()->NewTabManager(OuterTab.Pin().ToSharedRef());
+    InnerTabManager = FGlobalTabmanager::Get()->NewTabManager(InOuterTab);
 
     // Register spawners for inner tabs
     InnerTabManager->RegisterTabSpawner("PokeSharp_Entries",
@@ -75,10 +76,16 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
                     UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching entry labels: %s"), *Result.error());
                     return TArray<TSharedPtr<FEntryRowData>>();
                 }))
-                .OnEntrySelected(FOnEntrySelected::CreateLambda(
-                    [TabId = this->TabId](const TSharedPtr<FEntryRowData> &Entry) 
+                .OnEntrySelected(FOnEntrySelected::CreateSPLambda(this,
+                    [this](const TSharedPtr<FEntryRowData> &Entry) 
                     {
-                                       // TODO: notify C# view-model that Entry was selected for TabId
+                        if (Entry == nullptr)
+                        {
+                            Details->ClearEntryPath();
+                            return;
+                        }
+                        
+                        Details->SetEntryPath(PokeEdit::FFieldPath(PokeEdit::FPropertySegment(TabId), PokeEdit::FListIndexSegment(Entry->Index)));
                     }))
         ];
     // clang-format on
@@ -91,12 +98,7 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnDetailsTab(const FSpawnTabArgs &Ar
         .Label(NSLOCTEXT("SDefaultEditorPage", "DetailsTabLabel", "Details"))
         .TabRole(PanelTab)
         [
-            // TODO: replace with your real details widget driven by the C# view-model
-            SNew(SBorder)
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString(TEXT("Details panel goes here")))
-            ]
+            SAssignNew(Details, SGameDataEntryDetails)
         ];
     // clang-format on
 }

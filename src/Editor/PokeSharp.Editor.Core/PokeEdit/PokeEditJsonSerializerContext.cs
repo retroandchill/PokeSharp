@@ -6,7 +6,11 @@ using PokeSharp.Editor.Core.PokeEdit.Schema;
 namespace PokeSharp.Editor.Core.PokeEdit;
 
 [RegisterSingleton(Factory = nameof(Default))]
-[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+[JsonSourceGenerationOptions(
+    WriteIndented = true, 
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    AllowOutOfOrderMetadataProperties = true
+)]
 [JsonSerializable(typeof(FieldDefinition))]
 [JsonSerializable(typeof(FieldPath))]
 [JsonSerializable(typeof(FieldEdit))]

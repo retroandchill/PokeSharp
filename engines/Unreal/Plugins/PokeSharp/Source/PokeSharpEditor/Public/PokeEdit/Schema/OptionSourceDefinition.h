@@ -52,30 +52,6 @@ namespace PokeEdit
     using FOptionSourceDefinition = TVariant<FStaticOptionSourceDefinition, FDynamicOptionSourceDefinition>;
 
     template <>
-    struct POKESHARPEDITOR_API TJsonConverter<FOptionItemDefinition>
-    {
-        static TValueOrError<FOptionItemDefinition, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-
-        static TSharedRef<FJsonValue> Serialize(const FOptionItemDefinition &Value);
-    };
-
-    template <>
-    struct POKESHARPEDITOR_API TJsonConverter<FStaticOptionSourceDefinition>
-    {
-        static TValueOrError<FStaticOptionSourceDefinition, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-
-        static TSharedRef<FJsonValue> Serialize(const FStaticOptionSourceDefinition &Value);
-    };
-
-    template <>
-    struct POKESHARPEDITOR_API TJsonConverter<FDynamicOptionSourceDefinition>
-    {
-        static TValueOrError<FDynamicOptionSourceDefinition, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-
-        static TSharedRef<FJsonValue> Serialize(const FDynamicOptionSourceDefinition &Value);
-    };
-
-    template <>
     struct TJsonUnionTraits<FOptionSourceDefinition>
     {
         static constexpr auto JsonSchema = TJsonUnionType(
@@ -86,11 +62,8 @@ namespace PokeEdit
                           FOptionSourceDefinition::IndexOfType<FDynamicOptionSourceDefinition>()>(TEXT("Dynamic")));
     };
 
-    template <>
-    struct POKESHARPEDITOR_API TJsonConverter<FOptionSourceDefinition>
-    {
-        static TValueOrError<FOptionSourceDefinition, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-
-        static TSharedRef<FJsonValue> Serialize(const FOptionSourceDefinition &Value);
-    };
+    template struct POKESHARPEDITOR_API TJsonConverter<FOptionItemDefinition>;
+    template struct POKESHARPEDITOR_API TJsonConverter<FStaticOptionSourceDefinition>;
+    template struct POKESHARPEDITOR_API TJsonConverter<FDynamicOptionSourceDefinition>;
+    template struct POKESHARPEDITOR_API TJsonConverter<FOptionSourceDefinition>;
 } // namespace PokeEdit

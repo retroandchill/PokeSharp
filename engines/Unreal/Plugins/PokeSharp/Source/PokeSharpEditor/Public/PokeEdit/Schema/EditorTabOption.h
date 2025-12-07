@@ -20,11 +20,5 @@ namespace PokeEdit
                                                                   TJsonField<&FEditorTabOption::Name>(TEXT("name"))));
     };
 
-    template <>
-    struct POKESHARPEDITOR_API TJsonConverter<FEditorTabOption>
-    {
-        static TValueOrError<FEditorTabOption, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-
-        static TSharedRef<FJsonValue> Serialize(const FEditorTabOption &Value);
-    };
+    template struct POKESHARPEDITOR_API TJsonConverter<FEditorTabOption>;
 } // namespace PokeEdit

@@ -48,44 +48,8 @@ namespace PokeEdit
         return NullOpt;
     }
 
-    TValueOrError<TSharedRef<FFieldDefinition>, FString> TJsonConverter<TSharedRef<FFieldDefinition>>::Deserialize(
-        const TSharedRef<FJsonValue> &Value)
-    {
-        return TJsonUnionConverter<TSharedRef<FFieldDefinition>>::Deserialize(Value);
-    }
-
-    TSharedRef<FJsonValue> TJsonConverter<TSharedRef<FFieldDefinition>>::Serialize(
-        const TSharedRef<FFieldDefinition> &Value)
-    {
-        return TJsonUnionConverter<TSharedRef<FFieldDefinition>>::Serialize(Value);
-    }
-
-    TValueOrError<FDictionaryFieldPair, FString> TJsonConverter<FDictionaryFieldPair>::Deserialize(
-        const TSharedRef<FJsonValue> &Value)
-    {
-        return TJsonObjectConverter<FDictionaryFieldPair>::Deserialize(Value);
-    }
-
-    TSharedRef<FJsonValue> TJsonConverter<FDictionaryFieldPair>::Serialize(const FDictionaryFieldPair &Value)
-    {
-        return TJsonObjectConverter<FDictionaryFieldPair>::Serialize(Value);
-    }
-
-    template <std::derived_from<FFieldDefinition> T>
-        requires(!std::same_as<T, FFieldDefinition>)
-    TValueOrError<TSharedRef<T>, FString> TJsonConverter<TSharedRef<T>>::Deserialize(
-        const TSharedRef<FJsonValue> &Value)
-    {
-        return TJsonObjectConverter<TSharedRef<T>>::Deserialize(Value);
-    }
-
-    template <std::derived_from<FFieldDefinition> T>
-        requires(!std::same_as<T, FFieldDefinition>)
-    TSharedRef<FJsonValue> TJsonConverter<TSharedRef<T>>::Serialize(const TSharedRef<T> &Value)
-    {
-        return TJsonObjectConverter<TSharedRef<T>>::Serialize(Value);
-    }
-
+    template struct TJsonConverter<TSharedRef<FFieldDefinition>>;
+    template struct TJsonConverter<FDictionaryFieldPair>;
     template struct TJsonConverter<TSharedRef<FBoolFieldDefinition>>;
     template struct TJsonConverter<TSharedRef<FTextFieldDefinition>>;
     template struct TJsonConverter<TSharedRef<TNumberFieldDefinition<int8>>>;

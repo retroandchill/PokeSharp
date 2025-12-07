@@ -296,32 +296,8 @@ namespace PokeEdit
                            TJsonUnionKey<FOptionalFieldDefinition, EFieldKind::Text>(TEXT("Optional")));
     };
 
-    template <>
-    struct TJsonConverter<TSharedRef<FFieldDefinition>>
-    {
-        POKESHARPEDITOR_API static TValueOrError<TSharedRef<FFieldDefinition>, FString> Deserialize(
-            const TSharedRef<FJsonValue> &Value);
-
-        POKESHARPEDITOR_API static TSharedRef<FJsonValue> Serialize(const TSharedRef<FFieldDefinition> &Value);
-    };
-
-    template <>
-    struct TJsonConverter<FDictionaryFieldPair>
-    {
-        POKESHARPEDITOR_API static TValueOrError<FDictionaryFieldPair, FString> Deserialize(
-            const TSharedRef<FJsonValue> &Value);
-
-        POKESHARPEDITOR_API static TSharedRef<FJsonValue> Serialize(const FDictionaryFieldPair &Value);
-    };
-
-    template <std::derived_from<FFieldDefinition> T>
-        requires(!std::same_as<T, FFieldDefinition>)
-    struct TJsonConverter<TSharedRef<T>>
-    {
-        static TValueOrError<TSharedRef<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-        static TSharedRef<FJsonValue> Serialize(const TSharedRef<T> &Value);
-    };
-
+    template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FFieldDefinition>>;
+    template struct POKESHARPEDITOR_API TJsonConverter<FDictionaryFieldPair>;
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FBoolFieldDefinition>>;
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FTextFieldDefinition>>;
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<TNumberFieldDefinition<int8>>>;

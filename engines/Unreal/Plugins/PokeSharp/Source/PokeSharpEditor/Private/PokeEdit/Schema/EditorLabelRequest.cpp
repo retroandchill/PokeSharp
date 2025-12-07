@@ -4,14 +4,5 @@
 
 namespace PokeEdit
 {
-    TValueOrError<FEditorLabelRequest, FString> TJsonConverter<FEditorLabelRequest>::Deserialize(
-        const TSharedRef<FJsonValue> &Value)
-    {
-        return TJsonObjectConverter<FEditorLabelRequest>::Deserialize(Value);
-    }
-
-    TSharedRef<FJsonValue> TJsonConverter<FEditorLabelRequest>::Serialize(const FEditorLabelRequest &Value)
-    {
-        return TJsonObjectConverter<FEditorLabelRequest>::Serialize(Value);
-    }
+    template struct TJsonConverter<FEditorLabelRequest>;
 } // namespace PokeEdit

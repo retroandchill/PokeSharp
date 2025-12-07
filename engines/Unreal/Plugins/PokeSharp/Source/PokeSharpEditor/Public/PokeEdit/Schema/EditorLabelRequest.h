@@ -23,11 +23,6 @@ namespace PokeEdit
                             std::make_tuple(TJsonField<&FEditorLabelRequest::EditorId>(TEXT("editorId"))));
     };
 
-    template <>
-    struct POKESHARPEDITOR_API TJsonConverter<FEditorLabelRequest>
-    {
-        static TValueOrError<FEditorLabelRequest, FString> Deserialize(const TSharedRef<FJsonValue> &Value);
-
-        static TSharedRef<FJsonValue> Serialize(const FEditorLabelRequest &Value);
-    };
+    static_assert(TValidJsonObjectContainer<FEditorLabelRequest>);
+    template struct POKESHARPEDITOR_API TJsonConverter<FEditorLabelRequest>;
 } // namespace PokeEdit

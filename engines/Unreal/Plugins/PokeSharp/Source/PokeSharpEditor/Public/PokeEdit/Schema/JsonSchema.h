@@ -245,22 +245,8 @@ namespace PokeEdit
     template <typename T>
     concept TValidJsonObjectContainer = TJsonObjectContainer<T>::IsValid;
 
-    /**
-     * Template meta-type used to define if an object type can be converted either to or from JSON.<br>
-     * This is similar to TJsonConverter, but is distinct to allow for the conversion symbols to be defined only one
-     * and then linked.<br>
-     * To define a custom converter, create a template specialization for the target type and implement the
-     * following two methods:
-     * - static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue>& Value);
-     * - static TSharedRef<FJsonValue> Deserialize(const T& Value);
-     *
-     * @tparam T The type convert.
-     */
-    template <typename T>
-    struct TJsonObjectConverter;
-
     template <TValidJsonObjectContainer T>
-    struct TJsonObjectConverter<T>
+    struct TJsonConverter<T>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -585,21 +571,6 @@ namespace PokeEdit
     };
 
     /**
-    /**
-     * Template meta-type used to define if a discriminated union type can be converted either to or from JSON.<br>
-     * This is similar to TJsonConverter, but is distinct to allow for the conversion symbols to be defined only one
-     * and then linked.<br>
-     * To define a custom converter, create a template specialization for the target type and implement the
-     * following two methods:
-     * - static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue>& Value);
-     * - static TSharedRef<FJsonValue> Deserialize(const T& Value);
-     *
-     * @tparam T The type convert.
-     */
-    template <typename T>
-    struct TJsonUnionConverter;
-
-    /**
      * JSON converter for discriminated unions that are represented by TVariant.
      *
      * @tparam T The variant type
@@ -608,7 +579,7 @@ namespace PokeEdit
         requires TJsonUnion<T> && TVariantType<T> &&
                  std::same_as<typename std::decay_t<decltype(TJsonUnionTraits<T>::JsonSchema)>::DiscriminatorType,
                               SIZE_T>
-    struct TJsonUnionConverter<T>
+    struct TJsonConverter<T>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -709,7 +680,7 @@ namespace PokeEdit
      */
     template <typename T>
         requires TJsonUnion<T> && !TVariantType<T>
-                              struct TJsonUnionConverter<TSharedRef<T>>
+    struct TJsonConverter<TSharedRef<T>>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.

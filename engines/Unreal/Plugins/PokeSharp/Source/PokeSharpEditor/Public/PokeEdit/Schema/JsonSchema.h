@@ -257,7 +257,8 @@ namespace PokeEdit
             // We first need to gather a tuple of all the required members, and so long as they are all set (which would
             // also mean no-errors), we can then apply that transformation to construct the object.
             auto RequiredMembers = TJsonObjectContainer<T>::JsonSchema.ForEachRequiredField(
-                [&Errors, &JsonObject]<typename F>(const F &Field) {
+                [&Errors, &JsonObject]<typename F>(const F &Field)
+                {
                     const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
                     if (FieldValue == nullptr)
                     {
@@ -282,31 +283,32 @@ namespace PokeEdit
                 return std::unexpected(FString::Join(Errors, TEXT("\n")));
             }
 
-            auto Result = std::apply(
-                [](const auto &...Field) {
-                    return TJsonObjectContainer<T>::CreateObject(MoveTempIfPossible(Field.GetValue())...);
-                },
-                RequiredMembers);
+            auto Result =
+                std::apply([](const auto &...Field)
+                           { return TJsonObjectContainer<T>::CreateObject(MoveTempIfPossible(Field.GetValue())...); },
+                           RequiredMembers);
 
             // Now that we constructed the object from the required fields, loop through all the others and set those
             // If any get found.
-            TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField([&Errors, &Result,
-                                                                      &JsonObject]<typename F>(const F &Field) {
-                const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
-                if (FieldValue == nullptr)
-                    return;
+            TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField(
+                [&Errors, &Result, &JsonObject]<typename F>(const F &Field)
+                {
+                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
+                    if (FieldValue == nullptr)
+                        return;
 
-                std::expected<typename F::MemberType, FString> Deserialized =
-                    TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
-                if (Deserialized.has_value())
-                {
-                    F::SetMember(TJsonObjectContainer<T>::GetMutableObjectRef(Result), MoveTemp(Deserialized).value());
-                }
-                else
-                {
-                    Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Deserialized.error()}));
-                }
-            });
+                    std::expected<typename F::MemberType, FString> Deserialized =
+                        TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
+                    if (Deserialized.has_value())
+                    {
+                        F::SetMember(TJsonObjectContainer<T>::GetMutableObjectRef(Result),
+                                     MoveTemp(Deserialized).value());
+                    }
+                    else
+                    {
+                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Deserialized.error()}));
+                    }
+                });
 
             if (Errors.Num() > 0)
             {
@@ -325,10 +327,12 @@ namespace PokeEdit
         static TSharedRef<FJsonValue> Serialize(const T &Value)
         {
             auto JsonObject = MakeShared<FJsonObject>();
-            TJsonObjectContainer<T>::JsonSchema.ForEachField([&Value, &JsonObject]<typename F>(const F &Field) {
-                JsonObject->SetField(FString(Field.Name),
-                                     TJsonConverter<typename F::MemberType>::Serialize(F::GetMember(Value)));
-            });
+            TJsonObjectContainer<T>::JsonSchema.ForEachField(
+                [&Value, &JsonObject]<typename F>(const F &Field)
+                {
+                    JsonObject->SetField(FString(Field.Name),
+                                         TJsonConverter<typename F::MemberType>::Serialize(F::GetMember(Value)));
+                });
 
             return MakeShared<FJsonValueObject>(JsonObject);
         }
@@ -499,8 +503,9 @@ namespace PokeEdit
             return GetDiscriminatorValue(*Owner);
         }
 
-        template <typename F, typename T = std::decay_t<
-                                  std::invoke_result_t<F, const std::tuple_element_t<0, std::tuple<Members...>> &>>>
+        template <
+            typename F,
+            typename T = std::decay_t<std::invoke_result_t<F, const std::tuple_element_t<0, std::tuple<Members...>> &>>>
             requires((std::invocable<F, const Members &> &&
                       std::same_as<std::invoke_result_t<F, const Members &>, T>) &&
                      ...)
@@ -512,7 +517,8 @@ namespace PokeEdit
             // C++ 26 is supported.
             T Result;
             std::apply(
-                [&](const auto &...Field) {
+                [&](const auto &...Field)
+                {
                     (..., (Result.IsSet() ? void() : [&] {
                          if (auto IntermediateResult = std::invoke(Func, Field); IntermediateResult.IsSet())
                          {
@@ -593,33 +599,38 @@ namespace PokeEdit
             }
 
             return TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef())
-                .transform_error([](const FString &Error) {
-                    return FString::Format(TEXT("Field '{0}': {1}"),
-                                           {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
-                })
-                .and_then([&Value](const FString &Discriminator) -> std::expected<T, FString> {
-                    // We are going to scan through all the discriminators and find the first once that matches.
-                    // Once a set optional is returned, we end up skipping all other calls to the callback.
-                    TOptional<std::expected<T, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                        [&Value, &Discriminator]<typename F>(const F &Field) -> TOptional<std::expected<T, FString>> {
-                            if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
-                            {
-                                return TJsonConverter<typename F::ObjectType>::Deserialize(Value).transform(
-                                    [](typename F::ObjectType &&Deserialized) -> T {
-                                        return T(TInPlaceType<typename F::ObjectType>(), MoveTemp(Deserialized));
-                                    });
-                            }
-
-                            return NullOpt;
-                        });
-
-                    if (Result.IsSet())
+                .transform_error(
+                    [](const FString &Error)
                     {
-                        return Result.GetValue();
-                    }
+                        return FString::Format(TEXT("Field '{0}': {1}"),
+                                               {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
+                    })
+                .and_then(
+                    [&Value](const FString &Discriminator) -> std::expected<T, FString>
+                    {
+                        // We are going to scan through all the discriminators and find the first once that matches.
+                        // Once a set optional is returned, we end up skipping all other calls to the callback.
+                        TOptional<std::expected<T, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                            [&Value, &Discriminator]<typename F>(const F &Field) -> TOptional<std::expected<T, FString>>
+                            {
+                                if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                                {
+                                    return TJsonConverter<typename F::ObjectType>::Deserialize(Value).transform(
+                                        [](typename F::ObjectType &&Deserialized) -> T
+                                        { return T(TInPlaceType<typename F::ObjectType>(), MoveTemp(Deserialized)); });
+                                }
 
-                    return std::unexpected(FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
-                });
+                                return NullOpt;
+                            });
+
+                        if (Result.IsSet())
+                        {
+                            return Result.GetValue();
+                        }
+
+                        return std::unexpected(
+                            FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
+                    });
         }
 
         /**
@@ -634,7 +645,8 @@ namespace PokeEdit
             // Once a set optional is returned, we end up skipping all other calls to the callback.
             auto CurrentDiscriminator = TJsonUnionTraits<T>::JsonSchema.GetDiscriminatorValue(Value);
             TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                [&CurrentDiscriminator, &Value]<typename F>(const F &Field) {
+                [&CurrentDiscriminator, &Value]<typename F>(const F &Field)
+                {
                     if (Field.DiscriminatorValue == CurrentDiscriminator)
                     {
                         return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(
@@ -689,36 +701,41 @@ namespace PokeEdit
             }
 
             return TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef())
-                .transform_error([](const FString &Error) {
-                    return FString::Format(TEXT("Field '{0}': {1}"),
-                                           {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
-                })
-                .and_then([&Value](const FString &Discriminator) {
-                    // We are going to scan through all the discriminators and find the first once that matches.
-                    // Once a set optional is returned, we end up skipping all other calls to the callback.
-                    TOptional<std::expected<TSharedRef<T>, FString>> Result =
-                        TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                            [&Value, &Discriminator]<typename F>(
-                                const F &Field) -> TOptional<std::expected<TSharedRef<T>, FString>> {
-                                if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
-                                {
-                                    return TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value)
-                                        .transform([](const TSharedRef<typename F::ObjectType> &Deserialized) {
-                                            return StaticCastSharedRef<T>(Deserialized);
-                                        });
-                                }
-
-                                return NullOpt;
-                            });
-
-                    if (Result.IsSet())
+                .transform_error(
+                    [](const FString &Error)
                     {
-                        return Result.GetValue();
-                    }
+                        return FString::Format(TEXT("Field '{0}': {1}"),
+                                               {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
+                    })
+                .and_then(
+                    [&Value](const FString &Discriminator)
+                    {
+                        // We are going to scan through all the discriminators and find the first once that matches.
+                        // Once a set optional is returned, we end up skipping all other calls to the callback.
+                        TOptional<std::expected<TSharedRef<T>, FString>> Result =
+                            TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                                [&Value, &Discriminator]<typename F>(
+                                    const F &Field) -> TOptional<std::expected<TSharedRef<T>, FString>>
+                                {
+                                    if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                                    {
+                                        return TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value)
+                                            .transform([](const TSharedRef<typename F::ObjectType> &Deserialized)
+                                                       { return StaticCastSharedRef<T>(Deserialized); });
+                                    }
 
-                    return std::expected<TSharedRef<T>, FString>(
-                        std::unexpect, FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
-                });
+                                    return NullOpt;
+                                });
+
+                        if (Result.IsSet())
+                        {
+                            return Result.GetValue();
+                        }
+
+                        return std::expected<TSharedRef<T>, FString>(
+                            std::unexpect,
+                            FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
+                    });
         }
 
         /**
@@ -734,7 +751,8 @@ namespace PokeEdit
             // We are going to scan through all the discriminators and find the first once that matches.
             // Once a set optional is returned, we end up skipping all other calls to the callback.
             TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                [&CurrentDiscriminator, &Value]<typename F>(const F &Field) {
+                [&CurrentDiscriminator, &Value]<typename F>(const F &Field)
+                {
                     if (Field.DiscriminatorValue == CurrentDiscriminator)
                     {
                         return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(

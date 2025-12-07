@@ -6,9 +6,13 @@
 void USaveGameToSlotAsync::SaveGameToSlot(const FString &SlotName, const int32 UserIndex, USaveGame *SaveGame)
 {
     UGameplayStatics::AsyncSaveGameToSlot(
-        SaveGame, SlotName, UserIndex,
-        FAsyncSaveGameToSlotDelegate::CreateWeakLambda(this, [this](const FString &, int32, bool bSuccess) {
-            bSucceeded = bSuccess;
-            InvokeManagedCallback();
-        }));
+        SaveGame,
+        SlotName,
+        UserIndex,
+        FAsyncSaveGameToSlotDelegate::CreateWeakLambda(this,
+                                                       [this](const FString &, int32, bool bSuccess)
+                                                       {
+                                                           bSucceeded = bSuccess;
+                                                           InvokeManagedCallback();
+                                                       }));
 }

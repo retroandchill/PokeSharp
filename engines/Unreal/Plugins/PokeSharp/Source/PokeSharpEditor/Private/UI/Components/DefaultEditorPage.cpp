@@ -24,13 +24,14 @@ void SDefaultEditorPage::Construct(const FArguments &InArgs, const TSharedRef<SD
                                         FOnSpawnTab::CreateSP(this, &SDefaultEditorPage::SpawnDetailsTab));
 
     // Define the left/right layout (entries / details)
-    const auto Layout = FTabManager::NewLayout("PokeSharp_InnerLayout_V1")
-                            ->AddArea(FTabManager::NewPrimaryArea()
-                                          ->SetOrientation(Orient_Horizontal)
-                                          ->Split(FTabManager::NewStack()->SetSizeCoefficient(0.3f)->AddTab(
-                                              "PokeSharp_Entries", ETabState::OpenedTab))
-                                          ->Split(FTabManager::NewStack()->SetSizeCoefficient(0.7f)->AddTab(
-                                              "PokeSharp_Details", ETabState::OpenedTab)));
+    const auto Layout =
+        FTabManager::NewLayout("PokeSharp_InnerLayout_V1")
+            ->AddArea(FTabManager::NewPrimaryArea()
+                          ->SetOrientation(Orient_Horizontal)
+                          ->Split(FTabManager::NewStack()->SetSizeCoefficient(0.3f)->AddTab("PokeSharp_Entries",
+                                                                                            ETabState::OpenedTab))
+                          ->Split(FTabManager::NewStack()->SetSizeCoefficient(0.7f)->AddTab("PokeSharp_Details",
+                                                                                            ETabState::OpenedTab)));
 
     // Restore the layout as a widget and use it as our content
     auto Workspace = InnerTabManager->RestoreFrom(Layout,

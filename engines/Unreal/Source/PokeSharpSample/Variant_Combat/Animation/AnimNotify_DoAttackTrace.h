@@ -22,7 +22,8 @@ class UAnimNotify_DoAttackTrace : public UAnimNotify
 
   public:
     /** Perform the Anim Notify */
-    virtual void Notify(USkeletalMeshComponent *MeshComp, UAnimSequenceBase *Animation,
+    virtual void Notify(USkeletalMeshComponent *MeshComp,
+                        UAnimSequenceBase *Animation,
                         const FAnimNotifyEventReference &EventReference) override;
 
     /** Get the notify name */

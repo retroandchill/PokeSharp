@@ -5,8 +5,10 @@
 #include "UI/PrimaryGameLayout.h"
 
 UPushWidgetToLayerAsyncAction *UPushWidgetToLayerAsyncAction::PushWidgetToLayerAsync(
-    APlayerController *OwningPlayer, TSoftClassPtr<UCommonActivatableWidget> InWidgetClass,
-    const FGameplayTag InLayerName, const bool bSuspendInputUntilComplete)
+    APlayerController *OwningPlayer,
+    TSoftClassPtr<UCommonActivatableWidget> InWidgetClass,
+    const FGameplayTag InLayerName,
+    const bool bSuspendInputUntilComplete)
 {
     if (InWidgetClass.IsNull())
     {
@@ -42,22 +44,25 @@ void UPushWidgetToLayerAsyncAction::Activate()
 
     TWeakObjectPtr WeakThis = this;
     StreamingHandle = RootLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(
-        LayerName, bSuspendInputUntilComplete, MoveTemp(WidgetClass),
-        [this, WeakThis](const EAsyncWidgetLayerState State, UCommonActivatableWidget *Widget) {
+        LayerName,
+        bSuspendInputUntilComplete,
+        MoveTemp(WidgetClass),
+        [this, WeakThis](const EAsyncWidgetLayerState State, UCommonActivatableWidget *Widget)
+        {
             if (WeakThis.IsValid())
             {
                 switch (State)
                 {
-                case EAsyncWidgetLayerState::Initialize:
-                    ConfigureWidget.Broadcast(Widget);
-                    break;
-                case EAsyncWidgetLayerState::AfterPush:
-                    OnComplete.Broadcast(Widget);
-                    SetReadyToDestroy();
-                    break;
-                case EAsyncWidgetLayerState::Canceled:
-                    SetReadyToDestroy();
-                    break;
+                    case EAsyncWidgetLayerState::Initialize:
+                        ConfigureWidget.Broadcast(Widget);
+                        break;
+                    case EAsyncWidgetLayerState::AfterPush:
+                        OnComplete.Broadcast(Widget);
+                        SetReadyToDestroy();
+                        break;
+                    case EAsyncWidgetLayerState::Canceled:
+                        SetReadyToDestroy();
+                        break;
                 }
             }
             SetReadyToDestroy();

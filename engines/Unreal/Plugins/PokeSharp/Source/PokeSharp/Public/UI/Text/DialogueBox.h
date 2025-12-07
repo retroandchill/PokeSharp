@@ -121,13 +121,21 @@ class POKESHARP_API UDialogueBox : public UCommonUserWidget
     TObjectPtr<UDialogueTextBlock> LineText;
 
     // The amount of time between printing individual letters (for the "typewriter" effect).
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Getter, Setter, Category = "Dialogue Box",
+    UPROPERTY(EditAnywhere,
+              BlueprintReadWrite,
+              Getter,
+              Setter,
+              Category = "Dialogue Box",
               meta = (AllowPrivateAccess = "true"))
     float LetterPlayTime = 0.025f;
 
     // The amount of time to wait after finishing the line before actually marking it completed.
     // This helps prevent accidentally progressing dialogue on short lines.
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Getter, Setter, Category = "Dialogue Box",
+    UPROPERTY(EditAnywhere,
+              BlueprintReadWrite,
+              Getter,
+              Setter,
+              Category = "Dialogue Box",
               meta = (AllowPrivateAccess = "true"))
     float EndHoldTime = 0.15f;
 

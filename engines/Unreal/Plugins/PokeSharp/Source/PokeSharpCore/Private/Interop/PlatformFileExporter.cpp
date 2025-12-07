@@ -17,7 +17,9 @@ IFileHandle *UPlatformFileExporter::OpenRead(const TCHAR *FileName, const bool b
     return nullptr;
 }
 
-IFileHandle *UPlatformFileExporter::OpenWrite(const TCHAR *FileName, const bool bAppend, const bool bAllowRead,
+IFileHandle *UPlatformFileExporter::OpenWrite(const TCHAR *FileName,
+                                              const bool bAppend,
+                                              const bool bAllowRead,
                                               const bool bOverwrite)
 {
     auto &PlatformFile = FPlatformFileManager::Get().GetPlatformFile();

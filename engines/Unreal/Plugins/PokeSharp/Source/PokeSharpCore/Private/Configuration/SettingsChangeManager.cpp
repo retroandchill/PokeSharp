@@ -19,8 +19,9 @@ void FDebouncedSettingsCallback::RequestExecution(const float DebounceSeconds)
     bPendingExecution = true;
 
     // Schedule a one–shot ticker
-    TickerHandle = FTSTicker::GetCoreTicker().AddTicker(
-        FTickerDelegate::CreateRaw(this, &FDebouncedSettingsCallback::OnTick), DebounceSeconds);
+    TickerHandle =
+        FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &FDebouncedSettingsCallback::OnTick),
+                                             DebounceSeconds);
 }
 
 bool FDebouncedSettingsCallback::OnTick(float)
@@ -37,7 +38,8 @@ bool FDebouncedSettingsCallback::OnTick(float)
 void USettingsChangeManager::Initialize()
 {
     checkf(Instance == nullptr, TEXT("USettingsChangeManager has already been initialized")) Instance =
-        NewObject<USettingsChangeManager>(GetTransientPackage(), TEXT("SettingsChangeManager"),
+        NewObject<USettingsChangeManager>(GetTransientPackage(),
+                                          TEXT("SettingsChangeManager"),
                                           RF_Public | RF_MarkAsRootSet);
 }
 
@@ -63,7 +65,8 @@ FGuid USettingsChangeManager::Bind(UDeveloperSettings *Settings, const FGCHandle
 
 #if WITH_EDITOR
     Settings->OnSettingChanged().AddLambda(
-        [WeakBinding = DebouncedEntry.ToWeakPtr()](UObject *, FPropertyChangedEvent &) {
+        [WeakBinding = DebouncedEntry.ToWeakPtr()](UObject *, FPropertyChangedEvent &)
+        {
             const auto Binding = WeakBinding.Pin();
             if (Binding == nullptr)
                 return;

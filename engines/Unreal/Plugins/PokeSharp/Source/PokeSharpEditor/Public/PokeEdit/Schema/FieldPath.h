@@ -17,8 +17,9 @@ namespace PokeEdit
         {
         }
 
-        static constexpr auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FPropertySegment>, std::make_tuple(TJsonField<&FPropertySegment::Name>(TEXT("name"))));
+        static constexpr auto JsonSchema =
+            TJsonObjectType(std::in_place_type<FPropertySegment>,
+                            std::make_tuple(TJsonField<&FPropertySegment::Name>(TEXT("name"))));
     };
 
     struct FListIndexSegment
@@ -75,8 +76,9 @@ namespace PokeEdit
         {
         }
 
-        static constexpr auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FFieldPath>, std::make_tuple(TJsonField<&FFieldPath::Segments>(TEXT("segments"))));
+        static constexpr auto JsonSchema =
+            TJsonObjectType(std::in_place_type<FFieldPath>,
+                            std::make_tuple(TJsonField<&FFieldPath::Segments>(TEXT("segments"))));
     };
 
     template <>

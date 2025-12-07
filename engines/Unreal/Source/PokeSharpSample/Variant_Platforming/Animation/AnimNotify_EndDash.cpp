@@ -4,7 +4,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "PlatformingCharacter.h"
 
-void UAnimNotify_EndDash::Notify(USkeletalMeshComponent *MeshComp, UAnimSequenceBase *Animation,
+void UAnimNotify_EndDash::Notify(USkeletalMeshComponent *MeshComp,
+                                 UAnimSequenceBase *Animation,
                                  const FAnimNotifyEventReference &EventReference)
 {
     // cast the owner to the attacker interface

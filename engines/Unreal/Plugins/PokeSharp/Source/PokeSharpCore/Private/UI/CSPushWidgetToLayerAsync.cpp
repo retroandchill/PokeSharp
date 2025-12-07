@@ -20,8 +20,11 @@ void UCSPushWidgetToLayerAsync::PushWidgetToLayerStack(APlayerController *Player
     OnAsyncLoadComplete(EAsyncLoadSuccessState::InProgress, nullptr, false);
     TWeakObjectPtr WeakThis = this;
     StreamingHandle = RootLayout->PushWidgetToLayerStackAsync(
-        InLayerName, bSuspendInputUntilComplete, MoveTemp(ActivatableWidgetClass),
-        [this, WeakThis](const EAsyncWidgetLayerState State, UCommonActivatableWidget *Widget) {
+        InLayerName,
+        bSuspendInputUntilComplete,
+        MoveTemp(ActivatableWidgetClass),
+        [this, WeakThis](const EAsyncWidgetLayerState State, UCommonActivatableWidget *Widget)
+        {
             if (!WeakThis.IsValid())
             {
                 return;
@@ -29,15 +32,15 @@ void UCSPushWidgetToLayerAsync::PushWidgetToLayerStack(APlayerController *Player
 
             switch (State)
             {
-            case EAsyncWidgetLayerState::Initialize:
-                OnAsyncLoadComplete(EAsyncLoadSuccessState::BeforePush, Widget, false);
-                break;
-            case EAsyncWidgetLayerState::Canceled:
-                OnAsyncLoadComplete(EAsyncLoadSuccessState::Cancelled);
-                break;
-            case EAsyncWidgetLayerState::AfterPush:
-                OnAsyncLoadComplete(EAsyncLoadSuccessState::Success, Widget);
-                break;
+                case EAsyncWidgetLayerState::Initialize:
+                    OnAsyncLoadComplete(EAsyncLoadSuccessState::BeforePush, Widget, false);
+                    break;
+                case EAsyncWidgetLayerState::Canceled:
+                    OnAsyncLoadComplete(EAsyncLoadSuccessState::Cancelled);
+                    break;
+                case EAsyncWidgetLayerState::AfterPush:
+                    OnAsyncLoadComplete(EAsyncLoadSuccessState::Success, Widget);
+                    break;
             }
         });
 }
@@ -61,7 +64,8 @@ void UCSPushWidgetToLayerAsync::Cancel()
 }
 
 void UCSPushWidgetToLayerAsync::OnAsyncLoadComplete(const EAsyncLoadSuccessState InState,
-                                                    UCommonActivatableWidget *InWidget, const bool bDispose)
+                                                    UCommonActivatableWidget *InWidget,
+                                                    const bool bDispose)
 {
     State = InState;
     Widget = InWidget;

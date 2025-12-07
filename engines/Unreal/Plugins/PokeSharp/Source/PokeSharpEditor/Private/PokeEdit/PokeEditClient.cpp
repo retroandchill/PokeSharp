@@ -26,17 +26,19 @@ namespace PokeEdit
 
         return FPokeEditManager::Get()
             .SendRequest(RequestName, RequestArchive, ResponseWriter)
-            .and_then([&ResponseWriter] {
-                FMemoryReader Reader(*ResponseWriter);
-                const auto JsonReader = TJsonReader<UTF8CHAR>::Create(&Reader);
-                TSharedPtr<FJsonValue> JsonValue;
-                if (!FJsonSerializer::Deserialize(JsonReader, JsonValue))
+            .and_then(
+                [&ResponseWriter]
                 {
-                    return std::expected<TSharedRef<FJsonValue>, FString>(std::unexpect,
-                                                                          TEXT("Failed to deserialize response"));
-                }
+                    FMemoryReader Reader(*ResponseWriter);
+                    const auto JsonReader = TJsonReader<UTF8CHAR>::Create(&Reader);
+                    TSharedPtr<FJsonValue> JsonValue;
+                    if (!FJsonSerializer::Deserialize(JsonReader, JsonValue))
+                    {
+                        return std::expected<TSharedRef<FJsonValue>, FString>(std::unexpect,
+                                                                              TEXT("Failed to deserialize response"));
+                    }
 
-                return std::expected<TSharedRef<FJsonValue>, FString>(JsonValue.ToSharedRef());
-            });
+                    return std::expected<TSharedRef<FJsonValue>, FString>(JsonValue.ToSharedRef());
+                });
     }
 } // namespace PokeEdit

@@ -74,13 +74,19 @@ void ASideScrollingCharacter::SetupPlayerInputComponent(class UInputComponent *P
     if (UEnhancedInputComponent *EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         // Jumping
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this,
+        EnhancedInputComponent->BindAction(JumpAction,
+                                           ETriggerEvent::Started,
+                                           this,
                                            &ASideScrollingCharacter::DoJumpStart);
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+        EnhancedInputComponent->BindAction(JumpAction,
+                                           ETriggerEvent::Completed,
+                                           this,
                                            &ASideScrollingCharacter::DoJumpEnd);
 
         // Interacting
-        EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this,
+        EnhancedInputComponent->BindAction(InteractAction,
+                                           ETriggerEvent::Triggered,
+                                           this,
                                            &ASideScrollingCharacter::DoInteract);
 
         // Moving
@@ -88,14 +94,21 @@ void ASideScrollingCharacter::SetupPlayerInputComponent(class UInputComponent *P
 
         // Dropping from platform
         EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Triggered, this, &ASideScrollingCharacter::Drop);
-        EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Completed, this,
+        EnhancedInputComponent->BindAction(DropAction,
+                                           ETriggerEvent::Completed,
+                                           this,
                                            &ASideScrollingCharacter::DropReleased);
     }
 }
 
-void ASideScrollingCharacter::NotifyHit(class UPrimitiveComponent *MyComp, AActor *Other,
-                                        class UPrimitiveComponent *OtherComp, bool bSelfMoved, FVector HitLocation,
-                                        FVector HitNormal, FVector NormalImpulse, const FHitResult &Hit)
+void ASideScrollingCharacter::NotifyHit(class UPrimitiveComponent *MyComp,
+                                        AActor *Other,
+                                        class UPrimitiveComponent *OtherComp,
+                                        bool bSelfMoved,
+                                        FVector HitLocation,
+                                        FVector HitNormal,
+                                        FVector NormalImpulse,
+                                        const FHitResult &Hit)
 {
     Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
@@ -269,8 +282,11 @@ void ASideScrollingCharacter::MultiJump()
             bHasWallJumped = true;
 
             // schedule wall jump lockout reset
-            GetWorld()->GetTimerManager().SetTimer(WallJumpTimer, this, &ASideScrollingCharacter::ResetWallJump,
-                                                   DelayBetweenWallJumps, false);
+            GetWorld()->GetTimerManager().SetTimer(WallJumpTimer,
+                                                   this,
+                                                   &ASideScrollingCharacter::ResetWallJump,
+                                                   DelayBetweenWallJumps,
+                                                   false);
 
             return;
         }

@@ -109,8 +109,13 @@ class ASideScrollingCharacter : public ACharacter
     virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
     /** Collision handling */
-    virtual void NotifyHit(class UPrimitiveComponent *MyComp, AActor *Other, class UPrimitiveComponent *OtherComp,
-                           bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse,
+    virtual void NotifyHit(class UPrimitiveComponent *MyComp,
+                           AActor *Other,
+                           class UPrimitiveComponent *OtherComp,
+                           bool bSelfMoved,
+                           FVector HitLocation,
+                           FVector HitNormal,
+                           FVector NormalImpulse,
                            const FHitResult &Hit) override;
 
     /** Landing handling */

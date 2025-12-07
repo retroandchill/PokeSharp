@@ -19,10 +19,12 @@ FSlateBrush UPokemonActionWidget::GetIcon() const
             TArray<FKey> BoundKeys = EnhancedInputSubsystem->QueryKeysMappedToAction(AssociatedInputAction);
 
             const auto *CommonInputSubsystem = GetInputSubsystem();
-            if (FSlateBrush SlateBrush; !BoundKeys.IsEmpty() && CommonInputSubsystem &&
-                                        UCommonInputPlatformSettings::Get()->TryGetInputBrush(
-                                            SlateBrush, BoundKeys[0], CommonInputSubsystem->GetCurrentInputType(),
-                                            CommonInputSubsystem->GetCurrentGamepadName()))
+            if (FSlateBrush SlateBrush;
+                !BoundKeys.IsEmpty() && CommonInputSubsystem &&
+                UCommonInputPlatformSettings::Get()->TryGetInputBrush(SlateBrush,
+                                                                      BoundKeys[0],
+                                                                      CommonInputSubsystem->GetCurrentInputType(),
+                                                                      CommonInputSubsystem->GetCurrentGamepadName()))
             {
                 return SlateBrush;
             }

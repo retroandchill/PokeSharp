@@ -432,8 +432,8 @@ namespace PokeEdit
                 return TOptional<T>(NullOpt);
             }
 
-            return TJsonConverter<T>::Deserialize(Value).transform(
-                [](T &&Result) { return TOptional<T>(MoveTemp(Result)); });
+            return TJsonConverter<T>::Deserialize(Value).transform([](T &&Result)
+                                                                   { return TOptional<T>(MoveTemp(Result)); });
         }
 
         /**
@@ -481,8 +481,8 @@ namespace PokeEdit
                 return TSharedPtr<T>(nullptr);
             }
 
-            return TJsonConverter<TSharedRef<T>>::Deserialize(Value).transform(
-                [](const TSharedRef<T> &Result) { return Result.ToSharedPtr(); });
+            return TJsonConverter<TSharedRef<T>>::Deserialize(Value).transform([](const TSharedRef<T> &Result)
+                                                                               { return Result.ToSharedPtr(); });
         }
 
         /**

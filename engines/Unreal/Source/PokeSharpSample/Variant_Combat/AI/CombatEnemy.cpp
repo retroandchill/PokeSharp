@@ -145,7 +145,12 @@ void ACombatEnemy::DoAttackTrace(FName DamageSourceBone)
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-    if (GetWorld()->SweepMultiByObjectType(OutHits, TraceStart, TraceEnd, FQuat::Identity, ObjectParams, CollisionShape,
+    if (GetWorld()->SweepMultiByObjectType(OutHits,
+                                           TraceStart,
+                                           TraceEnd,
+                                           FQuat::Identity,
+                                           ObjectParams,
+                                           CollisionShape,
                                            QueryParams))
     {
         // iterate over each object hit
@@ -195,12 +200,15 @@ void ACombatEnemy::CheckChargedAttack()
     // jump to either the loop or attack section of the montage depending on whether we hit the loop target
     if (UAnimInstance *AnimInstance = GetMesh()->GetAnimInstance())
     {
-        AnimInstance->Montage_JumpToSection(
-            CurrentChargeLoop >= TargetChargeLoops ? ChargeAttackSection : ChargeLoopSection, ChargedAttackMontage);
+        AnimInstance->Montage_JumpToSection(CurrentChargeLoop >= TargetChargeLoops ? ChargeAttackSection
+                                                                                   : ChargeLoopSection,
+                                            ChargedAttackMontage);
     }
 }
 
-void ACombatEnemy::ApplyDamage(float Damage, AActor *DamageCauser, const FVector &DamageLocation,
+void ACombatEnemy::ApplyDamage(float Damage,
+                               AActor *DamageCauser,
+                               const FVector &DamageLocation,
                                const FVector &DamageImpulse)
 {
 
@@ -276,7 +284,9 @@ void ACombatEnemy::RemoveFromLevel()
     Destroy();
 }
 
-float ACombatEnemy::TakeDamage(float Damage, struct FDamageEvent const &DamageEvent, AController *EventInstigator,
+float ACombatEnemy::TakeDamage(float Damage,
+                               struct FDamageEvent const &DamageEvent,
+                               AController *EventInstigator,
                                AActor *DamageCauser)
 {
     // only process damage if the character is still alive

@@ -121,8 +121,13 @@ void APlatformingCharacter::MultiJump()
             FCollisionQueryParams QueryParams;
             QueryParams.AddIgnoredActor(this);
 
-            if (GetWorld()->SweepSingleByChannel(OutHit, TraceStart, TraceEnd, FQuat(),
-                                                 ECollisionChannel::ECC_Visibility, TraceShape, QueryParams))
+            if (GetWorld()->SweepSingleByChannel(OutHit,
+                                                 TraceStart,
+                                                 TraceEnd,
+                                                 FQuat(),
+                                                 ECollisionChannel::ECC_Visibility,
+                                                 TraceShape,
+                                                 QueryParams))
             {
                 // rotate the character to face away from the wall, so we're correctly oriented for the next wall jump
                 FRotator WallOrientation = OutHit.ImpactNormal.ToOrientationRotator();
@@ -143,8 +148,11 @@ void APlatformingCharacter::MultiJump()
                 // raise the wall jump flag to prevent an immediate second wall jump
                 bHasWallJumped = true;
 
-                GetWorld()->GetTimerManager().SetTimer(WallJumpTimer, this, &APlatformingCharacter::ResetWallJump,
-                                                       DelayBetweenWallJumps, false);
+                GetWorld()->GetTimerManager().SetTimer(WallJumpTimer,
+                                                       this,
+                                                       &APlatformingCharacter::ResetWallJump,
+                                                       DelayBetweenWallJumps,
+                                                       false);
             }
             // no wall jump, try a double jump next
             else
@@ -325,14 +333,20 @@ void APlatformingCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInp
     {
 
         // Jumping
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this,
+        EnhancedInputComponent->BindAction(JumpAction,
+                                           ETriggerEvent::Started,
+                                           this,
                                            &APlatformingCharacter::DoJumpStart);
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+        EnhancedInputComponent->BindAction(JumpAction,
+                                           ETriggerEvent::Completed,
+                                           this,
                                            &APlatformingCharacter::DoJumpEnd);
 
         // Moving
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlatformingCharacter::Move);
-        EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this,
+        EnhancedInputComponent->BindAction(MouseLookAction,
+                                           ETriggerEvent::Triggered,
+                                           this,
                                            &APlatformingCharacter::Look);
 
         // Looking

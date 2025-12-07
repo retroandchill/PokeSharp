@@ -274,7 +274,12 @@ void ACombatCharacter::DoAttackTrace(FName DamageSourceBone)
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-    if (GetWorld()->SweepMultiByObjectType(OutHits, TraceStart, TraceEnd, FQuat::Identity, ObjectParams, CollisionShape,
+    if (GetWorld()->SweepMultiByObjectType(OutHits,
+                                           TraceStart,
+                                           TraceEnd,
+                                           FQuat::Identity,
+                                           ObjectParams,
+                                           CollisionShape,
                                            QueryParams))
     {
         // iterate over each object hit
@@ -363,7 +368,12 @@ void ACombatCharacter::NotifyEnemiesOfIncomingAttack()
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-    if (GetWorld()->SweepMultiByObjectType(OutHits, TraceStart, TraceEnd, FQuat::Identity, ObjectParams, CollisionShape,
+    if (GetWorld()->SweepMultiByObjectType(OutHits,
+                                           TraceStart,
+                                           TraceEnd,
+                                           FQuat::Identity,
+                                           ObjectParams,
+                                           CollisionShape,
                                            QueryParams))
     {
         // iterate over each object hit
@@ -381,7 +391,9 @@ void ACombatCharacter::NotifyEnemiesOfIncomingAttack()
     }
 }
 
-void ACombatCharacter::ApplyDamage(float Damage, AActor *DamageCauser, const FVector &DamageLocation,
+void ACombatCharacter::ApplyDamage(float Damage,
+                                   AActor *DamageCauser,
+                                   const FVector &DamageLocation,
                                    const FVector &DamageImpulse)
 {
     // pass the damage event to the actor
@@ -440,7 +452,9 @@ void ACombatCharacter::RespawnCharacter()
     Destroy();
 }
 
-float ACombatCharacter::TakeDamage(float Damage, struct FDamageEvent const &DamageEvent, AController *EventInstigator,
+float ACombatCharacter::TakeDamage(float Damage,
+                                   struct FDamageEvent const &DamageEvent,
+                                   AController *EventInstigator,
                                    AActor *DamageCauser)
 {
     // only process damage if the character is still alive
@@ -528,17 +542,25 @@ void ACombatCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCom
         EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ACombatCharacter::Look);
 
         // Combo Attack
-        EnhancedInputComponent->BindAction(ComboAttackAction, ETriggerEvent::Started, this,
+        EnhancedInputComponent->BindAction(ComboAttackAction,
+                                           ETriggerEvent::Started,
+                                           this,
                                            &ACombatCharacter::ComboAttackPressed);
 
         // Charged Attack
-        EnhancedInputComponent->BindAction(ChargedAttackAction, ETriggerEvent::Started, this,
+        EnhancedInputComponent->BindAction(ChargedAttackAction,
+                                           ETriggerEvent::Started,
+                                           this,
                                            &ACombatCharacter::ChargedAttackPressed);
-        EnhancedInputComponent->BindAction(ChargedAttackAction, ETriggerEvent::Completed, this,
+        EnhancedInputComponent->BindAction(ChargedAttackAction,
+                                           ETriggerEvent::Completed,
+                                           this,
                                            &ACombatCharacter::ChargedAttackReleased);
 
         // Camera Side Toggle
-        EnhancedInputComponent->BindAction(ToggleCameraAction, ETriggerEvent::Triggered, this,
+        EnhancedInputComponent->BindAction(ToggleCameraAction,
+                                           ETriggerEvent::Triggered,
+                                           this,
                                            &ACombatCharacter::ToggleCamera);
     }
 }

@@ -38,19 +38,22 @@ void SGameDataEntryDetails::RefreshContent()
         return;
     }
 
-    Contents->SetContent(
-        PokeEdit::GetFieldDefinition(*EntryPath)
-            .transform([](const TSharedRef<PokeEdit::FFieldDefinition> &Definition) -> TSharedRef<SWidget> {
-                // clang-format off
+    Contents->SetContent(PokeEdit::GetFieldDefinition(*EntryPath)
+                             .transform(
+                                 [](const TSharedRef<PokeEdit::FFieldDefinition> &Definition) -> TSharedRef<SWidget>
+                                 {
+                                     // clang-format off
             return SNew(STextBlock)
                 .Text(FText::FromString(TEXT("Details panel goes here")));
-                // clang-format on
-            })
-            .or_else([](FString &&Error) -> std::expected<TSharedRef<SWidget>, FString> {
-                // clang-format off
+                                     // clang-format on
+                                 })
+                             .or_else(
+                                 [](FString &&Error) -> std::expected<TSharedRef<SWidget>, FString>
+                                 {
+                                     // clang-format off
             return SNew(STextBlock)
                 .Text(FText::FromString(MoveTemp(Error)));
-                // clang-format on
-            })
-            .value());
+                                     // clang-format on
+                                 })
+                             .value());
 }

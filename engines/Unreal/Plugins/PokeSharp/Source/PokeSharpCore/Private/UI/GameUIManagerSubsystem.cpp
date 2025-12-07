@@ -15,27 +15,35 @@ void UGameUIManagerSubsystem::Initialize(FSubsystemCollectionBase &Collection)
     }
 
     auto *GameInstance = GetGameInstance();
-    GameInstance->OnLocalPlayerAddedEvent.AddWeakLambda(this, [this](ULocalPlayer *NewPlayer) {
-        if (!PrimaryPlayer.IsValid())
+    GameInstance->OnLocalPlayerAddedEvent.AddWeakLambda(
+        this,
+        [this](ULocalPlayer *NewPlayer)
         {
-            UE_LOG(LogPokeSharpCore, Log, TEXT("AddLocalPlayer: Set %s to Primary Player"), *NewPlayer->GetName());
-            PrimaryPlayer = NewPlayer;
-        }
+            if (!PrimaryPlayer.IsValid())
+            {
+                UE_LOG(LogPokeSharpCore, Log, TEXT("AddLocalPlayer: Set %s to Primary Player"), *NewPlayer->GetName());
+                PrimaryPlayer = NewPlayer;
+            }
 
-        NotifyPlayerAdded(NewPlayer);
-    });
+            NotifyPlayerAdded(NewPlayer);
+        });
 
-    GameInstance->OnLocalPlayerRemovedEvent.AddWeakLambda(this, [this](ULocalPlayer *ExistingPlayer) {
-        if (PrimaryPlayer == ExistingPlayer)
+    GameInstance->OnLocalPlayerRemovedEvent.AddWeakLambda(
+        this,
+        [this](ULocalPlayer *ExistingPlayer)
         {
-            // TODO: do we want to fall back to another player?
-            PrimaryPlayer.Reset();
-            UE_LOG(LogPokeSharpCore, Log, TEXT("RemoveLocalPlayer: Unsetting Primary Player from %s"),
-                   *ExistingPlayer->GetName());
-        }
+            if (PrimaryPlayer == ExistingPlayer)
+            {
+                // TODO: do we want to fall back to another player?
+                PrimaryPlayer.Reset();
+                UE_LOG(LogPokeSharpCore,
+                       Log,
+                       TEXT("RemoveLocalPlayer: Unsetting Primary Player from %s"),
+                       *ExistingPlayer->GetName());
+            }
 
-        NotifyPlayerRemoved(ExistingPlayer);
-    });
+            NotifyPlayerRemoved(ExistingPlayer);
+        });
 
     K2_Initialize(Collection);
 }

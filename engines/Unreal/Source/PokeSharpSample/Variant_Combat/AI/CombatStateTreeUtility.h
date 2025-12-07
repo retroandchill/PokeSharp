@@ -54,7 +54,8 @@ struct FStateTreeCharacterGroundedCondition : public FStateTreeConditionCommonBa
 #if WITH_EDITOR
 
     /** Provides the description string */
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif
@@ -112,7 +113,8 @@ struct FStateTreeIsInDangerCondition : public FStateTreeConditionCommonBase
 #if WITH_EDITOR
 
     /** Provides the description string */
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif
@@ -157,7 +159,8 @@ struct FStateTreeComboAttackTask : public FStateTreeTaskCommonBase
                            const FStateTreeTransitionResult &Transition) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR
@@ -187,7 +190,8 @@ struct FStateTreeChargedAttackTask : public FStateTreeTaskCommonBase
                            const FStateTreeTransitionResult &Transition) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR
@@ -217,7 +221,8 @@ struct FStateTreeWaitForLandingTask : public FStateTreeTaskCommonBase
                            const FStateTreeTransitionResult &Transition) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR
@@ -266,7 +271,8 @@ struct FStateTreeFaceActorTask : public FStateTreeTaskCommonBase
                            const FStateTreeTransitionResult &Transition) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR
@@ -315,7 +321,8 @@ struct FStateTreeFaceLocationTask : public FStateTreeTaskCommonBase
                            const FStateTreeTransitionResult &Transition) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR
@@ -360,7 +367,8 @@ struct FStateTreeSetCharacterSpeedTask : public FStateTreeTaskCommonBase
                                            const FStateTreeTransitionResult &Transition) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR
@@ -412,7 +420,8 @@ struct FStateTreeGetPlayerInfoTask : public FStateTreeTaskCommonBase
     virtual EStateTreeRunStatus Tick(FStateTreeExecutionContext &Context, const float DeltaTime) const override;
 
 #if WITH_EDITOR
-    virtual FText GetDescription(const FGuid &ID, FStateTreeDataView InstanceDataView,
+    virtual FText GetDescription(const FGuid &ID,
+                                 FStateTreeDataView InstanceDataView,
                                  const IStateTreeBindingLookup &BindingLookup,
                                  EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 #endif // WITH_EDITOR

@@ -31,13 +31,24 @@ Macros:
     - SLATE_ARGUMENT(AttrType, AttrName) AttrType AttrName;
 MacroBlockBegin: "SLATE_BEGIN_ARGS"
 MacroBlockEnd: "SLATE_END_ARGS()"
----
-Language: CSharp
-ColumnLimit: 120
-MaxEmptyLinesToKeep: 1
-TabWidth: 4
-IndentWidth: 4
-SortIncludes: CaseInsensitive
-AllowShortFunctionsOnASingleLine: None
-NamespaceIndentation: All
-IncludeBlocks: Regroup
+
+BreakBeforeBraces: Allman
+BinPackParameters: false
+BinPackArguments: false
+AllowShortLambdasOnASingleLine: Inline
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+UseTab: Never
+IndentCaseLabels: true
+IndentCaseBlocks: true
+IndentGotoLabels: false
+
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeCtorInitializerColon: true
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceAroundPointerQualifiers: Default

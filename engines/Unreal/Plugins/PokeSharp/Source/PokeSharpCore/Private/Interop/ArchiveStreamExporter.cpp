@@ -92,15 +92,15 @@ bool UArchiveStreamExporter::Seek(FArchive &Archive, const int64 Offset, const E
 
     switch (Origin)
     {
-    case ESeekOrigin::Begin:
-        Archive.Seek(Offset);
-        break;
-    case ESeekOrigin::Current:
-        Archive.Seek(Archive.Tell() + Offset);
-        break;
-    case ESeekOrigin::End:
-        Archive.Seek(Archive.TotalSize() - Offset - 1);
-        break;
+        case ESeekOrigin::Begin:
+            Archive.Seek(Offset);
+            break;
+        case ESeekOrigin::Current:
+            Archive.Seek(Archive.Tell() + Offset);
+            break;
+        case ESeekOrigin::End:
+            Archive.Seek(Archive.TotalSize() - Offset - 1);
+            break;
     }
 
     NewPosition = Archive.Tell();

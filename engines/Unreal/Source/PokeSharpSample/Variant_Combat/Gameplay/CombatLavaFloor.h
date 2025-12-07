@@ -34,6 +34,9 @@ class ACombatLavaFloor : public AActor
   protected:
     /** Blocking hit handler */
     UFUNCTION()
-    void OnFloorHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComp,
-                    FVector NormalImpulse, const FHitResult &Hit);
+    void OnFloorHit(UPrimitiveComponent *HitComponent,
+                    AActor *OtherActor,
+                    UPrimitiveComponent *OtherComp,
+                    FVector NormalImpulse,
+                    const FHitResult &Hit);
 };

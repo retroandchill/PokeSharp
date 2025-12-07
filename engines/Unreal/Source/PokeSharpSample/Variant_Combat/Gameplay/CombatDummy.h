@@ -42,7 +42,9 @@ class ACombatDummy : public AActor, public ICombatDamageable
     // ~Begin CombatDamageable interface
 
     /** Handles damage and knockback events */
-    virtual void ApplyDamage(float Damage, AActor *DamageCauser, const FVector &DamageLocation,
+    virtual void ApplyDamage(float Damage,
+                             AActor *DamageCauser,
+                             const FVector &DamageLocation,
                              const FVector &DamageImpulse) override;
 
     /** Handles death events */

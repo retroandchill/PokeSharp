@@ -42,8 +42,11 @@ void ASideScrollingNPC::Interaction(AActor *Interactor)
     LaunchCharacter(LaunchVector, true, true);
 
     // set up a timer to schedule reactivation
-    GetWorld()->GetTimerManager().SetTimer(DeactivationTimer, this, &ASideScrollingNPC::ResetDeactivation,
-                                           DeactivationTime, false);
+    GetWorld()->GetTimerManager().SetTimer(DeactivationTimer,
+                                           this,
+                                           &ASideScrollingNPC::ResetDeactivation,
+                                           DeactivationTime,
+                                           false);
 }
 
 void ASideScrollingNPC::ResetDeactivation()

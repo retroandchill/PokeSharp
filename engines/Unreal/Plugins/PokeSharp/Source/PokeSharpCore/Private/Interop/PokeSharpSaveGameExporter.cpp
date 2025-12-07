@@ -3,7 +3,8 @@
 #include "Interop/PokeSharpSaveGameExporter.h"
 #include "Saving/PokeSharpSaveGame.h"
 
-void UPokeSharpSaveGameExporter::GetDataReadBuffer(const UPokeSharpSaveGame *SaveGame, const uint8 *&OutBuffer,
+void UPokeSharpSaveGameExporter::GetDataReadBuffer(const UPokeSharpSaveGame *SaveGame,
+                                                   const uint8 *&OutBuffer,
                                                    int32 &OutSize)
 {
     const auto DataView = SaveGame->GetData();

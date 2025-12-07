@@ -31,7 +31,8 @@ class POKESHARPCORE_API UCSPushWidgetToLayerAsync : public UCSAsyncActionBase
 
   public:
     UFUNCTION(meta = (ScriptMethod))
-    void PushWidgetToLayerStack(APlayerController *PlayerController, FGameplayTag InLayerName,
+    void PushWidgetToLayerStack(APlayerController *PlayerController,
+                                FGameplayTag InLayerName,
                                 const bool bSuspendInputUntilComplete,
                                 TSoftClassPtr<UCommonActivatableWidget> ActivatableWidgetClass);
 
@@ -42,7 +43,8 @@ class POKESHARPCORE_API UCSPushWidgetToLayerAsync : public UCSAsyncActionBase
     void Cancel();
 
   protected:
-    void OnAsyncLoadComplete(EAsyncLoadSuccessState InState, UCommonActivatableWidget *InWidget = nullptr,
+    void OnAsyncLoadComplete(EAsyncLoadSuccessState InState,
+                             UCommonActivatableWidget *InWidget = nullptr,
                              bool bDispose = true);
 
   private:

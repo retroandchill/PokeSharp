@@ -20,8 +20,11 @@ ACombatCheckpointVolume::ACombatCheckpointVolume()
     Box->OnComponentBeginOverlap.AddDynamic(this, &ACombatCheckpointVolume::OnOverlap);
 }
 
-void ACombatCheckpointVolume::OnOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor,
-                                        UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+void ACombatCheckpointVolume::OnOverlap(UPrimitiveComponent *OverlappedComponent,
+                                        AActor *OtherActor,
+                                        UPrimitiveComponent *OtherComp,
+                                        int32 OtherBodyIndex,
+                                        bool bFromSweep,
                                         const FHitResult &SweepResult)
 {
     // ensure we use this only once

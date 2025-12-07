@@ -77,7 +77,9 @@ void ACombatEnemySpawner::OnEnemyDied()
     if (SpawnCount <= 0)
     {
         // schedule the activation on depleted message
-        GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &ACombatEnemySpawner::SpawnerDepleted,
+        GetWorld()->GetTimerManager().SetTimer(SpawnTimer,
+                                               this,
+                                               &ACombatEnemySpawner::SpawnerDepleted,
                                                ActivationDelay);
         return;
     }

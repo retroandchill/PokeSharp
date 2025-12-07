@@ -91,7 +91,8 @@ class TOptionalPtr
      * @param args arguments provided to the member function
      * @return result of the member function wrapped in TOptionalPtr
      */
-    template <typename... Args, std::invocable<ObjectType *, Args...> FuncType,
+    template <typename... Args,
+              std::invocable<ObjectType *, Args...> FuncType,
               typename ReturnType = result_of_method_t<FuncType, Args...>>
     TOptionalPtr<ReturnType> Map(FuncType &&func, Args &&...args)
     {

@@ -27,7 +27,9 @@ EStateTreeRunStatus FStateTreeGetPlayerTask::Tick(FStateTreeExecutionContext &Co
 
 #if WITH_EDITOR
 FText FStateTreeGetPlayerTask::GetDescription(
-    const FGuid &ID, FStateTreeDataView InstanceDataView, const IStateTreeBindingLookup &BindingLookup,
+    const FGuid &ID,
+    FStateTreeDataView InstanceDataView,
+    const IStateTreeBindingLookup &BindingLookup,
     EStateTreeNodeFormatting Formatting /*= EStateTreeNodeFormatting::Text*/) const
 {
     return FText::FromString("<b>Get Player</b>");

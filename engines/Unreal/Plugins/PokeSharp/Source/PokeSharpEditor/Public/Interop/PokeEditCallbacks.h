@@ -11,7 +11,9 @@
  */
 struct FPokeEditCallbacks
 {
-    using FSendRequest = bool(__stdcall *)(FName, const TSharedRef<FArchive> &, const TSharedRef<FArchive> &,
+    using FSendRequest = bool(__stdcall *)(FName,
+                                           const TSharedRef<FArchive> &,
+                                           const TSharedRef<FArchive> &,
                                            FString &);
 
     FSendRequest SendRequest = nullptr;
@@ -27,7 +29,8 @@ class FPokeEditManager
 
     void SetCallbacks(FPokeEditCallbacks NewCallbacks);
 
-    std::expected<void, FString> SendRequest(FName RequestName, const TSharedRef<FArchive> &Payload,
+    std::expected<void, FString> SendRequest(FName RequestName,
+                                             const TSharedRef<FArchive> &Payload,
                                              const TSharedRef<FArchive> &Response) const;
 
   private:

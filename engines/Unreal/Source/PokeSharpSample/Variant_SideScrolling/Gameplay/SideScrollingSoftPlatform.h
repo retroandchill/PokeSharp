@@ -38,8 +38,11 @@ class ASideScrollingSoftPlatform : public AActor
   protected:
     /** Handles soft collision check box overlaps */
     UFUNCTION()
-    void OnSoftCollisionOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor,
-                                UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+    void OnSoftCollisionOverlap(UPrimitiveComponent *OverlappedComponent,
+                                AActor *OtherActor,
+                                UPrimitiveComponent *OtherComp,
+                                int32 OtherBodyIndex,
+                                bool bFromSweep,
                                 const FHitResult &SweepResult);
 
     /** Restores soft collision state when overlap ends */

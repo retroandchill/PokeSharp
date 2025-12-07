@@ -169,8 +169,12 @@ struct FRegionMapExtra
 
     FRegionMapExtra() = default;
 
-    FRegionMapExtra(const int32 InRegionNumber, const int32 InGameSwitch, const int32 InX, const int32 InY,
-                    FString InGraphic, const bool InAlwaysVisible = false)
+    FRegionMapExtra(const int32 InRegionNumber,
+                    const int32 InGameSwitch,
+                    const int32 InX,
+                    const int32 InY,
+                    FString InGraphic,
+                    const bool InAlwaysVisible = false)
         : RegionNumber(InRegionNumber), GameSwitch(InGameSwitch), X(InX), Y(InY), Graphic(MoveTemp(InGraphic)),
           AlwaysVisible(InAlwaysVisible)
     {
@@ -216,35 +220,50 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /**
      * The maximum amount of money the player can have.
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "The Player and NPCs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "The Player and NPCs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 MaxMoney = 999999;
 
     /**
      * The maximum number of Battle Points the player can have.
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "The Player and NPCs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "The Player and NPCs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 MaxCoins = 99999;
 
     /**
      * The maximum amount of soot the player can have.
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "The Player and NPCs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "The Player and NPCs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 MaxBattlePoints = 9999;
 
     /**
      * The maximum amount of soot the player can have.
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "The Player and NPCs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "The Player and NPCs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 MaxSoot = 9999;
 
     /**
      * The maximum length, in characters, that the player's name can be.
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "The Player and NPCs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "The Player and NPCs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 MaxPlayerNameSize = 9999;
 
@@ -371,7 +390,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// <summary>
     /// The odds of a newly generated Pokémon being shiny (out of 65536).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Pokémon",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Pokémon",
               meta = (UIMin = 1, ClampMin = 1, UIMax = 65536, ClampMax = 65536))
     int32 ShinyPokemonChance;
 
@@ -390,7 +412,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// <summary>
     /// The odds of a wild Pokémon/bred egg having Pokérus (out of 65536).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Pokémon",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Pokémon",
               meta = (UIMin = 1, ClampMin = 1, UIMax = 65536, ClampMax = 65536))
     int32 PokerusChance = 3;
 
@@ -451,7 +476,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// <summary>
     /// A list of maps used by roaming Pokémon. Each map has an array of other maps it can lead to.
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Roaming Pokémon",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Roaming Pokémon",
               meta = (UIMin = 1, ClampMin = 1))
     TMap<int32, FRoamingAreasList> RoamingAreas;
 
@@ -465,14 +493,20 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// <summary>
     /// The maximum number of Pokémon that can be in the party.
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Party and Pokémon Storage",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Party and Pokémon Storage",
               meta = (UIMin = 1, ClampMin = 1))
     int32 MaxPartySize = 6;
 
     /// <summary>
     /// The number of boxes in Pokémon storage.
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Party and Pokémon Storage",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Party and Pokémon Storage",
               meta = (UIMin = 1, ClampMin = 1))
     int32 NumStorageBoxes = 40;
 
@@ -739,28 +773,40 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// <summary>
     /// ID of the animation played when the player steps on grass (grass rustling).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 GrassAnimationId = 1;
 
     /// <summary>
     /// ID of the animation played when the player lands on the ground after hopping over a ledge (shows a dust impact).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 DustAnimationId = 2;
 
     /// <summary>
     /// ID of the animation played when a trainer notices the player (an exclamation bubble).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 ExclamationAnimationId = 3;
 
     /// <summary>
     /// ID of the animation played when a patch of grass rustles due to using the Poké Radar.
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 RustleNormalAnimationId = 1;
 
@@ -768,7 +814,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// ID of the animation played when a patch of grass rustles vigorously due to
     /// using the Poké Radar. (Rarer species)
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 RustleVigorousAnimationId = 5;
 
@@ -776,7 +825,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// ID of the animation played when a patch of grass rustles and shines due to
     /// using the Poké Radar. (Shiny encounter)
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 RustleShinyAnimationId = 6;
 
@@ -784,7 +836,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// ID of the animation played when a berry tree grows a stage while the player
     /// is on the map (for new plant growth mechanics only).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Overworld animation IDs",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "Overworld animation IDs",
               meta = (UIMin = 1, ClampMin = 1))
     int32 PlantSparkleAnimationId = 7;
 
@@ -904,7 +959,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// <summary>
     /// Whether X items (X Attack, etc.) raise their stat by 2 stages (true) or 1 (false).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, DisplayName = "X-Stat Items Raise by Two Stages",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              DisplayName = "X-Stat Items Raise by Two Stages",
               Category = "Ability and item effects")
     bool XStatItemsRaiseByTwoStages;
 
@@ -1011,7 +1069,10 @@ class POKESHARP_API UPokeSharpSettings : public UDeveloperSettings
     /// The Game Switch which, while ON, prevents the player from losing money if
     /// they lose a battle (they can still gain money from trainers for winning).
     /// </summary>
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "End of battle",
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Config,
+              Category = "End of battle",
               meta = (UIMin = 1, ClampMin = 1));
     int32 NoMoneyLoss = 33;
 

@@ -6,9 +6,12 @@
 void ULoadGameFromSlotAsync::LoadGameFromSlot(const FString &SlotName, const int32 UserIndex)
 {
     UGameplayStatics::AsyncLoadGameFromSlot(
-        SlotName, UserIndex,
-        FAsyncLoadGameFromSlotDelegate::CreateWeakLambda(this, [this](const FString &, int32, USaveGame *LoadedData) {
-            SaveGame = LoadedData;
-            InvokeManagedCallback();
-        }));
+        SlotName,
+        UserIndex,
+        FAsyncLoadGameFromSlotDelegate::CreateWeakLambda(this,
+                                                         [this](const FString &, int32, USaveGame *LoadedData)
+                                                         {
+                                                             SaveGame = LoadedData;
+                                                             InvokeManagedCallback();
+                                                         }));
 }

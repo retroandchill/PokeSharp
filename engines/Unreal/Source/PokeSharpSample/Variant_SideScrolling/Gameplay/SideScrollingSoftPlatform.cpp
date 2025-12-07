@@ -35,9 +35,12 @@ ASideScrollingSoftPlatform::ASideScrollingSoftPlatform()
     CollisionCheckBox->OnComponentBeginOverlap.AddDynamic(this, &ASideScrollingSoftPlatform::OnSoftCollisionOverlap);
 }
 
-void ASideScrollingSoftPlatform::OnSoftCollisionOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor,
-                                                        UPrimitiveComponent *OtherComp, int32 OtherBodyIndex,
-                                                        bool bFromSweep, const FHitResult &SweepResult)
+void ASideScrollingSoftPlatform::OnSoftCollisionOverlap(UPrimitiveComponent *OverlappedComponent,
+                                                        AActor *OtherActor,
+                                                        UPrimitiveComponent *OtherComp,
+                                                        int32 OtherBodyIndex,
+                                                        bool bFromSweep,
+                                                        const FHitResult &SweepResult)
 {
     // have we overlapped a character?
     if (ASideScrollingCharacter *Char = Cast<ASideScrollingCharacter>(OtherActor))

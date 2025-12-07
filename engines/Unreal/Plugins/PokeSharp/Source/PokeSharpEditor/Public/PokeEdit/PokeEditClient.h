@@ -14,5 +14,6 @@ class FJsonValue;
 namespace PokeEdit
 {
     POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> SendRequest(
-        FName RequestName, const TSharedRef<FJsonValue> &Payload);
+        FName RequestName,
+        const TSharedRef<FJsonValue> &Payload);
 }

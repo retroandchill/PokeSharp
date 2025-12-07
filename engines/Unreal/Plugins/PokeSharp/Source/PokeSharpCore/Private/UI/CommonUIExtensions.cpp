@@ -24,9 +24,9 @@ static bool IsOwningPlayerInputType(const UUserWidget *WidgetContextObject, ECom
     return TOptionalPtr(WidgetContextObject)
         .Map([](const UUserWidget *Widget) { return Widget->GetOwningLocalPlayer(); })
         .Map(&UCommonInputSubsystem::Get)
-        .MapToValue(false, [InputType](const UCommonInputSubsystem *Subsystem) {
-            return Subsystem->GetCurrentInputType() == InputType;
-        });
+        .MapToValue(false,
+                    [InputType](const UCommonInputSubsystem *Subsystem)
+                    { return Subsystem->GetCurrentInputType() == InputType; });
 }
 
 bool UCommonUIExtensions::IsOwningPlayerUsingTouch(const UUserWidget *WidgetContextObject)
@@ -51,13 +51,13 @@ UCommonActivatableWidget *UCommonUIExtensions::PushContentToLayer(const ULocalPl
     return TOptionalPtr(LocalPlayer->GetGameInstance()->GetSubsystem<UGameUIManagerSubsystem>())
         .Map([](UGameUIManagerSubsystem *Subsystem) { return Subsystem->GetCurrentPolicy(); })
         .Map([LocalPlayer](const UGameUIPolicy *Policy) { return Policy->GetRootLayout(LocalPlayer); })
-        .Map([LayerName, WidgetClass](UPrimaryGameLayout *Layout) {
-            return Layout->PushWidgetToLayerStack(LayerName, WidgetClass);
-        })
+        .Map([LayerName, WidgetClass](UPrimaryGameLayout *Layout)
+             { return Layout->PushWidgetToLayerStack(LayerName, WidgetClass); })
         .Get();
 }
 
-void UCommonUIExtensions::PushStreamedContentToLayer(const ULocalPlayer *LocalPlayer, FGameplayTag LayerName,
+void UCommonUIExtensions::PushStreamedContentToLayer(const ULocalPlayer *LocalPlayer,
+                                                     FGameplayTag LayerName,
                                                      TSoftClassPtr<UCommonActivatableWidget> WidgetClass)
 {
     if (ensure(LocalPlayer != nullptr) || !ensure(WidgetClass != nullptr))
@@ -68,9 +68,8 @@ void UCommonUIExtensions::PushStreamedContentToLayer(const ULocalPlayer *LocalPl
     TOptionalPtr(LocalPlayer->GetGameInstance()->GetSubsystem<UGameUIManagerSubsystem>())
         .Map([](UGameUIManagerSubsystem *Subsystem) { return Subsystem->GetCurrentPolicy(); })
         .Map([LocalPlayer](const UGameUIPolicy *Policy) { return Policy->GetRootLayout(LocalPlayer); })
-        .IfPresent([LayerName, &WidgetClass](UPrimaryGameLayout *Layout) {
-            return Layout->PushWidgetToLayerStackAsync(LayerName, true, MoveTemp(WidgetClass));
-        });
+        .IfPresent([LayerName, &WidgetClass](UPrimaryGameLayout *Layout)
+                   { return Layout->PushWidgetToLayerStackAsync(LayerName, true, MoveTemp(WidgetClass)); });
 }
 
 void UCommonUIExtensions::PopContentFromLayer(UCommonActivatableWidget *ActivatableWidget)
@@ -87,14 +86,12 @@ void UCommonUIExtensions::PopContentFromLayer(UCommonActivatableWidget *Activata
             .Get();
 
     TOptionalPtr(LocalPlayer)
-        .Map([](const ULocalPlayer *Player) {
-            return Player->GetGameInstance()->GetSubsystem<UGameUIManagerSubsystem>();
-        })
+        .Map([](const ULocalPlayer *Player)
+             { return Player->GetGameInstance()->GetSubsystem<UGameUIManagerSubsystem>(); })
         .Map([](const UGameUIManagerSubsystem *Subsystem) { return Subsystem->GetCurrentPolicy(); })
         .Map([LocalPlayer](const UGameUIPolicy *Policy) { return Policy->GetRootLayout(LocalPlayer); })
-        .IfPresent([ActivatableWidget](UPrimaryGameLayout *Layout) {
-            Layout->FindAndRemoveWidgetFromLayer(ActivatableWidget);
-        });
+        .IfPresent([ActivatableWidget](UPrimaryGameLayout *Layout)
+                   { Layout->FindAndRemoveWidgetFromLayer(ActivatableWidget); });
 }
 
 ULocalPlayer *UCommonUIExtensions::GetLocalPlayerFromController(APlayerController *PlayerController)

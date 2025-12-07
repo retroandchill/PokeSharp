@@ -14,9 +14,9 @@ namespace PokeEdit
     {
         static FName RequestName = "GetEditorTabs";
 
-        return SendRequest(RequestName, NoBodyJsonValue).and_then([](const TSharedRef<FJsonValue> &Response) {
-            return DeserializeFromJson<TArray<FEditorTabOption>>(Response);
-        });
+        return SendRequest(RequestName, NoBodyJsonValue)
+            .and_then([](const TSharedRef<FJsonValue> &Response)
+                      { return DeserializeFromJson<TArray<FEditorTabOption>>(Response); });
     }
 
     std::expected<TArray<FText>, FString> GetEntryLabels(const FName EditorId)
@@ -24,9 +24,9 @@ namespace PokeEdit
         static FName RequestName = "GetEntryLabels";
 
         const auto JsonRequest = SerializeToJson(FEditorLabelRequest(EditorId));
-        return SendRequest(RequestName, JsonRequest).and_then([](const TSharedRef<FJsonValue> &Response) {
-            return DeserializeFromJson<TArray<FText>>(Response);
-        });
+        return SendRequest(RequestName, JsonRequest)
+            .and_then([](const TSharedRef<FJsonValue> &Response)
+                      { return DeserializeFromJson<TArray<FText>>(Response); });
     }
 
     std::expected<TSharedRef<FFieldDefinition>, FString> GetFieldDefinition(const FFieldPath &Path)
@@ -34,8 +34,8 @@ namespace PokeEdit
         static FName RequestName = "GetFieldDefinition";
 
         const auto JsonRequest = SerializeToJson(Path);
-        return SendRequest(RequestName, JsonRequest).and_then([](const TSharedRef<FJsonValue> &Response) {
-            return DeserializeFromJson<TSharedRef<FFieldDefinition>>(Response);
-        });
+        return SendRequest(RequestName, JsonRequest)
+            .and_then([](const TSharedRef<FJsonValue> &Response)
+                      { return DeserializeFromJson<TSharedRef<FFieldDefinition>>(Response); });
     }
 } // namespace PokeEdit

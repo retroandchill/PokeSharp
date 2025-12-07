@@ -44,8 +44,13 @@ void UPrimaryGameLayout::SetIsDormant(bool bNewIsDormant)
         const auto NewDormancyStr = bNewIsDormant ? DormantString : NotDormantString;
         const auto PrimaryPlayerStr =
             LocalPlayer != nullptr && LocalPlayer->IsPrimaryPlayer() ? PrimaryString : NonPrimaryString;
-        UE_LOG(LogPokeSharpCore, Display, TEXT("%s PrimaryGameLayout Dormancy changed for [%d] from [%s] to [%s]"),
-               PrimaryPlayerStr, PlayerId, OldDormancyStr, NewDormancyStr);
+        UE_LOG(LogPokeSharpCore,
+               Display,
+               TEXT("%s PrimaryGameLayout Dormancy changed for [%d] from [%s] to [%s]"),
+               PrimaryPlayerStr,
+               PlayerId,
+               OldDormancyStr,
+               NewDormancyStr);
 
         bIsDormant = bNewIsDormant;
         OnIsDormantChanged();

@@ -13,7 +13,8 @@ void FPokeEditManager::SetCallbacks(const FPokeEditCallbacks NewCallbacks)
     Callbacks = NewCallbacks;
 }
 
-std::expected<void, FString> FPokeEditManager::SendRequest(const FName RequestName, const TSharedRef<FArchive> &Payload,
+std::expected<void, FString> FPokeEditManager::SendRequest(const FName RequestName,
+                                                           const TSharedRef<FArchive> &Payload,
                                                            const TSharedRef<FArchive> &Response) const
 {
     FString Error;

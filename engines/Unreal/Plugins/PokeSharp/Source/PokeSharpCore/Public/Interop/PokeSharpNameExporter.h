@@ -18,14 +18,21 @@ class POKESHARPCORE_API UPokeSharpNameExporter : public UObject
 
   public:
     UNREALSHARP_FUNCTION()
-    static void GetOrAddEntry(const UTF16CHAR *Str, int32 Length, bool FindMode, uint32 &ComparisonIndex,
-                              uint32 &DisplayIndex, int32 &Number);
+    static void GetOrAddEntry(const UTF16CHAR *Str,
+                              int32 Length,
+                              bool FindMode,
+                              uint32 &ComparisonIndex,
+                              uint32 &DisplayIndex,
+                              int32 &Number);
 
     UNREALSHARP_FUNCTION()
     static bool IsValid(uint32 ComparisonIndex, uint32 DisplayIndex);
 
     UNREALSHARP_FUNCTION()
-    static bool EqualsBuffer(uint32 ComparisonIndex, uint32 DisplayIndex, int32 Number, const UTF16CHAR *Str,
+    static bool EqualsBuffer(uint32 ComparisonIndex,
+                             uint32 DisplayIndex,
+                             int32 Number,
+                             const UTF16CHAR *Str,
                              int32 Length);
 
     UNREALSHARP_FUNCTION()

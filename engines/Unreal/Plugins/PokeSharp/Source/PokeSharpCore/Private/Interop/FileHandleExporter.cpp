@@ -36,15 +36,15 @@ bool UFileHandleExporter::Seek(IFileHandle *Handle, const uint64 Offset, const E
     bool Result = false;
     switch (Origin)
     {
-    case ESeekOrigin::Begin:
-        Result = Handle->Seek(Offset);
-        break;
-    case ESeekOrigin::Current:
-        Result = Handle->Seek(Handle->Tell() + Offset);
-        break;
-    case ESeekOrigin::End:
-        Result = Handle->SeekFromEnd(Offset);
-        break;
+        case ESeekOrigin::Begin:
+            Result = Handle->Seek(Offset);
+            break;
+        case ESeekOrigin::Current:
+            Result = Handle->Seek(Handle->Tell() + Offset);
+            break;
+        case ESeekOrigin::End:
+            Result = Handle->SeekFromEnd(Offset);
+            break;
     }
 
     if (!Result)

@@ -25,7 +25,9 @@ class ICombatDamageable
   public:
     /** Handles damage and knockback events */
     UFUNCTION(BlueprintCallable, Category = "Damageable")
-    virtual void ApplyDamage(float Damage, AActor *DamageCauser, const FVector &DamageLocation,
+    virtual void ApplyDamage(float Damage,
+                             AActor *DamageCauser,
+                             const FVector &DamageLocation,
                              const FVector &DamageImpulse) = 0;
 
     /** Handles death events */

@@ -61,8 +61,12 @@ void UGameUIPolicy::RequestPrimaryControl(UPrimaryGameLayout *Layout)
 
 void UGameUIPolicy::AddLayoutToViewport(ULocalPlayer *LocalPlayer, UPrimaryGameLayout *Layout)
 {
-    UE_LOG(LogPokeSharpCore, Log, TEXT("[%s] is adding player [%s]'s root layout [%s] to the viewport"), *GetName(),
-           *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));
+    UE_LOG(LogPokeSharpCore,
+           Log,
+           TEXT("[%s] is adding player [%s]'s root layout [%s] to the viewport"),
+           *GetName(),
+           *GetNameSafe(LocalPlayer),
+           *GetNameSafe(Layout));
 
     Layout->SetPlayerContext(FLocalPlayerContext(LocalPlayer));
     Layout->AddToPlayerScreen(1000);
@@ -78,16 +82,22 @@ void UGameUIPolicy::RemoveLayoutFromViewport(ULocalPlayer *LocalPlayer, UPrimary
         return;
     }
 
-    UE_LOG(LogPokeSharpCore, Log, TEXT("[%s] is removing player [%s]'s root layout [%s] from the viewport"), *GetName(),
-           *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));
+    UE_LOG(LogPokeSharpCore,
+           Log,
+           TEXT("[%s] is removing player [%s]'s root layout [%s] from the viewport"),
+           *GetName(),
+           *GetNameSafe(LocalPlayer),
+           *GetNameSafe(Layout));
 
     Layout->RemoveFromParent();
     if (LayoutSlateWidget.IsValid())
     {
-        UE_LOG(LogPokeSharpCore, Log,
+        UE_LOG(LogPokeSharpCore,
+               Log,
                TEXT("Player [%s]'s root layout [%s] has been removed from the viewport, but other references to its "
                     "underlying Slate widget still exist. Noting in case we leak it."),
-               *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));
+               *GetNameSafe(LocalPlayer),
+               *GetNameSafe(Layout));
     }
 
     OnRootLayoutRemovedFromViewport(LocalPlayer, Layout);
@@ -137,19 +147,22 @@ TSubclassOf<UPrimaryGameLayout> UGameUIPolicy::GetLayoutWidgetClass() const
 
 void UGameUIPolicy::NotifyPlayerAdded(ULocalPlayer *LocalPlayer)
 {
-    LocalPlayer->OnPlayerControllerChanged().AddWeakLambda(this, [this, LocalPlayer](APlayerController *) {
-        NotifyPlayerRemoved(LocalPlayer);
+    LocalPlayer->OnPlayerControllerChanged().AddWeakLambda(
+        this,
+        [this, LocalPlayer](APlayerController *)
+        {
+            NotifyPlayerRemoved(LocalPlayer);
 
-        if (const auto LayoutInfo = RootViewportLayouts.FindByKey(LocalPlayer); LayoutInfo != nullptr)
-        {
-            AddLayoutToViewport(LocalPlayer, LayoutInfo->RootLayout);
-            LayoutInfo->bAddedToViewport = true;
-        }
-        else
-        {
-            CreateLayoutWidget(LocalPlayer);
-        }
-    });
+            if (const auto LayoutInfo = RootViewportLayouts.FindByKey(LocalPlayer); LayoutInfo != nullptr)
+            {
+                AddLayoutToViewport(LocalPlayer, LayoutInfo->RootLayout);
+                LayoutInfo->bAddedToViewport = true;
+            }
+            else
+            {
+                CreateLayoutWidget(LocalPlayer);
+            }
+        });
 
     if (auto *LayoutInfo = RootViewportLayouts.FindByKey(LocalPlayer); LayoutInfo != nullptr)
     {

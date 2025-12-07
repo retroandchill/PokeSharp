@@ -21,8 +21,13 @@ class POKESHARPCORE_API UPokeSharpTextExporter : public UObject
     static void FromSourceString(const UTF16CHAR *Buffer, int32 Length, FText &OutText);
 
     UNREALSHARP_FUNCTION()
-    static void FromLocalized(const UTF16CHAR *NamespaceBuffer, int32 NamespaceLength, const UTF16CHAR *KeyBuffer,
-                              int32 KeyLength, const UTF16CHAR *StrBuffer, int32 StrLength, FText &OutText);
+    static void FromLocalized(const UTF16CHAR *NamespaceBuffer,
+                              int32 NamespaceLength,
+                              const UTF16CHAR *KeyBuffer,
+                              int32 KeyLength,
+                              const UTF16CHAR *StrBuffer,
+                              int32 StrLength,
+                              FText &OutText);
 
     UNREALSHARP_FUNCTION()
     static void FromLocText(const TCHAR *StrBuffer, int32 StrLength, FText &OutText);

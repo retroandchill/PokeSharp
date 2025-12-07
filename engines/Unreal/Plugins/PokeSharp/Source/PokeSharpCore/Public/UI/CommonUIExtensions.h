@@ -21,28 +21,39 @@ class UCommonUIExtensions : public UBlueprintFunctionLibrary
     GENERATED_BODY()
 
   public:
-    UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "Global UI Extensions",
+    UFUNCTION(BlueprintPure,
+              BlueprintCosmetic,
+              Category = "Global UI Extensions",
               meta = (WorldContext = "WidgetContextObject", ExtensionMethod))
     static POKESHARPCORE_API ECommonInputType GetOwningPlayerInputType(const UUserWidget *WidgetContextObject);
 
-    UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "Global UI Extensions",
+    UFUNCTION(BlueprintPure,
+              BlueprintCosmetic,
+              Category = "Global UI Extensions",
               meta = (WorldContext = "WidgetContextObject", ExtensionMethod))
     static POKESHARPCORE_API bool IsOwningPlayerUsingTouch(const UUserWidget *WidgetContextObject);
 
-    UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "Global UI Extensions",
+    UFUNCTION(BlueprintPure,
+              BlueprintCosmetic,
+              Category = "Global UI Extensions",
               meta = (WorldContext = "WidgetContextObject", ExtensionMethod))
     static POKESHARPCORE_API bool IsOwningPlayerUsingGamepad(const UUserWidget *WidgetContextObject);
 
-    UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions",
+    UFUNCTION(BlueprintCallable,
+              BlueprintCosmetic,
+              Category = "Global UI Extensions",
               meta = (DeterminesOutputType = "WidgetClass", DynamicOutputParam = "ReturnValue", ExtensionMethod))
     static POKESHARPCORE_API UCommonActivatableWidget *PushContentToLayer(
-        const ULocalPlayer *LocalPlayer, UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerName,
+        const ULocalPlayer *LocalPlayer,
+        UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerName,
         UPARAM(meta = (AllowAbstract = false)) TSubclassOf<UCommonActivatableWidget> WidgetClass);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
-    static POKESHARPCORE_API void PushStreamedContentToLayer(
-        const ULocalPlayer *LocalPlayer, UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag LayerName,
-        UPARAM(meta = (AllowAbstract = false)) TSoftClassPtr<UCommonActivatableWidget> WidgetClass);
+    static POKESHARPCORE_API void PushStreamedContentToLayer(const ULocalPlayer *LocalPlayer,
+                                                             UPARAM(meta = (Categories = "UI.Layer"))
+                                                                 FGameplayTag LayerName,
+                                                             UPARAM(meta = (AllowAbstract = false))
+                                                                 TSoftClassPtr<UCommonActivatableWidget> WidgetClass);
 
     UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Global UI Extensions", meta = (ExtensionMethod))
     static POKESHARPCORE_API void PopContentFromLayer(UCommonActivatableWidget *ActivatableWidget);

@@ -4,7 +4,8 @@
 #include <chrono>
 #include <utility>
 
-BEGIN_DEFINE_SPEC(FOptionalPtrSpec, "OptionalPtr.Unit",
+BEGIN_DEFINE_SPEC(FOptionalPtrSpec,
+                  "OptionalPtr.Unit",
                   EAutomationTestFlags::ProductFilter | EAutomationTestFlags::EditorContext)
 MockObject *m_wrapped_obj = nullptr;
 MockObject *m_default_obj = nullptr;
@@ -49,8 +50,9 @@ void MapTest(FuncObjectType &&func, Args &&...args)
     TestTrue("", std::is_same<decltype(testing_obj), ResultType>::value);
     if (m_wrapped_obj)
     {
-        TestTrue("", *testing_obj.Get() == *GetResult<decltype(testing_obj.Get())>(std::forward<FuncObjectType>(func),
-                                                                                   std::forward<Args>(args)...));
+        TestTrue("",
+                 *testing_obj.Get() == *GetResult<decltype(testing_obj.Get())>(std::forward<FuncObjectType>(func),
+                                                                               std::forward<Args>(args)...));
     }
 }
 
@@ -85,509 +87,756 @@ END_DEFINE_SPEC(FOptionalPtrSpec)
 
 void FOptionalPtrSpec::Define()
 {
-    Describe("Map", [this]() {
-        Describe("when given a wrapped UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
-                It("should map a non-const method and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::Method); });
-                It("should map a const method and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodConst); });
-                It("should map a method returning const data and return set optional",
-                   [this]() { MapTest<TOptionalPtr<const SimpleObject>, UMockUObject>(&MockObject::ConstMethod); });
-                It("should map a const method returning const data and return set optional", [this]() {
-                    MapTest<TOptionalPtr<const SimpleObject>, UMockUObject>(&MockObject::ConstMethodConst);
-                });
-                It("should map a method returning const pointer and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::ConstPointerMethod); });
-                It("should map a const method returning const pointer and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::ConstPointerMethodConst);
-                });
-                It("should map a non-const field and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::m_field); });
-                It("should map a const field and return set optional",
-                   [this]() { MapTest<TOptionalPtr<const SimpleObject>, UMockUObject>(&MockObject::m_const_field); });
-                It("should map a field with const pointer and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::m_field_const); });
+    Describe(
+        "Map",
+        [this]()
+        {
+            Describe(
+                "when given a wrapped UObject pointer",
+                [this]()
+                {
+                    Describe(
+                        "when valid",
+                        [this]()
+                        {
+                            BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
+                            AfterEach([this]() { m_wrapped_obj->Destroy(); });
+                            It("should map a non-const method and return set optional",
+                               [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::Method); });
+                            It("should map a const method and return set optional",
+                               [this]()
+                               { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodConst); });
+                            It("should map a method returning const data and return set optional",
+                               [this]()
+                               { MapTest<TOptionalPtr<const SimpleObject>, UMockUObject>(&MockObject::ConstMethod); });
+                            It("should map a const method returning const data and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<const SimpleObject>, UMockUObject>(
+                                       &MockObject::ConstMethodConst);
+                               });
+                            It("should map a method returning const pointer and return set optional",
+                               [this]()
+                               { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::ConstPointerMethod); });
+                            It("should map a const method returning const pointer and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::ConstPointerMethodConst);
+                               });
+                            It("should map a non-const field and return set optional",
+                               [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::m_field); });
+                            It("should map a const field and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<const SimpleObject>, UMockUObject>(&MockObject::m_const_field);
+                               });
+                            It("should map a field with const pointer and return set optional",
+                               [this]()
+                               { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::m_field_const); });
 
-                It("should map a method with copy parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamCopy, SimpleObject{});
-                });
-                It("should map a method with pointer parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamPointer,
-                                                                      new SimpleObject());
-                });
-                It("should map a method with const pointer parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithConstParamPointer,
-                                                                      new SimpleObject());
-                });
-                It("should map a method with const reference parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithConstParamRef,
-                                                                      SimpleObject{});
-                });
-                It("should map a method with non-const reference parameter and return set optional", [this]() {
-                    SimpleObject simple_object{};
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamRef, simple_object);
-                });
-                It("should map a method with r-value parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamRValue,
-                                                                      SimpleObject{});
-                });
-                It("should map a method with multiple parameters and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithMultipleParams,
-                                                                      SimpleObject{}, 0, 0.f);
+                            It("should map a method with copy parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamCopy,
+                                                                                     SimpleObject{});
+                               });
+                            It("should map a method with pointer parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::MethodWithParamPointer,
+                                       new SimpleObject());
+                               });
+                            It("should map a method with const pointer parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::MethodWithConstParamPointer,
+                                       new SimpleObject());
+                               });
+                            It("should map a method with const reference parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::MethodWithConstParamRef,
+                                       SimpleObject{});
+                               });
+                            It("should map a method with non-const reference parameter and return set optional",
+                               [this]()
+                               {
+                                   SimpleObject simple_object{};
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamRef,
+                                                                                     simple_object);
+                               });
+                            It("should map a method with r-value parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::MethodWithParamRValue,
+                                                                                     SimpleObject{});
+                               });
+                            It("should map a method with multiple parameters and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::MethodWithMultipleParams,
+                                       SimpleObject{},
+                                       0,
+                                       0.f);
+                               });
+
+                            It("should map the overloaded method 1 and return set optional",
+                               [this]()
+                               {
+                                   auto testing_obj = TOptionalPtr<UMockUObject>((UMockUObject *)(m_wrapped_obj))
+                                                          .Map(static_cast<SimpleObject *(MockObject::*)()>(
+                                                              &MockObject::OverloadedMethod));
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+                               });
+                            It("should map the overloaded method 2 and return set optional",
+                               [this]()
+                               {
+                                   bool executed = false;
+                                   auto testing_obj = TOptionalPtr<UMockUObject>((UMockUObject *)m_wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(MockObject::*)(bool &)>(
+                                                                   &MockObject::OverloadedMethod),
+                                                               executed);
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", executed);
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+                               });
+                        });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+                                 It("should map a method and return empty optional",
+                                    [this]()
+                                    { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::Method); });
+                             });
                 });
 
-                It("should map the overloaded method 1 and return set optional", [this]() {
-                    auto testing_obj =
-                        TOptionalPtr<UMockUObject>((UMockUObject *)(m_wrapped_obj))
-                            .Map(static_cast<SimpleObject *(MockObject::*)()>(&MockObject::OverloadedMethod));
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
-                });
-                It("should map the overloaded method 2 and return set optional", [this]() {
-                    bool executed = false;
-                    auto testing_obj =
-                        TOptionalPtr<UMockUObject>((UMockUObject *)m_wrapped_obj)
-                            .Map(static_cast<SimpleObject *(MockObject::*)(bool &)>(&MockObject::OverloadedMethod),
-                                 executed);
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", executed);
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
-                });
-            });
+            Describe(
+                "when given a wrapped non-UObject pointer",
+                [this]()
+                {
+                    Describe(
+                        "when valid",
+                        [this]()
+                        {
+                            BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
+                            AfterEach([this]() { m_wrapped_obj->Destroy(); });
+                            It("should map a non-const method and return set optional",
+                               [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::Method); });
+                            It("should map a const method and return set optional",
+                               [this]()
+                               { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodConst); });
+                            It("should map a method returning const data and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<const SimpleObject>, MockNonUObject>(&MockObject::ConstMethod);
+                               });
+                            It("should map a const method returning const data and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<const SimpleObject>, MockNonUObject>(
+                                       &MockObject::ConstMethodConst);
+                               });
+                            It("should map a method returning const pointer and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::ConstPointerMethod);
+                               });
+                            It("should map a const method returning const pointer and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::ConstPointerMethodConst);
+                               });
+                            It("should map a non-const field and return set optional",
+                               [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::m_field); });
+                            It("should map a const field and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<const SimpleObject>, MockNonUObject>(
+                                       &MockObject::m_const_field);
+                               });
+                            It("should map a field with const pointer and return set optional",
+                               [this]()
+                               { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::m_field_const); });
 
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
-                It("should map a method and return empty optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::Method); });
-            });
+                            It("should map a method with copy parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithParamCopy,
+                                                                                       SimpleObject{});
+                               });
+                            It("should map a method with pointer parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::MethodWithParamPointer,
+                                       new SimpleObject{});
+                               });
+                            It("should map a method with const pointer parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::MethodWithConstParamPointer,
+                                       new SimpleObject{});
+                               });
+                            It("should map a method with const reference parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::MethodWithConstParamRef,
+                                       SimpleObject{});
+                               });
+                            It("should map a method with non-const reference parameter and return set optional",
+                               [this]()
+                               {
+                                   SimpleObject simple_object{};
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithParamRef,
+                                                                                       simple_object);
+                               });
+                            It("should map a method with r-value parameter and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::MethodWithParamRValue,
+                                       SimpleObject{});
+                               });
+                            It("should map a method with multiple parameters and return set optional",
+                               [this]()
+                               {
+                                   MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::MethodWithMultipleParams,
+                                       SimpleObject{},
+                                       0,
+                                       0.f);
+                               });
+
+                            It("should map the overloaded method 1 and return set optional",
+                               [this]()
+                               {
+                                   auto testing_obj = TOptionalPtr<MockNonUObject>((MockNonUObject *)m_wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(MockObject::*)()>(
+                                                              &MockObject::OverloadedMethod));
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+                               });
+                            It("should map the overloaded method 2 and return set optional",
+                               [this]()
+                               {
+                                   bool executed = false;
+                                   auto testing_obj = TOptionalPtr<MockNonUObject>((MockNonUObject *)m_wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(MockObject::*)(bool &)>(
+                                                                   &MockObject::OverloadedMethod),
+                                                               executed);
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", executed);
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+                               });
+                        });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+                                 It("should map a method and return empty optional",
+                                    [this]()
+                                    { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::Method); });
+                             });
+                });
         });
+    Describe(
+        "IfPresent",
+        [this]()
+        {
+            Describe(
+                "when given a wrapped UObject pointer",
+                [this]()
+                {
+                    Describe("when valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
+                                 AfterEach([this]() { m_wrapped_obj->Destroy(); });
+                                 It("should execute a non-const method",
+                                    [this]() { IfPresentTest<UMockUObject>(&MockObject::Method2WithParamRef); });
 
-        Describe("when given a wrapped non-UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
-                It("should map a non-const method and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::Method); });
-                It("should map a const method and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodConst); });
-                It("should map a method returning const data and return set optional",
-                   [this]() { MapTest<TOptionalPtr<const SimpleObject>, MockNonUObject>(&MockObject::ConstMethod); });
-                It("should map a const method returning const data and return set optional", [this]() {
-                    MapTest<TOptionalPtr<const SimpleObject>, MockNonUObject>(&MockObject::ConstMethodConst);
-                });
-                It("should map a method returning const pointer and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::ConstPointerMethod); });
-                It("should map a const method returning const pointer and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::ConstPointerMethodConst);
-                });
-                It("should map a non-const field and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::m_field); });
-                It("should map a const field and return set optional",
-                   [this]() { MapTest<TOptionalPtr<const SimpleObject>, MockNonUObject>(&MockObject::m_const_field); });
-                It("should map a field with const pointer and return set optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::m_field_const); });
+                                 It("should execute a const method",
+                                    [this]() { IfPresentTest<UMockUObject>(&MockObject::MethodConstWithParamRef); });
+                             });
 
-                It("should map a method with copy parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithParamCopy,
-                                                                        SimpleObject{});
-                });
-                It("should map a method with pointer parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithParamPointer,
-                                                                        new SimpleObject{});
-                });
-                It("should map a method with const pointer parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithConstParamPointer,
-                                                                        new SimpleObject{});
-                });
-                It("should map a method with const reference parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithConstParamRef,
-                                                                        SimpleObject{});
-                });
-                It("should map a method with non-const reference parameter and return set optional", [this]() {
-                    SimpleObject simple_object{};
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithParamRef, simple_object);
-                });
-                It("should map a method with r-value parameter and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithParamRValue,
-                                                                        SimpleObject{});
-                });
-                It("should map a method with multiple parameters and return set optional", [this]() {
-                    MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::MethodWithMultipleParams,
-                                                                        SimpleObject{}, 0, 0.f);
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+
+                                 It("should not execute a non-const method",
+                                    [this]() { IfPresentTest<UMockUObject>(&MockObject::Method2WithParamRef); });
+
+                                 It("should not execute a const method",
+                                    [this]() { IfPresentTest<UMockUObject>(&MockObject::MethodConstWithParamRef); });
+                             });
                 });
 
-                It("should map the overloaded method 1 and return set optional", [this]() {
-                    auto testing_obj =
-                        TOptionalPtr<MockNonUObject>((MockNonUObject *)m_wrapped_obj)
-                            .Map(static_cast<SimpleObject *(MockObject::*)()>(&MockObject::OverloadedMethod));
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
-                });
-                It("should map the overloaded method 2 and return set optional", [this]() {
-                    bool executed = false;
-                    auto testing_obj =
-                        TOptionalPtr<MockNonUObject>((MockNonUObject *)m_wrapped_obj)
-                            .Map(static_cast<SimpleObject *(MockObject::*)(bool &)>(&MockObject::OverloadedMethod),
-                                 executed);
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", executed);
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
-                });
-            });
+            Describe(
+                "when given a wrapped non-UObject pointer",
+                [this]()
+                {
+                    Describe("when valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
+                                 AfterEach([this]() { m_wrapped_obj->Destroy(); });
 
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
-                It("should map a method and return empty optional",
-                   [this]() { MapTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::Method); });
-            });
+                                 It("should execute a non-const method",
+                                    [this]() { IfPresentTest<MockNonUObject>(&MockObject::Method2WithParamRef); });
+
+                                 It("should execute a const method",
+                                    [this]() { IfPresentTest<MockNonUObject>(&MockObject::MethodConstWithParamRef); });
+                             });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+
+                                 It("should not execute a non-const method",
+                                    [this]() { IfPresentTest<MockNonUObject>(&MockObject::Method2WithParamRef); });
+
+                                 It("should not execute a const method",
+                                    [this]() { IfPresentTest<MockNonUObject>(&MockObject::MethodConstWithParamRef); });
+                             });
+                });
         });
-    });
-    Describe("IfPresent", [this]() {
-        Describe("when given a wrapped UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
-                It("should execute a non-const method",
-                   [this]() { IfPresentTest<UMockUObject>(&MockObject::Method2WithParamRef); });
+    Describe("OrElse",
+             [this]()
+             {
+                 Describe("when given a wrapped UObject pointer",
+                          [this]()
+                          {
+                              Describe("when valid",
+                                       [this]()
+                                       {
+                                           BeforeEach(
+                                               [this]()
+                                               {
+                                                   m_wrapped_obj = NewObject<UMockUObject>();
+                                                   m_default_obj = NewObject<UMockUObject>();
+                                               });
+                                           AfterEach(
+                                               [this]()
+                                               {
+                                                   m_wrapped_obj->Destroy();
+                                                   m_default_obj->Destroy();
+                                               });
 
-                It("should execute a const method",
-                   [this]() { IfPresentTest<UMockUObject>(&MockObject::MethodConstWithParamRef); });
-            });
+                                           It("should return the initial wrapped object",
+                                              [this]() { OrElseTest<UMockUObject, UMockUObject>(); });
+                                       });
 
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
+                              Describe("when not valid",
+                                       [this]()
+                                       {
+                                           BeforeEach(
+                                               [this]()
+                                               {
+                                                   m_wrapped_obj = nullptr;
+                                                   m_default_obj = NewObject<UMockUObject>();
+                                               });
+                                           AfterEach([this]() { m_default_obj->Destroy(); });
 
-                It("should not execute a non-const method",
-                   [this]() { IfPresentTest<UMockUObject>(&MockObject::Method2WithParamRef); });
+                                           It("should return the wrapped default object",
+                                              [this]() { OrElseTest<UMockUObject, UMockUObject>(); });
+                                       });
+                          });
+                 Describe("when given a wrapped non-UObject pointer",
+                          [this]()
+                          {
+                              Describe("when valid",
+                                       [this]()
+                                       {
+                                           BeforeEach(
+                                               [this]()
+                                               {
+                                                   m_wrapped_obj = new MockNonUObject();
+                                                   m_default_obj = new MockNonUObject();
+                                               });
+                                           AfterEach(
+                                               [this]()
+                                               {
+                                                   m_wrapped_obj->Destroy();
+                                                   m_default_obj->Destroy();
+                                               });
 
-                It("should not execute a const method",
-                   [this]() { IfPresentTest<UMockUObject>(&MockObject::MethodConstWithParamRef); });
-            });
-        });
+                                           It("should return the initial wrapped object",
+                                              [this]() { OrElseTest<MockNonUObject, MockNonUObject>(); });
+                                       });
 
-        Describe("when given a wrapped non-UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
+                              Describe("when not valid",
+                                       [this]()
+                                       {
+                                           BeforeEach(
+                                               [this]()
+                                               {
+                                                   m_wrapped_obj = nullptr;
+                                                   m_default_obj = new MockNonUObject();
+                                               });
+                                           AfterEach([this]() { m_default_obj->Destroy(); });
 
-                It("should execute a non-const method",
-                   [this]() { IfPresentTest<MockNonUObject>(&MockObject::Method2WithParamRef); });
+                                           It("should return the wrapped default object",
+                                              [this]() { OrElseTest<MockNonUObject, MockNonUObject>(); });
+                                       });
+                          });
+             });
+    Describe(
+        "MapToValue",
+        [this]()
+        {
+            Describe(
+                "when given a wrapped UObject pointer",
+                [this]()
+                {
+                    Describe(
+                        "when valid",
+                        [this]()
+                        {
+                            BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
+                            AfterEach([this]() { m_wrapped_obj->Destroy(); });
 
-                It("should execute a const method",
-                   [this]() { IfPresentTest<MockNonUObject>(&MockObject::MethodConstWithParamRef); });
-            });
+                            It("should map a non-const method and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::Method); });
+                            It("should map a const method and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::MethodConst); });
+                            It("should map a method returning const data and return the value",
+                               [this]()
+                               { MapToValueTest<const SimpleObject *, UMockUObject>(&MockObject::ConstMethod); });
+                            It("should map a const method returning const data and return the value",
+                               [this]()
+                               { MapToValueTest<const SimpleObject *, UMockUObject>(&MockObject::ConstMethodConst); });
+                            It("should map a method returning const pointer and return the value",
+                               [this]()
+                               { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::ConstPointerMethod); });
+                            It("should map a const method returning const pointer and return the value",
+                               [this]()
+                               { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::ConstPointerMethodConst); });
+                            It("should map a non-const field and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::m_field); });
+                            It("should map a const field and return the value",
+                               [this]()
+                               { MapToValueTest<const SimpleObject *, UMockUObject>(&MockObject::m_const_field); });
+                            It("should map a field with const pointer and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::m_field_const); });
 
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
+                            It("should map the overloaded method 1 and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = NewObject<UMockUObject>();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   auto testing_obj = TOptionalPtr<UMockUObject>(wrapped_obj)
+                                                          .MapToValue(default_obj,
+                                                                      static_cast<SimpleObject *(MockObject::*)()>(
+                                                                          &MockObject::OverloadedMethod));
+                                   TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod());
+                                   TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
 
-                It("should not execute a non-const method",
-                   [this]() { IfPresentTest<MockNonUObject>(&MockObject::Method2WithParamRef); });
-
-                It("should not execute a const method",
-                   [this]() { IfPresentTest<MockNonUObject>(&MockObject::MethodConstWithParamRef); });
-            });
-        });
-    });
-    Describe("OrElse", [this]() {
-        Describe("when given a wrapped UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() {
-                    m_wrapped_obj = NewObject<UMockUObject>();
-                    m_default_obj = NewObject<UMockUObject>();
-                });
-                AfterEach([this]() {
-                    m_wrapped_obj->Destroy();
-                    m_default_obj->Destroy();
-                });
-
-                It("should return the initial wrapped object", [this]() { OrElseTest<UMockUObject, UMockUObject>(); });
-            });
-
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() {
-                    m_wrapped_obj = nullptr;
-                    m_default_obj = NewObject<UMockUObject>();
-                });
-                AfterEach([this]() { m_default_obj->Destroy(); });
-
-                It("should return the wrapped default object", [this]() { OrElseTest<UMockUObject, UMockUObject>(); });
-            });
-        });
-        Describe("when given a wrapped non-UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() {
-                    m_wrapped_obj = new MockNonUObject();
-                    m_default_obj = new MockNonUObject();
-                });
-                AfterEach([this]() {
-                    m_wrapped_obj->Destroy();
-                    m_default_obj->Destroy();
-                });
-
-                It("should return the initial wrapped object",
-                   [this]() { OrElseTest<MockNonUObject, MockNonUObject>(); });
-            });
-
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() {
-                    m_wrapped_obj = nullptr;
-                    m_default_obj = new MockNonUObject();
-                });
-                AfterEach([this]() { m_default_obj->Destroy(); });
-
-                It("should return the wrapped default object",
-                   [this]() { OrElseTest<MockNonUObject, MockNonUObject>(); });
-            });
-        });
-    });
-    Describe("MapToValue", [this]() {
-        Describe("when given a wrapped UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
-
-                It("should map a non-const method and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::Method); });
-                It("should map a const method and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::MethodConst); });
-                It("should map a method returning const data and return the value",
-                   [this]() { MapToValueTest<const SimpleObject *, UMockUObject>(&MockObject::ConstMethod); });
-                It("should map a const method returning const data and return the value",
-                   [this]() { MapToValueTest<const SimpleObject *, UMockUObject>(&MockObject::ConstMethodConst); });
-                It("should map a method returning const pointer and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::ConstPointerMethod); });
-                It("should map a const method returning const pointer and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::ConstPointerMethodConst); });
-                It("should map a non-const field and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::m_field); });
-                It("should map a const field and return the value",
-                   [this]() { MapToValueTest<const SimpleObject *, UMockUObject>(&MockObject::m_const_field); });
-                It("should map a field with const pointer and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::m_field_const); });
-
-                It("should map the overloaded method 1 and return the value", [this]() {
-                    auto wrapped_obj = NewObject<UMockUObject>();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    auto testing_obj =
-                        TOptionalPtr<UMockUObject>(wrapped_obj)
-                            .MapToValue(default_obj,
-                                        static_cast<SimpleObject *(MockObject::*)()>(&MockObject::OverloadedMethod));
-                    TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod());
-                    TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
-
-                    wrapped_obj->Destroy();
-                    delete default_obj;
-                });
-                It("should map the overloaded method 2 and return the value", [this]() {
-                    auto wrapped_obj = NewObject<UMockUObject>();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    bool executed = false;
-                    auto testing_obj = TOptionalPtr<UMockUObject>(wrapped_obj)
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                            It("should map the overloaded method 2 and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = NewObject<UMockUObject>();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   bool executed = false;
+                                   auto testing_obj =
+                                       TOptionalPtr<UMockUObject>(wrapped_obj)
                                            .MapToValue(default_obj,
                                                        static_cast<SimpleObject *(MockObject::*)(bool &)>(
                                                            &MockObject::OverloadedMethod),
                                                        executed);
-                    TestTrue("", executed);
-                    TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod(executed));
-                    TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
+                                   TestTrue("", executed);
+                                   TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod(executed));
+                                   TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
 
-                    wrapped_obj->Destroy();
-                    delete default_obj;
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                        });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+
+                                 It("should map a method and return the default value",
+                                    [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::Method); });
+                             });
                 });
-            });
 
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
+            Describe(
+                "when given a wrapped non-UObject pointer",
+                [this]()
+                {
+                    Describe(
+                        "when valid",
+                        [this]()
+                        {
+                            BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
+                            AfterEach([this]() { m_wrapped_obj->Destroy(); });
 
-                It("should map a method and return the default value",
-                   [this]() { MapToValueTest<SimpleObject *, UMockUObject>(&MockObject::Method); });
-            });
-        });
+                            It("should map a non-const method and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::Method); });
+                            It("should map a const method and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::MethodConst); });
+                            It("should map a method returning const data and return the value",
+                               [this]()
+                               { MapToValueTest<const SimpleObject *, MockNonUObject>(&MockObject::ConstMethod); });
+                            It("should map a const method returning const data and return the value",
+                               [this]()
+                               {
+                                   MapToValueTest<const SimpleObject *, MockNonUObject>(&MockObject::ConstMethodConst);
+                               });
+                            It("should map a method returning const pointer and return the value",
+                               [this]()
+                               { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::ConstPointerMethod); });
+                            It("should map a const method returning const pointer and return the value",
+                               [this]()
+                               {
+                                   MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::ConstPointerMethodConst);
+                               });
+                            It("should map a non-const field and return the value",
+                               [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::m_field); });
+                            It("should map a const field and return the value",
+                               [this]()
+                               { MapToValueTest<const SimpleObject *, MockNonUObject>(&MockObject::m_const_field); });
+                            It("should map a field with const pointer and return the value",
+                               [this]()
+                               { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::m_field_const); });
 
-        Describe("when given a wrapped non-UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
+                            It("should map the overloaded method 1 and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = new MockNonUObject();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   auto testing_obj = TOptionalPtr<MockNonUObject>(wrapped_obj)
+                                                          .MapToValue(default_obj,
+                                                                      static_cast<SimpleObject *(MockObject::*)()>(
+                                                                          &MockObject::OverloadedMethod));
+                                   TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod());
+                                   TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
 
-                It("should map a non-const method and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::Method); });
-                It("should map a const method and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::MethodConst); });
-                It("should map a method returning const data and return the value",
-                   [this]() { MapToValueTest<const SimpleObject *, MockNonUObject>(&MockObject::ConstMethod); });
-                It("should map a const method returning const data and return the value",
-                   [this]() { MapToValueTest<const SimpleObject *, MockNonUObject>(&MockObject::ConstMethodConst); });
-                It("should map a method returning const pointer and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::ConstPointerMethod); });
-                It("should map a const method returning const pointer and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::ConstPointerMethodConst); });
-                It("should map a non-const field and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::m_field); });
-                It("should map a const field and return the value",
-                   [this]() { MapToValueTest<const SimpleObject *, MockNonUObject>(&MockObject::m_const_field); });
-                It("should map a field with const pointer and return the value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::m_field_const); });
-
-                It("should map the overloaded method 1 and return the value", [this]() {
-                    auto wrapped_obj = new MockNonUObject();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    auto testing_obj =
-                        TOptionalPtr<MockNonUObject>(wrapped_obj)
-                            .MapToValue(default_obj,
-                                        static_cast<SimpleObject *(MockObject::*)()>(&MockObject::OverloadedMethod));
-                    TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod());
-                    TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
-
-                    wrapped_obj->Destroy();
-                    delete default_obj;
-                });
-                It("should map the overloaded method 2 and return the value", [this]() {
-                    auto wrapped_obj = new MockNonUObject();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    bool executed = false;
-                    auto testing_obj = TOptionalPtr<MockNonUObject>(wrapped_obj)
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                            It("should map the overloaded method 2 and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = new MockNonUObject();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   bool executed = false;
+                                   auto testing_obj =
+                                       TOptionalPtr<MockNonUObject>(wrapped_obj)
                                            .MapToValue(default_obj,
                                                        static_cast<SimpleObject *(MockObject::*)(bool &)>(
                                                            &MockObject::OverloadedMethod),
                                                        executed);
-                    TestTrue("", executed);
-                    TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod(executed));
-                    TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
+                                   TestTrue("", executed);
+                                   TestEqual("", *testing_obj, *wrapped_obj->OverloadedMethod(executed));
+                                   TestTrue("", std::is_same<decltype(testing_obj), SimpleObject *>::value);
 
-                    wrapped_obj->Destroy();
-                    delete default_obj;
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                        });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+
+                                 It("should map a method and return the default value",
+                                    [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::Method); });
+                             });
                 });
-            });
-
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
-
-                It("should map a method and return the default value",
-                   [this]() { MapToValueTest<SimpleObject *, MockNonUObject>(&MockObject::Method); });
-            });
         });
-    });
-    Describe("MapStatic", [this]() {
-        Describe("when given a wrapped UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
+    Describe(
+        "MapStatic",
+        [this]()
+        {
+            Describe(
+                "when given a wrapped UObject pointer",
+                [this]()
+                {
+                    Describe(
+                        "when valid",
+                        [this]()
+                        {
+                            BeforeEach([this]() { m_wrapped_obj = NewObject<UMockUObject>(); });
+                            AfterEach([this]() { m_wrapped_obj->Destroy(); });
 
-                It("should map a static function taking the wrapped object as parameter and return set optional",
-                   [this]() { MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::StaticFunction); });
-                It("should map a static function taking the wrapped object as parameter and another copy parameter and "
-                   "return set optional",
-                   [this]() {
-                       MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::StaticFunctionWithParamCopy,
-                                                                               SimpleObject{});
-                   });
-                It("should map a static function taking the wrapped object as parameter and another reference "
-                   "parameter and return set optional",
-                   [this]() {
-                       MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(
-                           &MockObject::StaticFunctionWithConstParamRef, SimpleObject{});
-                   });
+                            It("should map a static function taking the wrapped object as parameter and return set "
+                               "optional",
+                               [this]()
+                               {
+                                   MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::StaticFunction);
+                               });
+                            It("should map a static function taking the wrapped object as parameter and another copy "
+                               "parameter and "
+                               "return set optional",
+                               [this]()
+                               {
+                                   MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::StaticFunctionWithParamCopy,
+                                       SimpleObject{});
+                               });
+                            It("should map a static function taking the wrapped object as parameter and another "
+                               "reference "
+                               "parameter and return set optional",
+                               [this]()
+                               {
+                                   MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                       &MockObject::StaticFunctionWithConstParamRef,
+                                       SimpleObject{});
+                               });
 
-                It("should map the overloaded static function 1 and return the value", [this]() {
-                    auto wrapped_obj = NewObject<UMockUObject>();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    auto testing_obj =
-                        TOptionalPtr<UMockUObject>(wrapped_obj)
-                            .Map(static_cast<SimpleObject *(*)(MockObject *)>(&MockObject::OverloadedStaticFunction));
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+                            It("should map the overloaded static function 1 and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = NewObject<UMockUObject>();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   auto testing_obj = TOptionalPtr<UMockUObject>(wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(*)(MockObject *)>(
+                                                              &MockObject::OverloadedStaticFunction));
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
 
-                    wrapped_obj->Destroy();
-                    delete default_obj;
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                            It("should map the overloaded static function 2, set reference bool and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = NewObject<UMockUObject>();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   bool executed = false;
+                                   auto testing_obj = TOptionalPtr<UMockUObject>(wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(*)(MockObject *, bool &)>(
+                                                                   &MockObject::OverloadedStaticFunction),
+                                                               executed);
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", executed);
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                        });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+
+                                 It("should map a function and return empty optional",
+                                    [this]()
+                                    {
+                                        MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(
+                                            &MockObject::StaticFunction);
+                                    });
+                             });
                 });
-                It("should map the overloaded static function 2, set reference bool and return the value", [this]() {
-                    auto wrapped_obj = NewObject<UMockUObject>();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    bool executed = false;
-                    auto testing_obj = TOptionalPtr<UMockUObject>(wrapped_obj)
-                                           .Map(static_cast<SimpleObject *(*)(MockObject *, bool &)>(
-                                                    &MockObject::OverloadedStaticFunction),
-                                                executed);
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", executed);
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
 
-                    wrapped_obj->Destroy();
-                    delete default_obj;
+            Describe(
+                "when given a wrapped non-UObject pointer",
+                [this]()
+                {
+                    Describe(
+                        "when valid",
+                        [this]()
+                        {
+                            BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
+                            AfterEach([this]() { m_wrapped_obj->Destroy(); });
+
+                            It("should map a static function taking the wrapped object as parameter and return set "
+                               "optional",
+                               [this]()
+                               {
+                                   MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::StaticFunction);
+                               });
+                            It("should map a static function taking the wrapped object as parameter and another copy "
+                               "parameter and "
+                               "return set optional",
+                               [this]()
+                               {
+                                   MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::StaticFunctionWithParamCopy,
+                                       SimpleObject{});
+                               });
+                            It("should map a static function taking the wrapped object as parameter and another "
+                               "reference "
+                               "parameter and return set optional",
+                               [this]()
+                               {
+                                   MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                       &MockObject::StaticFunctionWithConstParamRef,
+                                       SimpleObject{});
+                               });
+
+                            It("should map the overloaded static function 1 and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = new MockNonUObject();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   auto testing_obj = TOptionalPtr<MockNonUObject>(wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(*)(MockObject *)>(
+                                                              &MockObject::OverloadedStaticFunction));
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                            It("should map the overloaded static function 2, set reference bool and return the value",
+                               [this]()
+                               {
+                                   auto wrapped_obj = new MockNonUObject();
+                                   auto default_obj = new SimpleObject{MethodEnum::Default};
+                                   auto testing_obj = TOptionalPtr<MockNonUObject>(wrapped_obj)
+                                                          .Map(static_cast<SimpleObject *(*)(MockObject *)>(
+                                                              &MockObject::OverloadedStaticFunction));
+                                   TestTrue("", testing_obj.IsSet());
+                                   TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
+
+                                   wrapped_obj->Destroy();
+                                   delete default_obj;
+                               });
+                        });
+
+                    Describe("when not valid",
+                             [this]()
+                             {
+                                 BeforeEach([this]() { m_wrapped_obj = nullptr; });
+
+                                 It("should map a static function and return empty optional",
+                                    [this]()
+                                    {
+                                        MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
+                                            &MockObject::StaticFunction);
+                                    });
+                             });
                 });
-            });
-
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
-
-                It("should map a function and return empty optional",
-                   [this]() { MapStaticTest<TOptionalPtr<SimpleObject>, UMockUObject>(&MockObject::StaticFunction); });
-            });
         });
-
-        Describe("when given a wrapped non-UObject pointer", [this]() {
-            Describe("when valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = new MockNonUObject(); });
-                AfterEach([this]() { m_wrapped_obj->Destroy(); });
-
-                It("should map a static function taking the wrapped object as parameter and return set optional",
-                   [this]() {
-                       MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::StaticFunction);
-                   });
-                It("should map a static function taking the wrapped object as parameter and another copy parameter and "
-                   "return set optional",
-                   [this]() {
-                       MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
-                           &MockObject::StaticFunctionWithParamCopy, SimpleObject{});
-                   });
-                It("should map a static function taking the wrapped object as parameter and another reference "
-                   "parameter and return set optional",
-                   [this]() {
-                       MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(
-                           &MockObject::StaticFunctionWithConstParamRef, SimpleObject{});
-                   });
-
-                It("should map the overloaded static function 1 and return the value", [this]() {
-                    auto wrapped_obj = new MockNonUObject();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    auto testing_obj =
-                        TOptionalPtr<MockNonUObject>(wrapped_obj)
-                            .Map(static_cast<SimpleObject *(*)(MockObject *)>(&MockObject::OverloadedStaticFunction));
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
-
-                    wrapped_obj->Destroy();
-                    delete default_obj;
-                });
-                It("should map the overloaded static function 2, set reference bool and return the value", [this]() {
-                    auto wrapped_obj = new MockNonUObject();
-                    auto default_obj = new SimpleObject{MethodEnum::Default};
-                    auto testing_obj =
-                        TOptionalPtr<MockNonUObject>(wrapped_obj)
-                            .Map(static_cast<SimpleObject *(*)(MockObject *)>(&MockObject::OverloadedStaticFunction));
-                    TestTrue("", testing_obj.IsSet());
-                    TestTrue("", std::is_same<decltype(testing_obj), TOptionalPtr<SimpleObject>>::value);
-
-                    wrapped_obj->Destroy();
-                    delete default_obj;
-                });
-            });
-
-            Describe("when not valid", [this]() {
-                BeforeEach([this]() { m_wrapped_obj = nullptr; });
-
-                It("should map a static function and return empty optional", [this]() {
-                    MapStaticTest<TOptionalPtr<SimpleObject>, MockNonUObject>(&MockObject::StaticFunction);
-                });
-            });
-        });
-    });
 }
 
-BEGIN_DEFINE_SPEC(FOptionalPtrPerformanceSpec, "OptionalPtr.Performance",
+BEGIN_DEFINE_SPEC(FOptionalPtrPerformanceSpec,
+                  "OptionalPtr.Performance",
                   EAutomationTestFlags::ProductFilter | EAutomationTestFlags::EditorContext)
 
 // https://stackoverflow.com/a/33900479
@@ -892,8 +1141,9 @@ template <uint8 NumOfCalls, bool IsUObject = true>
     requires !IsUObject
              void CompareExecutionTimes(bool dont_set = false)
 {
-    const auto map_exec_time = GetExecutionTime<MockNonUObject>(
-        num_of_repetitions, &FOptionalPtrPerformanceSpec::MapFlowNonUObject<NumOfCalls>);
+    const auto map_exec_time =
+        GetExecutionTime<MockNonUObject>(num_of_repetitions,
+                                         &FOptionalPtrPerformanceSpec::MapFlowNonUObject<NumOfCalls>);
     AddInfo(FString::Printf(TEXT("Execution time for Map approach: %f ns"), map_exec_time));
     AddInfo(FString::Printf(TEXT("Execution time for regular approach: %f ns"),
                             GetExecTimeInternal<NumOfCalls, IsUObject, MockNonUObject>()));
@@ -902,34 +1152,48 @@ END_DEFINE_SPEC(FOptionalPtrPerformanceSpec)
 
 void FOptionalPtrPerformanceSpec::Define()
 {
-    Describe("Map", [this]() {
-        Describe("when given a wrapped UObject pointer", [this]() {
-            It(FString::Printf(TEXT("should log the performance for 1 call with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<1>(); });
-            It(FString::Printf(TEXT("should log the performance for 2 calls with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<2>(); });
-            It(FString::Printf(TEXT("should log the performance for 3 calls with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<3>(); });
-            It(FString::Printf(TEXT("should log the performance for 4 calls with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<4>(); });
-        });
-        Describe("when given a wrapped non-UObject pointer", [this]() {
-            It(FString::Printf(TEXT("should log the performance for 1 call with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<1, false>(); });
-            It(FString::Printf(TEXT("should log the performance for 2 calls with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<2, false>(); });
-            It(FString::Printf(TEXT("should log the performance for 3 calls with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<3, false>(); });
-            It(FString::Printf(TEXT("should log the performance for 4 calls with validation over %u repetitions"),
-                               num_of_repetitions),
-               [this]() { CompareExecutionTimes<4, false>(); });
-        });
-    });
+    Describe("Map",
+             [this]()
+             {
+                 Describe("when given a wrapped UObject pointer",
+                          [this]()
+                          {
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 1 call with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<1>(); });
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 2 calls with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<2>(); });
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 3 calls with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<3>(); });
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 4 calls with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<4>(); });
+                          });
+                 Describe("when given a wrapped non-UObject pointer",
+                          [this]()
+                          {
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 1 call with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<1, false>(); });
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 2 calls with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<2, false>(); });
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 3 calls with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<3, false>(); });
+                              It(FString::Printf(
+                                     TEXT("should log the performance for 4 calls with validation over %u repetitions"),
+                                     num_of_repetitions),
+                                 [this]() { CompareExecutionTimes<4, false>(); });
+                          });
+             });
 }

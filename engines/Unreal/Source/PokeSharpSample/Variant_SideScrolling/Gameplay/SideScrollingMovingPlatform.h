@@ -30,7 +30,9 @@ class ASideScrollingMovingPlatform : public AActor, public ISideScrollingInterac
     FVector PlatformTarget;
 
     /** Time for the platform to move to the destination */
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Moving Platform",
+    UPROPERTY(EditAnywhere,
+              BlueprintReadOnly,
+              Category = "Moving Platform",
               meta = (ClampMin = 0, ClampMax = 10, Units = "s"))
     float MoveDuration = 5.0f;
 
@@ -52,7 +54,9 @@ class ASideScrollingMovingPlatform : public AActor, public ISideScrollingInterac
 
   protected:
     /** Allows Blueprint code to do the actual platform movement */
-    UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Moving Platform",
+    UFUNCTION(BlueprintImplementableEvent,
+              BlueprintCallable,
+              Category = "Moving Platform",
               meta = (DisplayName = "Move to Target"))
     void BP_MoveToTarget();
 };

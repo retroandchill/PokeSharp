@@ -270,7 +270,9 @@ class ACombatCharacter : public ACharacter, public ICombatAttacker, public IComb
     void NotifyEnemiesOfIncomingAttack();
 
     /** Handles damage and knockback events */
-    virtual void ApplyDamage(float Damage, AActor *DamageCauser, const FVector &DamageLocation,
+    virtual void ApplyDamage(float Damage,
+                             AActor *DamageCauser,
+                             const FVector &DamageLocation,
                              const FVector &DamageImpulse) override;
 
     /** Handles death events */
@@ -289,7 +291,9 @@ class ACombatCharacter : public ACharacter, public ICombatAttacker, public IComb
 
   public:
     /** Overrides the default TakeDamage functionality */
-    virtual float TakeDamage(float Damage, struct FDamageEvent const &DamageEvent, AController *EventInstigator,
+    virtual float TakeDamage(float Damage,
+                             struct FDamageEvent const &DamageEvent,
+                             AController *EventInstigator,
                              AActor *DamageCauser) override;
 
     /** Overrides landing to reset damage ragdoll physics */

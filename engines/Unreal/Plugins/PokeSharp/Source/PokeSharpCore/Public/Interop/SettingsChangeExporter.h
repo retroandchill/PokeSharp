@@ -20,7 +20,8 @@ class POKESHARPCORE_API USettingsChangeExporter : public UObject
 
   public:
     UNREALSHARP_FUNCTION()
-    static void RegisterSettingsChangeCallback(UDeveloperSettings *DeveloperSettings, FGCHandleIntPtr Callback,
+    static void RegisterSettingsChangeCallback(UDeveloperSettings *DeveloperSettings,
+                                               FGCHandleIntPtr Callback,
                                                FGuid &OutGuid);
 
     UNREALSHARP_FUNCTION()

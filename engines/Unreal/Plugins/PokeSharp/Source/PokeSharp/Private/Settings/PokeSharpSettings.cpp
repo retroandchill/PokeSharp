@@ -92,11 +92,12 @@ void UPokeSharpSettings::SetMechanicsGeneration(const bool SetAll)
     SET_IF_NOT_CONFIGURED(MoveCategoryPerMove, MechanicsGeneration >= 4);
     SET_IF_NOT_CONFIGURED(NewCriticalHitRateMechanics, MechanicsGeneration >= 6);
     SET_IF_NOT_CONFIGURED(MoreTypeEffects, MechanicsGeneration >= 6);
-    SET_IF_NOT_CONFIGURED(BadgesBoosts, {.Attack = MechanicsGeneration >= 4 ? 999 : 1,
-                                         .Defense = MechanicsGeneration >= 4 ? 999 : 5,
-                                         .SpecialAttack = MechanicsGeneration >= 4 ? 999 : 7,
-                                         .SpecialDefense = MechanicsGeneration >= 4 ? 999 : 7,
-                                         .Speed = MechanicsGeneration >= 4 ? 999 : 3});
+    SET_IF_NOT_CONFIGURED(BadgesBoosts,
+                          {.Attack = MechanicsGeneration >= 4 ? 999 : 1,
+                           .Defense = MechanicsGeneration >= 4 ? 999 : 5,
+                           .SpecialAttack = MechanicsGeneration >= 4 ? 999 : 7,
+                           .SpecialDefense = MechanicsGeneration >= 4 ? 999 : 7,
+                           .Speed = MechanicsGeneration >= 4 ? 999 : 3});
     SET_IF_NOT_CONFIGURED(FixedDurationWeatherFromAbility, MechanicsGeneration >= 6);
     SET_IF_NOT_CONFIGURED(XStatItemsRaiseByTwoStages, MechanicsGeneration >= 7);
     SET_IF_NOT_CONFIGURED(NewPokeBallCatchRates, MechanicsGeneration >= 7);

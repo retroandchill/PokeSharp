@@ -29,12 +29,14 @@ class ASideScrollingCameraManager : public APlayerCameraManager
     float CameraZOffset = 100.0f;
 
     /** Minimum camera scrolling bounds in world space */
-    UPROPERTY(EditAnywhere, Category = "Side Scrolling Camera",
+    UPROPERTY(EditAnywhere,
+              Category = "Side Scrolling Camera",
               meta = (ClampMin = -100000, ClampMax = 100000, Units = "cm"))
     float CameraXMinBounds = -400.0f;
 
     /** Maximum camera scrolling bounds in world space */
-    UPROPERTY(EditAnywhere, Category = "Side Scrolling Camera",
+    UPROPERTY(EditAnywhere,
+              Category = "Side Scrolling Camera",
               meta = (ClampMin = -100000, ClampMax = 100000, Units = "cm"))
     float CameraXMaxBounds = 10000.0f;
 

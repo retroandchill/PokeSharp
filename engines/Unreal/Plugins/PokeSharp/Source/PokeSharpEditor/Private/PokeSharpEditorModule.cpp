@@ -49,8 +49,11 @@ void FPokeSharpEditorModule::RegisterMenu() const
     auto &Section = ToolbarMenu->FindOrAddSection("PluginTools");
 
     const auto Entry = FToolMenuEntry::InitComboButton(
-        "PokeSharp", FUIAction(), FOnGetContent::CreateLambda([this] { return GeneratePokeSharpMenu(); }),
-        LOCTEXT("PokeSharp_Label", "PokeSharp"), LOCTEXT("PokeSharp_Tooltip", "List of all PokeSharp actions"),
+        "PokeSharp",
+        FUIAction(),
+        FOnGetContent::CreateLambda([this] { return GeneratePokeSharpMenu(); }),
+        LOCTEXT("PokeSharp_Label", "PokeSharp"),
+        LOCTEXT("PokeSharp_Tooltip", "List of all PokeSharp actions"),
         TAttribute<FSlateIcon>::CreateLambda(
             [] { return FSlateIcon(FPokeSharpStyle::GetStyleSetName(), "PokeSharp.Toolbar"); }));
     Section.AddEntry(Entry);
@@ -63,11 +66,20 @@ TSharedRef<SWidget> FPokeSharpEditorModule::GeneratePokeSharpMenu() const
 
     MenuBuilder.BeginSection("Data", LOCTEXT("Data", "Data"));
 
-    MenuBuilder.AddMenuEntry(Commands.GetImportPbsData(), NAME_None, TAttribute<FText>(), TAttribute<FText>(),
+    MenuBuilder.AddMenuEntry(Commands.GetImportPbsData(),
+                             NAME_None,
+                             TAttribute<FText>(),
+                             TAttribute<FText>(),
                              FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Icons.Toolbar.Import"));
-    MenuBuilder.AddMenuEntry(Commands.GetExportPbsData(), NAME_None, TAttribute<FText>(), TAttribute<FText>(),
+    MenuBuilder.AddMenuEntry(Commands.GetExportPbsData(),
+                             NAME_None,
+                             TAttribute<FText>(),
+                             TAttribute<FText>(),
                              FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Icons.Toolbar.Export"));
-    MenuBuilder.AddMenuEntry(Commands.GetEditData(), NAME_None, TAttribute<FText>(), TAttribute<FText>(),
+    MenuBuilder.AddMenuEntry(Commands.GetEditData(),
+                             NAME_None,
+                             TAttribute<FText>(),
+                             TAttribute<FText>(),
                              FSlateIcon(FAppStyle::Get().GetStyleSetName(), "EditorPreferences.TabIcon"));
 
     MenuBuilder.EndSection();

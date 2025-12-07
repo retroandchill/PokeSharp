@@ -58,8 +58,9 @@ namespace PokeEdit
 
     // There's some strange behavior when defining these in the body of a class that has a VTable where all the offsets
     // are off by 8, so moving this here fixes that
-    constexpr static auto FieldDefinitionRequired = std::make_tuple(
-        TJsonField<&FFieldDefinition::FieldId>(TEXT("fieldId")), TJsonField<&FFieldDefinition::Label>(TEXT("label")));
+    constexpr static auto FieldDefinitionRequired =
+        std::make_tuple(TJsonField<&FFieldDefinition::FieldId>(TEXT("fieldId")),
+                        TJsonField<&FFieldDefinition::Label>(TEXT("label")));
 
     constexpr static auto FieldDefinitionOptional =
         std::make_tuple(TJsonField<&FFieldDefinition::Tooltip>(TEXT("tooltip")),
@@ -81,7 +82,8 @@ namespace PokeEdit
         }
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FBoolFieldDefinition>, FieldDefinitionRequired,
+            std::in_place_type<FBoolFieldDefinition>,
+            FieldDefinitionRequired,
             std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FBoolFieldDefinition::CurrentValue>(TEXT("currentValue")))));
     };
@@ -106,7 +108,8 @@ namespace PokeEdit
         FString CurrentValue;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FTextFieldDefinition>, FieldDefinitionRequired,
+            std::in_place_type<FTextFieldDefinition>,
+            FieldDefinitionRequired,
             std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FTextFieldDefinition::MaxLength>(TEXT("maxLength")),
                                            TJsonField<&FTextFieldDefinition::Regex>(TEXT("regex")),
@@ -181,7 +184,8 @@ namespace PokeEdit
         T CurrentValue = 0;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<TNumberFieldDefinition>, FieldDefinitionRequired,
+            std::in_place_type<TNumberFieldDefinition>,
+            FieldDefinitionRequired,
             std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&TNumberFieldDefinition::MinValue>(TEXT("minValue")),
                                            TJsonField<&TNumberFieldDefinition::MaxValue>(TEXT("maxValue")),
@@ -192,7 +196,9 @@ namespace PokeEdit
 
     struct FChoiceFieldDefinition final : FFieldDefinition
     {
-        FChoiceFieldDefinition(FFieldPathSegment InFieldId, FText InLabel, FOptionSourceDefinition InOptions,
+        FChoiceFieldDefinition(FFieldPathSegment InFieldId,
+                               FText InLabel,
+                               FOptionSourceDefinition InOptions,
                                const TSharedRef<FJsonValue> &InCurrentValue)
             : FFieldDefinition(MoveTemp(InFieldId), MoveTemp(InLabel)), Options(MoveTemp(InOptions)),
               CurrentValue(InCurrentValue)
@@ -232,7 +238,8 @@ namespace PokeEdit
         TArray<TSharedRef<FFieldDefinition>> Fields;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FObjectFieldDefinition>, FieldDefinitionRequired,
+            std::in_place_type<FObjectFieldDefinition>,
+            FieldDefinitionRequired,
             std::tuple_cat(FieldDefinitionOptional,
                            std::make_tuple(TJsonField<&FObjectFieldDefinition::Fields>(TEXT("fields")))));
     };
@@ -271,7 +278,8 @@ namespace PokeEdit
         TArray<TSharedRef<FFieldDefinition>> ItemFields;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FListFieldDefinition>, FieldDefinitionRequired,
+            std::in_place_type<FListFieldDefinition>,
+            FieldDefinitionRequired,
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FListFieldDefinition::ItemFields>(TEXT("itemFields")))));
     };
@@ -308,7 +316,8 @@ namespace PokeEdit
         TArray<FDictionaryFieldPair> Pairs;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FDictionaryFieldDefinition>, FieldDefinitionRequired,
+            std::in_place_type<FDictionaryFieldDefinition>,
+            FieldDefinitionRequired,
             std::tuple_cat(BaseFieldsOptional,
                            std::make_tuple(TJsonField<&FDictionaryFieldDefinition::Pairs>(TEXT("pairs")))));
     };
@@ -328,9 +337,11 @@ namespace PokeEdit
         TSharedPtr<FFieldDefinition> ValueField;
 
         constexpr static auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FOptionalFieldDefinition>, FieldDefinitionRequired,
-            std::tuple_cat(FieldDefinitionOptional, std::make_tuple(TJsonField<&FOptionalFieldDefinition::ValueField>(
-                                                        TEXT("valueDefinition")))));
+            std::in_place_type<FOptionalFieldDefinition>,
+            FieldDefinitionRequired,
+            std::tuple_cat(
+                FieldDefinitionOptional,
+                std::make_tuple(TJsonField<&FOptionalFieldDefinition::ValueField>(TEXT("valueDefinition")))));
     };
 
     template <>

@@ -7,13 +7,17 @@ void UPokeSharpTextExporter::FromSourceString(const UTF16CHAR *Buffer, const int
     OutText = FText::FromStringView(TStringView(Buffer, Length));
 }
 
-void UPokeSharpTextExporter::FromLocalized(const UTF16CHAR *NamespaceBuffer, const int32 NamespaceLength,
-                                           const UTF16CHAR *KeyBuffer, const int32 KeyLength,
-                                           const UTF16CHAR *StrBuffer, const int32 StrLength, FText &OutText)
+void UPokeSharpTextExporter::FromLocalized(const UTF16CHAR *NamespaceBuffer,
+                                           const int32 NamespaceLength,
+                                           const UTF16CHAR *KeyBuffer,
+                                           const int32 KeyLength,
+                                           const UTF16CHAR *StrBuffer,
+                                           const int32 StrLength,
+                                           FText &OutText)
 {
-    OutText =
-        FText::AsLocalizable_Advanced(FTextKey(TStringView(NamespaceBuffer, NamespaceLength)),
-                                      FTextKey(TStringView(KeyBuffer, KeyLength)), TStringView(StrBuffer, StrLength));
+    OutText = FText::AsLocalizable_Advanced(FTextKey(TStringView(NamespaceBuffer, NamespaceLength)),
+                                            FTextKey(TStringView(KeyBuffer, KeyLength)),
+                                            TStringView(StrBuffer, StrLength));
 }
 
 void UPokeSharpTextExporter::FromLocText(const TCHAR *StrBuffer, const int32 StrLength, FText &OutText)

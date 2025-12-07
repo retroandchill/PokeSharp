@@ -27,12 +27,15 @@ void USelectableWidget::NativePreConstruct()
 #endif
 
     Buttons = NewObject<UCommonButtonGroupBase>(this);
-    Buttons->NativeOnHoveredButtonBaseChanged.AddWeakLambda(
-        this, [this](UCommonButtonBase *, const int32 Index) { SetDesiredFocusIndex(Index); });
-    Buttons->NativeOnButtonBaseClicked.AddWeakLambda(this, [this](UCommonButtonBase *, const int32 Index) {
-        SetDesiredFocusIndex(Index);
-        OnButtonClicked.Broadcast(Index);
-    });
+    Buttons->NativeOnHoveredButtonBaseChanged.AddWeakLambda(this,
+                                                            [this](UCommonButtonBase *, const int32 Index)
+                                                            { SetDesiredFocusIndex(Index); });
+    Buttons->NativeOnButtonBaseClicked.AddWeakLambda(this,
+                                                     [this](UCommonButtonBase *, const int32 Index)
+                                                     {
+                                                         SetDesiredFocusIndex(Index);
+                                                         OnButtonClicked.Broadcast(Index);
+                                                     });
 }
 
 UWidget *USelectableWidget::NativeGetDesiredFocusTarget() const

@@ -76,7 +76,11 @@ class POKESHARP_API USelectableWidget : public UCommonActivatableWidget
     UPROPERTY(Transient)
     TObjectPtr<UCommonButtonGroupBase> Buttons;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Getter, Setter, Category = "Selection",
+    UPROPERTY(EditAnywhere,
+              BlueprintReadWrite,
+              Getter,
+              Setter,
+              Category = "Selection",
               meta = (AllowPrivateAccess = "true"))
     int32 DesiredFocusIndex;
 

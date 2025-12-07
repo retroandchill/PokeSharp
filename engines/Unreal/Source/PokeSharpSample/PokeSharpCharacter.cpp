@@ -69,7 +69,8 @@ void APokeSharpCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInput
     }
     else
     {
-        UE_LOG(LogPokeSharpSample, Error,
+        UE_LOG(LogPokeSharpSample,
+               Error,
                TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input "
                     "system. If you intend to use the legacy system, then you will need to update this C++ file."),
                *GetNameSafe(this));

@@ -21,7 +21,9 @@ class POKESHARPCORE_API UPlatformFileExporter : public UObject
     static IFileHandle *OpenRead(const TCHAR *FileName, bool bAllowWrite = false);
 
     UNREALSHARP_FUNCTION()
-    static IFileHandle *OpenWrite(const TCHAR *FileName, bool bAppend = false, bool bAllowRead = false,
+    static IFileHandle *OpenWrite(const TCHAR *FileName,
+                                  bool bAppend = false,
+                                  bool bAllowRead = false,
                                   bool bOverwrite = true);
 
   private:

@@ -30,7 +30,9 @@ ACombatDummy::ACombatDummy()
     PhysicsConstraint->SetConstrainedComponents(BasePlate, NAME_None, Dummy, NAME_None);
 }
 
-void ACombatDummy::ApplyDamage(float Damage, AActor *DamageCauser, const FVector &DamageLocation,
+void ACombatDummy::ApplyDamage(float Damage,
+                               AActor *DamageCauser,
+                               const FVector &DamageLocation,
                                const FVector &DamageImpulse)
 {
     // apply impulse to the dummy

@@ -129,24 +129,33 @@ void SPokeSharpEditor::RebuildToolbar()
 
     // Example: basic section with Save / Undo / Redo
     ToolbarBuilder.BeginSection("Main");
-    ToolbarBuilder.AddToolBarButton(FUIAction(FExecuteAction::CreateLambda([this] {
-                                        // TODO: call C# view-model save for CurrentTab
-                                    })),
-                                    NAME_None, FText::FromString(TEXT("Save")),
+    ToolbarBuilder.AddToolBarButton(FUIAction(FExecuteAction::CreateLambda(
+                                        [this]
+                                        {
+                                            // TODO: call C# view-model save for CurrentTab
+                                        })),
+                                    NAME_None,
+                                    FText::FromString(TEXT("Save")),
                                     FText::FromString(TEXT("Save current asset")),
                                     FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Icons.Save"));
 
-    ToolbarBuilder.AddToolBarButton(FUIAction(FExecuteAction::CreateLambda([this] {
-                                        // TODO: Undo for CurrentTab
-                                    })),
-                                    NAME_None, FText::FromString(TEXT("Undo")),
+    ToolbarBuilder.AddToolBarButton(FUIAction(FExecuteAction::CreateLambda(
+                                        [this]
+                                        {
+                                            // TODO: Undo for CurrentTab
+                                        })),
+                                    NAME_None,
+                                    FText::FromString(TEXT("Undo")),
                                     FText::FromString(TEXT("Undo last action")),
                                     FSlateIcon(FAppStyle::Get().GetStyleSetName(), "GenericCommands.Undo"));
 
-    ToolbarBuilder.AddToolBarButton(FUIAction(FExecuteAction::CreateLambda([this] {
-                                        // TODO: Redo for CurrentTab
-                                    })),
-                                    NAME_None, FText::FromString(TEXT("Redo")),
+    ToolbarBuilder.AddToolBarButton(FUIAction(FExecuteAction::CreateLambda(
+                                        [this]
+                                        {
+                                            // TODO: Redo for CurrentTab
+                                        })),
+                                    NAME_None,
+                                    FText::FromString(TEXT("Redo")),
                                     FText::FromString(TEXT("Redo last action")),
                                     FSlateIcon(FAppStyle::Get().GetStyleSetName(), "GenericCommands.Redo"));
     ToolbarBuilder.EndSection();

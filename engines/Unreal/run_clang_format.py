@@ -82,39 +82,39 @@ def format_file(args: FormatArgs) -> FormatResult:
     Format a single file and return success status and filename
     """
     filepath = os.path.join(args.dirpath, args.filename)
-    try:
-        if args.check_only:
-            result = subprocess.run(
-                ['clang-format', filepath],
-                capture_output=True,
-                text=True,
-                check=True
-            )
+    if args.check_only:
+        result = subprocess.run(
+            ['clang-format', filepath],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            return FormatResult(success=False, filepath=filepath, message=result.stderr)
 
-            # Compare the output with the current file content
-            with open(filepath, 'r') as f:
-                current_content = f.read()
+        # Compare the output with the current file content
+        with open(filepath, 'r') as f:
+            current_content = f.read()
 
-            if current_content != result.stdout:
-                print(f"File {filepath} needs formatting")
+        if current_content != result.stdout:
+            print(f"File {filepath} needs formatting")
 
-            needs_formatting = current_content != result.stdout
+        needs_formatting = current_content != result.stdout
 
-            return FormatResult(
-                success=not needs_formatting,
-                filepath=filepath,
-                message="" if not needs_formatting else "needs formatting"
-            )
-        else:
-            subprocess.run(['clang-format', '-i', filepath],
-                           check=True, capture_output=True)
-            return FormatResult(
-                success=True,
-                filepath=filepath,
-                message=""
-            )
-    except Exception as e:
-        return FormatResult(success=False, filepath=filepath, message=str(e))
+        return FormatResult(
+            success=not needs_formatting,
+            filepath=filepath,
+            message="" if not needs_formatting else "needs formatting"
+        )
+    else:
+        result = subprocess.run(['clang-format', '-i', filepath], capture_output=True)
+        if result.returncode != 0:
+            return FormatResult(success=False, filepath=filepath, message=result.stderr)
+
+        return FormatResult(
+            success=True,
+            filepath=filepath,
+            message=""
+        )
 
 
 def main(check: bool):

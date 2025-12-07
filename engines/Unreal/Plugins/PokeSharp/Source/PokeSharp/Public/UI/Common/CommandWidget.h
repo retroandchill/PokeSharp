@@ -50,7 +50,11 @@ class POKESHARP_API UCommandWidget : public USelectableWidget
     UPROPERTY(EditAnywhere, Category = "Selection")
     TSubclassOf<UPokemonButtonBase> ButtonClass;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Getter, Setter, Category = "Selection",
+    UPROPERTY(EditAnywhere,
+              BlueprintReadWrite,
+              Getter,
+              Setter,
+              Category = "Selection",
               meta = (AllowPrivateAccess = "true"))
     TArray<FCommandData> Commands;
 };

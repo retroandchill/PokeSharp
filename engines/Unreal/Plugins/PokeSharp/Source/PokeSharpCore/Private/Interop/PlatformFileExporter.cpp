@@ -1,6 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Interop/PlatformFileExporter.h"
+#include "GenericPlatform/GenericPlatformFile.h"
+#include "HAL/PlatformFileManager.h"
+#include "Misc/PackageName.h"
 
 IFileHandle *UPlatformFileExporter::OpenRead(const TCHAR *FileName, const bool bAllowWrite)
 {

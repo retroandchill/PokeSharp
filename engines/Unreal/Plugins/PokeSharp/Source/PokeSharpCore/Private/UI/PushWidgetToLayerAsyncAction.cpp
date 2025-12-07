@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/PushWidgetToLayerAsyncAction.h"
+#include "Engine/Engine.h"
 #include "UI/PrimaryGameLayout.h"
 
 UPushWidgetToLayerAsyncAction *UPushWidgetToLayerAsyncAction::PushWidgetToLayerAsync(

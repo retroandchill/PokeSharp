@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
 #include "PokeSharpSaveGame.h"
+#include "Templates/SubclassOf.h"
 
 #include "PokeSharpSaveSettings.generated.h"
 

@@ -2,6 +2,7 @@
 
 #include "Saving/PokeSharpSaveGame.h"
 #include "Saving/PokeSharpSaveSettings.h"
+#include "UObject/Package.h"
 
 UPokeSharpSaveGame *UPokeSharpSaveGame::CreateSaveGame()
 {

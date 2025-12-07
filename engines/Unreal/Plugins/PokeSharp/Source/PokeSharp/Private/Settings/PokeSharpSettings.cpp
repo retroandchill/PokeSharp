@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Settings/PokeSharpSettings.h"
+#include "Misc/ConfigCacheIni.h"
 
 UPokeSharpSettings::UPokeSharpSettings()
 {

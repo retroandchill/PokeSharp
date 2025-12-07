@@ -2,7 +2,9 @@
 
 #include "Configuration/SettingsChangeManager.h"
 #include "Containers/Ticker.h"
+#include "Engine/DeveloperSettings.h"
 #include "LogPokeSharpCore.h"
+#include "UObject/Package.h"
 
 TObjectPtr<USettingsChangeManager> USettingsChangeManager::Instance;
 

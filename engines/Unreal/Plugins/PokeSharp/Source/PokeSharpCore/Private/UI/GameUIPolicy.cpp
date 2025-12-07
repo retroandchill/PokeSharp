@@ -1,6 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/GameUIPolicy.h"
+#include "Engine/Engine.h"
+#include "Framework/Application/SlateApplication.h"
 #include "LogPokeSharpCore.h"
 #include "OptionalPtr.h"
 #include "UI/GameUIManagerSubsystem.h"

@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Interop/FileHandleExporter.h"
+#include "GenericPlatform/GenericPlatformFile.h"
 
 int64 UFileHandleExporter::GetSize(IFileHandle *Handle)
 {

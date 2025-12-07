@@ -3,13 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonActivatableWidget.h"
 #include "CommonInputTypeEnum.h"
 #include "GameplayTagContainer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "CommonUIExtensions.generated.h"
 
-class UCommonActivatableWidget;
+class ULocalPlayer;
+
 /**
  *
  */

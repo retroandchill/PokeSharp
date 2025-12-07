@@ -9,6 +9,7 @@
 
 #include "SettingsChangeExporter.generated.h"
 
+class UDeveloperSettings;
 /**
  *
  */

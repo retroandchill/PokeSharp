@@ -4,52 +4,39 @@ using UnrealBuildTool;
 
 public class CommonUtilities : ModuleRules
 {
-    public CommonUtilities(ReadOnlyTargetRules Target)
-        : base(Target)
+    public CommonUtilities(ReadOnlyTargetRules target)
+        : base(target)
     {
-        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp23;
 
-        PublicIncludePaths.AddRange(
-            new string[]
-            {
-                // ... add public include paths required here ...
-            }
-        );
+        PublicIncludePaths.AddRange([
+            // ... add public include paths required here ...
+        ]);
 
-        PrivateIncludePaths.AddRange(
-            new string[]
-            {
-                // ... add other private include paths required here ...
-            }
-        );
+        PrivateIncludePaths.AddRange([
+            // ... add other private include paths required here ...
+        ]);
 
-        PublicDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "Core",
-                "UnrealSharpAsync",
-                "UnrealSharpCore",
-                // ... add other public dependencies that you statically link with here ...
-            }
-        );
+        PublicDependencyModuleNames.AddRange([
+            "Core",
+            "UnrealSharpAsync",
+            "UnrealSharpCore",
+            "CoreUObject",
+            // ... add other public dependencies that you statically link with here ...
+        ]);
 
-        PrivateDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "CoreUObject",
-                "Engine",
-                "Slate",
-                "SlateCore",
-                "UnrealSharpBinds",
-                // ... add private dependencies that you statically link with here ...
-            }
-        );
+        PrivateDependencyModuleNames.AddRange([
+            "CoreUObject",
+            "Engine",
+            "Slate",
+            "SlateCore",
+            "UnrealSharpBinds",
+            // ... add private dependencies that you statically link with here ...
+        ]);
 
-        DynamicallyLoadedModuleNames.AddRange(
-            new string[]
-            {
-                // ... add any modules that your module loads dynamically here ...
-            }
-        );
+        DynamicallyLoadedModuleNames.AddRange([
+            // ... add any modules that your module loads dynamically here ...
+        ]);
     }
 }

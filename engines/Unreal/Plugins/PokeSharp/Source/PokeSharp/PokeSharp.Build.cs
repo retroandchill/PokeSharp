@@ -6,6 +6,7 @@ public class PokeSharp : ModuleRules
         : base(target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp23;
 
         PublicDependencyModuleNames.AddRange([
             "Core",

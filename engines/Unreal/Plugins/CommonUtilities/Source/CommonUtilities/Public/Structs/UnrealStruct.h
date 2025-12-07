@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Class.h"
 
 /**
  * Concept for any USTRUCT that is defined using native information.

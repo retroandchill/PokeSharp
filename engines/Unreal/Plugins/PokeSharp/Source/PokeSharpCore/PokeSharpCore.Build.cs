@@ -5,7 +5,8 @@ public class PokeSharpCore : ModuleRules
     public PokeSharpCore(ReadOnlyTargetRules target)
         : base(target)
     {
-        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp23;
 
         PublicDependencyModuleNames.AddRange([
             "Core",

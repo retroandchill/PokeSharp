@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Ticker.h"
 #include "CSManagedDelegate.h"
 
 #include "SettingsChangeManager.generated.h"
+
+class UDeveloperSettings;
 
 struct FSettingsChangeDelegateCallback
 {

@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/GameInstance.h"
 #include "Extensions/Subsystems/SubsystemCollectionBaseRef.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 
 #include "GameUIManagerSubsystem.generated.h"
 

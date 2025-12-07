@@ -254,12 +254,12 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+        static std::expected<T, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {
             TSharedPtr<FJsonObject> *JsonObject;
             if (!Value->TryGetObject(JsonObject))
             {
-                return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
+                return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
             TArray<FString> Errors;
 
@@ -274,21 +274,21 @@ namespace PokeEdit
                         return TOptional<typename F::MemberType>();
                     }
 
-                    TValueOrError<typename F::MemberType, FString> Deserialized =
+                    std::expected<typename F::MemberType, FString> Deserialized =
                         TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
 
-                    if (const auto *Error = Deserialized.TryGetError(); Error != nullptr)
+                    if (!Deserialized.has_value())
                     {
-                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Error}));
+                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Deserialized.error()}));
                         return TOptional<typename F::MemberType>();
                     }
 
-                    return TOptional<typename F::MemberType>(Deserialized.GetValue());
+                    return TOptional<typename F::MemberType>(MoveTempIfPossible(Deserialized).value());
                 });
 
             if (Errors.Num() > 0)
             {
-                return MakeError(FString::Join(Errors, TEXT("\n")));
+                return std::unexpected(FString::Join(Errors, TEXT("\n")));
             }
 
             auto Result = std::apply(
@@ -299,32 +299,30 @@ namespace PokeEdit
 
             // Now that we constructed the object from the required fields, loop through all the others and set those
             // If any get found.
-            TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField(
-                [&Errors, &Result, &JsonObject]<typename F>(const F &Field) {
-                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
-                    if (FieldValue == nullptr)
-                        return;
+            TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField([&Errors, &Result,
+                                                                      &JsonObject]<typename F>(const F &Field) {
+                const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
+                if (FieldValue == nullptr)
+                    return;
 
-                    TValueOrError<typename F::MemberType, FString> Deserialized =
-                        TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
-
-                    if (const auto *Error = Deserialized.TryGetError(); Error != nullptr)
-                    {
-                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Error}));
-                    }
-                    else
-                    {
-                        F::SetMember(TJsonObjectContainer<T>::GetMutableObjectRef(Result),
-                                     MoveTemp(Deserialized.GetValue()));
-                    }
-                });
+                std::expected<typename F::MemberType, FString> Deserialized =
+                    TJsonConverter<typename F::MemberType>::Deserialize(FieldValue.ToSharedRef());
+                if (Deserialized.has_value())
+                {
+                    F::SetMember(TJsonObjectContainer<T>::GetMutableObjectRef(Result), MoveTemp(Deserialized.value()));
+                }
+                else
+                {
+                    Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Deserialized.error()}));
+                }
+            });
 
             if (Errors.Num() > 0)
             {
-                return MakeError(FString::Join(Errors, TEXT("\n")));
+                return std::unexpected(FString::Join(Errors, TEXT("\n")));
             }
 
-            return MakeValue(Result);
+            return MoveTempIfPossible(Result);
         }
 
         /**
@@ -360,11 +358,11 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<TSharedPtr<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+        static std::expected<TSharedPtr<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {
             if (Value->IsNull())
             {
-                return MakeValue(nullptr);
+                return TSharedPtr<T>(nullptr);
             }
 
             return TJsonConverter<TSharedRef<T>>::Deserialize(Value);
@@ -587,55 +585,50 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<T, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+        static std::expected<T, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {
             TSharedPtr<FJsonObject> *JsonObject;
             if (!Value->TryGetObject(JsonObject))
             {
-                return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
+                return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
 
             auto KeyField = (*JsonObject)->TryGetField(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName);
             if (KeyField == nullptr)
             {
-                return MakeError(FString::Format(
+                return std::unexpected(FString::Format(
                     TEXT("Field '{0}' is missing from object '{1}'"),
                     {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
             }
 
-            auto KeyString = TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef());
-            if (const auto *Error = KeyString.TryGetError())
-            {
-                return MakeError(FString::Format(
-                    TEXT("Field '{0}': {1}"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error}));
-            }
+            return TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef())
+                .transform_error([](const FString &Error) {
+                    return FString::Format(TEXT("Field '{0}': {1}"),
+                                           {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
+                })
+                .and_then([&Value](const FString &Discriminator) -> std::expected<T, FString> {
+                    // We are going to scan through all the discriminators and find the first once that matches.
+                    // Once a set optional is returned, we end up skipping all other calls to the callback.
+                    TOptional<std::expected<T, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                        [&Value, &Discriminator]<typename F>(const F &Field) -> TOptional<std::expected<T, FString>> {
+                            if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                            {
+                                return TJsonConverter<typename F::ObjectType>::Deserialize(Value).transform(
+                                    [](typename F::ObjectType &&Deserialized) -> T {
+                                        return T(TInPlaceType<typename F::ObjectType>(), MoveTemp(Deserialized));
+                                    });
+                            }
 
-            // We are going to scan through all the discriminators and find the first once that matches.
-            // Once a set optional is returned, we end up skipping all other calls to the callback.
-            auto &Discriminator = KeyString.GetValue();
-            TOptional<TValueOrError<T, FString>> Result =
-                TJsonUnionTraits<T>::JsonSchema.ForEachField([&Value, &Discriminator]<typename F>(const F &Field) {
-                    if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                            return NullOpt;
+                        });
+
+                    if (Result.IsSet())
                     {
-                        auto Deserialized = TJsonConverter<typename F::ObjectType>::Deserialize(Value);
-                        if (auto *Error = Deserialized.TryGetError(); Error != nullptr)
-                        {
-                            return TOptional<TValueOrError<T, FString>>(MakeError(MoveTemp(*Error)));
-                        }
-
-                        return TOptional<TValueOrError<T, FString>>(MakeValue(
-                            T(TInPlaceType<typename F::ObjectType>(), MoveTempIfPossible(Deserialized.GetValue()))));
+                        return Result.GetValue();
                     }
 
-                    return TOptional<TValueOrError<T, FString>>();
+                    return std::unexpected(FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
                 });
-
-            if (Result.IsSet())
-            {
-                return Result.GetValue();
-            }
-
-            return MakeError(FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
         }
 
         /**
@@ -680,7 +673,7 @@ namespace PokeEdit
      */
     template <typename T>
         requires TJsonUnion<T> && !TVariantType<T>
-    struct TJsonConverter<TSharedRef<T>>
+                              struct TJsonConverter<TSharedRef<T>>
     {
         /**
          * Attempts to deserialize a JSON value to the target type.
@@ -688,55 +681,53 @@ namespace PokeEdit
          * @param Value The input JSON value
          * @return Either the deserialized value, or an error message explaining why serialization failed.
          */
-        static TValueOrError<TSharedRef<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+        static std::expected<TSharedRef<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
         {
             TSharedPtr<FJsonObject> *JsonObject;
             if (!Value->TryGetObject(JsonObject))
             {
-                return MakeError(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
+                return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
 
             auto KeyField = (*JsonObject)->TryGetField(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName);
             if (KeyField == nullptr)
             {
-                return MakeError(FString::Format(
+                return std::unexpected(FString::Format(
                     TEXT("Field '{0}' is missing from object '{1}'"),
                     {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
             }
 
-            auto KeyString = TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef());
-            if (const auto *Error = KeyString.TryGetError())
-            {
-                return MakeError(FString::Format(
-                    TEXT("Field '{0}': {1}"), {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error}));
-            }
+            return TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef())
+                .transform_error([](const FString &Error) {
+                    return FString::Format(TEXT("Field '{0}': {1}"),
+                                           {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
+                })
+                .and_then([&Value](const FString &Discriminator) {
+                    // We are going to scan through all the discriminators and find the first once that matches.
+                    // Once a set optional is returned, we end up skipping all other calls to the callback.
+                    TOptional<std::expected<TSharedRef<T>, FString>> Result =
+                        TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                            [&Value, &Discriminator]<typename F>(
+                                const F &Field) -> TOptional<std::expected<TSharedRef<T>, FString>> {
+                                if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                                {
+                                    return TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value)
+                                        .transform([](const TSharedRef<typename F::ObjectType> &Deserialized) {
+                                            return StaticCastSharedRef<T>(Deserialized);
+                                        });
+                                }
 
-            // We are going to scan through all the discriminators and find the first once that matches.
-            // Once a set optional is returned, we end up skipping all other calls to the callback.
-            auto &Discriminator = KeyString.GetValue();
-            TOptional<TValueOrError<TSharedRef<T>, FString>> Result =
-                TJsonUnionTraits<T>::JsonSchema.ForEachField([&Value, &Discriminator]<typename F>(const F &Field) {
-                    if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
+                                return NullOpt;
+                            });
+
+                    if (Result.IsSet())
                     {
-                        auto Deserialized = TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value);
-                        if (auto *Error = Deserialized.TryGetError(); Error != nullptr)
-                        {
-                            return TOptional<TValueOrError<TSharedRef<T>, FString>>(MakeError(MoveTemp(*Error)));
-                        }
-
-                        return TOptional<TValueOrError<TSharedRef<T>, FString>>(
-                            MakeValue(MoveTempIfPossible(Deserialized.GetValue())));
+                        return Result.GetValue();
                     }
 
-                    return TOptional<TValueOrError<TSharedRef<T>, FString>>();
+                    return std::expected<TSharedRef<T>, FString>(
+                        std::unexpect, FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
                 });
-
-            if (Result.IsSet())
-            {
-                return Result.GetValue();
-            }
-
-            return MakeError(FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
         }
 
         /**

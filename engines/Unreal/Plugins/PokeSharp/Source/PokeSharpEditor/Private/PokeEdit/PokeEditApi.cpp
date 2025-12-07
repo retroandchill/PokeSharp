@@ -3,35 +3,39 @@
 #include "PokeEdit/PokeEditApi.h"
 #include "PokeEdit/PokeEditClient.h"
 #include "PokeEdit/Schema/EditorLabelRequest.h"
+#include "PokeEdit/Schema/FieldDefinition.h"
+#include "PokeEdit/Schema/FieldPath.h"
 
 namespace PokeEdit
 {
     const TSharedRef<FJsonValue> NoBodyJsonValue = MakeShared<FJsonValueObject>(MakeShared<FJsonObject>());
 
-    TValueOrError<TArray<FEditorTabOption>, FString> GetEditorTabs()
+    std::expected<TArray<FEditorTabOption>, FString> GetEditorTabs()
     {
         static FName RequestName = "GetEditorTabs";
 
-        auto JsonResult = SendRequest(RequestName, NoBodyJsonValue);
-        if (JsonResult.HasError())
-        {
-            return MakeError(JsonResult.StealError());
-        }
-
-        return DeserializeFromJson<TArray<FEditorTabOption>>(JsonResult.GetValue());
+        return SendRequest(RequestName, NoBodyJsonValue).and_then([](const TSharedRef<FJsonValue> &Response) {
+            return DeserializeFromJson<TArray<FEditorTabOption>>(Response);
+        });
     }
 
-    TValueOrError<TArray<FText>, FString> GetEntryLabels(const FName EditorId)
+    std::expected<TArray<FText>, FString> GetEntryLabels(const FName EditorId)
     {
         static FName RequestName = "GetEntryLabels";
 
         const auto JsonRequest = SerializeToJson(FEditorLabelRequest(EditorId));
-        auto JsonResult = SendRequest(RequestName, JsonRequest);
-        if (JsonResult.HasError())
-        {
-            return MakeError(JsonResult.StealError());
-        }
+        return SendRequest(RequestName, JsonRequest).and_then([](const TSharedRef<FJsonValue> &Response) {
+            return DeserializeFromJson<TArray<FText>>(Response);
+        });
+    }
 
-        return DeserializeFromJson<TArray<FText>>(JsonResult.GetValue());
+    std::expected<TSharedRef<FFieldDefinition>, FString> GetFieldDefinition(const FFieldPath &Path)
+    {
+        static FName RequestName = "GetFieldDefinition";
+
+        const auto JsonRequest = SerializeToJson(Path);
+        return SendRequest(RequestName, JsonRequest).and_then([](const TSharedRef<FJsonValue> &Response) {
+            return DeserializeFromJson<TSharedRef<FFieldDefinition>>(Response);
+        });
     }
 } // namespace PokeEdit

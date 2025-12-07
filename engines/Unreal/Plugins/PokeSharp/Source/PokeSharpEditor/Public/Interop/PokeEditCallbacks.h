@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Templates/ValueOrError.h"
+#include <expected>
 
 /**
  *
@@ -26,7 +27,7 @@ class FPokeEditManager
 
     void SetCallbacks(FPokeEditCallbacks NewCallbacks);
 
-    TValueOrError<void, FString> SendRequest(FName RequestName, const TSharedRef<FArchive> &Payload,
+    std::expected<void, FString> SendRequest(FName RequestName, const TSharedRef<FArchive> &Payload,
                                              const TSharedRef<FArchive> &Response) const;
 
   private:

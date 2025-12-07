@@ -111,8 +111,7 @@ TSharedRef<SDockTab> FPokeSharpEditorModule::SpawnPokeSharpEditorTab(const FSpaw
     auto DockTab = SNew(SDockTab)
         .TabRole(NomadTab);
     
-    DockTab->SetContent(SNew(SPokeSharpEditor)
-        .Owner(DockTab));
+    DockTab->SetContent(SNew(SPokeSharpEditor, DockTab));
     // clang-format on
     return DockTab;
 }

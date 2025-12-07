@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Templates/ValueOrError.h"
+#include <expected>
 
 class FJsonValue;
 
@@ -12,6 +13,6 @@ class FJsonValue;
  */
 namespace PokeEdit
 {
-    POKESHARPEDITOR_API TValueOrError<TSharedRef<FJsonValue>, FString> SendRequest(
+    POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> SendRequest(
         FName RequestName, const TSharedRef<FJsonValue> &Payload);
 }

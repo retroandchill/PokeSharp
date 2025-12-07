@@ -71,13 +71,13 @@ void SPokeSharpEditor::Construct(const FArguments &InArgs)
 void SPokeSharpEditor::RefreshTabs()
 {
     auto EditorTabs = PokeEdit::GetEditorTabs();
-    if (const auto *Error = EditorTabs.TryGetError(); Error != nullptr)
+    if (!EditorTabs.has_value())
     {
-        UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching tabs: %s"), **Error)
+        UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching tabs: %s"), *EditorTabs.error())
         return;
     }
 
-    auto &Tabs = EditorTabs.GetValue();
+    auto &Tabs = EditorTabs.value();
     if (!Tabs.IsEmpty())
     {
         CurrentTab = Tabs[0].Id;

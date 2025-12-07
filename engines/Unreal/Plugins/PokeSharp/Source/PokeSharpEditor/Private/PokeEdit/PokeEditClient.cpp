@@ -9,35 +9,34 @@
 
 namespace PokeEdit
 {
-    TValueOrError<TSharedRef<FJsonValue>, FString> SendRequest(const FName RequestName,
+    std::expected<TSharedRef<FJsonValue>, FString> SendRequest(const FName RequestName,
                                                                const TSharedRef<FJsonValue> &Payload)
     {
         TArray<uint8> Buffer;
         FMemoryWriter Writer(Buffer);
-        if (auto JsonWriter = TJsonWriter<UTF8CHAR>::Create(&Writer);
+        if (const auto JsonWriter = TJsonWriter<UTF8CHAR>::Create(&Writer);
             !FJsonSerializer::Serialize(Payload, FString(), JsonWriter))
         {
-            return MakeError(
+            return std::unexpected(
                 FString::Format(TEXT("Failed to serialize payload for request '{0}'"), {RequestName.ToString()}));
         }
 
-        auto RequestArchive = MakeShared<FMemoryReader>(Buffer);
+        const auto RequestArchive = MakeShared<FMemoryReader>(Buffer);
         auto ResponseWriter = MakeShared<FArrayWriter>();
 
-        if (auto Result = FPokeEditManager::Get().SendRequest(RequestName, RequestArchive, ResponseWriter);
-            Result.HasError())
-        {
-            return MakeError(Result.StealError());
-        }
+        return FPokeEditManager::Get()
+            .SendRequest(RequestName, RequestArchive, ResponseWriter)
+            .and_then([&ResponseWriter] {
+                FMemoryReader Reader(*ResponseWriter);
+                const auto JsonReader = TJsonReader<UTF8CHAR>::Create(&Reader);
+                TSharedPtr<FJsonValue> JsonValue;
+                if (!FJsonSerializer::Deserialize(JsonReader, JsonValue))
+                {
+                    return std::expected<TSharedRef<FJsonValue>, FString>(std::unexpect,
+                                                                          TEXT("Failed to deserialize response"));
+                }
 
-        FMemoryReader Reader(*ResponseWriter);
-        auto JsonReader = TJsonReader<UTF8CHAR>::Create(&Reader);
-        TSharedPtr<FJsonValue> JsonValue;
-        if (!FJsonSerializer::Deserialize(JsonReader, JsonValue))
-        {
-            return MakeError(TEXT("Failed to deserialize response"));
-        }
-
-        return MakeValue(JsonValue.ToSharedRef());
+                return std::expected<TSharedRef<FJsonValue>, FString>(JsonValue.ToSharedRef());
+            });
     }
 } // namespace PokeEdit

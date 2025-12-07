@@ -5,13 +5,28 @@
 
 namespace PokeEdit
 {
+    constexpr std::array FieldKindLiterals = {std::make_pair(TEXT("Text"), EFieldKind::Text),
+                                              std::make_pair(TEXT("Int8"), EFieldKind::Int8),
+                                              std::make_pair(TEXT("Int16"), EFieldKind::Int16),
+                                              std::make_pair(TEXT("Int32"), EFieldKind::Int32),
+                                              std::make_pair(TEXT("Int64"), EFieldKind::Int64),
+                                              std::make_pair(TEXT("UInt8"), EFieldKind::UInt8),
+                                              std::make_pair(TEXT("UInt16"), EFieldKind::UInt16),
+                                              std::make_pair(TEXT("UInt32"), EFieldKind::UInt32),
+                                              std::make_pair(TEXT("UInt64"), EFieldKind::UInt64),
+                                              std::make_pair(TEXT("Float"), EFieldKind::Float),
+                                              std::make_pair(TEXT("Double"), EFieldKind::Double),
+                                              std::make_pair(TEXT("Bool"), EFieldKind::Bool),
+                                              std::make_pair(TEXT("Choice"), EFieldKind::Choice),
+                                              std::make_pair(TEXT("Object"), EFieldKind::Object),
+                                              std::make_pair(TEXT("List"), EFieldKind::List),
+                                              std::make_pair(TEXT("Dictionary"), EFieldKind::Dictionary),
+                                              std::make_pair(TEXT("Optional"), EFieldKind::Optional)};
+
     FString LexToString(EFieldKind Kind)
     {
-        constexpr std::array KindNames = {TEXT("Text"), TEXT("Int"),        TEXT("Float"),
-                                          TEXT("Bool"), TEXT("Choice"),     TEXT("Object"),
-                                          TEXT("List"), TEXT("Dictionary"), TEXT("Optional")};
-        check(static_cast<uint8>(Kind) < KindNames.size());
-        return KindNames[static_cast<uint8>(Kind)];
+        check(static_cast<uint8>(Kind) < FieldKindLiterals.size());
+        return FieldKindLiterals[static_cast<uint8>(Kind)].first;
     }
 
     bool LexFromString(EFieldKind &OutKind, const FStringView Lex)
@@ -27,17 +42,7 @@ namespace PokeEdit
 
     TOptional<EFieldKind> LexFromString(const FStringView Lex)
     {
-        constexpr std::array Literals = {std::make_pair(TEXT("Text"), EFieldKind::Text),
-                                         std::make_pair(TEXT("Int"), EFieldKind::Int),
-                                         std::make_pair(TEXT("Float"), EFieldKind::Float),
-                                         std::make_pair(TEXT("Bool"), EFieldKind::Bool),
-                                         std::make_pair(TEXT("Choice"), EFieldKind::Choice),
-                                         std::make_pair(TEXT("Object"), EFieldKind::Object),
-                                         std::make_pair(TEXT("List"), EFieldKind::List),
-                                         std::make_pair(TEXT("Dictionary"), EFieldKind::Dictionary),
-                                         std::make_pair(TEXT("Optional"), EFieldKind::Optional)};
-
-        for (const auto &[Literal, Kind] : Literals)
+        for (const auto &[Literal, Kind] : FieldKindLiterals)
         {
             if (Lex.Equals(Literal, ESearchCase::IgnoreCase))
             {

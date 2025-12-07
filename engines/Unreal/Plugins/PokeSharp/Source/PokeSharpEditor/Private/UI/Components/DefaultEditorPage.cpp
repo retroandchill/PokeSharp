@@ -57,26 +57,30 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
             SNew(SGameDataEntrySelector)
                 .OnGetEntries(FOnGetEntries::CreateLambda([TabId = this->TabId]
                 {
-                    auto Labels = PokeEdit::GetEntryLabels(TabId);
-                    if (const auto* Error = Labels.TryGetError(); Error != nullptr)
+                    auto Result = PokeEdit::GetEntryLabels(TabId)
+                        .transform([](const TArray<FText>& Labels) {
+                            return Labels |
+                                enumerate |
+                                TransformTuple([](int32 Index, const FText& Label) -> TSharedPtr<FEntryRowData> {
+                                    return MakeShared<FEntryRowData>(Index, Label);
+                                }) |
+                                RenderAs<TArray>();
+                        });
+                    
+                    if (Result.has_value())
                     {
-                        UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching entry labels: %s"), **Error);
-                        return TArray<TSharedPtr<FEntryRowData>>();
+                        return MoveTemp(Result).value();
                     }
                     
-                    // clang-format off
-                    return Labels.GetValue() |
-                        enumerate |
-                        TransformTuple([](int32 Index, const FText& Label) -> TSharedPtr<FEntryRowData> {
-                            return MakeShared<FEntryRowData>(Index, Label);
-                        }) |
-                        RenderAs<TArray>();
-                                   // clang-format on
-                               }))
-                               .OnEntrySelected(FOnEntrySelected::CreateLambda(
-                                   [TabId = this->TabId](const TSharedPtr<FEntryRowData> &Entry) {
+                    UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching entry labels: %s"), *Result.error());
+                    return TArray<TSharedPtr<FEntryRowData>>();
+                }))
+                .OnEntrySelected(FOnEntrySelected::CreateLambda(
+                    [TabId = this->TabId](const TSharedPtr<FEntryRowData> &Entry) 
+                    {
                                        // TODO: notify C# view-model that Entry was selected for TabId
-                                   }))];
+                    }))
+        ];
     // clang-format on
 }
 

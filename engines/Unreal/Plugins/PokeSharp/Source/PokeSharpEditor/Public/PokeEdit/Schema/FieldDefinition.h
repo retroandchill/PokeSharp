@@ -11,8 +11,16 @@ namespace PokeEdit
     enum class EFieldKind : uint8
     {
         Text,
-        Int,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        UInt8,
+        UInt16,
+        UInt32,
+        UInt64,
         Float,
+        Double,
         Bool,
         Choice,
         Object,
@@ -113,7 +121,51 @@ namespace PokeEdit
 
         EFieldKind GetKind() const override
         {
-            return EFieldKind::Int;
+            if constexpr (std::is_same_v<T, int8>)
+            {
+                return EFieldKind::Int8;
+            }
+            else if constexpr (std::is_same_v<T, int16>)
+            {
+                return EFieldKind::Int16;
+            }
+            else if constexpr (std::is_same_v<T, int32>)
+            {
+                return EFieldKind::Int32;
+            }
+            else if constexpr (std::is_same_v<T, int64>)
+            {
+                return EFieldKind::Int64;
+            }
+            else if constexpr (std::is_same_v<T, uint8>)
+            {
+                return EFieldKind::UInt8;
+            }
+            else if constexpr (std::is_same_v<T, uint16>)
+            {
+                return EFieldKind::UInt16;
+            }
+            else if constexpr (std::is_same_v<T, uint32>)
+            {
+                return EFieldKind::UInt32;
+            }
+            else if constexpr (std::is_same_v<T, uint64>)
+            {
+                return EFieldKind::UInt64;
+            }
+            else if constexpr (std::is_same_v<T, float>)
+            {
+                return EFieldKind::Float;
+            }
+            else if constexpr (std::is_same_v<T, double>)
+            {
+                return EFieldKind::Double;
+            }
+            else
+            {
+                static_assert(false, "Invalid numeric type");
+                std::unreachable();
+            }
         }
 
         TOptional<T> MinValue;

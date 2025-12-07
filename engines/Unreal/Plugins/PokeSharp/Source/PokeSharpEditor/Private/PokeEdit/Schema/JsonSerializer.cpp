@@ -14,37 +14,37 @@ namespace PokeEdit
         return Result;
     }
 
-    TValueOrError<bool, FString> TJsonConverter<bool>::Deserialize(const TSharedRef<FJsonValue> &Value)
+    std::expected<bool, FString> TJsonConverter<bool>::Deserialize(const TSharedRef<FJsonValue> &Value)
     {
         if (bool Result; Value->TryGetBool(Result))
         {
-            return MakeValue(Result);
+            return Result;
         }
 
-        return MakeError(FString::Format(TEXT("Value '{0}' is not a boolean"), {WriteAsString(Value)}));
+        return std::unexpected(FString::Format(TEXT("Value '{0}' is not a boolean"), {WriteAsString(Value)}));
     }
 
-    TValueOrError<FName, FString> TJsonConverter<FName>::Deserialize(const TSharedRef<FJsonValue> &Value)
+    std::expected<FName, FString> TJsonConverter<FName>::Deserialize(const TSharedRef<FJsonValue> &Value)
     {
         if (FString Result; Value->TryGetString(Result))
         {
-            return MakeValue(FName(Result));
+            return FName(Result);
         }
 
-        return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
+        return std::unexpected(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
     }
 
-    TValueOrError<FString, FString> TJsonConverter<FString>::Deserialize(const TSharedRef<FJsonValue> &Value)
+    std::expected<FString, FString> TJsonConverter<FString>::Deserialize(const TSharedRef<FJsonValue> &Value)
     {
         if (FString Result; Value->TryGetString(Result))
         {
-            return MakeValue(Result);
+            return Result;
         }
 
-        return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
+        return std::unexpected(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
     }
 
-    TValueOrError<FText, FString> TJsonConverter<FText>::Deserialize(const TSharedRef<FJsonValue> &Value)
+    std::expected<FText, FString> TJsonConverter<FText>::Deserialize(const TSharedRef<FJsonValue> &Value)
     {
         if (FString Result; Value->TryGetString(Result))
         {
@@ -53,10 +53,10 @@ namespace PokeEdit
             {
                 LocalizedText = FText::FromString(Result);
             }
-            return MakeValue(MoveTemp(LocalizedText));
+            return MoveTemp(LocalizedText);
         }
 
-        return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
+        return std::unexpected(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
     }
 
     TSharedRef<FJsonValue> TJsonConverter<FText>::Serialize(const FText &Value)

@@ -1,5 +1,6 @@
 ﻿#include "PokeSharpEditorModule.h"
 #include "LevelEditor.h"
+#include "PokeEdit/Model/Type.h"
 #include "ToolMenuEntry.h"
 #include "ToolMenus.h"
 #include "UI/PokeSharpEditor.h"
@@ -17,6 +18,8 @@ void FPokeSharpEditorModule::StartupModule()
     RegisterCommands();
     RegisterMenu();
     RegisterTabSpawner();
+
+    ModelMapping.Emplace(TEXT("PokemonType"), FType::StaticStruct());
 }
 
 void FPokeSharpEditorModule::ShutdownModule()
@@ -106,7 +109,7 @@ void FPokeSharpEditorModule::RegisterTabSpawner()
 {
     FGlobalTabmanager::Get()
         ->RegisterNomadTabSpawner(PokeSharpEditorTabName,
-                                  FOnSpawnTab::CreateStatic(&FPokeSharpEditorModule::SpawnPokeSharpEditorTab))
+                                  FOnSpawnTab::CreateRaw(this, &FPokeSharpEditorModule::SpawnPokeSharpEditorTab))
         .SetDisplayName(LOCTEXT("PokeSharpEditorTabTitle", "PokeSharp Data Editor"))
         .SetTooltipText(LOCTEXT("PokeSharpEditorTabTooltip", "Edit PokeSharp data"))
         .SetIcon(FSlateIcon(FPokeSharpStyle::GetStyleSetName(), "PokeSharp.Toolbar"));
@@ -117,13 +120,17 @@ void FPokeSharpEditorModule::UnregisterTabSpawner()
     FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(PokeSharpEditorTabName);
 }
 
-TSharedRef<SDockTab> FPokeSharpEditorModule::SpawnPokeSharpEditorTab(const FSpawnTabArgs &SpawnTabArgs)
+TSharedRef<SDockTab> FPokeSharpEditorModule::SpawnPokeSharpEditorTab(const FSpawnTabArgs &) const
 {
     // clang-format off
     auto DockTab = SNew(SDockTab)
         .TabRole(NomadTab);
     
-    DockTab->SetContent(SNew(SPokeSharpEditor, DockTab));
+    DockTab->SetContent(SNew(SPokeSharpEditor, DockTab)
+        .GetStructForTab_Lambda([this] (const FName TabId)
+        {
+            return ModelMapping.FindRef(TabId);
+        }));
     // clang-format on
     return DockTab;
 }

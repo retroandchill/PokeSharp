@@ -30,6 +30,12 @@ public class EditorService
             ?? throw new InvalidOperationException($"No editor found for {editorId}");
     }
 
+    public JsonNode GetEntryAtIndex(Name editorId, int index)
+    {
+        return _editors.GetValueOrDefault(editorId)?.GetEntry(index)
+            ?? throw new InvalidOperationException($"No editor found for {editorId}");
+    }
+
     public FieldDefinition GetFieldDefinition(FieldPath path)
     {
         if (path.Segments.Length == 0)

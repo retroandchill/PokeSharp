@@ -26,7 +26,9 @@ public class TextJsonConverter : JsonConverter<Text>
         try
         {
             var foundString = reader.GetString();
-            return foundString is not null ? Text.FromLocText(foundString) : throw new JsonException("Name cannot be null.");
+            return foundString is not null
+                ? Text.FromLocText(foundString)
+                : throw new JsonException("Name cannot be null.");
         }
         catch (InvalidOperationException ex)
         {

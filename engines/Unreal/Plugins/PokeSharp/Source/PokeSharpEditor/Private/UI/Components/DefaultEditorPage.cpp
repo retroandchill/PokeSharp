@@ -2,16 +2,25 @@
 
 #include "UI/Components/DefaultEditorPage.h"
 #include "Framework/Docking/TabManager.h"
+#include "IStructureDetailsView.h"
+#include "JsonObjectConverter.h"
 #include "LogPokeSharpEditor.h"
 #include "Mcro/CommonCore.h"
+#include "Modules/ModuleManager.h"
 #include "PokeEdit/PokeEditApi.h"
-#include "UI/Components/GameDataEntryDetails.h"
+#include "PokeEdit/Schema/FieldPath.h"
+#include "PropertyEditorModule.h"
+#include "Serialization/JsonSerializer.h"
 #include "UI/Components/GameDataEntrySelector.h"
 #include "Widgets/Docking/SDockTab.h"
 
-void SDefaultEditorPage::Construct(const FArguments &InArgs, const TSharedRef<SDockTab> &InOuterTab)
+void SDefaultEditorPage::Construct(const FArguments &InArgs,
+                                   const TSharedRef<SDockTab> &InOuterTab,
+                                   const FName InTabId,
+                                   const UStruct *InModel)
 {
-    TabId = InArgs._TabId.Get();
+    TabId = InTabId;
+    Model = InModel;
     OuterTab = InOuterTab;
 
     InnerTabManager = FGlobalTabmanager::Get()->NewTabManager(InOuterTab);
@@ -82,11 +91,30 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
                     {
                         if (Entry == nullptr)
                         {
-                            Details->ClearEntryPath();
-                            return;
+                            EntryStruct.Reset();
                         }
+                        else
+                        {
+                            using FResult = std::expected<TSharedPtr<FStructOnScope>, FString>;
                         
-                        Details->SetEntryPath(PokeEdit::FFieldPath(PokeEdit::FPropertySegment(TabId), PokeEdit::FListIndexSegment(Entry->Index)));
+                            EntryStruct = PokeEdit::GetEntryAtIndex(TabId, Entry->Index)
+                                .transform_error([](FString&& Error) { return FText::FromString(MoveTemp(Error)); })
+                                .and_then([this](const TSharedRef<FJsonValue> &EntryJson)
+                                {
+                                    return PokeEdit::DeserializeFromJson(EntryJson, Model);
+                                })
+                                .transform([](const TSharedRef<FStructOnScope> &Result)
+                                {
+                                    return Result.ToSharedPtr();
+                                })
+                                .or_else([](const FText &Error) -> FResult
+                                {
+                                    UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching entry data: %s"), *Error.ToString());
+                                    return TSharedPtr<FStructOnScope>();
+                                })
+                                .value();
+                        }
+                        DetailsView->SetStructureData(EntryStruct);
                     }))
         ];
     // clang-format on
@@ -94,12 +122,19 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
 
 TSharedRef<SDockTab> SDefaultEditorPage::SpawnDetailsTab(const FSpawnTabArgs &Args)
 {
+    auto &PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FDetailsViewArgs DetailsViewArgs;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+    const FStructureDetailsViewArgs DetailsViewArgsStruct;
+
+    DetailsView = PropertyEditorModule.CreateStructureDetailView(DetailsViewArgs, DetailsViewArgsStruct, EntryStruct);
+
     // clang-format off
     return SNew(SDockTab)
         .Label(NSLOCTEXT("SDefaultEditorPage", "DetailsTabLabel", "Details"))
         .TabRole(PanelTab)
         [
-            SAssignNew(Details, SGameDataEntryDetails)
+            DetailsView->GetWidget().ToSharedRef()
         ];
     // clang-format on
 }

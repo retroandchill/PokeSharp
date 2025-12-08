@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PokeEdit/Schema/JsonSerializer.h"
+#include "JsonObjectConverter.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 
@@ -69,5 +70,34 @@ namespace PokeEdit
         FString Buffer;
         FTextStringHelper::WriteToBuffer(Buffer, Value);
         return MakeShared<FJsonValueString>(MoveTemp(Buffer));
+    }
+
+    std::expected<TSharedRef<FStructOnScope>, FText> DeserializeFromJson(const TSharedRef<FJsonValue> &Value,
+                                                                         const UStruct *Struct,
+                                                                         const int64 CheckFlags,
+                                                                         const int64 SkipFlags,
+                                                                         const bool bStrictMode,
+                                                                         const FCustomImportCallback *ImportCb)
+    {
+        const auto JsonObject = Value->AsObject();
+        if (JsonObject == nullptr)
+        {
+            return std::unexpected(FText::FromStringView(TEXT("Provided value is not a JSON object")));
+        }
+
+        auto Result = MakeShared<FStructOnScope>(Struct);
+        if (FText OutError; !FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(),
+                                                                       Struct,
+                                                                       Result->GetStructMemory(),
+                                                                       CheckFlags,
+                                                                       SkipFlags,
+                                                                       bStrictMode,
+                                                                       &OutError,
+                                                                       ImportCb))
+        {
+            return std::unexpected(MoveTemp(OutError));
+        }
+
+        return Result;
     }
 } // namespace PokeEdit

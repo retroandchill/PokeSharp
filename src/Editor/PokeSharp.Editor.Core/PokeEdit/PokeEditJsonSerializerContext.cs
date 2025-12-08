@@ -7,7 +7,7 @@ namespace PokeSharp.Editor.Core.PokeEdit;
 
 [RegisterSingleton(Factory = nameof(Default))]
 [JsonSourceGenerationOptions(
-    WriteIndented = true, 
+    WriteIndented = true,
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     AllowOutOfOrderMetadataProperties = true
 )]
@@ -17,4 +17,5 @@ namespace PokeSharp.Editor.Core.PokeEdit;
 [JsonSerializable(typeof(IEnumerable<EditorTabOption>))]
 [JsonSerializable(typeof(IEnumerable<Text>))]
 [JsonSerializable(typeof(EditorLabelRequest))]
+[JsonSerializable(typeof(EntityRequest))]
 public partial class PokeEditJsonSerializerContext : JsonSerializerContext;

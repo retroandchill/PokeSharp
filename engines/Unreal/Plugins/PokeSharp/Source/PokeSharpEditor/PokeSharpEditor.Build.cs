@@ -16,6 +16,7 @@ public class PokeSharpEditor : ModuleRules
             "Json",
             "Slate",
             "Mcro",
+            "PropertyEditor",
         ]);
 
         PrivateDependencyModuleNames.AddRange([
@@ -26,6 +27,7 @@ public class PokeSharpEditor : ModuleRules
             "ToolMenus",
             "Projects",
             "InputCore",
+            "JsonUtilities",
         ]);
     }
 }

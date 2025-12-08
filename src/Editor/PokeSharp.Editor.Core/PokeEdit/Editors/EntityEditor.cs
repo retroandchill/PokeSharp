@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using PokeSharp.Core.Collections;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Strings;
+using PokeSharp.Core.Utils;
 using PokeSharp.Editor.Core.PokeEdit.Properties;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
@@ -21,6 +22,8 @@ public interface IEntityEditor
     bool DisplayAsSingleton { get; }
 
     void SyncFromSource();
+
+    JsonNode GetEntry(int index);
 
     FieldDefinition GetField(FieldPathSegment outer, ReadOnlySpan<FieldPathSegment> path);
 
@@ -49,6 +52,13 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
     public void SyncFromSource()
     {
         Interlocked.Exchange(ref _entries, [.. T.Entities]);
+    }
+
+    public JsonNode GetEntry(int index)
+    {
+        return index < _entries.Length && index >= 0
+            ? JsonSerializer.SerializeToNode(_entries[index], options).RequireNonNull()
+            : throw new InvalidOperationException($"Cannot find index {index} in collection.");
     }
 
     public FieldDefinition GetField(FieldPathSegment outer, ReadOnlySpan<FieldPathSegment> path)

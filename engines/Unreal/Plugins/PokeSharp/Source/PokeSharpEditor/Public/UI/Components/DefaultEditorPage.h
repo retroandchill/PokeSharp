@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
-class SGameDataEntryDetails;
+class FStructOnScope;
+class IStructureDetailsView;
 class FTabManager;
 class FSpawnTabArgs;
 class SDockTab;
+
 /**
  *
  */
@@ -19,12 +21,13 @@ class POKESHARPEDITOR_API SDefaultEditorPage : public SCompoundWidget
         {
         }
 
-        SLATE_ATTRIBUTE(FName, TabId)
-
     SLATE_END_ARGS()
 
     /** Constructs this widget with InArgs */
-    void Construct(const FArguments &InArgs, const TSharedRef<SDockTab> &InOuterTab);
+    void Construct(const FArguments &InArgs,
+                   const TSharedRef<SDockTab> &InOuterTab,
+                   FName InTabId,
+                   const UStruct *InModel);
 
   private:
     // tab spawn handlers
@@ -36,7 +39,9 @@ class POKESHARPEDITOR_API SDefaultEditorPage : public SCompoundWidget
 
     // resolved from the attribute in Construct
     FName TabId;
+    TObjectPtr<const UStruct> Model;
     TWeakPtr<SDockTab> OuterTab;
 
-    TSharedPtr<SGameDataEntryDetails> Details;
+    TSharedPtr<IStructureDetailsView> DetailsView;
+    TSharedPtr<FStructOnScope> EntryStruct;
 };

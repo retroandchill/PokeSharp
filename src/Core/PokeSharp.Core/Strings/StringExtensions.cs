@@ -8,20 +8,33 @@ public static class StringExtensions
     {
         public string Escape()
         {
-            if (string.IsNullOrWhiteSpace(value)) return value;
-        
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+
             var sb = new StringBuilder(value.Length + 8);
-        
+
             foreach (var c in value)
             {
                 switch (c)
                 {
-                    case '\\': sb.Append("\\\\"); break;
-                    case '\"': sb.Append("\\\""); break;
-                    case '\n': sb.Append("\\n");  break;
-                    case '\r': sb.Append("\\r");  break;
-                    case '\t': sb.Append("\\t");  break;
-                    case '\0': sb.Append("\\0");  break;
+                    case '\\':
+                        sb.Append("\\\\");
+                        break;
+                    case '\"':
+                        sb.Append("\\\"");
+                        break;
+                    case '\n':
+                        sb.Append("\\n");
+                        break;
+                    case '\r':
+                        sb.Append("\\r");
+                        break;
+                    case '\t':
+                        sb.Append("\\t");
+                        break;
+                    case '\0':
+                        sb.Append("\\0");
+                        break;
                     default:
                         // Optional: escape other control chars as \xNN
                         if (char.IsControl(c))
@@ -42,8 +55,9 @@ public static class StringExtensions
 
         public string Unescape()
         {
-            if (string.IsNullOrWhiteSpace(value)) return value;
-        
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+
             var sb = new StringBuilder(value.Length);
             for (var i = 0; i < value.Length; i++)
             {
@@ -64,20 +78,30 @@ public static class StringExtensions
                 var next = value[++i];
                 switch (next)
                 {
-                    case '\\': sb.Append('\\'); break;
-                    case '\"': sb.Append('\"'); break;
-                    case 'n':  sb.Append('\n'); break;
-                    case 'r':  sb.Append('\r'); break;
-                    case 't':  sb.Append('\t'); break;
-                    case '0':  sb.Append('\0'); break;
+                    case '\\':
+                        sb.Append('\\');
+                        break;
+                    case '\"':
+                        sb.Append('\"');
+                        break;
+                    case 'n':
+                        sb.Append('\n');
+                        break;
+                    case 'r':
+                        sb.Append('\r');
+                        break;
+                    case 't':
+                        sb.Append('\t');
+                        break;
+                    case '0':
+                        sb.Append('\0');
+                        break;
 
                     case 'x':
                         // Expect up to 2 hex digits (to match the escaper's \xNN)
                         var hexStart = i + 1;
                         var hexLen = 0;
-                        while (hexStart + hexLen < value.Length &&
-                               hexLen < 2 &&
-                               IsHexDigit(value[hexStart + hexLen]))
+                        while (hexStart + hexLen < value.Length && hexLen < 2 && IsHexDigit(value[hexStart + hexLen]))
                         {
                             hexLen++;
                         }

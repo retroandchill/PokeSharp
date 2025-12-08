@@ -4,11 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonValue.h"
+#include "JsonObjectConverter.h"
 #include "Templates/ValueOrError.h"
+#include "UObject/StructOnScope.h"
 #include <expected>
 
 namespace PokeEdit
 {
+    using FCustomImportCallback = FJsonObjectConverter::CustomImportCallback;
+
     /**
      * Convert a JSON value to its serialized String representation. Used primarily for printing the value on in
      * debug/error logs.
@@ -511,6 +515,14 @@ namespace PokeEdit
     {
         return TJsonConverter<std::remove_cvref_t<T>>::Deserialize(Value);
     }
+
+    POKESHARPEDITOR_API std::expected<TSharedRef<FStructOnScope>, FText> DeserializeFromJson(
+        const TSharedRef<FJsonValue> &Value,
+        const UStruct *Struct,
+        int64 CheckFlags = 0,
+        int64 SkipFlags = 0,
+        const bool bStrictMode = false,
+        const FCustomImportCallback *ImportCb = nullptr);
 
     /**
      * Serializes a value to the target type.

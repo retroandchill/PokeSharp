@@ -40,9 +40,9 @@ public sealed partial class UnlocalizedTextProvider : ITextProvider
         {
             return new BasicTextData(locString, locString);
         }
-        
-        var escapedNs     = match.Groups["ns"].Value.Unescape();
-        var escapedKey    = match.Groups["key"].Value.Unescape();
+
+        var escapedNs = match.Groups["ns"].Value.Unescape();
+        var escapedKey = match.Groups["key"].Value.Unescape();
         var escapedSource = match.Groups["src"].Value.Unescape();
         return new BasicTextData(escapedSource, escapedSource, escapedNs, escapedKey);
     }
@@ -51,7 +51,9 @@ public sealed partial class UnlocalizedTextProvider : ITextProvider
     {
         throw new NotImplementedException();
     }
-    
-    [GeneratedRegex("""NSLOCTEXT\(\s*"(?<ns>(?:\\.|[^"\\])*)"\s*,\s*"(?<key>(?:\\.|[^"\\])*)"\s*,\s*"(?<src>(?:\\.|[^"\\])*)"\s*\)""")]
+
+    [GeneratedRegex(
+        """NSLOCTEXT\(\s*"(?<ns>(?:\\.|[^"\\])*)"\s*,\s*"(?<key>(?:\\.|[^"\\])*)"\s*,\s*"(?<src>(?:\\.|[^"\\])*)"\s*\)"""
+    )]
     private static partial Regex NsLocTextPattern { get; }
 }

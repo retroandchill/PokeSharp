@@ -36,13 +36,13 @@ public sealed record BasicTextData(
 
     public string ToLocString()
     {
-        if (Namespace is null || Key is null || IsCultureInvariant) return SourceString;
-        
-        var escapedNs     = Namespace.Escape();
-        var escapedKey    = Key.Escape();
+        if (Namespace is null || Key is null || IsCultureInvariant)
+            return SourceString;
+
+        var escapedNs = Namespace.Escape();
+        var escapedKey = Key.Escape();
         var escapedSource = SourceString.Escape();
 
         return $"NSLOCTEXT(\"{escapedNs}\", \"{escapedKey}\", \"{escapedSource}\")";
-
     }
 }

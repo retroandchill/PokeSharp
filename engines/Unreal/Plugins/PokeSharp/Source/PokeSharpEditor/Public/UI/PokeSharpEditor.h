@@ -8,6 +8,9 @@
 class SUniformWrapPanel;
 class SBorder;
 class SDockTab;
+
+DECLARE_DELEGATE_RetVal_OneParam(const UStruct *, FGetStructForTab, FName);
+
 /**
  *
  */
@@ -17,6 +20,8 @@ class POKESHARPEDITOR_API SPokeSharpEditor : public SCompoundWidget
     SLATE_BEGIN_ARGS(SPokeSharpEditor)
         {
         }
+
+        SLATE_EVENT(FGetStructForTab, GetStructForTab)
 
     SLATE_END_ARGS()
 
@@ -35,4 +40,5 @@ class POKESHARPEDITOR_API SPokeSharpEditor : public SCompoundWidget
     TSharedPtr<SBorder> ToolbarContainer;
     TSharedPtr<SUniformWrapPanel> TabBar;
     TSharedPtr<SBorder> ContentArea;
+    FGetStructForTab GetStructForTabDelegate;
 };

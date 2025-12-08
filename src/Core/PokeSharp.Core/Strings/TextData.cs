@@ -60,6 +60,6 @@ public interface ITextData
     /// </summary>
     /// <returns></returns>
     ReadOnlySpan<char> AsDisplaySpan();
-    
+
     string ToLocString();
 }

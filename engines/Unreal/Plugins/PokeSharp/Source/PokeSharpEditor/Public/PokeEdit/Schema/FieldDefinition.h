@@ -369,7 +369,6 @@ namespace PokeEdit
     };
 
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FFieldDefinition>>;
-    template struct POKESHARPEDITOR_API TJsonConverter<FDictionaryFieldPair>;
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FBoolFieldDefinition>>;
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<FTextFieldDefinition>>;
     template struct POKESHARPEDITOR_API TJsonConverter<TSharedRef<TNumberFieldDefinition<int8>>>;

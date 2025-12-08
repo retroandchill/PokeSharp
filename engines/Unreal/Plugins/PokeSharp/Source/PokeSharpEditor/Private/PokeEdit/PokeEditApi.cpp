@@ -3,6 +3,7 @@
 #include "PokeEdit/PokeEditApi.h"
 #include "PokeEdit/PokeEditClient.h"
 #include "PokeEdit/Schema/EditorLabelRequest.h"
+#include "PokeEdit/Schema/EntityRequest.h"
 #include "PokeEdit/Schema/FieldDefinition.h"
 #include "PokeEdit/Schema/FieldPath.h"
 
@@ -27,6 +28,13 @@ namespace PokeEdit
         return SendRequest(RequestName, JsonRequest)
             .and_then([](const TSharedRef<FJsonValue> &Response)
                       { return DeserializeFromJson<TArray<FText>>(Response); });
+    }
+
+    std::expected<TSharedRef<FJsonValue>, FString> GetEntryAtIndex(const FName EditorId, const int32 Index)
+    {
+        static FName RequestName = "GetEntryAtIndex";
+        const auto JsonRequest = SerializeToJson(FEntityRequest(EditorId, Index));
+        return SendRequest(RequestName, JsonRequest);
     }
 
     std::expected<TSharedRef<FFieldDefinition>, FString> GetFieldDefinition(const FFieldPath &Path)

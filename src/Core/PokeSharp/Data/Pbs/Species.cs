@@ -3,11 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MessagePack;
-using MessagePack.Formatters;
-using PokeSharp.Core;
 using PokeSharp.Core.Data;
 using PokeSharp.Core.Strings;
-using PokeSharp.Data.Core;
+using PokeSharp.Serialization.Json;
 using PokeSharp.Serialization.MessagePack;
 
 namespace PokeSharp.Data.Pbs;
@@ -26,6 +24,7 @@ public readonly record struct SpeciesForm(Name Species, int Form = 0)
 public readonly record struct LevelUpMove(Name Move, int Level);
 
 [MessagePackObject(true)]
+[JsonConverter(typeof(EvolutionInfoJsonConverter))]
 public record EvolutionInfo(
     Name Species,
     Name EvolutionMethod,

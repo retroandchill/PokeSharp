@@ -82,7 +82,7 @@ public sealed class PokemonCompiler(
                 }
 
                 var paramType = Evolution.TryGet(evolution.EvolutionMethod, out var evo) ? evo.Parameter : null;
-                var paramValue = evolution.Parameter?.ToString() ?? string.Empty;
+                var paramValue = evolution.Parameter.ToString();
 
                 if (paramType == typeof(Species))
                 {

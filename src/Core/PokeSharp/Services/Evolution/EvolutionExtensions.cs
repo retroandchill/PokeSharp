@@ -166,7 +166,7 @@ public static class EvolutionExtensions
                 )
                     return previousMinLevel;
 
-                return evolutionMethodData.AnyLevelUp ? previousMinLevel + 1 : evo.Parameter.GetInteger();
+                return evolutionMethodData.AnyLevelUp ? previousMinLevel + 1 : (int)evo.Parameter!;
             }
         }
     }

@@ -92,12 +92,14 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
                         if (Entry == nullptr)
                         {
                             EntryStruct.Reset();
+                            SelectedEntryIndex = INDEX_NONE;
                         }
                         else
                         {
                             using FResult = std::expected<TSharedPtr<FStructOnScope>, FString>;
                         
-                            EntryStruct = PokeEdit::GetEntryAtIndex(TabId, Entry->Index)
+                            SelectedEntryIndex = Entry->Index;
+                            EntryStruct = PokeEdit::GetEntryAtIndex(TabId, SelectedEntryIndex)
                                 .transform_error([](FString&& Error) { return FText::FromString(MoveTemp(Error)); })
                                 .and_then([this](const TSharedRef<FJsonValue> &EntryJson)
                                 {
@@ -128,6 +130,17 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnDetailsTab(const FSpawnTabArgs &Ar
     const FStructureDetailsViewArgs DetailsViewArgsStruct;
 
     DetailsView = PropertyEditorModule.CreateStructureDetailView(DetailsViewArgs, DetailsViewArgsStruct, EntryStruct);
+    DetailsView->GetOnFinishedChangingPropertiesDelegate().AddLambda(
+        [this](const FPropertyChangedEvent &Event)
+        {
+            // TODO: Actually construct the full information, this is just a basic idea of what we need to do here
+            const auto *ValuePtr = Event.Property->ContainerPtrToValuePtr<void>(EntryStruct->GetStructMemory());
+            auto Serialized = FJsonObjectConverter::UPropertyToJsonValue(Event.Property, ValuePtr).ToSharedRef();
+
+            PokeEdit::FFieldPath PropertyPath(PokeEdit::FPropertySegment(TabId),
+                                              PokeEdit::FListIndexSegment(SelectedEntryIndex),
+                                              PokeEdit::FPropertySegment(Event.Property->GetFName()));
+        });
 
     // clang-format off
     return SNew(SDockTab)

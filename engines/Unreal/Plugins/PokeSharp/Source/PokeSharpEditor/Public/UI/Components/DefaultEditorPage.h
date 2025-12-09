@@ -44,4 +44,5 @@ class POKESHARPEDITOR_API SDefaultEditorPage : public SCompoundWidget
 
     TSharedPtr<IStructureDetailsView> DetailsView;
     TSharedPtr<FStructOnScope> EntryStruct;
+    int32 SelectedEntryIndex = INDEX_NONE;
 };

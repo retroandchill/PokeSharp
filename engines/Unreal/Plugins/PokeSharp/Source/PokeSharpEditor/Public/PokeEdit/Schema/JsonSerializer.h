@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Dom/JsonValue.h"
 #include "JsonObjectConverter.h"
+#include "Mcro/Enums.h"
 #include "Templates/ValueOrError.h"
+#include "Types/AttributeStorage.h"
 #include "UObject/StructOnScope.h"
 #include <expected>
 
@@ -323,9 +325,9 @@ namespace PokeEdit
         {
             if (FString Result; Value->TryGetString(Result))
             {
-                if (T Enum; LexFromString(Enum, Result))
+                if (auto Parsed = ParseEnum<T>(Result); Parsed.IsSet())
                 {
-                    return MakeValue(Enum);
+                    return *Parsed;
                 }
 
                 return MakeError(FString::Format(TEXT("Value '{0}' is not a valid enum value"), {Result}));

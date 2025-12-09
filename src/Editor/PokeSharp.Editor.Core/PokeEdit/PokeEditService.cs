@@ -43,18 +43,10 @@ public sealed partial class PokeEditService(EditorService editorService)
 
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask<FieldDefinition> GetFieldDefinitionAsync(
-        FieldPath path,
+    public ValueTask<List<FieldEdit>> ProcessFieldEditAsync(
+        FieldEdit edit,
         CancellationToken cancellationToken = default
     )
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(editorService.GetFieldDefinition(path));
-    }
-
-    [CreateSyncVersion]
-    [PokeEditRequest]
-    public ValueTask<JsonNode?> ProcessFieldEditAsync(FieldEdit edit, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult(editorService.ProcessFieldEdit(edit));
@@ -68,7 +60,6 @@ public static class PokeEditServiceExtensions
     {
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEditorTabsHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryLabelsHandler>();
-        services.AddSingleton<IRequestHandler, PokeEditServiceGetFieldDefinitionHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryAtIndexHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceProcessFieldEditHandler>();
     }

@@ -9,6 +9,8 @@
 
 namespace PokeEdit
 {
+    const TSharedRef<FJsonValue> NoBodyJsonValue = MakeShared<FJsonValueObject>(MakeShared<FJsonObject>());
+
     std::expected<TSharedRef<FJsonValue>, FString> SendRequest(const FName RequestName,
                                                                const TSharedRef<FJsonValue> &Payload)
     {

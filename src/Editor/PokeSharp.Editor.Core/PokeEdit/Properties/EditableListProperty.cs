@@ -69,48 +69,6 @@ public sealed class EditableListProperty<TRoot, TItem>(
         return With(root, list.RemoveAt(index));
     }
 
-    public override FieldDefinition GetDefinition(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        JsonSerializerOptions? options = null
-    )
-    {
-        var currentValue = Get(root);
-        if (path.Length == 0)
-        {
-            return new ListFieldDefinition
-            {
-                FieldId = new PropertySegment(Name),
-                Label = DisplayName,
-                Tooltip = Tooltip,
-                Category = Category,
-                IsDefaultValue = currentValue.SequenceEqual(DefaultValue),
-                ItemFields =
-                [
-                    .. currentValue.Select(
-                        (item, i) =>
-                            this.CreateValueField(ItemType, item, default, new ListIndexSegment(i), [], options)
-                    ),
-                ],
-                FixedSize = this.TryGetBooleanMetadata(EditablePropertyBuilder.FixedSizeKey),
-                MinSize = this.TryGetNumericMetadata<int>(EditablePropertyBuilder.MinSizeKey),
-                MaxSize = this.TryGetNumericMetadata<int>(EditablePropertyBuilder.MaxSizeKey),
-            };
-        }
-
-        if (path[0] is not ListIndexSegment indexSegment)
-        {
-            throw new InvalidOperationException(
-                $"First segment under list property {Name} must be list index, got {path[0]}"
-            );
-        }
-
-        var index = indexSegment.Index;
-        return currentValue.Length > index || index < 0
-            ? this.CreateValueField(ItemType, currentValue[index], default, indexSegment, path, options)
-            : throw new InvalidOperationException($"Cannot find index {index} in list.");
-    }
-
     public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
@@ -161,5 +119,89 @@ public sealed class EditableListProperty<TRoot, TItem>(
         return list.Length > index || index < 0
             ? SetItem(root, index, ItemType.ApplyEdit(list[index], remaining, edit, options))
             : throw new InvalidOperationException($"Cannot find index {index} in list.");
+    }
+
+    public override void CollectDiffs(
+        TRoot oldRoot,
+        TRoot newRoot,
+        List<FieldEdit> edits,
+        FieldPath basePath,
+        JsonSerializerOptions? options = null
+    )
+    {
+        var oldList = Get(oldRoot);
+        var newList = Get(newRoot);
+
+        if (oldList == newList)
+            return;
+
+        var propertyPath = new FieldPath(basePath.Segments.Add(new PropertySegment(Name)));
+
+        var oldCount = oldList.Length;
+        var newCount = newList.Length;
+        var minCount = Math.Min(oldCount, newCount);
+
+        for (var i = 0; i < minCount; i++)
+        {
+            var oldItem = oldList[i];
+            var newItem = newList[i];
+
+            if (EqualityComparer<TItem>.Default.Equals(oldItem, newItem))
+                continue;
+
+            var itemPath = new FieldPath(propertyPath.Segments.Add(new ListIndexSegment(i)));
+
+            if (ItemType is null)
+            {
+                // No nested editable type; treat as atomic and emit SetValueEdit
+                edits.Add(
+                    new SetValueEdit
+                    {
+                        Path = itemPath,
+                        NewValue = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
+                    }
+                );
+            }
+            else
+            {
+                // Nested editable type: let it compute its own diffs
+                ItemType.CollectDiffs(oldItem, newItem, edits, itemPath, options);
+            }
+        }
+
+        // 2. If new list is longer → inserts for [minCount..newCount-1]
+        if (newCount > oldCount)
+        {
+            for (var i = minCount; i < newCount; i++)
+            {
+                var newItem = newList[i];
+
+                edits.Add(
+                    new ListInsertEdit
+                    {
+                        Path = propertyPath,
+                        Index = i,
+                        NewItem = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
+                    }
+                );
+            }
+        }
+        // 3. If new list is shorter → removes for [newCount..oldCount-1]
+        else if (newCount < oldCount)
+        {
+            // Important: remove from the end backward so indices stay valid.
+            for (var i = oldCount - 1; i >= newCount; i--)
+            {
+                edits.Add(
+                    new ListRemoveAtEdit
+                    {
+                        Path = propertyPath, // collection-level op
+                        Index = i,
+                        // Optional: capture OriginalItem if useful
+                        OriginalItem = JsonSerializer.SerializeToNode(oldList[i], options),
+                    }
+                );
+            }
+        }
     }
 }

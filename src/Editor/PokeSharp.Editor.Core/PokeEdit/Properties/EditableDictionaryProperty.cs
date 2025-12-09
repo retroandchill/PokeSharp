@@ -57,76 +57,6 @@ public sealed class EditableDictionaryProperty<TRoot, TKey, TValue>(
         return With(root, dictionary.Remove(key));
     }
 
-    public override FieldDefinition GetDefinition(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        JsonSerializerOptions? options = null
-    )
-    {
-        var currentValue = Get(root);
-        if (path.Length == 0)
-        {
-            return new DictionaryFieldDefinition
-            {
-                FieldId = new PropertySegment(Name),
-                Label = DisplayName,
-                Tooltip = Tooltip,
-                Category = Category,
-                IsDefaultValue = DictionariesEqual(currentValue, DefaultValue),
-                Pairs =
-                [
-                    .. currentValue.Select(x =>
-                    {
-                        var jsonKey = JsonSerializer.SerializeToNode(x.Key, options).RequireNonNull();
-                        return new DictionaryFieldPair(
-                            this.CreateValueField(KeyType, x.Key, default, new PropertySegment(Name), [], options),
-                            this.CreateValueField(
-                                ValueType,
-                                x.Value,
-                                default,
-                                new DictionaryKeySegment(jsonKey),
-                                [],
-                                options
-                            )
-                        );
-                    }),
-                ],
-                FixedSize = this.TryGetBooleanMetadata(EditablePropertyBuilder.FixedSizeKey),
-                MinSize = this.TryGetNumericMetadata<int>(EditablePropertyBuilder.MinSizeKey),
-                MaxSize = this.TryGetNumericMetadata<int>(EditablePropertyBuilder.MaxSizeKey),
-            };
-        }
-
-        if (path[0] is not DictionaryKeySegment keySegment)
-        {
-            throw new InvalidOperationException(
-                $"First segment under list property {Name} must be list index, got {path[0]}"
-            );
-        }
-
-        var key = keySegment.Key.Deserialize<TKey>(options).RequireNonNull();
-
-        return currentValue.TryGetValue(key, out var value)
-            ? this.CreateValueField(ValueType, value, default, keySegment, path, options)
-            : throw new InvalidOperationException($"Cannot find key {key} in dictionary.");
-    }
-
-    private static bool DictionariesEqual(ImmutableDictionary<TKey, TValue> a, ImmutableDictionary<TKey, TValue>? b)
-    {
-        if (b is null)
-            return false;
-        if (a.Count != b.Count)
-            return false;
-
-        foreach (var (key, value) in a)
-        {
-            if (!b.TryGetValue(key, out var otherValue) || !a.ValueComparer.Equals(value, otherValue))
-                return false;
-        }
-
-        return true;
-    }
-
     public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
@@ -176,5 +106,72 @@ public sealed class EditableDictionaryProperty<TRoot, TKey, TValue>(
         return dictionary.TryGetValue(key.RequireNonNull(), out var value)
             ? SetEntry(root, key.RequireNonNull(), ValueType.ApplyEdit(value, remaining, edit, options))
             : throw new InvalidOperationException($"Cannot find key {key} in dictionary.");
+    }
+
+    public override void CollectDiffs(
+        TRoot oldRoot,
+        TRoot newRoot,
+        List<FieldEdit> edits,
+        FieldPath basePath,
+        JsonSerializerOptions? options = null
+    )
+    {
+        var oldDictionary = Get(oldRoot);
+        var newDictionary = Get(newRoot);
+
+        if (ReferenceEquals(oldDictionary, newDictionary))
+            return;
+
+        var propertyPath = new FieldPath(basePath.Segments.Add(new PropertySegment(Name)));
+
+        foreach (var (key, value) in oldDictionary)
+        {
+            if (!newDictionary.TryGetValue(key, out var newValue))
+            {
+                edits.Add(
+                    new DictionaryRemoveEntryEdit
+                    {
+                        Path = propertyPath,
+                        Key = JsonSerializer.SerializeToNode(key, options).RequireNonNull(),
+                        OriginalValue = JsonSerializer.SerializeToNode(value, options),
+                    }
+                );
+            }
+            else if (!EqualityComparer<TValue>.Default.Equals(value, newValue))
+            {
+                var keyValue = JsonSerializer.SerializeToNode(key, options).RequireNonNull();
+                if (ValueType is null)
+                {
+                    edits.Add(
+                        new DictionarySetEntryEdit
+                        {
+                            Path = propertyPath,
+                            Key = keyValue,
+                            NewValue = JsonSerializer.SerializeToNode(newValue, options).RequireNonNull(),
+                        }
+                    );
+                }
+                else
+                {
+                    var keyPath = new FieldPath(propertyPath.Segments.Add(new DictionaryKeySegment(keyValue)));
+                    ValueType.CollectDiffs(value, newValue, edits, keyPath, options);
+                }
+            }
+        }
+
+        foreach (var (key, value) in newDictionary)
+        {
+            if (!oldDictionary.ContainsKey(key))
+            {
+                edits.Add(
+                    new DictionarySetEntryEdit
+                    {
+                        Path = propertyPath,
+                        Key = JsonSerializer.SerializeToNode(key, options).RequireNonNull(),
+                        NewValue = JsonSerializer.SerializeToNode(value, options).RequireNonNull(),
+                    }
+                );
+            }
+        }
     }
 }

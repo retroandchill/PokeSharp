@@ -6,7 +6,7 @@ namespace PokeSharp.Serialization.Json;
 
 [RegisterSingleton(Factory = nameof(Default))]
 [JsonSourceGenerationOptions(
-    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, 
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     IgnoreReadOnlyProperties = true,
     RespectNullableAnnotations = true,
     AllowTrailingCommas = true

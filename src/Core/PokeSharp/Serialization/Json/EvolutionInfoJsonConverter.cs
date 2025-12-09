@@ -14,15 +14,15 @@ public class EvolutionInfoJsonConverter : JsonConverter<EvolutionInfo>
         {
             throw new JsonException("Expected StartObject for EvolutionInfo.");
         }
-        
+
         Name? species = null;
         Name? evolutionMethod = null;
         object? parameter = null;
         bool isPrevious = false;
-        
+
         // We may need to buffer the Parameter token until we know the type
         JsonElement? parameterElement = null;
-        
+
         while (reader.Read())
         {
             if (reader.TokenType == JsonTokenType.EndObject)
@@ -54,9 +54,9 @@ public class EvolutionInfoJsonConverter : JsonConverter<EvolutionInfo>
                     // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
                     isPrevious = reader.TokenType switch
                     {
-                        JsonTokenType.True  => true,
+                        JsonTokenType.True => true,
                         JsonTokenType.False => false,
-                        _ => throw new JsonException("IsPrevious must be a boolean.")
+                        _ => throw new JsonException("IsPrevious must be a boolean."),
                     };
                     break;
 
@@ -74,12 +74,14 @@ public class EvolutionInfoJsonConverter : JsonConverter<EvolutionInfo>
 
         // Get the evolution metadata (Parameter type lives here)
         var evolutionMeta = Evolution.Get(evolutionMethod.Value);
-        
+
         // If there was a parameter JSON, deserialize it using the correct runtime type
         if (parameterElement is not null)
         {
             // Deserialize to the specific parameter type
-            parameter = evolutionMeta.Parameter is not null ? parameterElement.Value.Deserialize(evolutionMeta.Parameter, options) : null;
+            parameter = evolutionMeta.Parameter is not null
+                ? parameterElement.Value.Deserialize(evolutionMeta.Parameter, options)
+                : null;
         }
         else if (evolutionMeta.Parameter is not null)
         {
@@ -120,7 +122,9 @@ public class EvolutionInfoJsonConverter : JsonConverter<EvolutionInfo>
         }
         else
         {
-            throw new JsonException($"Parameter type {value.Parameter.GetType()} does not match expected type {parameterType}.");
+            throw new JsonException(
+                $"Parameter type {value.Parameter.GetType()} does not match expected type {parameterType}."
+            );
         }
 
         writer.WritePropertyName(nameof(EvolutionInfo.IsPrevious));

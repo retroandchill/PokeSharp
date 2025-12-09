@@ -25,9 +25,7 @@ public interface IEntityEditor
 
     JsonNode GetEntry(int index);
 
-    FieldDefinition GetField(FieldPathSegment outer, ReadOnlySpan<FieldPathSegment> path);
-
-    JsonNode? ApplyEdit(FieldEdit edit, ReadOnlySpan<FieldPathSegment> path);
+    List<FieldEdit> ApplyEdit(FieldEdit edit, ReadOnlySpan<FieldPathSegment> path);
 }
 
 public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTypeRepository repository) : IEntityEditor
@@ -61,33 +59,7 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
             : throw new InvalidOperationException($"Cannot find index {index} in collection.");
     }
 
-    public FieldDefinition GetField(FieldPathSegment outer, ReadOnlySpan<FieldPathSegment> path)
-    {
-        if (path.Length == 0)
-        {
-            return new ListFieldDefinition
-            {
-                FieldId = outer,
-                Label = Name,
-                ItemFields =
-                [
-                    .. _entries.Select((x, i) => _type.GetDefinition(x, new ListIndexSegment(i), _type, [], options)),
-                ],
-            };
-        }
-
-        if (path[0] is not ListIndexSegment indexSegment)
-        {
-            throw new InvalidOperationException($"Must be a list index segment, found {path[0]}");
-        }
-
-        var index = indexSegment.Index;
-        return index < _entries.Length && index >= 0
-            ? _type.GetDefinition(_entries[index], indexSegment, _type, path[1..], options)
-            : throw new InvalidOperationException($"Cannot find index {index} in collection.");
-    }
-
-    public JsonNode? ApplyEdit(FieldEdit edit, ReadOnlySpan<FieldPathSegment> path)
+    public List<FieldEdit> ApplyEdit(FieldEdit edit, ReadOnlySpan<FieldPathSegment> path)
     {
         if (path.Length == 0)
         {
@@ -119,14 +91,16 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
             }
 
             Interlocked.Exchange(ref _entries, _entries.SetItem(indexSegment.Index, newValue));
-            return JsonSerializer.SerializeToNode(newValue, options);
         }
 
         Interlocked.Exchange(ref _entries, _entries.SetItem(index, _type.ApplyEdit(current, remaining, edit, options)));
-        return JsonSerializer.SerializeToNode(current, options);
+
+        var result = new List<FieldEdit>();
+        _type.CollectDiffs(current, _entries[index], result, new FieldPath([.. path]), options);
+        return result;
     }
 
-    private JsonNode? ApplyEditToCollection(FieldEdit edit)
+    private List<FieldEdit> ApplyEditToCollection(FieldEdit edit)
     {
         switch (edit)
         {
@@ -141,8 +115,7 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
                 }
 
                 Interlocked.Exchange(ref _entries, _entries.Add(newEntry));
-
-                return JsonSerializer.SerializeToNode(_entries[^1], options);
+                break;
             }
             case ListInsertEdit listInsertEdit:
             {
@@ -155,17 +128,18 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
                 }
 
                 Interlocked.Exchange(ref _entries, _entries.Insert(listInsertEdit.Index, newEntry));
-
-                return JsonSerializer.SerializeToNode(_entries[listInsertEdit.Index], options);
+                break;
             }
             case ListRemoveAtEdit listRemoveAtEdit:
                 Interlocked.Exchange(ref _entries, _entries.RemoveAt(listRemoveAtEdit.Index));
-                return null;
+                break;
             case ListSwapEdit listSwapEdit:
                 Interlocked.Exchange(ref _entries, _entries.Swap(listSwapEdit.IndexA, listSwapEdit.IndexB));
-                return null;
+                break;
             default:
                 throw new InvalidOperationException($"Cannot perform edit {edit} on a collection.");
         }
+
+        return [edit];
     }
 }

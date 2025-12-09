@@ -26,15 +26,6 @@ public sealed class EditableObjectProperty<TRoot, TValue>(
     IEditableType IEditableObjectProperty.Type => Type;
     public IEditableType<TValue> Type { get; } = cache.GetOrBuildType(builder.TargetType);
 
-    public override FieldDefinition GetDefinition(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        JsonSerializerOptions? options = null
-    )
-    {
-        return Type.GetDefinition(Get(root), new PropertySegment(Name), this, path, options);
-    }
-
     public override TRoot ApplyEdit(
         TRoot root,
         ReadOnlySpan<FieldPathSegment> path,
@@ -50,5 +41,23 @@ public sealed class EditableObjectProperty<TRoot, TValue>(
         return edit is SetValueEdit set
             ? With(root, set.NewValue.Deserialize<TValue>(options).RequireNonNull())
             : throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}");
+    }
+
+    public override void CollectDiffs(
+        TRoot oldRoot,
+        TRoot newRoot,
+        List<FieldEdit> edits,
+        FieldPath basePath,
+        JsonSerializerOptions? options = null
+    )
+    {
+        var oldValue = Get(oldRoot);
+        var newValue = Get(newRoot);
+
+        if (EqualityComparer<TValue>.Default.Equals(oldValue, newValue))
+            return;
+
+        var propertyPath = new FieldPath(basePath.Segments.Add(new PropertySegment(Name)));
+        Type.CollectDiffs(oldValue, newValue, edits, propertyPath, options);
     }
 }

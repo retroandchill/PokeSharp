@@ -53,7 +53,9 @@ namespace PokeEdit
      */
     template <typename T>
     concept TJsonSerializable = requires(const T &Value) {
-        { TJsonConverter<std::remove_cvref_t<T>>::Serialize(Value) } -> std::convertible_to<TSharedRef<FJsonValue>>;
+        {
+            TJsonConverter<std::remove_cvref_t<T>>::Serialize(Value)
+        } -> std::convertible_to<TSharedRef<const FJsonValue>>;
     };
 
     /**

@@ -17,7 +17,7 @@ public sealed record ListIndexSegment(int Index) : FieldPathSegment;
 
 public sealed record DictionaryKeySegment(JsonNode Key) : FieldPathSegment;
 
-public sealed record FieldPath(ImmutableArray<FieldPathSegment> Segments)
+public readonly record struct FieldPath(ImmutableArray<FieldPathSegment> Segments)
 {
     public override string ToString() =>
         string.Join(

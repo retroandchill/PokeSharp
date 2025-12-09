@@ -11,11 +11,11 @@ namespace PokeSharp.Editor.Core.PokeEdit;
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     AllowOutOfOrderMetadataProperties = true
 )]
-[JsonSerializable(typeof(FieldDefinition))]
 [JsonSerializable(typeof(FieldPath))]
 [JsonSerializable(typeof(FieldEdit))]
 [JsonSerializable(typeof(IEnumerable<EditorTabOption>))]
 [JsonSerializable(typeof(IEnumerable<Text>))]
+[JsonSerializable(typeof(List<FieldEdit>))]
 [JsonSerializable(typeof(EditorLabelRequest))]
 [JsonSerializable(typeof(EntityRequest))]
 public partial class PokeEditJsonSerializerContext : JsonSerializerContext;

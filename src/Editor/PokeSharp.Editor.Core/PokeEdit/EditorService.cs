@@ -36,24 +36,7 @@ public class EditorService
             ?? throw new InvalidOperationException($"No editor found for {editorId}");
     }
 
-    public FieldDefinition GetFieldDefinition(FieldPath path)
-    {
-        if (path.Segments.Length == 0)
-        {
-            throw new ArgumentException("Path must have at least one segment");
-        }
-
-        if (path.Segments[0] is not PropertySegment propertySegment)
-        {
-            throw new ArgumentException("First segment must be a property");
-        }
-
-        return _editors.TryGetValue(propertySegment.Name, out var editor)
-            ? editor.GetField(path.Segments[0], path.Segments.AsSpan()[1..])
-            : throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
-    }
-
-    public JsonNode? ProcessFieldEdit(FieldEdit edit)
+    public List<FieldEdit> ProcessFieldEdit(FieldEdit edit)
     {
         if (edit.Path.Segments.Length == 0)
         {

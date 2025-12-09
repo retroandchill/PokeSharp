@@ -5,14 +5,13 @@ namespace PokeSharp.Editor.Core.PokeEdit.Schema;
 
 [JsonPolymorphic]
 [JsonDerivedType(typeof(SetValueEdit), "SetValue")]
-[JsonDerivedType(typeof(ClearValueEdit), "ClearValue")]
 [JsonDerivedType(typeof(ListAddEdit), "ListAdd")]
 [JsonDerivedType(typeof(ListInsertEdit), "ListInsert")]
 [JsonDerivedType(typeof(ListRemoveAtEdit), "ListRemoveAt")]
 [JsonDerivedType(typeof(ListSwapEdit), "ListSwap")]
 [JsonDerivedType(typeof(DictionarySetEntryEdit), "DictionarySetEntry")]
 [JsonDerivedType(typeof(DictionaryRemoveEntryEdit), "DictionaryRemoveEntry")]
-[JsonDerivedType(typeof(OptionalResetEdit), "OptionalResetEdit")]
+[JsonDerivedType(typeof(OptionalResetEdit), "OptionalReset")]
 public abstract record FieldEdit
 {
     public required FieldPath Path { get; init; }
@@ -21,13 +20,6 @@ public abstract record FieldEdit
 public sealed record SetValueEdit : FieldEdit
 {
     public required JsonNode NewValue { get; init; }
-}
-
-public sealed record ClearValueEdit : FieldEdit;
-
-public sealed record ListAppendEdit : FieldEdit
-{
-    public required JsonNode NewItem { get; init; }
 }
 
 public sealed record ListAddEdit : FieldEdit

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Schema/EditorTabOption.h"
+#include "Schema/FieldEdit.h"
 
 namespace PokeEdit
 {
@@ -14,4 +15,8 @@ namespace PokeEdit
     POKESHARPEDITOR_API std::expected<TArray<FText>, FString> GetEntryLabels(FName EditorId);
 
     POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> GetEntryAtIndex(FName EditorId, int32 Index);
+
+    POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> GetEntryAtIndex(FName EditorId, int32 Index);
+    
+    POKESHARPEDITOR_API std::expected<TArray<FFieldEdit>, FString> PerformFieldEdit(const FFieldEdit& Edit);
 } // namespace PokeEdit

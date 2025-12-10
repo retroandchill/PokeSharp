@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PokeEdit/Serialization/JsonMacros.h"
 
 #include "Type.generated.h"
 
@@ -24,10 +25,10 @@ struct POKESHARPEDITOR_API FType
     int32 IconPosition;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    uint8 IsSpecialType : 1;
+    bool IsSpecialType;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    uint8 IsPseudoType : 1;
+    bool IsPseudoType;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     TArray<FName> Weaknesses;
@@ -41,3 +42,17 @@ struct POKESHARPEDITOR_API FType
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     TArray<FName> Flags;
 };
+
+JSON_OBJECT_SCHEMA_BEGIN(FType)
+    JSON_FIELD_OPTIONAL(Id)
+    JSON_FIELD_OPTIONAL(Name)
+    JSON_FIELD_OPTIONAL(IconPosition)
+    JSON_FIELD_OPTIONAL(IsSpecialType)
+    JSON_FIELD_OPTIONAL(IsPseudoType)
+    JSON_FIELD_OPTIONAL(Weaknesses)
+    JSON_FIELD_OPTIONAL(Resistances)
+    JSON_FIELD_OPTIONAL(Immunities)
+    JSON_FIELD_OPTIONAL(Flags)
+JSON_OBJECT_SCHEMA_END
+
+template struct POKESHARPEDITOR_API PokeEdit::TJsonConverter<FType>;

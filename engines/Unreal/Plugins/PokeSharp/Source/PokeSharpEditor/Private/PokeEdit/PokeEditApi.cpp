@@ -26,7 +26,7 @@ namespace PokeEdit
         return SendRequest<TSharedRef<FJsonValue>>(RequestName, FEntityRequest(EditorId, Index));
     }
 
-    std::expected<TArray<FFieldEdit>, FString> PerformFieldEdit(const FFieldEdit& Edit)
+    std::expected<TArray<FFieldEdit>, FString> PerformFieldEdit(const FFieldEdit &Edit)
     {
         static FName RequestName = "PerformFieldEdit";
         return SendRequest<TArray<FFieldEdit>>(RequestName, Edit);

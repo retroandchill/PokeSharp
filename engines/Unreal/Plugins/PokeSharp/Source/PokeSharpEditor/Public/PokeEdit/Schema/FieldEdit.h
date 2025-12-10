@@ -17,12 +17,12 @@ namespace PokeEdit
             : Path(MoveTemp(InPath)), NewValue(InNewValue)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FSetValueEdit>,
-                            std::make_tuple(TJsonField<&FSetValueEdit::Path>(TEXT("path")),
-                                            TJsonField<&FSetValueEdit::NewValue>(TEXT("newValue"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FSetValueEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(NewValue)
+    JSON_OBJECT_SCHEMA_END
 
     struct FListAddEdit
     {
@@ -33,12 +33,12 @@ namespace PokeEdit
             : Path(MoveTemp(InPath)), NewItem(InNewItem)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FListAddEdit>,
-                            std::make_tuple(TJsonField<&FListAddEdit::Path>(TEXT("path")),
-                                            TJsonField<&FListAddEdit::NewItem>(TEXT("newItem"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FListAddEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(NewItem)
+    JSON_OBJECT_SCHEMA_END
 
     struct FListInsertEdit
     {
@@ -50,13 +50,13 @@ namespace PokeEdit
             : Path(MoveTemp(InPath)), Index(InIndex), NewItem(InNewItem)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FListInsertEdit>,
-                            std::make_tuple(TJsonField<&FListInsertEdit::Path>(TEXT("path")),
-                                            TJsonField<&FListInsertEdit::Index>(TEXT("index")),
-                                            TJsonField<&FListInsertEdit::NewItem>(TEXT("newItem"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FListInsertEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(Index)
+        JSON_FIELD_REQUIRED(NewItem)
+    JSON_OBJECT_SCHEMA_END
 
     struct FListRemoveAtEdit
     {
@@ -67,13 +67,13 @@ namespace PokeEdit
         FListRemoveAtEdit(FFieldPath InPath, const int32 InIndex) : Path(MoveTemp(InPath)), Index(InIndex)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FListRemoveAtEdit>,
-                            std::make_tuple(TJsonField<&FListRemoveAtEdit::Path>(TEXT("path")),
-                                            TJsonField<&FListRemoveAtEdit::Index>(TEXT("index"))),
-                            std::make_tuple(TJsonField<&FListRemoveAtEdit::OriginalItem>(TEXT("originalItem"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FListRemoveAtEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(Index)
+        JSON_FIELD_OPTIONAL(OriginalItem)
+    JSON_OBJECT_SCHEMA_END
 
     struct FListSwapEdit
     {
@@ -85,13 +85,13 @@ namespace PokeEdit
             : Path(MoveTemp(InPath)), IndexA(InIndexA), IndexB(InIndexB)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FListSwapEdit>,
-                            std::make_tuple(TJsonField<&FListSwapEdit::Path>(TEXT("path")),
-                                            TJsonField<&FListSwapEdit::IndexA>(TEXT("indexA")),
-                                            TJsonField<&FListSwapEdit::IndexB>(TEXT("indexB"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FListSwapEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(IndexA)
+        JSON_FIELD_REQUIRED(IndexB)
+    JSON_OBJECT_SCHEMA_END
 
     struct FDictionarySetEntryEdit
     {
@@ -105,13 +105,13 @@ namespace PokeEdit
             : Path(MoveTemp(InPath)), Key(Key), NewValue(NewValue)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FDictionarySetEntryEdit>,
-                            std::make_tuple(TJsonField<&FDictionarySetEntryEdit::Path>(TEXT("path")),
-                                            TJsonField<&FDictionarySetEntryEdit::Key>(TEXT("key")),
-                                            TJsonField<&FDictionarySetEntryEdit::NewValue>(TEXT("newValue"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FDictionarySetEntryEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(Key)
+        JSON_FIELD_REQUIRED(NewValue)
+    JSON_OBJECT_SCHEMA_END
 
     struct FDictionaryRemoveEntryEdit
     {
@@ -123,13 +123,13 @@ namespace PokeEdit
             : Path(MoveTemp(InPath)), Key(InKey)
         {
         }
-
-        static constexpr auto JsonSchema = TJsonObjectType(
-            std::in_place_type<FDictionaryRemoveEntryEdit>,
-            std::make_tuple(TJsonField<&FDictionaryRemoveEntryEdit::Path>(TEXT("path")),
-                            TJsonField<&FDictionaryRemoveEntryEdit::Key>(TEXT("key"))),
-            std::make_tuple(TJsonField<&FDictionaryRemoveEntryEdit::OriginalItem>(TEXT("originalItem"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FDictionaryRemoveEntryEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_REQUIRED(Key)
+        JSON_FIELD_OPTIONAL(OriginalItem)
+    JSON_OBJECT_SCHEMA_END
 
     struct FOptionalResetEdit
     {
@@ -139,12 +139,12 @@ namespace PokeEdit
         explicit FOptionalResetEdit(FFieldPath InPath) : Path(MoveTemp(InPath))
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FOptionalResetEdit>,
-                            std::make_tuple(TJsonField<&FOptionalResetEdit::Path>(TEXT("path"))),
-                            std::make_tuple(TJsonField<&FOptionalResetEdit::OriginalItem>(TEXT("originalItem"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FOptionalResetEdit)
+        JSON_FIELD_REQUIRED(Path)
+        JSON_FIELD_OPTIONAL(OriginalItem)
+    JSON_OBJECT_SCHEMA_END
 
     using FFieldEdit = TVariant<FSetValueEdit,
                                 FListAddEdit,
@@ -163,22 +163,16 @@ namespace PokeEdit
                      std::forward_like<S>(Self));
     }
 
-    template <>
-    struct TJsonUnionTraits<FFieldEdit>
-    {
-        static constexpr auto JsonSchema = TJsonUnionType(
-            TJsonDiscriminator<&FFieldEdit::GetIndex>(),
-            TJsonUnionKey<FSetValueEdit, FFieldEdit::IndexOfType<FSetValueEdit>()>(TEXT("SetValue")),
-            TJsonUnionKey<FListAddEdit, FFieldEdit::IndexOfType<FListAddEdit>()>(TEXT("ListAdd")),
-            TJsonUnionKey<FListInsertEdit, FFieldEdit::IndexOfType<FListInsertEdit>()>(TEXT("ListInsert")),
-            TJsonUnionKey<FListRemoveAtEdit, FFieldEdit::IndexOfType<FListRemoveAtEdit>()>(TEXT("ListRemoveAt")),
-            TJsonUnionKey<FListSwapEdit, FFieldEdit::IndexOfType<FListSwapEdit>()>(TEXT("ListSwap")),
-            TJsonUnionKey<FDictionarySetEntryEdit, FFieldEdit::IndexOfType<FDictionarySetEntryEdit>()>(
-                TEXT("DictionarySetEntry")),
-            TJsonUnionKey<FDictionaryRemoveEntryEdit, FFieldEdit::IndexOfType<FDictionaryRemoveEntryEdit>()>(
-                TEXT("DictionaryRemoveEntry")),
-            TJsonUnionKey<FOptionalResetEdit, FFieldEdit::IndexOfType<FOptionalResetEdit>()>(TEXT("OptionalReset")));
-    };
+    JSON_VARIANT_BEGIN(FFieldEdit)
+        JSON_VARIANT_TYPE(FSetValueEdit, TEXT("SetValue"))
+        JSON_VARIANT_TYPE(FListAddEdit, TEXT("ListAdd"))
+        JSON_VARIANT_TYPE(FListInsertEdit, TEXT("ListInsert"))
+        JSON_VARIANT_TYPE(FListRemoveAtEdit, TEXT("ListRemoveAt"))
+        JSON_VARIANT_TYPE(FListSwapEdit, TEXT("ListSwap"))
+        JSON_VARIANT_TYPE(FDictionarySetEntryEdit, TEXT("DictionarySetEntry"))
+        JSON_VARIANT_TYPE(FDictionaryRemoveEntryEdit, TEXT("DictionaryRemoveEntry"))
+        JSON_VARIANT_TYPE(FOptionalResetEdit, TEXT("OptionalReset"))
+    JSON_VARIANT_END
 
     template POKESHARPEDITOR_API struct TJsonConverter<FSetValueEdit>;
     template POKESHARPEDITOR_API struct TJsonConverter<FListAddEdit>;

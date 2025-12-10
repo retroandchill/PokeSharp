@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "JsonSchema.h"
+#include "PokeEdit/Serialization/JsonMacros.h"
 
 namespace PokeEdit
 {
@@ -20,12 +20,12 @@ namespace PokeEdit
             : EditorId(InEditorId), Index(InIndex)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FEntityRequest>,
-                            std::make_tuple(TJsonField<&FEntityRequest::EditorId>(TEXT("editorId")),
-                                            TJsonField<&FEntityRequest::Index>(TEXT("index"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FEntityRequest)
+        JSON_FIELD_REQUIRED(EditorId)
+        JSON_FIELD_REQUIRED(Index)
+    JSON_OBJECT_SCHEMA_END
 
     template struct POKESHARPEDITOR_API TJsonConverter<FEntityRequest>;
 } // namespace PokeEdit

@@ -29,8 +29,9 @@ Macros:
     - verify(x)=x;
     - SLATE_ATTRIBUTE(AttrType, AttrName) AttrType AttrName;
     - SLATE_ARGUMENT(AttrType, AttrName) AttrType AttrName;
-MacroBlockBegin: "SLATE_BEGIN_ARGS"
-MacroBlockEnd: "SLATE_END_ARGS()"
+    - JSON_FIELD_REQUIRED(x)=x;
+MacroBlockBegin: "SLATE_BEGIN_ARGS|JSON_OBJECT_SCHEMA_BEGIN|JSON_VARIANT_BEGIN"
+MacroBlockEnd: "SLATE_END_ARGS()|JSON_OBJECT_SCHEMA_END|JSON_VARIANT_END"
 
 BreakBeforeBraces: Allman
 BinPackParameters: false

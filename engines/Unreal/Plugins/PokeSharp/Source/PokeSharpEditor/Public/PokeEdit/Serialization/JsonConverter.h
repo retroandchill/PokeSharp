@@ -6,6 +6,7 @@
 #include "Dom/JsonValue.h"
 #include "JsonObjectConverter.h"
 #include "Mcro/Enums.h"
+#include "Serialization/JsonSerializer.h"
 #include "Templates/ValueOrError.h"
 #include "Types/AttributeStorage.h"
 #include "UObject/StructOnScope.h"

@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "JsonSchema.h"
+#include "PokeEdit/Serialization/JsonMacros.h"
+#include "PokeEdit/Serialization/JsonSchema.h"
 
 namespace PokeEdit
 {
@@ -17,11 +18,11 @@ namespace PokeEdit
         }
 
         FName EditorId;
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FEditorLabelRequest>,
-                            std::make_tuple(TJsonField<&FEditorLabelRequest::EditorId>(TEXT("editorId"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FEditorLabelRequest)
+        JSON_FIELD_REQUIRED(EditorId)
+    JSON_OBJECT_SCHEMA_END
 
     static_assert(TValidJsonObjectContainer<FEditorLabelRequest>);
     template struct POKESHARPEDITOR_API TJsonConverter<FEditorLabelRequest>;

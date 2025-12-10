@@ -1,6 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PokeEdit/Schema/JsonSerializer.h"
+#include "PokeEdit/Serialization/JsonConverter.h"
 #include "JsonObjectConverter.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"

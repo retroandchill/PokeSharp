@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AudioMixerBlueprintLibrary.h"
 #include "Dom/JsonObject.h"
-#include "JsonSerializer.h"
+#include "JsonConverter.h"
+#include "JsonHelpers.h"
 #include <bit>
 
 namespace PokeEdit
@@ -43,12 +45,12 @@ namespace PokeEdit
         using OwnerType = TMemberInfo<Member>::OwnerType;
         using MemberType = TMemberInfo<Member>::MemberType;
 
-        /**
-         * The string representation of the name.
-         */
-        FStringView Name;
+        FStringView CppName;
+        FStringView JsonName;
+        bool Required;
 
-        constexpr explicit TJsonField(const FStringView InName) : Name(InName)
+        constexpr explicit TJsonField(const FStringView InCppName, const FStringView InJsonName, const bool InRequired)
+            : CppName(InCppName), JsonName(InJsonName), Required(InRequired)
         {
         }
 
@@ -104,55 +106,61 @@ namespace PokeEdit
      * Represents a serializable JSON object type.
      *
      * @tparam T The target type of serialization. May also represent a TSharedRef-wrapped object.
-     * @tparam Required The tuple containing all-of-the required serialization members. If any of these members are
+     * @tparam Members The tuple containing all-of-the required serialization members. If any of these members are
      *                  not found, deserialization fails. These members should correspond directly to members that are
      *                  set via the types constructor, which must take a value convertable to that type in the order
      *                  that is specified.
-     * @tparam Optional Tuple containing all-of-the additional parameters that do not need to be set during
-     *                  deserialization. Each of these must be publically settable, as they are set on the object after
-     *                  it is created.
      */
-    template <typename T, TMembersTuple Required = std::tuple<>, TMembersTuple Optional = std::tuple<>>
+    template <typename T, auto... Members>
     struct TJsonObjectType
     {
         using OwnerType = T;
+        std::tuple<TJsonField<Members>...> Fields;
 
-        Required RequiredFields;
-        Optional OptionalFields;
-
-        constexpr TJsonObjectType(std::in_place_type_t<T>, const Required &InRequired, const Optional &InOptional = {})
-            : RequiredFields(InRequired), OptionalFields(InOptional)
+        constexpr explicit TJsonObjectType(std::in_place_type_t<T>, TJsonField<Members>... InFields)
+            : Fields(InFields...)
         {
         }
 
         template <typename F>
         constexpr void ForEachField(const F &Func) const
         {
-            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, RequiredFields);
-            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, OptionalFields);
-        }
-
-        template <typename F>
-        constexpr auto ForEachRequiredField(const F &Func) const
-        {
-            return std::apply([&](const auto &...Field) { return std::make_tuple(std::invoke(Func, Field)...); },
-                              RequiredFields);
-        }
-
-        template <typename F>
-        constexpr void ForEachOptionalField(const F &Func) const
-        {
-            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, OptionalFields);
+            std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, Fields);
         }
     };
+
+    template <std::invocable T>
+    consteval auto GetRequiredMembers(T Factory)
+    {
+        return FilterTuple([](const auto &Member) { return Member.Required; }, Factory);
+    }
+
+    template <std::invocable T>
+    consteval auto GetOptionalMembers(T Factory)
+    {
+        return FilterTuple([](const auto &Member) { return Member.Required; }, Factory);
+    }
+
+    template <typename T, typename F>
+    constexpr auto ForEachRequiredField(T Factory, F Func)
+    {
+        return std::apply([&](const auto &...Field) { return std::make_tuple(std::invoke(Func, Field)...); },
+                          GetRequiredMembers(Factory));
+    }
+
+    template <typename T, typename F>
+    constexpr void ForEachOptionalField(T Factory, F Func)
+    {
+        std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, GetOptionalMembers(Factory));
+    }
 
     template <typename>
     struct TIsJsonObjectType : std::false_type
     {
     };
 
-    template <typename T, TMembersTuple Required, TMembersTuple Optional>
-    struct TIsJsonObjectType<TJsonObjectType<T, Required, Optional>> : std::true_type
+    template <typename T, auto... Members>
+    struct TIsJsonObjectType<TJsonObjectType<T, Members...>> : std::true_type
     {
     };
 
@@ -256,13 +264,14 @@ namespace PokeEdit
 
             // We first need to gather a tuple of all the required members, and so long as they are all set (which would
             // also mean no-errors), we can then apply that transformation to construct the object.
-            auto RequiredMembers = TJsonObjectContainer<T>::JsonSchema.ForEachRequiredField(
+            auto RequiredMembers = ForEachRequiredField(
+                [] { return TJsonObjectContainer<T>::JsonSchema.Fields; },
                 [&Errors, &JsonObject]<typename F>(const F &Field)
                 {
-                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
+                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.JsonName);
                     if (FieldValue == nullptr)
                     {
-                        Errors.Add(FString::Format(TEXT("Field '{0}' is required"), {Field.Name}));
+                        Errors.Add(FString::Format(TEXT("Field '{0}' is required"), {Field.JsonName}));
                         return TOptional<typename F::MemberType>();
                     }
 
@@ -271,7 +280,7 @@ namespace PokeEdit
 
                     if (!Deserialized.has_value())
                     {
-                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Deserialized.error()}));
+                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.JsonName, *Deserialized.error()}));
                         return TOptional<typename F::MemberType>();
                     }
 
@@ -290,10 +299,11 @@ namespace PokeEdit
 
             // Now that we constructed the object from the required fields, loop through all the others and set those
             // If any get found.
-            TJsonObjectContainer<T>::JsonSchema.ForEachOptionalField(
+            ForEachOptionalField(
+                [] { return TJsonObjectContainer<T>::JsonSchema.Fields; },
                 [&Errors, &Result, &JsonObject]<typename F>(const F &Field)
                 {
-                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.Name);
+                    const TSharedPtr<FJsonValue> FieldValue = (*JsonObject)->TryGetField(Field.JsonName);
                     if (FieldValue == nullptr)
                         return;
 
@@ -306,7 +316,7 @@ namespace PokeEdit
                     }
                     else
                     {
-                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.Name, *Deserialized.error()}));
+                        Errors.Add(FString::Format(TEXT("Field '{0}': {1}"), {Field.JsonName, *Deserialized.error()}));
                     }
                 });
 
@@ -330,7 +340,7 @@ namespace PokeEdit
             TJsonObjectContainer<T>::JsonSchema.ForEachField(
                 [&Value, &JsonObject]<typename F>(const F &Field)
                 {
-                    JsonObject->SetField(FString(Field.Name),
+                    JsonObject->SetField(FString(Field.JsonName),
                                          TJsonConverter<typename F::MemberType>::Serialize(F::GetMember(Value)));
                 });
 
@@ -519,12 +529,15 @@ namespace PokeEdit
             std::apply(
                 [&](const auto &...Field)
                 {
-                    (..., (Result.IsSet() ? void() : [&] {
+                    (void)([&] {
                          if (auto IntermediateResult = std::invoke(Func, Field); IntermediateResult.IsSet())
                          {
                              Result = IntermediateResult.GetValue();
+                             return true;
                          }
-                     }()));
+                        
+                        return false;
+                     }() && ...);
                 },
                 Fields);
 

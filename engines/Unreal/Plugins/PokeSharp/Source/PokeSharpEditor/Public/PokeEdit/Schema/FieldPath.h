@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "JsonSchema.h"
-#include "Mcro/Range.h"
 #include "Mcro/Range/Conversion.h"
+#include "PokeEdit/Serialization/JsonMacros.h"
+#include "PokeEdit/Serialization/JsonSchema.h"
 
 namespace PokeEdit
 {
@@ -16,11 +16,11 @@ namespace PokeEdit
         explicit FPropertySegment(const FName InName) : Name(InName)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FPropertySegment>,
-                            std::make_tuple(TJsonField<&FPropertySegment::Name>(TEXT("name"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FPropertySegment)
+        JSON_FIELD_REQUIRED(Name)
+    JSON_OBJECT_SCHEMA_END
 
     struct FListIndexSegment
     {
@@ -29,11 +29,11 @@ namespace PokeEdit
         explicit FListIndexSegment(const int32 InIndex) : Index(InIndex)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FListIndexSegment>,
-                            std::make_tuple(TJsonField<&FListIndexSegment::Index>(TEXT("index"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FListIndexSegment)
+        JSON_FIELD_REQUIRED(Index)
+    JSON_OBJECT_SCHEMA_END
 
     struct FDictionaryKeySegment
     {
@@ -42,11 +42,11 @@ namespace PokeEdit
         explicit FDictionaryKeySegment(const TSharedRef<FJsonValue> &InIndex) : Key(InIndex)
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FDictionaryKeySegment>,
-                            std::make_tuple(TJsonField<&FDictionaryKeySegment::Key>(TEXT("key"))));
     };
+
+    JSON_OBJECT_SCHEMA_BEGIN(FDictionaryKeySegment)
+        JSON_FIELD_REQUIRED(Key)
+    JSON_OBJECT_SCHEMA_END
 
     using FFieldPathSegment = TVariant<FPropertySegment, FListIndexSegment, FDictionaryKeySegment>;
 
@@ -75,22 +75,17 @@ namespace PokeEdit
             : Segments({FFieldPathSegment(TInPlaceType<std::remove_cvref_t<T>>(), Forward<T>(InSegments))...})
         {
         }
-
-        static constexpr auto JsonSchema =
-            TJsonObjectType(std::in_place_type<FFieldPath>,
-                            std::make_tuple(TJsonField<&FFieldPath::Segments>(TEXT("segments"))));
     };
 
-    template <>
-    struct TJsonUnionTraits<FFieldPathSegment>
-    {
-        static constexpr auto JsonSchema = TJsonUnionType(
-            TJsonDiscriminator<&FFieldPathSegment::GetIndex>(),
-            TJsonUnionKey<FPropertySegment, FFieldPathSegment::IndexOfType<FPropertySegment>()>(TEXT("Property")),
-            TJsonUnionKey<FListIndexSegment, FFieldPathSegment::IndexOfType<FListIndexSegment>()>(TEXT("ListIndex")),
-            TJsonUnionKey<FDictionaryKeySegment, FFieldPathSegment::IndexOfType<FDictionaryKeySegment>()>(
-                TEXT("DictionaryKey")));
-    };
+    JSON_OBJECT_SCHEMA_BEGIN(FFieldPath)
+        JSON_FIELD_REQUIRED(Segments)
+    JSON_OBJECT_SCHEMA_END
+
+    JSON_VARIANT_BEGIN(FFieldPathSegment)
+        JSON_VARIANT_TYPE(FPropertySegment, TEXT("Property"))
+        JSON_VARIANT_TYPE(FListIndexSegment, TEXT("ListIndex"))
+        JSON_VARIANT_TYPE(FDictionaryKeySegment, TEXT("DictionaryKey"))
+    JSON_VARIANT_END
 
     template POKESHARPEDITOR_API struct TJsonConverter<FPropertySegment>;
     template POKESHARPEDITOR_API struct TJsonConverter<FListIndexSegment>;

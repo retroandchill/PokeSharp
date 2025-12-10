@@ -3,8 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Schema/JsonSerializer.h"
-#include "Templates/ValueOrError.h"
+#include "Serialization/JsonConverter.h"
 #include <expected>
 
 class FJsonValue;

@@ -3,11 +3,13 @@ using PokeSharp.RGSS.RPG;
 
 namespace PokeSharp.RGSS.Serialization;
 
-[RegisterSingleton(Factory = nameof(Default))]
+[RegisterSingleton(Factory = nameof(Default), Duplicate = DuplicateStrategy.Append)]
 [JsonSourceGenerationOptions(
-    GenerationMode = JsonSourceGenerationMode.Metadata,
-    WriteIndented = true,
-    PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower
+    PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,
+    AllowOutOfOrderMetadataProperties = true,
+    IgnoreReadOnlyProperties = true,
+    RespectNullableAnnotations = true,
+    AllowTrailingCommas = true
 )]
 [JsonSerializable(typeof(Dictionary<int, MapInfo>))]
 [JsonSerializable(typeof(MapInfo))]

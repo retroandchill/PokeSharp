@@ -4,9 +4,10 @@ using PokeSharp.Data.Pbs;
 
 namespace PokeSharp.Serialization.Json;
 
-[RegisterSingleton(Factory = nameof(Default))]
+[RegisterSingleton(Factory = nameof(Default), Duplicate = DuplicateStrategy.Append)]
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    AllowOutOfOrderMetadataProperties = true,
     IgnoreReadOnlyProperties = true,
     RespectNullableAnnotations = true,
     AllowTrailingCommas = true

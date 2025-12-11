@@ -5,11 +5,16 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+namespace PokeEdit
+{
+    class FJsonStructHandle;
+}
+
 class SUniformWrapPanel;
 class SBorder;
 class SDockTab;
 
-DECLARE_DELEGATE_RetVal_OneParam(const UStruct *, FGetStructForTab, FName);
+DECLARE_DELEGATE_RetVal_OneParam(TSharedPtr<PokeEdit::FJsonStructHandle>, FGetStructForTab, FName);
 
 /**
  *

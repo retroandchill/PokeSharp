@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AudioMixerBlueprintLibrary.h"
 #include "Dom/JsonObject.h"
 #include "JsonConverter.h"
 #include "JsonHelpers.h"
@@ -54,6 +53,14 @@ namespace PokeEdit
         {
         }
 
+        template <auto Str>
+        constexpr explicit TJsonField(const FStringView InCppName,
+                                      TStaticStringView<Str> StaticString,
+                                      const bool InRequired)
+            : CppName(InCppName), JsonName(StaticString.Value), Required(InRequired)
+        {
+        }
+
         template <typename T>
             requires std::same_as<std::remove_cvref_t<T>, OwnerType>
         static constexpr decltype(auto) GetMember(T &&Owner)
@@ -88,20 +95,6 @@ namespace PokeEdit
     template <auto Member>
     using TOwnerOf = TMemberInfo<Member>::OwnerType;
 
-    template <typename>
-    struct TIsMembersTuple : std::false_type
-    {
-    };
-
-    template <auto... Members>
-        requires(TJsonFieldMember<Members> && ...)
-    struct TIsMembersTuple<std::tuple<TJsonField<Members>...>> : std::true_type
-    {
-    };
-
-    template <typename T>
-    concept TMembersTuple = TIsMembersTuple<std::remove_cvref_t<T>>::value;
-
     /**
      * Represents a serializable JSON object type.
      *
@@ -127,6 +120,12 @@ namespace PokeEdit
         {
             std::apply([&](const auto &...Field) { (std::invoke(Func, Field), ...); }, Fields);
         }
+
+        template <typename F>
+        constexpr void ForEachFieldWithBreak(const F &Func) const
+        {
+            std::apply([&](const auto &...Field) { (std::invoke(Func, Field) && ...); }, Fields);
+        }
     };
 
     template <std::invocable T>
@@ -138,7 +137,7 @@ namespace PokeEdit
     template <std::invocable T>
     consteval auto GetOptionalMembers(T Factory)
     {
-        return FilterTuple([](const auto &Member) { return Member.Required; }, Factory);
+        return FilterTuple([](const auto &Member) { return !Member.Required; }, Factory);
     }
 
     template <typename T, typename F>
@@ -533,10 +532,10 @@ namespace PokeEdit
                          if (auto IntermediateResult = std::invoke(Func, Field); IntermediateResult.IsSet())
                          {
                              Result = IntermediateResult.GetValue();
-                             return true;
+                             return false;
                          }
                         
-                        return false;
+                        return true;
                      }() && ...);
                 },
                 Fields);

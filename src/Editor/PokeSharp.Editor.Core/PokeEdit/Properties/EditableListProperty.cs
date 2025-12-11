@@ -176,14 +176,27 @@ public sealed class EditableListProperty<TRoot, TItem>(
             {
                 var newItem = newList[i];
 
-                edits.Add(
-                    new ListInsertEdit
-                    {
-                        Path = propertyPath,
-                        Index = i,
-                        NewItem = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
-                    }
-                );
+                if (i == newCount - 1)
+                {
+                    edits.Add(
+                        new ListAddEdit
+                        {
+                            Path = propertyPath,
+                            NewItem = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
+                        }
+                    );
+                }
+                else
+                {
+                    edits.Add(
+                        new ListInsertEdit
+                        {
+                            Path = propertyPath,
+                            Index = i,
+                            NewItem = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
+                        }
+                    );
+                }
             }
         }
         // 3. If new list is shorter → removes for [newCount..oldCount-1]

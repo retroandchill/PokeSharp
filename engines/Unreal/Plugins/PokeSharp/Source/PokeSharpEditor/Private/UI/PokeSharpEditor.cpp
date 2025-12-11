@@ -116,8 +116,10 @@ void SPokeSharpEditor::RebuildCurrentTabContent()
 
     // In the future: ask C# what kind of page this tab wants (dockable vs simple).
     // For now: always build the default data editor page.
-    ContentArea->SetContent(
-        SNew(SDefaultEditorPage, Owner.Pin().ToSharedRef(), CurrentTab, GetStructForTabDelegate.Execute(CurrentTab)));
+    ContentArea->SetContent(SNew(SDefaultEditorPage,
+                                 Owner.Pin().ToSharedRef(),
+                                 CurrentTab,
+                                 GetStructForTabDelegate.Execute(CurrentTab).ToSharedRef()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

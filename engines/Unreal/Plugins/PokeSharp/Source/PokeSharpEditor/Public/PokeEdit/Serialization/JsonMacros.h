@@ -25,10 +25,10 @@
 #define JSON_FIELD_NAMED_REQUIRED(FieldName, Name) JSON_FIELD_INTERNAL(FieldName, Name, true)
 
 #define JSON_FIELD_OPTIONAL(FieldName)                                                                                 \
-    JSON_FIELD_NAMED_OPTIONAL(FieldName, PokeEdit::ToCamelCase(TEXT(#FieldName)).ToStringView())
+    JSON_FIELD_NAMED_OPTIONAL(FieldName, TStaticStringView<PokeEdit::ToCamelCase(TEXT(#FieldName))>{})
 
 #define JSON_FIELD_REQUIRED(FieldName)                                                                                 \
-    JSON_FIELD_NAMED_REQUIRED(FieldName, PokeEdit::ToCamelCase(TEXT(#FieldName)).ToStringView())
+    JSON_FIELD_NAMED_REQUIRED(FieldName, TStaticStringView<PokeEdit::ToCamelCase(TEXT(#FieldName))>{})
 
 #define JSON_VARIANT_BEGIN(TypeName)                                                                                   \
     template <>                                                                                                        \

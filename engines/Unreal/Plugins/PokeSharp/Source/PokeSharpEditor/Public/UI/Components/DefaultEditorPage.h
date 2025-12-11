@@ -5,6 +5,11 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+namespace PokeEdit
+{
+    class FJsonStructHandle;
+}
+
 class FStructOnScope;
 class IStructureDetailsView;
 class FTabManager;
@@ -27,7 +32,7 @@ class POKESHARPEDITOR_API SDefaultEditorPage : public SCompoundWidget
     void Construct(const FArguments &InArgs,
                    const TSharedRef<SDockTab> &InOuterTab,
                    FName InTabId,
-                   const UStruct *InModel);
+                   const TSharedRef<PokeEdit::FJsonStructHandle> &InModel);
 
   private:
     // tab spawn handlers
@@ -39,7 +44,7 @@ class POKESHARPEDITOR_API SDefaultEditorPage : public SCompoundWidget
 
     // resolved from the attribute in Construct
     FName TabId;
-    TObjectPtr<const UStruct> Model;
+    TSharedPtr<PokeEdit::FJsonStructHandle> Model;
     TWeakPtr<SDockTab> OuterTab;
 
     TSharedPtr<IStructureDetailsView> DetailsView;

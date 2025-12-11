@@ -75,6 +75,8 @@ namespace PokeEdit
             : Segments({FFieldPathSegment(TInPlaceType<std::remove_cvref_t<T>>(), Forward<T>(InSegments))...})
         {
         }
+
+        POKESHARPEDITOR_API FString ToString() const;
     };
 
     JSON_OBJECT_SCHEMA_BEGIN(FFieldPath)

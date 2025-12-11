@@ -90,13 +90,22 @@ public abstract class EntityEditor<T>(JsonSerializerOptions options, PokeEditTyp
                 );
             }
 
-            Interlocked.Exchange(ref _entries, _entries.SetItem(indexSegment.Index, newValue));
+            ImmutableInterlocked.InterlockedExchange(ref _entries, _entries.SetItem(indexSegment.Index, newValue));
         }
 
-        Interlocked.Exchange(ref _entries, _entries.SetItem(index, _type.ApplyEdit(current, remaining, edit, options)));
+        ImmutableInterlocked.InterlockedExchange(
+            ref _entries,
+            _entries.SetItem(index, _type.ApplyEdit(current, remaining, edit, options))
+        );
 
         var result = new List<FieldEdit>();
-        _type.CollectDiffs(current, _entries[index], result, new FieldPath([.. path]), options);
+        _type.CollectDiffs(
+            current,
+            _entries[index],
+            result,
+            new FieldPath([new PropertySegment(Id), path[0]]),
+            options
+        );
         return result;
     }
 

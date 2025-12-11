@@ -21,6 +21,13 @@ namespace PokeEdit
     {
         std::array<TCHAR, N> Data;
 
+        constexpr TStaticString() = default;
+
+        constexpr explicit TStaticString(const TCHAR (&Str)[N])
+        {
+            Data = Str;
+        }
+
         constexpr const TCHAR *GetData() const
         {
             return Data.data();
@@ -31,7 +38,7 @@ namespace PokeEdit
         }
         constexpr FStringView ToStringView() const
         {
-            return FStringView(GetData(), Size());
+            return FStringView(GetData());
         }
     };
 
@@ -54,6 +61,12 @@ namespace PokeEdit
 
         return Result;
     }
+
+    template <auto Str>
+    struct TStaticStringView
+    {
+        static constexpr FStringView Value = Str.ToStringView();
+    };
 
     template <typename Predicate, typename Tuple, std::size_t Index = 0>
     consteval auto FilterTuple(Predicate Check, Tuple Target)

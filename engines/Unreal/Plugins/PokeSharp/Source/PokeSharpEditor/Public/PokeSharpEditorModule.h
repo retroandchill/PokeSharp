@@ -3,12 +3,22 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+namespace PokeEdit
+{
+    class FJsonStructHandle;
+    struct FFieldPath;
+} // namespace PokeEdit
+
 class FUICommandList;
 class FSpawnTabArgs;
 class SDockTab;
 class SWidget;
 
-class FPokeSharpEditorModule : public IModuleInterface
+DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<PokeEdit::FJsonStructHandle>,
+                                 FJsonStructHandleFactory,
+                                 PokeEdit::FFieldPath)
+
+    class FPokeSharpEditorModule : public IModuleInterface
 {
   public:
     void StartupModule() override;
@@ -30,5 +40,5 @@ class FPokeSharpEditorModule : public IModuleInterface
 
     static const FName PokeSharpEditorTabName;
     TSharedPtr<FUICommandList> PokeSharpCommands;
-    TMap<FName, const UStruct *> ModelMapping;
+    TMap<FName, FJsonStructHandleFactory> ModelMapping;
 };

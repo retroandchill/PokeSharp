@@ -14,6 +14,11 @@ public static class JsonSerializerOptionsRegistration
             var resolvers = provider.GetServices<IJsonTypeInfoResolver>();
             return new JsonSerializerOptions
             {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                AllowOutOfOrderMetadataProperties = true,
+                IgnoreReadOnlyProperties = true,
+                RespectNullableAnnotations = true,
+                AllowTrailingCommas = true,
                 TypeInfoResolver = JsonTypeInfoResolver.Combine(
                     resolvers.Concat([new DefaultJsonTypeInfoResolver()]).ToArray()
                 ),

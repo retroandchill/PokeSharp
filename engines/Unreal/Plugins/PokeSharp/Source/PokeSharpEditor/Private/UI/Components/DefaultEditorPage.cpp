@@ -8,6 +8,7 @@
 #include "Mcro/CommonCore.h"
 #include "Modules/ModuleManager.h"
 #include "PokeEdit/PokeEditApi.h"
+#include "PokeEdit/Properties/JsonStructHandle.h"
 #include "PokeEdit/Schema/FieldPath.h"
 #include "PropertyEditorModule.h"
 #include "Serialization/JsonSerializer.h"
@@ -17,7 +18,7 @@
 void SDefaultEditorPage::Construct(const FArguments &InArgs,
                                    const TSharedRef<SDockTab> &InOuterTab,
                                    const FName InTabId,
-                                   const UStruct *InModel)
+                                   const TSharedRef<PokeEdit::FJsonStructHandle> &InModel)
 {
     TabId = InTabId;
     Model = InModel;
@@ -99,19 +100,19 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
                             using FResult = std::expected<TSharedPtr<FStructOnScope>, FString>;
                         
                             SelectedEntryIndex = Entry->Index;
+                            Model->SetBasePath(PokeEdit::FFieldPath(PokeEdit::FPropertySegment(TabId), PokeEdit::FListIndexSegment(SelectedEntryIndex)));
                             EntryStruct = PokeEdit::GetEntryAtIndex(TabId, SelectedEntryIndex)
-                                .transform_error([](FString&& Error) { return FText::FromString(MoveTemp(Error)); })
                                 .and_then([this](const TSharedRef<FJsonValue> &EntryJson)
                                 {
-                                    return PokeEdit::DeserializeFromJson(EntryJson, Model);
+                                    return Model->DeserializeFromJson(EntryJson);
                                 })
                                 .transform([](const TSharedRef<FStructOnScope> &Result)
                                 {
                                     return Result.ToSharedPtr();
                                 })
-                                .or_else([](const FText &Error) -> FResult
+                                .or_else([](const FString &Error) -> FResult
                                 {
-                                    UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching entry data: %s"), *Error.ToString());
+                                    UE_LOG(LogPokeSharpEditor, Error, TEXT("Error fetching entry data: %s"), *Error);
                                     return TSharedPtr<FStructOnScope>();
                                 })
                                 .value();
@@ -127,6 +128,7 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnDetailsTab(const FSpawnTabArgs &Ar
     auto &PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+    DetailsViewArgs.NotifyHook = Model.Get();
     const FStructureDetailsViewArgs DetailsViewArgsStruct;
 
     DetailsView = PropertyEditorModule.CreateStructureDetailView(DetailsViewArgs, DetailsViewArgsStruct, EntryStruct);

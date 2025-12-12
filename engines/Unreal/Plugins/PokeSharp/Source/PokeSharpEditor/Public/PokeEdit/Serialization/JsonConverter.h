@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Array.h"
 #include "Dom/JsonValue.h"
 #include "JsonObjectConverter.h"
 #include "Mcro/Enums.h"
@@ -415,6 +416,46 @@ namespace PokeEdit
             }
 
             return MakeShared<FJsonValueArray>(MoveTemp(JsonValues));
+        }
+    };
+
+    template <typename T>
+        requires TJsonDeserializable<T> || TJsonSerializable<T>
+    struct TJsonConverter<TMap<FName, T>>
+    {
+        static std::expected<TMap<FName, T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+            requires TJsonDeserializable<T>
+        {
+            const auto Object = Value->AsObject();
+            if (Object == nullptr)
+            {
+                return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
+            }
+
+            TMap<FName, T> Result;
+            for (const auto &[Key, JsonValue] : Object->Values)
+            {
+                auto DeserializedValue = TJsonConverter<T>::Deserialize(JsonValue.ToSharedRef());
+                if (!DeserializedValue.has_value())
+                {
+                    return std::unexpected(MoveTemp(DeserializedValue).error());
+                }
+
+                Result.Add(FName(Key), MoveTemp(DeserializedValue).value());
+            }
+
+            return MoveTemp(Result);
+        }
+
+        static TSharedRef<FJsonValue> Serialize(const TMap<FName, T> &Value)
+            requires TJsonSerializable<T>
+        {
+            auto JsonObject = MakeShared<FJsonObject>();
+            for (const auto &[Key, Value] : Value)
+            {
+                JsonObject->SetField(Key.ToString(), TJsonConverter<T>::Serialize(Value));
+            }
+            return MakeShared<FJsonValueObject>(JsonObject);
         }
     };
 

@@ -240,6 +240,30 @@ namespace PokeEdit
         }
     };
 
+    template <TJsonObject T>
+    struct TJsonObjectContainer<TUniquePtr<T>>
+    {
+        static constexpr bool IsValid = true;
+        using ObjectType = T;
+        static constexpr auto JsonSchema = TJsonObjectTraits<T>::JsonSchema;
+
+        template <typename... A>
+        static TUniquePtr<T> CreateObject(A &&...Args)
+        {
+            return MakeUnique<T>(Forward<A>(Args)...);
+        }
+
+        static T &GetMutableObjectRef(const TUniquePtr<T> &Obj)
+        {
+            return Obj.Get();
+        }
+
+        static const T &GetObjectRef(const TUniquePtr<T> &Obj)
+        {
+            return Obj.Get();
+        }
+    };
+
     template <typename T>
     concept TValidJsonObjectContainer = TJsonObjectContainer<T>::IsValid;
 
@@ -555,8 +579,8 @@ namespace PokeEdit
     };
 
     template <typename S, typename T>
-    concept TValidJsonUnionType =
-        TIsJsonUnionType<std::remove_cvref_t<S>>::value && std::same_as<T, typename std::remove_cvref_t<S>::OwnerType>;
+    concept TValidJsonUnionType = TIsJsonUnionType<std::remove_cvref_t<S>>::value &&
+                                  std::derived_from<T, typename std::remove_cvref_t<S>::OwnerType>;
 
     template <typename>
     struct TJsonUnionTraits;
@@ -573,19 +597,99 @@ namespace PokeEdit
     };
 
     template <typename T>
-    concept TJsonUnion = requires {
-        { TJsonUnionTraits<T>::JsonSchema } -> TValidJsonUnionType<T>;
+    concept TJsonUnion =
+        requires {
+            { TJsonUnionTraits<T>::JsonSchema } -> TValidJsonUnionType<T>;
+        } && TVariantType<T> &&
+        std::same_as<typename std::decay_t<decltype(TJsonUnionTraits<T>::JsonSchema)>::DiscriminatorType, SIZE_T>;
+
+    template <typename>
+    struct TJsonUnionContainer
+    {
+        static constexpr bool IsValid = false;
     };
+
+    template <TJsonUnion T>
+    struct TJsonUnionContainer<T>
+    {
+        static constexpr bool IsValid = true;
+        using ObjectType = T;
+        static constexpr auto JsonSchema = TJsonUnionTraits<T>::JsonSchema;
+
+        template <typename... A>
+        static T CreateObject(A &&...Args)
+        {
+            return T(Forward<A>(Args)...);
+        }
+
+        static T &GetMutableObjectRef(T &Obj)
+        {
+            return Obj;
+        }
+
+        static const T &GetObjectRef(const T &Obj)
+        {
+            return Obj;
+        }
+    };
+
+    template <TJsonUnion T>
+    struct TJsonUnionContainer<TSharedRef<T>>
+    {
+        static constexpr bool IsValid = true;
+        using ObjectType = T;
+        static constexpr auto JsonSchema = TJsonUnionTraits<T>::JsonSchema;
+
+        template <typename... A>
+        static TSharedRef<T> CreateObject(A &&...Args)
+        {
+            return MakeShared<T>(Forward<A>(Args)...);
+        }
+
+        static T &GetMutableObjectRef(const TSharedRef<T> &Obj)
+        {
+            return Obj.Get();
+        }
+
+        static const T &GetObjectRef(const TSharedRef<T> &Obj)
+        {
+            return Obj.Get();
+        }
+    };
+
+    template <TJsonUnion T>
+    struct TJsonUnionContainer<TUniquePtr<T>>
+    {
+        static constexpr bool IsValid = true;
+        using ObjectType = T;
+        static constexpr auto JsonSchema = TJsonUnionTraits<T>::JsonSchema;
+
+        template <typename... A>
+        static TUniquePtr<T> CreateObject(A &&...Args)
+        {
+            return MakeUnique<T>(Forward<A>(Args)...);
+        }
+
+        static T &GetMutableObjectRef(const TUniquePtr<T> &Obj)
+        {
+            return *Obj.Get();
+        }
+
+        static const T &GetObjectRef(const TUniquePtr<T> &Obj)
+        {
+            return *Obj.Get();
+        }
+    };
+
+    template <typename T>
+    concept TValidJsonUnionContainer = TJsonUnionContainer<T>::IsValid;
 
     /**
      * JSON converter for discriminated unions that are represented by TVariant.
      *
      * @tparam T The variant type
      */
-    template <typename T>
-        requires TJsonUnion<T> && TVariantType<T> &&
-                 std::same_as<typename std::decay_t<decltype(TJsonUnionTraits<T>::JsonSchema)>::DiscriminatorType,
-                              SIZE_T>
+    template <TValidJsonUnionContainer T>
     struct TJsonConverter<T>
     {
         /**
@@ -602,34 +706,39 @@ namespace PokeEdit
                 return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
 
-            auto KeyField = (*JsonObject)->TryGetField(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName);
+            auto KeyField = (*JsonObject)->TryGetField(TJsonUnionContainer<T>::JsonSchema.DiscriminatorMember.KeyName);
             if (KeyField == nullptr)
             {
                 return std::unexpected(FString::Format(
                     TEXT("Field '{0}' is missing from object '{1}'"),
-                    {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
+                    {TJsonUnionContainer<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
             }
 
             return TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef())
                 .transform_error(
                     [](const FString &Error)
                     {
-                        return FString::Format(TEXT("Field '{0}': {1}"),
-                                               {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
+                        return FString::Format(
+                            TEXT("Field '{0}': {1}"),
+                            {TJsonUnionContainer<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
                     })
                 .and_then(
                     [&Value](const FString &Discriminator) -> std::expected<T, FString>
                     {
                         // We are going to scan through all the discriminators and find the first once that matches.
                         // Once a set optional is returned, we end up skipping all other calls to the callback.
-                        TOptional<std::expected<T, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
+                        TOptional<std::expected<T, FString>> Result = TJsonUnionContainer<T>::JsonSchema.ForEachField(
                             [&Value, &Discriminator]<typename F>(const F &Field) -> TOptional<std::expected<T, FString>>
                             {
                                 if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
                                 {
                                     return TJsonConverter<typename F::ObjectType>::Deserialize(Value).transform(
                                         [](typename F::ObjectType &&Deserialized) -> T
-                                        { return T(TInPlaceType<typename F::ObjectType>(), MoveTemp(Deserialized)); });
+                                        {
+                                            return TJsonUnionContainer<T>::CreateObject(
+                                                TInPlaceType<typename F::ObjectType>(),
+                                                MoveTemp(Deserialized));
+                                        });
                                 }
 
                                 return NullOpt;
@@ -637,7 +746,7 @@ namespace PokeEdit
 
                         if (Result.IsSet())
                         {
-                            return Result.GetValue();
+                            return MoveTemp(Result.GetValue());
                         }
 
                         return std::unexpected(
@@ -655,132 +764,29 @@ namespace PokeEdit
         {
             // We are going to scan through all the discriminators and find the first once that matches.
             // Once a set optional is returned, we end up skipping all other calls to the callback.
-            auto CurrentDiscriminator = TJsonUnionTraits<T>::JsonSchema.GetDiscriminatorValue(Value);
-            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                [&CurrentDiscriminator, &Value]<typename F>(const F &Field)
-                {
-                    if (Field.DiscriminatorValue == CurrentDiscriminator)
-                    {
-                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(
-                            std::make_pair(TJsonConverter<typename F::ObjectType>::Serialize(
-                                               Value.template Get<typename F::ObjectType>()),
-                                           FString(Field.KeyName)));
-                    }
+            auto &ValueReference = TJsonUnionContainer<T>::GetObjectRef(Value);
 
-                    return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>();
-                });
+            auto CurrentDiscriminator = TJsonUnionContainer<T>::JsonSchema.GetDiscriminatorValue(ValueReference);
+            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result =
+                TJsonUnionContainer<T>::JsonSchema.ForEachField(
+                    [&CurrentDiscriminator, &ValueReference]<typename F>(const F &Field)
+                    {
+                        if (Field.DiscriminatorValue == CurrentDiscriminator)
+                        {
+                            return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(
+                                std::make_pair(TJsonConverter<typename F::ObjectType>::Serialize(
+                                                   ValueReference.template Get<typename F::ObjectType>()),
+                                               FString(Field.KeyName)));
+                        }
+
+                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>();
+                    });
             check(Result.IsSet());
 
             auto &[DiscriminatorValue, KeyName] = Result.GetValue();
 
             const auto JsonObject = Result->first->AsObject();
-            JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName),
-                                 MakeShared<FJsonValueString>(MoveTemp(KeyName)));
-
-            return DiscriminatorValue;
-        }
-    };
-
-    /**
-     * JSON converter for discriminated unions that are represented by TSharedRef.
-     *
-     * @tparam T The variant type
-     */
-    template <typename T>
-        requires TJsonUnion<T> && !TVariantType<T>
-                              struct TJsonConverter<TSharedRef<T>>
-    {
-        /**
-         * Attempts to deserialize a JSON value to the target type.
-         *
-         * @param Value The input JSON value
-         * @return Either the deserialized value, or an error message explaining why serialization failed.
-         */
-        static std::expected<TSharedRef<T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
-        {
-            TSharedPtr<FJsonObject> *JsonObject;
-            if (!Value->TryGetObject(JsonObject))
-            {
-                return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
-            }
-
-            auto KeyField = (*JsonObject)->TryGetField(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName);
-            if (KeyField == nullptr)
-            {
-                return std::unexpected(FString::Format(
-                    TEXT("Field '{0}' is missing from object '{1}'"),
-                    {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, WriteAsString(Value)}));
-            }
-
-            return TJsonConverter<FString>::Deserialize(KeyField.ToSharedRef())
-                .transform_error(
-                    [](const FString &Error)
-                    {
-                        return FString::Format(TEXT("Field '{0}': {1}"),
-                                               {TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName, *Error});
-                    })
-                .and_then(
-                    [&Value](const FString &Discriminator)
-                    {
-                        // We are going to scan through all the discriminators and find the first once that matches.
-                        // Once a set optional is returned, we end up skipping all other calls to the callback.
-                        TOptional<std::expected<TSharedRef<T>, FString>> Result =
-                            TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                                [&Value, &Discriminator]<typename F>(
-                                    const F &Field) -> TOptional<std::expected<TSharedRef<T>, FString>>
-                                {
-                                    if (Field.KeyName.Equals(Discriminator, ESearchCase::IgnoreCase))
-                                    {
-                                        return TJsonConverter<TSharedRef<typename F::ObjectType>>::Deserialize(Value)
-                                            .transform([](const TSharedRef<typename F::ObjectType> &Deserialized)
-                                                       { return StaticCastSharedRef<T>(Deserialized); });
-                                    }
-
-                                    return NullOpt;
-                                });
-
-                        if (Result.IsSet())
-                        {
-                            return Result.GetValue();
-                        }
-
-                        return std::expected<TSharedRef<T>, FString>(
-                            std::unexpect,
-                            FString::Format(TEXT("Unknown discriminator value '{0}'"), {Discriminator}));
-                    });
-        }
-
-        /**
-         * Serializes a value to the target type.
-         *
-         * @param Value The input value
-         * @return The serialized JSON value
-         */
-        static TSharedRef<FJsonValue> Serialize(const TSharedRef<T> &Value)
-        {
-            auto CurrentDiscriminator = TJsonUnionTraits<T>::JsonSchema.GetDiscriminatorValue(Value);
-
-            // We are going to scan through all the discriminators and find the first once that matches.
-            // Once a set optional is returned, we end up skipping all other calls to the callback.
-            TOptional<std::pair<TSharedRef<FJsonValue>, FString>> Result = TJsonUnionTraits<T>::JsonSchema.ForEachField(
-                [&CurrentDiscriminator, &Value]<typename F>(const F &Field)
-                {
-                    if (Field.DiscriminatorValue == CurrentDiscriminator)
-                    {
-                        return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>(
-                            std::make_pair(TJsonConverter<TSharedRef<typename F::ObjectType>>::Serialize(
-                                               StaticCastSharedRef<typename F::ObjectType>(Value)),
-                                           FString(Field.KeyName)));
-                    }
-
-                    return TOptional<std::pair<TSharedRef<FJsonValue>, FString>>();
-                });
-            check(Result.IsSet());
-
-            auto [DiscriminatorValue, KeyName] = MoveTemp(Result.GetValue());
-
-            const auto JsonObject = Result->first->AsObject();
-            JsonObject->SetField(FString(TJsonUnionTraits<T>::JsonSchema.DiscriminatorMember.KeyName),
+            JsonObject->SetField(FString(TJsonUnionContainer<T>::JsonSchema.DiscriminatorMember.KeyName),
                                  MakeShared<FJsonValueString>(MoveTemp(KeyName)));
 
             return DiscriminatorValue;

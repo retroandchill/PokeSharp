@@ -13,20 +13,9 @@ public interface IEditableProperty : IEditableMember
 public interface IEditableProperty<TRoot> : IEditableProperty
     where TRoot : notnull
 {
-    TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    );
+    TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null);
 
-    void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    );
+    DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null);
 }
 
 public interface IEditableProperty<TRoot, TValue> : IEditableProperty<TRoot>
@@ -67,18 +56,7 @@ public abstract class EditablePropertyBase<TRoot, TValue>(EditablePropertyBuilde
 
     public TRoot With(TRoot root, TValue value) => _with(root, value);
 
-    public abstract TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    );
+    public abstract TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null);
 
-    public abstract void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    );
+    public abstract DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null);
 }

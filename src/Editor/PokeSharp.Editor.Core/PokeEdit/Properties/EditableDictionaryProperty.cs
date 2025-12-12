@@ -57,104 +57,110 @@ public sealed class EditableDictionaryProperty<TRoot, TKey, TValue>(
         return With(root, dictionary.Remove(key));
     }
 
-    public override TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    )
+    public override TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null)
     {
-        if (path.Length == 0)
+        return diff switch
         {
-            // Collection-level operations (add/remove/swap...)
-            // Similar to your existing ApplyEditToCollection, but scoped to this property
-            return edit switch
-            {
-                DictionarySetEntryEdit set => SetEntry(
-                    root,
-                    set.Key.Deserialize<TKey>().RequireNonNull(),
-                    set.NewValue.Deserialize<TValue>().RequireNonNull()
-                ),
-                DictionaryRemoveEntryEdit rm => RemoveEntry(root, rm.Key.Deserialize<TKey>().RequireNonNull()),
-                _ => throw new InvalidOperationException($"Edit {edit} is not valid for list property {Name}"),
-            };
-        }
-
-        if (path[0] is not DictionaryKeySegment keySegment)
-        {
-            throw new InvalidOperationException(
-                $"First segment under list property {Name} must be list index, got {path[0]}"
-            );
-        }
-
-        var key = keySegment.Key.Deserialize<TKey>(options);
-
-        var remaining = path[1..];
-        if (remaining.Length == 0)
-            return edit is SetValueEdit setEdit
-                ? SetEntry(root, key.RequireNonNull(), setEdit.NewValue.Deserialize<TValue>(options).RequireNonNull())
-                : throw new InvalidOperationException($"Edit {edit} is not a set operation for list item.");
-
-        if (ValueType is null)
-        {
-            throw new InvalidOperationException(
-                $"Cannot traverse into dictionary value type {typeof(TValue).Name} (no editable properties defined)."
-            );
-        }
-
-        var dictionary = Get(root);
-        return dictionary.TryGetValue(key.RequireNonNull(), out var value)
-            ? SetEntry(root, key.RequireNonNull(), ValueType.ApplyEdit(value, remaining, edit, options))
-            : throw new InvalidOperationException($"Cannot find key {key} in dictionary.");
+            ValueSetNode set => With(
+                root,
+                set.NewValue.Deserialize<ImmutableDictionary<TKey, TValue>>(options).RequireNonNull()
+            ),
+            DictionaryDiffNode dict => ApplyDictionaryEdits(root, dict, options),
+            _ => throw new InvalidOperationException($"Invalid diff node type: {diff.GetType().Name}"),
+        };
     }
 
-    public override void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
+    private TRoot ApplyDictionaryEdits(TRoot root, DictionaryDiffNode dict, JsonSerializerOptions? options)
+    {
+        var newDictionary = dict.Edits.Aggregate(
+            Get(root),
+            (current, edit) =>
+                edit switch
+                {
+                    DictionarySetNode set => ApplyDictionaryIndexEdit(current, set, options),
+                    DictionaryAddNode add => current.SetItem(
+                        add.Key.Deserialize<TKey>(options).RequireNonNull(),
+                        add.Value.Deserialize<TValue>(options).RequireNonNull()
+                    ),
+                    DictionaryRemoveNode rm => current.Remove(rm.Key.Deserialize<TKey>(options).RequireNonNull()),
+                    DictionaryChangeKeyNode changeKey => ApplyChangeKeyEdit(current, changeKey, options),
+                    _ => throw new InvalidOperationException($"Invalid diff node type: {edit.GetType().Name}"),
+                }
+        );
+        return With(root, newDictionary);
+    }
+
+    private ImmutableDictionary<TKey, TValue> ApplyDictionaryIndexEdit(
+        ImmutableDictionary<TKey, TValue> currentValue,
+        DictionarySetNode set,
+        JsonSerializerOptions? options
     )
+    {
+        var key = set.Key.Deserialize<TKey>(options).RequireNonNull();
+        if (!currentValue.TryGetValue(key, out var value))
+            throw new InvalidOperationException($"Cannot find key {key} in dictionary.");
+
+        currentValue = set.Change switch
+        {
+            ValueSetNode valueSet => currentValue.SetItem(
+                key,
+                valueSet.NewValue.Deserialize<TValue>(options).RequireNonNull()
+            ),
+            ObjectDiffNode objectDiff when ValueType is not null => currentValue.SetItem(
+                key,
+                ValueType.ApplyEdit(value, objectDiff, options)
+            ),
+            _ => throw new InvalidOperationException($"Invalid diff node type: {set.Change.GetType().Name}"),
+        };
+        return currentValue;
+    }
+
+    private ImmutableDictionary<TKey, TValue> ApplyChangeKeyEdit(
+        ImmutableDictionary<TKey, TValue> currentValue,
+        DictionaryChangeKeyNode changeKey,
+        JsonSerializerOptions? options
+    )
+    {
+        var oldKey = changeKey.OldKey.Deserialize<TKey>(options).RequireNonNull();
+        return currentValue.TryGetValue(oldKey, out var value)
+            ? currentValue.SetItem(changeKey.NewKey.Deserialize<TKey>(options).RequireNonNull(), value)
+            : throw new InvalidOperationException($"Cannot find key {oldKey} in dictionary.");
+    }
+
+    public override DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null)
     {
         var oldDictionary = Get(oldRoot);
         var newDictionary = Get(newRoot);
 
         if (ReferenceEquals(oldDictionary, newDictionary))
-            return;
+            return null;
 
-        var propertyPath = new FieldPath(basePath.Segments.Add(new PropertySegment(Name)));
-
+        var builder = ImmutableArray.CreateBuilder<DictionaryEditNode>();
         foreach (var (key, value) in oldDictionary)
         {
             if (!newDictionary.TryGetValue(key, out var newValue))
             {
-                edits.Add(
-                    new DictionaryRemoveEntryEdit
-                    {
-                        Path = propertyPath,
-                        Key = JsonSerializer.SerializeToNode(key, options).RequireNonNull(),
-                        OriginalValue = JsonSerializer.SerializeToNode(value, options),
-                    }
-                );
+                builder.Add(new DictionaryRemoveNode(JsonSerializer.SerializeToNode(key, options).RequireNonNull()));
             }
             else if (!EqualityComparer<TValue>.Default.Equals(value, newValue))
             {
                 var keyValue = JsonSerializer.SerializeToNode(key, options).RequireNonNull();
                 if (ValueType is null)
                 {
-                    edits.Add(
-                        new DictionarySetEntryEdit
-                        {
-                            Path = propertyPath,
-                            Key = keyValue,
-                            NewValue = JsonSerializer.SerializeToNode(newValue, options).RequireNonNull(),
-                        }
+                    builder.Add(
+                        new DictionarySetNode(
+                            keyValue,
+                            new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull())
+                        )
                     );
                 }
                 else
                 {
-                    var keyPath = new FieldPath(propertyPath.Segments.Add(new DictionaryKeySegment(keyValue)));
-                    ValueType.CollectDiffs(value, newValue, edits, keyPath, options);
+                    var diff = ValueType.Diff(value, newValue, options);
+                    if (diff is not null)
+                    {
+                        builder.Add(new DictionarySetNode(keyValue, diff));
+                    }
                 }
             }
         }
@@ -163,15 +169,19 @@ public sealed class EditableDictionaryProperty<TRoot, TKey, TValue>(
         {
             if (!oldDictionary.ContainsKey(key))
             {
-                edits.Add(
-                    new DictionarySetEntryEdit
-                    {
-                        Path = propertyPath,
-                        Key = JsonSerializer.SerializeToNode(key, options).RequireNonNull(),
-                        NewValue = JsonSerializer.SerializeToNode(value, options).RequireNonNull(),
-                    }
+                builder.Add(
+                    new DictionaryAddNode(
+                        JsonSerializer.SerializeToNode(key, options).RequireNonNull(),
+                        JsonSerializer.SerializeToNode(value, options).RequireNonNull()
+                    )
                 );
             }
         }
+
+        return builder.Count != 0
+            ? new DictionaryDiffNode(
+                builder.Count == builder.Capacity ? builder.MoveToImmutable() : builder.ToImmutable()
+            )
+            : null;
     }
 }

@@ -26,38 +26,18 @@ public sealed class EditableObjectProperty<TRoot, TValue>(
     IEditableType IEditableObjectProperty.Type => Type;
     public IEditableType<TValue> Type { get; } = cache.GetOrBuildType(builder.TargetType);
 
-    public override TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    )
+    public override TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null)
     {
-        if (path.Length != 0)
+        return diff switch
         {
-            return With(root, Type.ApplyEdit(Get(root), path, edit, options));
-        }
-
-        return edit is SetValueEdit set
-            ? With(root, set.NewValue.Deserialize<TValue>(options).RequireNonNull())
-            : throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}");
+            ValueSetNode set => With(root, set.NewValue.Deserialize<TValue>(options).RequireNonNull()),
+            ObjectDiffNode obj => With(root, Type.ApplyEdit(Get(root), obj, options)),
+            _ => throw new InvalidOperationException($"Invalid diff node type: {diff.GetType().Name}"),
+        };
     }
 
-    public override void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    )
+    public override DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null)
     {
-        var oldValue = Get(oldRoot);
-        var newValue = Get(newRoot);
-
-        if (EqualityComparer<TValue>.Default.Equals(oldValue, newValue))
-            return;
-
-        var propertyPath = new FieldPath(basePath.Segments.Add(new PropertySegment(Name)));
-        Type.CollectDiffs(oldValue, newValue, edits, propertyPath, options);
+        return Type.Diff(Get(oldRoot), Get(newRoot), options);
     }
 }

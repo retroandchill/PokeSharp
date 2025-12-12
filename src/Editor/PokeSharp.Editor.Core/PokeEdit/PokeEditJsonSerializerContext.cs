@@ -13,11 +13,11 @@ namespace PokeSharp.Editor.Core.PokeEdit;
     RespectNullableAnnotations = true,
     AllowTrailingCommas = true
 )]
-[JsonSerializable(typeof(FieldPath))]
-[JsonSerializable(typeof(FieldEdit))]
+[JsonSerializable(typeof(DiffNode))]
 [JsonSerializable(typeof(IEnumerable<EditorTabOption>))]
 [JsonSerializable(typeof(IEnumerable<Text>))]
-[JsonSerializable(typeof(List<FieldEdit>))]
 [JsonSerializable(typeof(EditorLabelRequest))]
 [JsonSerializable(typeof(EntityRequest))]
+[JsonSerializable(typeof(EntityUpdateRequest))]
+[JsonSerializable(typeof(EntityUpdateResponse))]
 public partial class PokeEditJsonSerializerContext : JsonSerializerContext;

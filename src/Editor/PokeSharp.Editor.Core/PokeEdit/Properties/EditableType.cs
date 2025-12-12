@@ -29,15 +29,9 @@ public interface IEditableType<T> : IEditableType
 
     bool TryGetProperty(Name name, [NotNullWhen(true)] out IEditableProperty<T>? property);
 
-    T ApplyEdit(T root, ReadOnlySpan<FieldPathSegment> path, FieldEdit edit, JsonSerializerOptions? options = null);
+    T ApplyEdit(T root, ObjectDiffNode diff, JsonSerializerOptions? options = null);
 
-    void CollectDiffs(
-        T oldRoot,
-        T newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    );
+    ObjectDiffNode? Diff(T oldRoot, T newRoot, JsonSerializerOptions? options = null);
 }
 
 public sealed class EditableType<T>(EditableTypeBuilder<T> builder, ModelBuildCache cache) : IEditableType<T>
@@ -75,44 +69,31 @@ public sealed class EditableType<T>(EditableTypeBuilder<T> builder, ModelBuildCa
         return _properties.TryGetValue(name, out property);
     }
 
-    public T ApplyEdit(
-        T root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    )
+    public T ApplyEdit(T root, ObjectDiffNode diff, JsonSerializerOptions? options = null)
     {
-        if (path.Length == 0)
-        {
-            throw new InvalidOperationException("Cannot apply edit to root type");
-        }
-
-        if (path[0] is not PropertySegment propertySegment)
-        {
-            throw new InvalidOperationException($"Expected property segment, got {path[0]}");
-        }
-
-        return TryGetProperty(propertySegment.Name, out var prop)
-            ? prop.ApplyEdit(root, path[1..], edit, options)
-            : throw new InvalidOperationException($"No property {propertySegment.Name} on {typeof(T).Name}");
+        return diff.Properties.Aggregate(
+            root,
+            (current, edit) =>
+            {
+                var property = GetProperty(edit.Key);
+                return property.ApplyEdit(current, edit.Value, options);
+            }
+        );
     }
 
-    public void CollectDiffs(
-        T oldRoot,
-        T newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    )
+    public ObjectDiffNode? Diff(T oldRoot, T newRoot, JsonSerializerOptions? options = null)
     {
-        // If the objects are the exact same, then just return
-        if (ReferenceEquals(oldRoot, newRoot))
-            return;
-
+        var dictionaryBuilder = ImmutableDictionary.CreateBuilder<Name, DiffNode>();
         foreach (var property in Properties)
         {
-            property.CollectDiffs(oldRoot, newRoot, edits, basePath, options);
+            var diff = property.Diff(oldRoot, newRoot, options);
+            if (diff is not null)
+            {
+                dictionaryBuilder.Add(property.Name, diff);
+            }
         }
+
+        return dictionaryBuilder.Count != 0 ? new ObjectDiffNode(dictionaryBuilder.ToImmutable()) : null;
     }
 
     IEnumerable<IEditableProperty> IEditableType.Properties => Properties;

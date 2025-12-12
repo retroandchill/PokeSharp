@@ -43,63 +43,39 @@ public sealed class EditableOptionalValueProperty<TRoot, TValue>(
     public IEditableType<TValue>? InnerType => cache.GetOrBuildType(builder.TargetInnerType);
     public Type InnerClrType => typeof(TValue);
 
-    public override TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    )
+    public override TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null)
     {
-        if (path.Length == 0)
+        switch (diff)
         {
-            return edit switch
-            {
-                SetValueEdit set => With(root, set.NewValue.Deserialize<TValue>(options)),
-                OptionalResetEdit => Reset(root),
-                _ => throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}"),
-            };
+            case ValueSetNode set:
+                return With(root, set.NewValue.Deserialize<TValue?>(options));
+            case ValueResetNode:
+                return Reset(root);
+            case ObjectDiffNode obj when InnerType is not null:
+                var currentValue = Get(root);
+                return currentValue is not null
+                    ? With(root, InnerType.ApplyEdit(currentValue.Value, obj, options))
+                    : throw new InvalidOperationException(
+                        $"Cannot traverse into optional property {Name}, no value set."
+                    );
+            default:
+                throw new InvalidOperationException($"Invalid diff node type: {diff.GetType().Name}");
         }
-
-        if (InnerType is null)
-        {
-            throw new InvalidOperationException(
-                $"Cannot traverse into scalar property {Name}, path still has {path.Length} segment(s)."
-            );
-        }
-
-        var currentValue = Get(root);
-        return currentValue is not null
-            ? With(root, InnerType.ApplyEdit(currentValue.Value, path, edit, options))
-            : throw new InvalidOperationException($"Cannot traverse into optional property {Name}, no value set.");
     }
 
-    public override void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    )
+    public override DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null)
     {
         var oldValue = Get(oldRoot);
         var newValue = Get(newRoot);
         if (EqualityComparer<TValue?>.Default.Equals(oldValue, newValue))
-            return;
+            return null;
 
         if (oldValue is not null && newValue is null)
         {
-            edits.Add(new OptionalResetEdit { Path = new FieldPath(basePath.Segments.Add(new PropertySegment(Name))) });
+            return new ValueResetNode();
         }
-        else
-        {
-            edits.Add(
-                new SetValueEdit
-                {
-                    NewValue = JsonSerializer.SerializeToNode(newValue, options).RequireNonNull(),
-                    Path = new FieldPath(basePath.Segments.Add(new PropertySegment(Name))),
-                }
-            );
-        }
+
+        return new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull());
     }
 
     public bool IsSet(TRoot root)
@@ -125,63 +101,39 @@ public sealed class EditableOptionalReferenceProperty<TRoot, TValue>(
     public IEditableType<TValue>? InnerType => cache.GetOrBuildType(builder.TargetInnerType);
     public Type InnerClrType => typeof(TValue);
 
-    public override TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    )
+    public override TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null)
     {
-        if (path.Length == 0)
+        switch (diff)
         {
-            return edit switch
-            {
-                SetValueEdit set => With(root, set.NewValue.Deserialize<TValue>(options).RequireNonNull()),
-                OptionalResetEdit => Reset(root),
-                _ => throw new InvalidOperationException($"Edit {edit} is not valid for scalar property {Name}"),
-            };
+            case ValueSetNode set:
+                return With(root, set.NewValue.Deserialize<TValue?>(options));
+            case ValueResetNode:
+                return Reset(root);
+            case ObjectDiffNode obj when InnerType is not null:
+                var currentValue = Get(root);
+                return currentValue is not null
+                    ? With(root, InnerType.ApplyEdit(currentValue, obj, options))
+                    : throw new InvalidOperationException(
+                        $"Cannot traverse into optional property {Name}, no value set."
+                    );
+            default:
+                throw new InvalidOperationException($"Invalid diff node type: {diff.GetType().Name}");
         }
-
-        if (InnerType is null)
-        {
-            throw new InvalidOperationException(
-                $"Cannot traverse into scalar property {Name}, path still has {path.Length} segment(s)."
-            );
-        }
-
-        var currentValue = Get(root);
-        return currentValue is not null
-            ? With(root, InnerType.ApplyEdit(currentValue, path, edit, options))
-            : throw new InvalidOperationException($"Cannot traverse into optional property {Name}, no value set.");
     }
 
-    public override void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
-    )
+    public override DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null)
     {
         var oldValue = Get(oldRoot);
         var newValue = Get(newRoot);
         if (EqualityComparer<TValue?>.Default.Equals(oldValue, newValue))
-            return;
+            return null;
 
         if (oldValue is not null && newValue is null)
         {
-            edits.Add(new OptionalResetEdit { Path = new FieldPath(basePath.Segments.Add(new PropertySegment(Name))) });
+            return new ValueResetNode();
         }
-        else
-        {
-            edits.Add(
-                new SetValueEdit
-                {
-                    NewValue = JsonSerializer.SerializeToNode(newValue, options).RequireNonNull(),
-                    Path = new FieldPath(basePath.Segments.Add(new PropertySegment(Name))),
-                }
-            );
-        }
+
+        return new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull());
     }
 
     public bool IsSet(TRoot root)

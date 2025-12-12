@@ -43,13 +43,15 @@ public sealed partial class PokeEditService(EditorService editorService)
 
     [CreateSyncVersion]
     [PokeEditRequest]
-    public ValueTask<List<FieldEdit>> PerformFieldEditAsync(
-        FieldEdit edit,
+    public ValueTask<EntityUpdateResponse> UpdateEntityAtIndexAsync(
+        EntityUpdateRequest edit,
         CancellationToken cancellationToken = default
     )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(editorService.ProcessFieldEdit(edit));
+        return ValueTask.FromResult(
+            new EntityUpdateResponse(editorService.UpdateEntity(edit.EditorId, edit.Index, edit.Change))
+        );
     }
 }
 
@@ -61,6 +63,6 @@ public static class PokeEditServiceExtensions
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEditorTabsHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryLabelsHandler>();
         services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryAtIndexHandler>();
-        services.AddSingleton<IRequestHandler, PokeEditServicePerformFieldEditHandler>();
+        services.AddSingleton<IRequestHandler, PokeEditServiceUpdateEntityAtIndexHandler>();
     }
 }

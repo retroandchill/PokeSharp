@@ -36,20 +36,10 @@ public class EditorService
             ?? throw new InvalidOperationException($"No editor found for {editorId}");
     }
 
-    public List<FieldEdit> ProcessFieldEdit(FieldEdit edit)
+    public ObjectDiffNode? UpdateEntity(Name editorId, int index, ObjectDiffNode diff)
     {
-        if (edit.Path.Segments.Length == 0)
-        {
-            throw new ArgumentException("Path must have at least one segment");
-        }
-
-        if (edit.Path.Segments[0] is not PropertySegment propertySegment)
-        {
-            throw new ArgumentException("First segment must be a property");
-        }
-
-        return _editors.TryGetValue(propertySegment.Name, out var editor)
-            ? editor.ApplyEdit(edit, edit.Path.Segments.AsSpan()[1..])
-            : throw new InvalidOperationException($"No editor found for {propertySegment.Name}");
+        return _editors.TryGetValue(editorId, out var editor)
+            ? editor.ApplyEdit(index, diff)
+            : throw new InvalidOperationException($"No editor found for {editorId}");
     }
 }

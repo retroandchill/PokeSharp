@@ -69,78 +69,74 @@ public sealed class EditableListProperty<TRoot, TItem>(
         return With(root, list.RemoveAt(index));
     }
 
-    public override TRoot ApplyEdit(
-        TRoot root,
-        ReadOnlySpan<FieldPathSegment> path,
-        FieldEdit edit,
-        JsonSerializerOptions? options = null
-    )
+    public override TRoot ApplyEdit(TRoot root, DiffNode diff, JsonSerializerOptions? options = null)
     {
-        if (path.Length == 0)
+        return diff switch
         {
-            // Collection-level operations (add/remove/swap...)
-            // Similar to your existing ApplyEditToCollection, but scoped to this property
-            return edit switch
-            {
-                ListAddEdit add => Add(root, add.NewItem.Deserialize<TItem>().RequireNonNull()),
-                ListInsertEdit ins => Insert(root, ins.Index, ins.NewItem.Deserialize<TItem>().RequireNonNull()),
-                ListRemoveAtEdit rm => RemoveAt(root, rm.Index),
-                ListSwapEdit sw => Swap(root, sw.IndexA, sw.IndexB),
-                _ => throw new InvalidOperationException($"Edit {edit} is not valid for list property {Name}"),
-            };
-        }
-
-        if (path[0] is not ListIndexSegment indexSegment)
-        {
-            throw new InvalidOperationException(
-                $"First segment under list property {Name} must be list index, got {path[0]}"
-            );
-        }
-
-        var index = indexSegment.Index;
-
-        // If you want to support nesting *into* list items (i.e., item has its own editable properties),
-        // you’d inject a property map for TItem and recurse into it here.
-        // For now, treat item as scalar: remaining path must be empty.
-        var remaining = path[1..];
-        if (remaining.Length == 0)
-            return edit is SetValueEdit setEdit
-                ? SetItem(root, index, setEdit.NewValue.Deserialize<TItem>(options).RequireNonNull())
-                : throw new InvalidOperationException($"Edit {edit} is not a set operation for list item.");
-
-        if (ItemType is null)
-        {
-            throw new InvalidOperationException(
-                $"Cannot traverse into list item type {typeof(TItem).Name} (no editable properties defined)."
-            );
-        }
-
-        var list = Get(root);
-        return list.Length > index || index < 0
-            ? SetItem(root, index, ItemType.ApplyEdit(list[index], remaining, edit, options))
-            : throw new InvalidOperationException($"Cannot find index {index} in list.");
+            ValueSetNode set => With(root, set.NewValue.Deserialize<ImmutableArray<TItem>>(options).RequireNonNull()),
+            ListDiffNode list => ApplyListEdits(root, options, list),
+            _ => throw new InvalidOperationException($"Invalid diff node type: {diff.GetType().Name}"),
+        };
     }
 
-    public override void CollectDiffs(
-        TRoot oldRoot,
-        TRoot newRoot,
-        List<FieldEdit> edits,
-        FieldPath basePath,
-        JsonSerializerOptions? options = null
+    private TRoot ApplyListEdits(TRoot root, JsonSerializerOptions? options, ListDiffNode list)
+    {
+        var newValue = list.Edits.Aggregate(
+            Get(root),
+            (current, edit) =>
+                edit switch
+                {
+                    ListSetNode set => ApplyListIndexEdit(current, set, options),
+                    ListAddNode add => current.Add(add.NewValue.Deserialize<TItem>(options).RequireNonNull()),
+                    ListInsertNode ins => current.Insert(
+                        ins.Index,
+                        ins.NewValue.Deserialize<TItem>(options).RequireNonNull()
+                    ),
+                    ListRemoveNode rm => current.RemoveAt(rm.Index),
+                    ListSwapNode sw => current.Swap(sw.IndexA, sw.IndexB),
+                    _ => throw new InvalidOperationException($"Invalid diff node type: {edit.GetType().Name}"),
+                }
+        );
+        return With(root, newValue);
+    }
+
+    private ImmutableArray<TItem> ApplyListIndexEdit(
+        ImmutableArray<TItem> currentValue,
+        ListSetNode set,
+        JsonSerializerOptions? options
     )
+    {
+        if (set.Index < 0 || set.Index >= currentValue.Length)
+            throw new InvalidOperationException($"Cannot find index {set.Index} in list.");
+
+        currentValue = set.Change switch
+        {
+            ValueSetNode valueSet => currentValue.SetItem(
+                set.Index,
+                valueSet.NewValue.Deserialize<TItem>(options).RequireNonNull()
+            ),
+            ObjectDiffNode objectDiff when ItemType is not null => currentValue.SetItem(
+                set.Index,
+                ItemType.ApplyEdit(currentValue[set.Index], objectDiff, options)
+            ),
+            _ => throw new InvalidOperationException($"Invalid diff node type: {set.Change.GetType().Name}"),
+        };
+        return currentValue;
+    }
+
+    public override DiffNode? Diff(TRoot oldRoot, TRoot newRoot, JsonSerializerOptions? options = null)
     {
         var oldList = Get(oldRoot);
         var newList = Get(newRoot);
 
         if (oldList == newList)
-            return;
-
-        var propertyPath = new FieldPath(basePath.Segments.Add(new PropertySegment(Name)));
+            return null;
 
         var oldCount = oldList.Length;
         var newCount = newList.Length;
         var minCount = Math.Min(oldCount, newCount);
 
+        var builder = ImmutableArray.CreateBuilder<ListEditNode>();
         for (var i = 0; i < minCount; i++)
         {
             var oldItem = oldList[i];
@@ -149,23 +145,21 @@ public sealed class EditableListProperty<TRoot, TItem>(
             if (EqualityComparer<TItem>.Default.Equals(oldItem, newItem))
                 continue;
 
-            var itemPath = new FieldPath(propertyPath.Segments.Add(new ListIndexSegment(i)));
-
             if (ItemType is null)
             {
                 // No nested editable type; treat as atomic and emit SetValueEdit
-                edits.Add(
-                    new SetValueEdit
-                    {
-                        Path = itemPath,
-                        NewValue = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
-                    }
+                builder.Add(
+                    new ListSetNode(
+                        i,
+                        new ValueSetNode(JsonSerializer.SerializeToNode(newItem, options).RequireNonNull())
+                    )
                 );
             }
             else
             {
-                // Nested editable type: let it compute its own diffs
-                ItemType.CollectDiffs(oldItem, newItem, edits, itemPath, options);
+                var diff = ItemType.Diff(oldItem, newItem, options);
+                if (diff is not null)
+                    builder.Add(new ListSetNode(i, diff));
             }
         }
 
@@ -178,23 +172,12 @@ public sealed class EditableListProperty<TRoot, TItem>(
 
                 if (i == newCount - 1)
                 {
-                    edits.Add(
-                        new ListAddEdit
-                        {
-                            Path = propertyPath,
-                            NewItem = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
-                        }
-                    );
+                    builder.Add(new ListAddNode(JsonSerializer.SerializeToNode(newItem, options).RequireNonNull()));
                 }
                 else
                 {
-                    edits.Add(
-                        new ListInsertEdit
-                        {
-                            Path = propertyPath,
-                            Index = i,
-                            NewItem = JsonSerializer.SerializeToNode(newItem, options).RequireNonNull(),
-                        }
+                    builder.Add(
+                        new ListInsertNode(i, JsonSerializer.SerializeToNode(newItem, options).RequireNonNull())
                     );
                 }
             }
@@ -205,16 +188,12 @@ public sealed class EditableListProperty<TRoot, TItem>(
             // Important: remove from the end backward so indices stay valid.
             for (var i = oldCount - 1; i >= newCount; i--)
             {
-                edits.Add(
-                    new ListRemoveAtEdit
-                    {
-                        Path = propertyPath, // collection-level op
-                        Index = i,
-                        // Optional: capture OriginalItem if useful
-                        OriginalItem = JsonSerializer.SerializeToNode(oldList[i], options),
-                    }
-                );
+                builder.Add(new ListRemoveNode(i));
             }
         }
+
+        return builder.Count != 0
+            ? new ListDiffNode(builder.Count == builder.Capacity ? builder.MoveToImmutable() : builder.ToImmutable())
+            : null;
     }
 }

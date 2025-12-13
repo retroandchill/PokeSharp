@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using PokeSharp.Core.Strings;
+using PokeSharp.Core.Utils;
 
 namespace PokeSharp.Core.Serialization.Json;
 
@@ -37,8 +38,19 @@ public class NameJsonConverter<T> : JsonConverter<T>
     }
 
     /// <inheritdoc />
+    public override T ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return Read(ref reader, typeToConvert, options);
+    }
+
+    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
+    }
+    
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(value.ToString().RequireNonNull());
     }
 }

@@ -67,15 +67,22 @@ public sealed class EditableOptionalValueProperty<TRoot, TValue>(
     {
         var oldValue = Get(oldRoot);
         var newValue = Get(newRoot);
-        if (EqualityComparer<TValue?>.Default.Equals(oldValue, newValue))
-            return null;
-
-        if (oldValue is not null && newValue is null)
+        if (oldValue is null)
+        {
+            return newValue is not null ? new ValueSetNode(JsonSerializer.SerializeToNode(newValue.Value, options).RequireNonNull()) : null;
+        }
+        
+        if (newValue is null)
         {
             return new ValueResetNode();
         }
 
-        return new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull());
+        if (InnerType is null)
+        {
+            return new ValueSetNode(JsonSerializer.SerializeToNode(newValue.Value, options).RequireNonNull());
+        }
+        
+        return InnerType.Diff(oldValue.Value, newValue.Value, options);
     }
 
     public bool IsSet(TRoot root)
@@ -125,15 +132,22 @@ public sealed class EditableOptionalReferenceProperty<TRoot, TValue>(
     {
         var oldValue = Get(oldRoot);
         var newValue = Get(newRoot);
-        if (EqualityComparer<TValue?>.Default.Equals(oldValue, newValue))
-            return null;
-
-        if (oldValue is not null && newValue is null)
+        if (oldValue is null)
+        {
+            return newValue is not null ? new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull()) : null;
+        }
+        
+        if (newValue is null)
         {
             return new ValueResetNode();
         }
 
-        return new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull());
+        if (InnerType is null)
+        {
+            return new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull());
+        }
+        
+        return InnerType.Diff(oldValue, newValue, options);
     }
 
     public bool IsSet(TRoot root)

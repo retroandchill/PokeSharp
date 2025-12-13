@@ -78,14 +78,14 @@ class TVariantWrapper
     }
     
     template <typename F>
-        requires (std::invocable<F, T&> || ...)
+        requires (std::invocable<F, T&> && ...)
     constexpr decltype(auto) Visit(F&& Functor)
     {
         return ::Visit(Forward<F>(Functor), Value);
     }
     
     template <typename F>
-        requires (std::invocable<F, const T&> || ...)
+        requires (std::invocable<F, const T&> && ...)
     constexpr decltype(auto) Visit(F&& Functor) const
     {
         return ::Visit(Forward<F>(Functor), Value);

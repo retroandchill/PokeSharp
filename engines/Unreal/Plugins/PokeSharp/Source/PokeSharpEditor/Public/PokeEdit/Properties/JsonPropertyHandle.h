@@ -3,8 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FieldEditBuilder.h"
-#include "PokeEdit/Schema/FieldEdit.h"
+#include "DiffNodeOperations.h"
 #include "PokeEdit/Serialization/JsonSchema.h"
 #include "Structs/UnrealStruct.h"
 
@@ -21,7 +20,7 @@ namespace PokeEdit
 
         virtual void CacheCurrentValue(const T &Owner) = 0;
 
-        virtual TArray<FFieldEdit> CollectDiffs(const T &Owner, const FFieldPath &BasePath) const = 0;
+        virtual TOptional<FDiffNode> CollectDiffs(const T &Owner, int32 Index) const = 0;
 
         virtual std::expected<void, FString> Rollback(T &Owner) = 0;
 
@@ -41,14 +40,12 @@ namespace PokeEdit
             Field.Emplace(Owner.*Member);
         }
 
-        TArray<FFieldEdit> CollectDiffs(const OwnerType &Owner, const FFieldPath &BasePath) const override
+        TOptional<FDiffNode> CollectDiffs(const OwnerType &Owner, int32 Index) const override
         {
             if (!Field.IsSet())
-                return {};
+                return NullOpt;
 
-            TArray<FFieldEdit> Edits;
-            PokeEdit::CollectDiffs(*Field, Owner.*Member, Edits, BasePath);
-            return Edits;
+            return PokeEdit::Diff(Field.GetValue(), Owner.*Member);
         }
 
         std::expected<void, FString> Rollback(OwnerType &Owner) override

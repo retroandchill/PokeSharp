@@ -14,9 +14,10 @@ class FSpawnTabArgs;
 class SDockTab;
 class SWidget;
 
-DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<PokeEdit::FJsonStructHandle>,
+DECLARE_DELEGATE_RetVal_TwoParams(TSharedRef<PokeEdit::FJsonStructHandle>,
                                  FJsonStructHandleFactory,
-                                 PokeEdit::FFieldPath)
+                                 FName,
+                                 int32)
 
     class FPokeSharpEditorModule : public IModuleInterface
 {

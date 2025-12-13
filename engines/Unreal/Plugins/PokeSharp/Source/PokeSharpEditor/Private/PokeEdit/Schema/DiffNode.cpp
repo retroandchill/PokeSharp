@@ -1,8 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PokeEdit/Schema/DiffNode.h"
-#include "PokeEdit/Schema/DictionaryEditNode.h"
-#include "PokeEdit/Schema/ListEditNode.h"
 
 namespace PokeEdit
 {
@@ -12,4 +10,17 @@ namespace PokeEdit
     template struct TJsonConverter<FObjectDiffNode>;
     template struct TJsonConverter<FListDiffNode>;
     template struct TJsonConverter<FDictionaryDiffNode>;
+    
+    template struct TJsonConverter<FListEditNode>;
+    template struct TJsonConverter<FListSetNode>;
+    template struct TJsonConverter<FListAddNode>;
+    template struct TJsonConverter<FListInsertNode>;
+    template struct TJsonConverter<FListRemoveNode>;
+    template struct TJsonConverter<FListSwapNode>;
+    
+    template struct TJsonConverter<FDictionaryEditNode>;
+    template struct TJsonConverter<FDictionarySetNode>;
+    template struct TJsonConverter<FDictionaryAddNode>;
+    template struct TJsonConverter<FDictionaryRemoveNode>;
+    template struct TJsonConverter<FDictionaryChangeKeyNode>;
 } // namespace PokeEdit

@@ -9,7 +9,6 @@
 #include "Modules/ModuleManager.h"
 #include "PokeEdit/PokeEditApi.h"
 #include "PokeEdit/Properties/JsonStructHandle.h"
-#include "PokeEdit/Schema/FieldPath.h"
 #include "PropertyEditorModule.h"
 #include "Serialization/JsonSerializer.h"
 #include "UI/Components/GameDataEntrySelector.h"
@@ -100,7 +99,7 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
                             using FResult = std::expected<TSharedPtr<FStructOnScope>, FString>;
                         
                             SelectedEntryIndex = Entry->Index;
-                            Model->SetBasePath(PokeEdit::FFieldPath(PokeEdit::FPropertySegment(TabId), PokeEdit::FListIndexSegment(SelectedEntryIndex)));
+                            Model->SetIndex(SelectedEntryIndex);
                             EntryStruct = PokeEdit::GetEntryAtIndex(TabId, SelectedEntryIndex)
                                 .and_then([this](const TSharedRef<FJsonValue> &EntryJson)
                                 {
@@ -108,6 +107,7 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnEntriesTab(const FSpawnTabArgs &Ar
                                 })
                                 .transform([](const TSharedRef<FStructOnScope> &Result)
                                 {
+                                    Result->SetPackage(GetTransientPackage());
                                     return Result.ToSharedPtr();
                                 })
                                 .or_else([](const FString &Error) -> FResult
@@ -132,18 +132,6 @@ TSharedRef<SDockTab> SDefaultEditorPage::SpawnDetailsTab(const FSpawnTabArgs &Ar
     const FStructureDetailsViewArgs DetailsViewArgsStruct;
 
     DetailsView = PropertyEditorModule.CreateStructureDetailView(DetailsViewArgs, DetailsViewArgsStruct, EntryStruct);
-    DetailsView->GetOnFinishedChangingPropertiesDelegate().AddLambda(
-        [this](const FPropertyChangedEvent &Event)
-        {
-            // TODO: Actually construct the full information, this is just a basic idea of what we need to do here
-            const auto *ValuePtr = Event.Property->ContainerPtrToValuePtr<void>(EntryStruct->GetStructMemory());
-            auto Serialized = FJsonObjectConverter::UPropertyToJsonValue(Event.Property, ValuePtr).ToSharedRef();
-
-            PokeEdit::FFieldPath PropertyPath(PokeEdit::FPropertySegment(TabId),
-                                              PokeEdit::FListIndexSegment(SelectedEntryIndex),
-                                              PokeEdit::FPropertySegment(Event.Property->GetFName()));
-        });
-
     // clang-format off
     return SNew(SDockTab)
         .Label(NSLOCTEXT("SDefaultEditorPage", "DetailsTabLabel", "Details"))

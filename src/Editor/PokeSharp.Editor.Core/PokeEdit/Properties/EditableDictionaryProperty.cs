@@ -115,7 +115,7 @@ public sealed class EditableDictionaryProperty<TRoot, TKey, TValue>(
         return currentValue;
     }
 
-    private ImmutableDictionary<TKey, TValue> ApplyChangeKeyEdit(
+    private static ImmutableDictionary<TKey, TValue> ApplyChangeKeyEdit(
         ImmutableDictionary<TKey, TValue> currentValue,
         DictionaryChangeKeyNode changeKey,
         JsonSerializerOptions? options

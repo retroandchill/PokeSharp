@@ -19,11 +19,11 @@ void FPokeSharpEditorModule::StartupModule()
     RegisterCommands();
     RegisterMenu();
     RegisterTabSpawner();
-
+    
     ModelMapping.Emplace(TEXT("PokemonType"),
                          FJsonStructHandleFactory::CreateLambda(
-                             [](PokeEdit::FFieldPath Path)
-                             { return MakeShared<PokeEdit::TJsonStructHandle<FType>>(MoveTemp(Path)); }));
+                             [](const FName TabName, const int32 Index)
+                             { return MakeShared<PokeEdit::TJsonStructHandle<FType>>(TabName, Index); }));
 }
 
 void FPokeSharpEditorModule::ShutdownModule()
@@ -133,7 +133,7 @@ TSharedRef<SDockTab> FPokeSharpEditorModule::SpawnPokeSharpEditorTab(const FSpaw
     DockTab->SetContent(SNew(SPokeSharpEditor, DockTab)
         .GetStructForTab_Lambda([this] (const FName TabId)
         {
-            return ModelMapping.FindRef(TabId).Execute(PokeEdit::FFieldPath(PokeEdit::FPropertySegment(TabId)));
+            return ModelMapping.FindRef(TabId).Execute(TabId, 0);
         }));
     // clang-format on
     return DockTab;

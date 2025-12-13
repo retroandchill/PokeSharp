@@ -127,6 +127,32 @@ namespace PokeEdit
             std::apply([&](const auto &...Field) { (std::invoke(Func, Field) && ...); }, Fields);
         }
     };
+    
+    template <typename>
+    struct TMemberVariantType;
+    
+    template <typename T, auto... Members>
+        requires (sizeof...(Members) > 0)
+    struct TMemberVariantType<TJsonObjectType<T, Members...>>
+    {
+        using FType = TVariant<TJsonField<Members>...>;
+    };
+    
+    template <typename T, auto... Members>
+        requires (sizeof...(Members) == 0)
+    struct TMemberVariantType<TJsonObjectType<T, Members...>>
+    {
+        using FType = TVariant<std::monostate>;
+    };
+    
+    template <typename T>
+    concept TValidMemberVariant = requires
+    {
+        typename TMemberVariantType<std::remove_cvref_t<T>>::FType;
+    };
+    
+    template <TValidMemberVariant T>
+    using TMemberVariant = TMemberVariantType<std::remove_cvref_t<T>>::FType;
 
     template <std::invocable T>
     consteval auto GetRequiredMembers(T Factory)

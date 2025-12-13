@@ -239,9 +239,15 @@ namespace PokeEdit
      */
     template <typename T>
     concept TPrintableEnum = std::is_enum_v<T> && requires(T Enum) {
-        { LexToString(Enum) } -> std::same_as<FString>;
+        { LexToString(Enum) } -> std::convertible_to<FString>;
     };
 
+    template <typename T>
+    constexpr FString PrintEnum(const T Value)
+    {
+        return LexToString(Value);
+    }
+    
     /**
      * Determines if a type is an Enum that can be parsed from a string value,
      * represented by a null-terminated character array.
@@ -281,7 +287,7 @@ namespace PokeEdit
      */
     template <typename T>
     concept TParsableEnum = TParsableEnumFromLiteral<T> || TParsableEnumFromStringView<T> || TParsableEnumFromString<T>;
-
+    
     /**
      * Attempt to parse a string object into an nnum value.
      *
@@ -290,20 +296,20 @@ namespace PokeEdit
      * @return The enum value if a matching literal was found, otherwise an empty optional.
      */
     template <TParsableEnum T>
-    constexpr TOptional<T> ParseEnum(const FString &Lex)
+    constexpr std::expected<T, FString> ParseEnum(const FString &Lex)
     {
         T Result;
         if constexpr (TParsableEnumFromString<T>)
         {
-            return LexFromString(Result, Lex) ? TOptional<T>(Result) : TOptional<T>();
+            return LexFromString(Result, Lex) ? std::expected<T, FString>(Result) : std::expected<T, FString>(std::unexpect, FString::Format(TEXT("Value '{0}' is not a valid enum value"), {Lex}));
         }
         else if constexpr (TParsableEnumFromStringView<T>)
         {
-            return LexFromString(Result, Lex) ? TOptional<T>(Result) : TOptional<T>();
+            return LexFromString(Result, Lex) ? std::expected<T, FString>(Result) : std::expected<T, FString>(std::unexpect, FString::Format(TEXT("Value '{0}' is not a valid enum value"), {Lex}));
         }
         else
         {
-            return LexFromString(Result, Lex.GetCharArray().GetData()) ? TOptional<T>(Result) : TOptional<T>();
+            return LexFromString(Result, Lex.GetCharArray().GetData()) ? std::expected<T, FString>(Result) : std::expected<T, FString>(std::unexpect, FString::Format(TEXT("Value '{0}' is not a valid enum value"), {Lex}));
         }
     }
 
@@ -327,15 +333,10 @@ namespace PokeEdit
         {
             if (FString Result; Value->TryGetString(Result))
             {
-                if (auto Parsed = ParseEnum<T>(Result); Parsed.IsSet())
-                {
-                    return *Parsed;
-                }
-
-                return MakeError(FString::Format(TEXT("Value '{0}' is not a valid enum value"), {Result}));
+                return ParseEnum<T>(Result);
             }
 
-            return MakeError(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
+            return std::unexpected(FString::Format(TEXT("Value '{0}' is not a string"), {WriteAsString(Value)}));
         }
 
         /**
@@ -347,7 +348,7 @@ namespace PokeEdit
         static TSharedRef<FJsonValue> Serialize(const T Value)
             requires TPrintableEnum<T>
         {
-            return MakeShared<FJsonValueString>(LexToString(Value));
+            return MakeShared<FJsonValueString>(PrintEnum(Value));
         }
     };
 
@@ -418,13 +419,82 @@ namespace PokeEdit
             return MakeShared<FJsonValueArray>(MoveTemp(JsonValues));
         }
     };
-
-    template <typename T>
-        requires TJsonDeserializable<T> || TJsonSerializable<T>
-    struct TJsonConverter<TMap<FName, T>>
+    
+    template <typename>
+    struct TMapKeyTraits;
+    
+    template <>
+    struct TMapKeyTraits<FName>
     {
-        static std::expected<TMap<FName, T>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
-            requires TJsonDeserializable<T>
+        static std::expected<FName, FString> Deserialize(FStringView String)
+        {
+            return FName(String);
+        }
+        
+        static FString Serialize(const FName Key)
+        {
+            return Key.ToString();
+        }
+    };
+    
+    template <>
+    struct TMapKeyTraits<FString>
+    {
+        static std::expected<FString, FString> Deserialize(const FString &String)
+        {
+            return String;
+        }
+        
+        static std::expected<FString, FString> Deserialize(FString &&String)
+        {
+            return MoveTemp(String);
+        }
+        
+        static FString Serialize(const FString& Key)
+        {
+            return Key;
+        }
+        
+        static FString Serialize(FString&& Key)
+        {
+            return MoveTemp(Key);
+        }
+    };
+    
+    template <typename T>
+        requires TPrintableEnum<T> || TParsableEnum<T>
+    struct TMapKeyTraits<T>
+    {
+        static std::expected<T, FString> Deserialize(const FString &String)
+        {
+            return ParseEnum<T>(String);
+        }
+        
+        static FString Serialize(const T Key)
+        {
+            return PrintEnum(Key);
+        }
+    };
+    
+    template <typename T>
+    concept TParsableMapKey = requires(const FString& String)
+    {
+        { TMapKeyTraits<T>::Deserialize(String) } -> std::convertible_to<std::expected<T, FString>>;
+    };
+    
+    template <typename T>
+    concept TPrintableMapKey = requires(const T& Key)
+    {
+        { TMapKeyTraits<T>::Serialize(Key) } -> std::convertible_to<FString>;
+    };
+    
+
+    template <typename K, typename V>
+        requires ((TParsableMapKey<K> || TPrintableMapKey<K>) && (TJsonDeserializable<V> || TJsonSerializable<V>))
+    struct TJsonConverter<TMap<K, V>>
+    {
+        static std::expected<TMap<K, V>, FString> Deserialize(const TSharedRef<FJsonValue> &Value)
+            requires TParsableMapKey<K> && TJsonDeserializable<V>
         {
             const auto Object = Value->AsObject();
             if (Object == nullptr)
@@ -432,28 +502,34 @@ namespace PokeEdit
                 return std::unexpected(FString::Format(TEXT("Value '{0}' is not an object"), {WriteAsString(Value)}));
             }
 
-            TMap<FName, T> Result;
+            TMap<FName, V> Result;
             for (const auto &[Key, JsonValue] : Object->Values)
             {
-                auto DeserializedValue = TJsonConverter<T>::Deserialize(JsonValue.ToSharedRef());
+                auto KeyValue = TMapKeyTraits<K>::Deserialize(Key);
+                if (!KeyValue.has_value())
+                {
+                    return std::unexpected(MoveTemp(KeyValue).error());
+                }
+                
+                auto DeserializedValue = TJsonConverter<V>::Deserialize(JsonValue.ToSharedRef());
                 if (!DeserializedValue.has_value())
                 {
                     return std::unexpected(MoveTemp(DeserializedValue).error());
                 }
 
-                Result.Add(FName(Key), MoveTemp(DeserializedValue).value());
+                Result.Add(MoveTemp(KeyValue).value(), MoveTemp(DeserializedValue).value());
             }
 
             return MoveTemp(Result);
         }
 
-        static TSharedRef<FJsonValue> Serialize(const TMap<FName, T> &Value)
-            requires TJsonSerializable<T>
+        static TSharedRef<FJsonValue> Serialize(const TMap<K, V> &Value)
+            requires TPrintableMapKey<K> && TJsonSerializable<V>
         {
             auto JsonObject = MakeShared<FJsonObject>();
-            for (const auto &[Key, Value] : Value)
+            for (const auto &[Key, MapValue] : Value)
             {
-                JsonObject->SetField(Key.ToString(), TJsonConverter<T>::Serialize(Value));
+                JsonObject->SetField(TMapKeyTraits<K>::Serialize(Key), TJsonConverter<V>::Serialize(MapValue));
             }
             return MakeShared<FJsonValueObject>(JsonObject);
         }

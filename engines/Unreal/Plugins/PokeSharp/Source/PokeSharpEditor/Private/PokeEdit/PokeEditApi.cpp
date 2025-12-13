@@ -2,9 +2,7 @@
 
 #include "PokeEdit/PokeEditApi.h"
 #include "PokeEdit/PokeEditClient.h"
-#include "PokeEdit/Schema/EditorLabelRequest.h"
-#include "PokeEdit/Schema/EntityRequest.h"
-#include "PokeEdit/Schema/FieldPath.h"
+#include "PokeEdit/Schema/Requests.h"
 
 namespace PokeEdit
 {
@@ -26,9 +24,9 @@ namespace PokeEdit
         return SendRequest<TSharedRef<FJsonValue>>(RequestName, FEntityRequest(EditorId, Index));
     }
 
-    std::expected<TArray<FFieldEdit>, FString> PerformFieldEdit(const FFieldEdit &Edit)
+    std::expected<FEntityUpdateResponse, FString> UpdateEntityAtIndex(const FName EditorId, const int32 Index, FObjectDiffNode DiffNode)
     {
-        static FName RequestName = "PerformFieldEdit";
-        return SendRequest<TArray<FFieldEdit>>(RequestName, Edit);
+        static FName RequestName = "UpdateEntityAtIndex";
+        return SendRequest<FEntityUpdateResponse>(RequestName, FEntityUpdateRequest(EditorId, Index, MoveTemp(DiffNode)));
     }
 } // namespace PokeEdit

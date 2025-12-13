@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Schema/EditorTabOption.h"
-#include "Schema/FieldEdit.h"
+#include "Schema/Responses.h"
 
 namespace PokeEdit
 {
+    struct FEntityUpdateRequest;
     struct FFieldPath;
 
     POKESHARPEDITOR_API std::expected<TArray<FEditorTabOption>, FString> GetEditorTabs();
@@ -18,5 +18,5 @@ namespace PokeEdit
 
     POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> GetEntryAtIndex(FName EditorId, int32 Index);
 
-    POKESHARPEDITOR_API std::expected<TArray<FFieldEdit>, FString> PerformFieldEdit(const FFieldEdit &Edit);
+    POKESHARPEDITOR_API std::expected<FEntityUpdateResponse, FString> UpdateEntityAtIndex(FName EditorId, int32 Index, FObjectDiffNode DiffNode);
 } // namespace PokeEdit

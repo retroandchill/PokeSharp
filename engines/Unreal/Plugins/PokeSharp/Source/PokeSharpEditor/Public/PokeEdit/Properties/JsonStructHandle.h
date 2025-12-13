@@ -7,7 +7,6 @@
 #include "LogPokeSharpEditor.h"
 #include "Misc/NotifyHook.h"
 #include "PokeEdit/PokeEditApi.h"
-#include "PokeEdit/Schema/FieldPath.h"
 #include "PokeEdit/Serialization/JsonSchema.h"
 
 namespace PokeEdit
@@ -15,8 +14,8 @@ namespace PokeEdit
     class FJsonStructHandle : public FNotifyHook
     {
       public:
-        explicit FJsonStructHandle(const UScriptStruct *ScriptStruct, FFieldPath BasePath)
-            : Struct(ScriptStruct), BasePath(MoveTemp(BasePath))
+        explicit FJsonStructHandle(const UScriptStruct *ScriptStruct, const FName TabName,  const int32 Index)
+            : Struct(ScriptStruct), TabName(TabName), Index(Index)
         {
         }
         virtual ~FJsonStructHandle() = default;
@@ -25,15 +24,20 @@ namespace PokeEdit
         {
             return Struct;
         }
-
-        const FFieldPath &GetBasePath() const
+        
+        FName GetTabName() const
         {
-            return BasePath;
+            return TabName;
         }
 
-        void SetBasePath(FFieldPath Path)
+        int32 GetIndex() const
         {
-            BasePath = MoveTemp(Path);
+            return Index;
+        }
+
+        void SetIndex(const int32 InIndex)
+        {
+            Index = InIndex;
         }
 
         virtual std::expected<TSharedRef<FStructOnScope>, FString> DeserializeFromJson(
@@ -41,17 +45,18 @@ namespace PokeEdit
 
       private:
         TObjectPtr<const UScriptStruct> Struct;
-        FFieldPath BasePath;
+        FName TabName;
+        int32 Index;
     };
 
     template <TSerializableStruct T>
-        requires TCanApplyFieldEdit<T> && TDiffableType<T>
+        requires TCanApplyDiff<T> && TDiffableType<T>
     class TJsonStructHandle final : public FJsonStructHandle
     {
         constexpr static auto JsonSchema = TJsonObjectTraits<T>::JsonSchema;
 
       public:
-        explicit TJsonStructHandle(FFieldPath BasePath) : FJsonStructHandle(GetScriptStruct<T>(), MoveTemp(BasePath))
+        explicit TJsonStructHandle(const FName TabName, const int32 Index) : FJsonStructHandle(GetScriptStruct<T>(), TabName, Index)
         {
         }
 
@@ -85,42 +90,33 @@ namespace PokeEdit
             {
                 return;
             }
-
-            auto PropertyPath = GetBasePath();
-            PropertyPath.Segments.Emplace(TInPlaceType<FPropertySegment>{}, PropertyThatChanged->GetFName());
-            auto Diffs = (*ChangedProperty)->CollectDiffs(CurrentValue, PropertyPath);
-
-            // For now, it's probably safe to assume that we'll only ever have one thing that changes, if that changes,
-            // we'll have to rethink how the API is designed.
-            check(Diffs.Num() <= 1);
-
-            if (Diffs.Num() == 0)
+            
+            auto Diffs = (*ChangedProperty)->CollectDiffs(CurrentValue, GetIndex());
+            if (!Diffs.IsSet())
             {
                 (*ChangedProperty)->ClearCache();
                 return;
             }
-
+            
             if (auto RollbackResult = (*ChangedProperty)->Rollback(CurrentValue); !RollbackResult.has_value())
             {
                 UE_LOG(LogPokeSharpEditor, Error, TEXT("%s"), *RollbackResult.error());
                 return;
             }
+            
+            TMap<FName, TSharedRef<FDiffNode>> DiffsMap;
+            DiffsMap.Add(PropertyThatChanged->GetFName(), MakeShared<FDiffNode>(MoveTemp(*Diffs)));
 
-            auto FinalResult = PerformFieldEdit(Diffs[0]).and_then(
-                [&](const TArray<FFieldEdit> &Edits) -> std::expected<void, FString>
-                {
-                    for (auto &Edit : Edits)
+            auto FinalResult = UpdateEntityAtIndex(GetTabName(), GetIndex(), FObjectDiffNode(MoveTemp(DiffsMap)))
+                .and_then([&](const FEntityUpdateResponse &Edits) -> std::expected<void, FString>
                     {
-                        TConstArrayView<FFieldPathSegment> Path = GetPath(Edit).Segments;
-                        auto RelativePath = Path.RightChop(GetBasePath().Segments.Num());
-                        if (auto EditResult = ApplyFieldEdit(CurrentValue, Edit, RelativePath); !EditResult.has_value())
+                        if (!Edits.Diff.IsSet())
                         {
-                            return EditResult;
+                            return {};
                         }
-                    }
-
-                    return {};
-                });
+                        
+                        return ApplyEdit(CurrentValue, *Edits.Diff);
+                    });
 
             if (!FinalResult.has_value())
             {

@@ -1,8 +1,6 @@
-using PokeSharp.Core.Strings;
-
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
-public readonly record struct RouteParamSlice(Name ParamId, int Start, int Length);
+public readonly record struct RouteParamSlice(int Start, int Length);
 
 public ref struct RouteValueBuffer(ReadOnlySpan<char> route, Span<RouteParamSlice> storage)
 {

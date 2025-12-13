@@ -4,9 +4,12 @@ namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 public interface IRequestHandler
 {
-    Name Name { get; }
+    void Process(RouteValueBuffer buffer, Stream requestStream, Stream responseStream);
 
-    void Process(Stream requestStream, Stream responseStream);
-
-    ValueTask ProcessAsync(Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default);
+    ValueTask ProcessAsync(
+        RouteValueBuffer buffer,
+        Stream requestStream,
+        Stream responseStream,
+        CancellationToken cancellationToken = default
+    );
 }

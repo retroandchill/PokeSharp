@@ -3,7 +3,7 @@
     "profiles": {
         "Generators": {
             "commandName": "DebugRoslynComponent",
-            "targetProject": "../../Editor/PokeSharp.Editor/PokeSharp.Editor.csproj"
+            "targetProject": "../../Editor/PokeSharp.Editor.Core/PokeSharp.Editor.Core.csproj"
         }
     }
 }

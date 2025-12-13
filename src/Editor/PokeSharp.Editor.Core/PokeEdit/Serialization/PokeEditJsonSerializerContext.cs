@@ -3,7 +3,7 @@ using Injectio.Attributes;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
-namespace PokeSharp.Editor.Core.PokeEdit;
+namespace PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 [RegisterSingleton(Factory = nameof(Default), Duplicate = DuplicateStrategy.Append)]
 [JsonSourceGenerationOptions(

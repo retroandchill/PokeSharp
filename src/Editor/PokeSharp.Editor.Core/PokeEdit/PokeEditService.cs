@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Nodes;
 using Injectio.Attributes;
-using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
@@ -8,11 +7,12 @@ using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Editor.Core.PokeEdit;
 
-[RegisterSingleton]
+[RegisterSingleton(ServiceType = typeof(IApiController))]
+[PokeEditController("editor")]
 public sealed partial class PokeEditService(EditorService editorService)
 {
     [CreateSyncVersion]
-    [PokeEditRequest]
+    [PokeEditGet("tabs")]
     public ValueTask<IEnumerable<EditorTabOption>> GetEditorTabsAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -20,49 +20,38 @@ public sealed partial class PokeEditService(EditorService editorService)
     }
 
     [CreateSyncVersion]
-    [PokeEditRequest]
+    [PokeEditGet("{editorId}/labels")]
     public ValueTask<IEnumerable<Text>> GetEntryLabelsAsync(
-        EditorLabelRequest editorId,
+        Name editorId,
         CancellationToken cancellationToken = default
     )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(editorService.GetEntryLabels(editorId.EditorId));
+        return ValueTask.FromResult(editorService.GetEntryLabels(editorId));
     }
 
     [CreateSyncVersion]
-    [PokeEditRequest]
+    [PokeEditGet("{editorId}/{index}")]
     public ValueTask<JsonNode> GetEntryAtIndexAsync(
-        EntityRequest request,
+        Name editorId,
+        int index,
         CancellationToken cancellationToken = default
     )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(editorService.GetEntryAtIndex(request.EditorId, request.Index));
+        return ValueTask.FromResult(editorService.GetEntryAtIndex(editorId, index));
     }
 
     [CreateSyncVersion]
-    [PokeEditRequest]
+    [PokeEditPatch("{editorId}/{index}")]
     public ValueTask<EntityUpdateResponse> UpdateEntityAtIndexAsync(
-        EntityUpdateRequest edit,
+        Name editorId,
+        int index,
+        ObjectDiffNode edit,
         CancellationToken cancellationToken = default
     )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(
-            new EntityUpdateResponse(editorService.UpdateEntity(edit.EditorId, edit.Index, edit.Change))
-        );
-    }
-}
-
-public static class PokeEditServiceExtensions
-{
-    [RegisterServices]
-    public static void RegisterRequestHandlers(this IServiceCollection services)
-    {
-        services.AddSingleton<IRequestHandler, PokeEditServiceGetEditorTabsHandler>();
-        services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryLabelsHandler>();
-        services.AddSingleton<IRequestHandler, PokeEditServiceGetEntryAtIndexHandler>();
-        services.AddSingleton<IRequestHandler, PokeEditServiceUpdateEntityAtIndexHandler>();
+        return ValueTask.FromResult(new EntityUpdateResponse(editorService.UpdateEntity(editorId, index, edit)));
     }
 }

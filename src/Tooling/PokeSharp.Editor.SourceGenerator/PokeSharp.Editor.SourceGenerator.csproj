@@ -45,12 +45,6 @@
       PackagePath="analyzers/roslyn$(ROSLYN_VERSION)/dotnet/cs"
       Visible="false"
     />
-    <None
-      Include="$(PKGHandlebars_Net)\lib\netstandard2.0\Handlebars.dll"
-      Pack="true"
-      PackagePath="analyzers/roslyn$(ROSLYN_VERSION)/dotnet/cs"
-      Visible="false"
-    />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\SourceTemplates.resx">

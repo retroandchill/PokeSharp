@@ -1,82 +1,54 @@
 #nullable enable
-using System.Text.Json;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 namespace {{Namespace}};
 
-partial class {{ClassName}} : IApiController
+public sealed class {{ClassName}}({{ServiceClass}} service, IPokeEditSerializer serializer) : IRequestHandler
 {
-    public IEnumerable<(ApiVerb Verb, RouteNode Node)> GetRoutes(JsonSerializerOptions jsonOptions) 
+    private static readonly Name RequestName = "{{RequestName}}";
+    public Name Name => RequestName;
+    
+    public void Process(Stream requestStream, Stream responseStream)
     {
-        return [];
+        {{#HasRequestBody}}
+        var request = serializer.Deserialize<{{RequestType}}>(requestStream);
+        {{#RequestTypeNotNull}}
+        if (request is null) throw new InvalidOperationException("Request body was null");
+        {{/RequestTypeNotNull}}
+        {{/HasRequestBody}}
+        {{#HasResponseBody}}var response = {{/HasResponseBody}}service.{{MethodName}}({{#HasRequestBody}}request{{/HasRequestBody}});
+        {{#HasResponseBody}}
+        {{#ResponseNotNull}}
+        if (response is null) throw new InvalidOperationException("Response was null");    
+        {{/ResponseNotNull}}
+        serializer.Serialize(responseStream, response);
+        {{/HasResponseBody}}
+        {{^HasResponseBody}}
+        using var streamWriter = new StreamWriter(responseStream);
+        streamWriter.WriteAsync("{}");
+        {{/HasResponseBody}}
     }
 
-    {{#Routes}}
-    private sealed class {{MethodName}}Handler({{../ClassName}} controller, JsonSerializerOptions jsonOptions) : IRequestHandler 
+    public async ValueTask ProcessAsync(Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default)
     {
-        public void Process(RouteValueBuffer buffer, Stream requestStream, Stream responseStream)
-        {
-            {{#HasPathParameters}}
-            ParsePathParameters(buffer{{#PathParameters}}, out var {{Name}}{{/PathParameters}});
-            {{/HasPathParameters}}
-            {{#HasRequestBody}}
-            var request = JsonSerializer.Deserialize<{{RequestType}}>(requestStream, jsonOptions);
-            {{#RequestTypeNotNull}}
-            if (request is null) throw new InvalidOperationException("Request body was null");
-            {{/RequestTypeNotNull}}
-            {{/HasRequestBody}}
-            {{#HasResponseBody}}var response = {{/HasResponseBody}}controller.{{MethodName}}({{RequestParameters false}});
-            {{#HasResponseBody}}
-            {{#ResponseNotNull}}
-            if (response is null) throw new InvalidOperationException("Response was null");    
-            {{/ResponseNotNull}}
-            JsonSerializer.Serialize(responseStream, response, jsonOptions);
-            {{/HasResponseBody}}
-            {{^HasResponseBody}}
-            using var streamWriter = new StreamWriter(responseStream);
-            streamWriter.WriteAsync("{}");
-            {{/HasResponseBody}}
-        }
-    
-        public ValueTask ProcessAsync(RouteValueBuffer buffer, Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default)
-        {
-            {{#HasPathParameters}}
-            ParsePathParameters(buffer{{#PathParameters}}, out var {{Name}}{{/PathParameters}});
-            {{/HasPathParameters}}
-            return InvokeAsync({{#PathParameters}}{{Name}}, {{/PathParameters}}requestStream, responseStream, cancellationToken);
-        }
-    
-        {{#HasPathParameters}}
-        private static void ParsePathParameters(RouteValueBuffer buffer{{#PathParameters}}, out {{Type}} {{Name}}{{/PathParameters}})
-        {
-            {{#PathParameters}}
-            {{Name}} = {{PathParamGetter}};
-            {{/PathParameters}}
-        }
-        {{/HasPathParameters}}
-    
-        private async ValueTask InvokeAsync({{#PathParameters}}{{Type}} {{Name}}, {{/PathParameters}}Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default)
-        {
-            {{#HasRequestBody}}
-            var request = await JsonSerializer.DeserializeAsync<{{RequestType}}>(requestStream, jsonOptions, cancellationToken);
-            {{#RequestTypeNotNull}}
-            if (request is null) throw new InvalidOperationException("Request body was null");
-            {{/RequestTypeNotNull}}
-            {{/HasRequestBody}}
-            {{#HasResponseBody}}var response = {{/HasResponseBody}}await controller.{{MethodName}}Async({{RequestParameters true}});
-            {{#HasResponseBody}}
-            {{#ResponseNotNull}}
-            if (response is null) throw new InvalidOperationException("Response was null");    
-            {{/ResponseNotNull}}
-            await JsonSerializer.SerializeAsync(responseStream, response, jsonOptions, cancellationToken);
-            {{/HasResponseBody}}
-            {{^HasResponseBody}}
-            await using var streamWriter = new StreamWriter(responseStream);
-            await streamWriter.WriteAsync("{}", cancellationToken);
-            {{/HasResponseBody}}
-        }
+        {{#HasRequestBody}}
+        var request = await serializer.DeserializeAsync<{{RequestType}}>(requestStream, cancellationToken);
+        {{#RequestTypeNotNull}}
+        if (request is null) throw new InvalidOperationException("Request body was null");
+        {{/RequestTypeNotNull}}
+        {{/HasRequestBody}}
+        {{#HasResponseBody}}var response = {{/HasResponseBody}}await service.{{MethodName}}Async({{#HasRequestBody}}request{{/HasRequestBody}}{{#HasCancellationToken}}{{#HasRequestBody}}, {{/HasRequestBody}}cancellationToken{{/HasCancellationToken}});
+        {{#HasResponseBody}}
+        {{#ResponseNotNull}}
+        if (response is null) throw new InvalidOperationException("Response was null");    
+        {{/ResponseNotNull}}
+        await serializer.SerializeAsync(responseStream, response, cancellationToken);
+        {{/HasResponseBody}}
+        {{^HasResponseBody}}
+        await using var streamWriter = new StreamWriter(responseStream);
+        await streamWriter.WriteAsync("{}", cancellationToken);
+        {{/HasResponseBody}}
     }
-    {{/Routes}}
 }

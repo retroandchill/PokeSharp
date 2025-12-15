@@ -69,11 +69,9 @@ public sealed class EditableOptionalValueProperty<TRoot, TValue>(
         var newValue = Get(newRoot);
         if (oldValue is null)
         {
-            return newValue is not null
-                ? new ValueSetNode(JsonSerializer.SerializeToNode(newValue.Value, options).RequireNonNull())
-                : null;
+            return newValue is not null ? new ValueSetNode(JsonSerializer.SerializeToNode(newValue.Value, options).RequireNonNull()) : null;
         }
-
+        
         if (newValue is null)
         {
             return new ValueResetNode();
@@ -83,7 +81,7 @@ public sealed class EditableOptionalValueProperty<TRoot, TValue>(
         {
             return new ValueSetNode(JsonSerializer.SerializeToNode(newValue.Value, options).RequireNonNull());
         }
-
+        
         return InnerType.Diff(oldValue.Value, newValue.Value, options);
     }
 
@@ -136,11 +134,9 @@ public sealed class EditableOptionalReferenceProperty<TRoot, TValue>(
         var newValue = Get(newRoot);
         if (oldValue is null)
         {
-            return newValue is not null
-                ? new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull())
-                : null;
+            return newValue is not null ? new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull()) : null;
         }
-
+        
         if (newValue is null)
         {
             return new ValueResetNode();
@@ -150,7 +146,7 @@ public sealed class EditableOptionalReferenceProperty<TRoot, TValue>(
         {
             return new ValueSetNode(JsonSerializer.SerializeToNode(newValue, options).RequireNonNull());
         }
-
+        
         return InnerType.Diff(oldValue, newValue, options);
     }
 

@@ -48,7 +48,7 @@ public class NameJsonConverter<T> : JsonConverter<T>
     {
         writer.WriteStringValue(value.ToString());
     }
-
+    
     public override void WriteAsPropertyName(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
     {
         writer.WritePropertyName(value.ToString().RequireNonNull());

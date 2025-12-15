@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using HandlebarsDotNet;
+using HandlebarsDotNet.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PokeSharp.Editor.Core;
@@ -8,7 +10,6 @@ using PokeSharp.Editor.SourceGenerator.Model;
 using PokeSharp.Editor.SourceGenerator.Properties;
 using PokeSharp.Editor.SourceGenerator.Utilities;
 using Retro.SourceGeneratorUtilities.Utilities.Types;
-using RhoMicro.CodeAnalysis.Library.Extensions;
 
 namespace PokeSharp.Editor.SourceGenerator;
 
@@ -36,14 +37,6 @@ public class RequestHandlerGenerator : IIncrementalGenerator
     {
         var info = controller.GetPokeEditControllerInfo();
 
-        var routeTree = new Dictionary<PokeEditRequestType, RouteTreeNode>
-        {
-            [PokeEditRequestType.Get] = new() { Key = "Get", Segment = new SegmentSpec(SegmentType.Literal, "") },
-            [PokeEditRequestType.Post] = new() { Key = "Post", Segment = new SegmentSpec(SegmentType.Literal, "") },
-            [PokeEditRequestType.Put] = new() { Key = "Put", Segment = new SegmentSpec(SegmentType.Literal, "") },
-            [PokeEditRequestType.Patch] = new() { Key = "Patch", Segment = new SegmentSpec(SegmentType.Literal, "") },
-            [PokeEditRequestType.Delete] = new() { Key = "Delete", Segment = new SegmentSpec(SegmentType.Literal, "") },
-        };
         var routes = ImmutableArray.CreateBuilder<ApiRouteInfo>();
         foreach (
             var (method, requestInfo) in controller
@@ -69,12 +62,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                 fullRoute = requestInfo.Route is null ? info.Path : $"{info.Path}/{requestInfo.Route}";
             }
 
-            var segments = GetSegments(method, fullRoute);
-
-            var root = routeTree[requestInfo.Type];
-            var leafNode = CreateTreeNode(segments.AsSpan(), root);
-
-            var pathParameters = FindPathParameters(segments);
+            var pathParameters = FindPathParameters(method, fullRoute);
             var nonPathParameters = method
                 .Parameters.Where(p => !pathParameters.Any(x => x.Name == p.Name) && p.Type.Name != "CancellationToken")
                 .ToImmutableArray();
@@ -92,36 +80,37 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             var hasCancellationToken =
                 method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken";
 
-            leafNode.Endpoint = new ApiRouteInfo
-            {
-                MethodName = methodName,
-                PathParameters = pathParameters,
-                MethodParameters =
-                [
-                    .. method.Parameters.Select(p =>
-                    {
-                        if (p.Type.IsAssignableTo<CancellationToken>())
+            routes.Add(
+                new ApiRouteInfo
+                {
+                    MethodName = methodName,
+                    PathParameters = pathParameters,
+                    MethodParameters =
+                    [
+                        .. method.Parameters.Select(p =>
                         {
-                            return new MethodParameter("cancellationToken");
-                        }
+                            if (p.Type.IsAssignableTo<CancellationToken>())
+                            {
+                                return new MethodParameter("cancellationToken");
+                            }
 
-                        return pathParameters.Any(x => x.Name == p.Name)
-                            ? new MethodParameter(p.Name)
-                            : new MethodParameter("request");
-                    }),
-                ],
-                RequestType = requestType?.ToDisplayString() ?? "object?",
-                RequestTypeNotNull =
-                    requestType is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
-                ResponseType = responseType?.ToDisplayString() ?? "object?",
-                ResponseNotNull =
-                    responseType is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
-                HasRequestBody = requestType is not null,
-                HasResponseBody =
-                    method is { ReturnsVoid: false, ReturnType: INamedTypeSymbol { IsGenericType: true } },
-                HasCancellationToken = hasCancellationToken,
-            };
-            routes.Add(leafNode.Endpoint);
+                            return pathParameters.Any(x => x.Name == p.Name)
+                                ? new MethodParameter(p.Name)
+                                : new MethodParameter("request");
+                        }),
+                    ],
+                    RequestType = requestType?.ToDisplayString() ?? "object?",
+                    RequestTypeNotNull =
+                        requestType is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
+                    ResponseType = responseType?.ToDisplayString() ?? "object?",
+                    ResponseNotNull =
+                        responseType is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
+                    HasRequestBody = requestType is not null,
+                    HasResponseBody =
+                        method is { ReturnsVoid: false, ReturnType: INamedTypeSymbol { IsGenericType: true } },
+                    HasCancellationToken = hasCancellationToken,
+                }
+            );
         }
 
         var templateParameters = new
@@ -129,7 +118,6 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             Namespace = controller.ContainingNamespace.ToDisplayString(),
             ClassName = controller.Name,
             Routes = routes.DrainToImmutable(),
-            RouteTree = GetAllRouteTreeNodes(routeTree).ToImmutableArray(),
         };
 
         var handlebars = Handlebars.Create();
@@ -189,94 +177,19 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         );
     }
 
-    private static readonly Regex PathParamRegex = new(@"\{(\w+)(?::(\w+))?}");
+    private static readonly Regex PathParamRegex = new(@"\{(\w+)}");
 
-    private static ImmutableArray<SegmentSpec> GetSegments(IMethodSymbol method, string route)
+    private static ImmutableArray<PathParameterInfo> FindPathParameters(IMethodSymbol method, string baseRoute)
     {
-        return
-        [
-            .. route.Split('/').Select(s => GetSegmentSpec(method, s)).Where(x => x.HasValue).Select(x => x!.Value),
-        ];
-    }
-
-    private static SegmentSpec? GetSegmentSpec(IMethodSymbol method, string segment)
-    {
-        var match = PathParamRegex.Match(segment);
-        if (!match.Success)
-            return new SegmentSpec(SegmentType.Literal, segment);
-
-        var paramName = match.Groups[1].Value;
-        var parameter = method.Parameters.FirstOrDefault(p => p.Name == paramName);
-        if (parameter is null)
-            return null;
-
-        if (
-            parameter.Type.SpecialType == SpecialType.System_String
-            || parameter.Type.ToDisplayString() == GeneratorConstants.Name
-        )
-        {
-            return new SegmentSpec(SegmentType.String, Parameter: parameter);
-        }
-
-        if (parameter.Type.SpecialType == SpecialType.System_Int32)
-        {
-            return new SegmentSpec(SegmentType.Numeric, parameter.Type.ToDisplayString(), parameter);
-        }
-
-        return null;
-    }
-
-    private static ImmutableArray<PathParameterInfo> FindPathParameters(ImmutableArray<SegmentSpec> segments)
-    {
-        var paths = segments
-            .Select(x => x.Parameter)
+        var paths = baseRoute
+            .Split('/')
+            .Select(segment => PathParamRegex.Match(segment))
+            .Where(match => match.Success)
+            .Select(match => method.Parameters.FirstOrDefault(p => p.Name == match.Groups[1].Value))
             .OfType<IParameterSymbol>()
             .Select(matchingParameter => new PathParameterInfo(matchingParameter.Type, matchingParameter.Name))
             .ToList();
 
         return [.. paths.Select((x, i) => x with { Index = i })];
-    }
-
-    private static RouteTreeNode CreateTreeNode(ReadOnlySpan<SegmentSpec> spec, RouteTreeNode node)
-    {
-        while (spec.Length > 0)
-        {
-            var nextChild = spec[0];
-            var key = nextChild.ToSegmentKey();
-            if (!node.Children.TryGetValue(key, out var childNode))
-            {
-                childNode = new RouteTreeNode { Key = key, Segment = nextChild };
-                node.Children.Add(key, childNode);
-            }
-
-            spec = spec[1..];
-            node = childNode;
-        }
-
-        return node;
-    }
-
-    private readonly record struct RouteTreeData(PokeEditRequestType Type, List<RouteTreeNode> Nodes, string Top);
-
-    private static IEnumerable<RouteTreeData> GetAllRouteTreeNodes(Dictionary<PokeEditRequestType, RouteTreeNode> nodes)
-    {
-        foreach (var (key, node) in nodes)
-        {
-            var childList = node.Children.Values.SelectMany(GetAllNodes).ToList();
-            if (childList.Count == 0)
-                continue;
-
-            yield return new RouteTreeData(key, childList, childList[^1].VariableName);
-        }
-    }
-
-    private static IEnumerable<RouteTreeNode> GetAllNodes(RouteTreeNode node)
-    {
-        foreach (var child in node.Children.Values.SelectMany(GetAllNodes))
-        {
-            yield return child;
-        }
-
-        yield return node;
     }
 }

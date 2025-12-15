@@ -10,25 +10,7 @@ partial class {{ClassName}} : IApiController
 {
     public IEnumerable<(ApiVerb Verb, RouteNode Node)> GetRoutes(JsonSerializerOptions jsonOptions) 
     {
-        {{#RouteTree}}
-        {{#Nodes}}
-        var {{VariableName}}_{{../Type}} = new RouteNode 
-        {
-            Matcher = new {{Segment.MatcherName}},
-            {{#HasEndpoint}}
-            Handler = new {{Endpoint.MethodName}}Handler(this, jsonOptions),
-            {{/HasEndpoint}}
-            Children = [
-                {{#Children}}
-                {{Value.VariableName}}_{{../../Type}},
-                {{/Children}}
-            ]
-        };    
-        
-        {{/Nodes}}
-        yield return (ApiVerb.{{Type}}, {{Top}}_{{Type}});
-        
-        {{/RouteTree}}
+        return [];
     }
 
     {{#Routes}}

@@ -1,5 +1,5 @@
 using System.Globalization;
-using System.Numerics;
+using PokeSharp.Core.Strings;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
@@ -21,8 +21,8 @@ public sealed class LiteralPathSegmentMatcher(string literal) : IPathSegmentMatc
     }
 }
 
-public sealed class NumericPathSegmentMatcher<T> : IPathSegmentMatcher
-    where T : struct, INumber<T>
+public sealed class ParsablePathSegmentMatcher<T>(Name paramId) : IPathSegmentMatcher
+    where T : ISpanParsable<T>
 {
     public int Priority => int.MinValue;
 
@@ -30,7 +30,7 @@ public sealed class NumericPathSegmentMatcher<T> : IPathSegmentMatcher
     {
         if (T.TryParse(pathSegment, CultureInfo.InvariantCulture, out _))
         {
-            slice = new RouteParamSlice(start, pathSegment.Length);
+            slice = new RouteParamSlice(paramId, start, pathSegment.Length);
             return true;
         }
 
@@ -39,13 +39,13 @@ public sealed class NumericPathSegmentMatcher<T> : IPathSegmentMatcher
     }
 }
 
-public sealed class StringPathSegmentMatcher : IPathSegmentMatcher
+public sealed class StringPathSegmentMatcher(Name paramId) : IPathSegmentMatcher
 {
     public int Priority => int.MinValue;
 
     public bool TryMatch(int start, ReadOnlySpan<char> pathSegment, out RouteParamSlice? slice)
     {
-        slice = new RouteParamSlice(start, pathSegment.Length);
+        slice = new RouteParamSlice(paramId, start, pathSegment.Length);
         return true;
     }
 }

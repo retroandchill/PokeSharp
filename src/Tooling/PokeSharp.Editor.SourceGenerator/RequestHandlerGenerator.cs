@@ -123,6 +123,8 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             HasCancellationToken =
                 method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken",
             ResponseWriteType = returnType is not null ? responseWriteType : null,
+            SerializedResponse = responseWriteType == "Serialized",
+            NeedsNullCheck = returnType is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated } or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" },
             Parameters = [..validParameters.Select((x, i) => GetRequestParameter(x, i == validParameters.Length - 1))]
         };
     }
@@ -130,21 +132,28 @@ public class RequestHandlerGenerator : IIncrementalGenerator
     private static RequestParameterInfo GetRequestParameter(IParameterSymbol parameter, bool isLast)
     {
         var (readType, generic) = GetReadOrWriteType(parameter.Type);
+
+        var needsNullCheck =
+            parameter.Type is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
+                or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" };
         return new RequestParameterInfo
         {
             Name = parameter.Name,
             ReadType = readType,
             Generic = generic,
+            IsSerialized = readType == "Serialized",
             SyncPassExpression = readType switch
             {
                 "String" => $"{parameter.Name}.ToString()",
                 "Bytes" => GetBytePassExpression(parameter),
+                "Serialized" when needsNullCheck => $"{parameter.Name}.RequireNonNull()",
                 _ => parameter.Name
             },
             AsyncPassExpression = readType switch
             {
                 "String" => $"{parameter.Name}.ToString()",
                 "Bytes" => GetBytePassExpression(parameter, true),
+                "Serialized" when needsNullCheck => $"{parameter.Name}.RequireNonNull()",
                 _ => parameter.Name
             },
             IsLast = isLast

@@ -12,8 +12,11 @@
 struct FPokeEditCallbacks
 {
     using FSendRequest = bool(__stdcall *)(FName,
-                                           const TSharedRef<FArchive> &,
-                                           const TSharedRef<FArchive> &,
+                                           FName,
+                                           const uint8*,
+                                           const size_t*,
+                                           int32,
+                                           uint8*,
                                            FString &);
 
     FSendRequest SendRequest = nullptr;
@@ -29,10 +32,12 @@ class FPokeEditManager
 
     void SetCallbacks(FPokeEditCallbacks NewCallbacks);
 
-    std::expected<void, FString> SendRequest(FName RequestName,
-                                             const TSharedRef<FArchive> &Payload,
-                                             const TSharedRef<FArchive> &Response) const;
+    std::expected<void, FString> SendRequest(FName ControllerName,
+                                             FName MethodName,
+                                             const uint8* Payload,
+                                             TConstArrayView<size_t> ArgumentOffsets,
+                                             uint8* Response) const;
 
-  private:
+private:
     FPokeEditCallbacks Callbacks;
 };

@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interop/PokeEditCallbacks.h"
 #include "Serialization/JsonConverter.h"
 #include "Requests/RequestPacking.h"
+#include <bit>
 #include <expected>
 
 class FJsonValue;
@@ -20,13 +22,42 @@ namespace PokeEdit
         FName RequestName,
         const TSharedRef<FJsonValue> &Payload);
     
+    template <size_t N>
+        requires (N <= std::numeric_limits<int32>::max())
+    constexpr TConstArrayView<size_t> GetIndexView(const std::array<size_t, N>& Array)
+    {
+        if constexpr (N == 0)
+        {
+            return TConstArrayView<size_t>();
+        }
+        else
+        {
+            return TConstArrayView<size_t>(Array.data(), static_cast<int32>(N));
+        }
+    }
+    
     template <typename Result = void, TPackable... Args>
-        requires((TJsonDeserializable<Result> || std::same_as<Result, void>) && sizeof...(Args) <= 8)
+        requires((TPackable<Result> || std::same_as<Result, void>) && sizeof...(Args) <= 8)
     std::expected<Result, FString> SendRequest(const FName ControllerName, const FName MethodName, const TRequestPayload<Args...>& InArgs)
     {
         constexpr auto Indices = TRequestPayloadIndices<Args...>::Value;
         
-        return std::unexpected(FString::Format(TEXT("Request {0}.{1} not implemented"), {ControllerName.ToString(), MethodName.ToString()}));
+        auto IndexView = GetIndexView(Indices);
+        
+        if constexpr (std::same_as<Result, void>)
+        {    
+            return FPokeEditManager::Get()
+                .SendRequest(ControllerName, MethodName, std::bit_cast<const uint8*>(&InArgs), IndexView, nullptr);
+        }
+        else
+        {
+            TPackedType<Result> PackedResult;
+            return FPokeEditManager::Get().SendRequest(ControllerName, MethodName, std::bit_cast<const uint8*>(&InArgs), IndexView, std::bit_cast<uint8*>(&PackedResult))
+                .and_then([&PackedResult]
+                {
+                    return UnpackResponse<Result>(PackedResult);
+                });
+        }
     }
     
     template <typename Result = void, TPackable... Args>

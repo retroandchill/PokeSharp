@@ -16,4 +16,18 @@ namespace PokeEdit
         
         return Buffer;
     }
+
+    std::expected<TSharedRef<FJsonValue>, FString> ReadJsonFromBuffer(const TArray<uint8> &Buffer)
+    {
+        FMemoryReader Reader(Buffer);
+        const auto JsonReader = TJsonReader<UTF8CHAR>::Create(&Reader);
+        TSharedPtr<FJsonValue> JsonValue;
+        if (!FJsonSerializer::Deserialize(JsonReader, JsonValue))
+        {
+            return std::expected<TSharedRef<FJsonValue>, FString>(std::unexpect,
+                                                                  TEXT("Failed to deserialize response"));
+        }
+
+        return std::expected<TSharedRef<FJsonValue>, FString>(JsonValue.ToSharedRef());
+    }
 }

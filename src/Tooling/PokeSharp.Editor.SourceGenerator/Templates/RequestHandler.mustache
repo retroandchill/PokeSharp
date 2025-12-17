@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Threading;
 using PokeSharp.Core.Strings;
+using PokeSharp.Core.Utils;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
@@ -32,15 +33,17 @@ partial class {{ClassName}} : IPokeEditController
     
 internal sealed class {{../ClassName}}{{Name}}Handler({{../ClassName}} owner) : IRequestHandler
 {
-    public void Process<TReader>(ref TReader reader, IResponseWriter writer) where TReader : IRequestParameterReader, allows ref struct
+    public void Process<TReader, TWriter>(ref TReader reader, ref TWriter writer, IPokeEditSerializer serializer) 
+        where TReader : IRequestParameterReader, allows ref struct
+        where TWriter : IResponseWriter, allows ref struct
     {
         {{#SupportsSync}}
         {{#Parameters}}
-        var {{Name}} = reader.Read{{ReadType}}{{Generic}}();
+        var {{Name}} = reader.Read{{ReadType}}{{Generic}}({{#IsSerialized}}serializer{{/IsSerialized}}){{#NeedsNullCheck}}.RequireNonNull(){{/NeedsNullCheck}};
         {{/Parameters}}
         {{#HasResponse}}var response = {{/HasResponse}}owner.{{SyncName}}({{#Parameters}}{{SyncPassExpression}}{{^IsLast}}, {{/IsLast}}{{/Parameters}});
         {{#HasResponse}}
-        writer.Write{{ResponseWriteType}}(response);
+        writer.Write{{ResponseWriteType}}(response{{#NeedsNullCheck}}.RequireNonNull(){{/NeedsNullCheck}}{{#SerializedResponse}}, serializer{{/SerializedResponse}});
         {{/HasResponse}}
         {{/SupportsSync}}
         {{^SupportsSync}}
@@ -48,12 +51,12 @@ internal sealed class {{../ClassName}}{{Name}}Handler({{../ClassName}} owner) : 
         {{/SupportsSync}}
     }
 
-    public async ValueTask ProcessAsync(IAsyncRequestParameterReader reader, IAsyncResponseWriter writer, CancellationToken cancellationToken = default)
+    public async ValueTask ProcessAsync(IAsyncRequestParameterReader reader, IAsyncResponseWriter writer, IPokeEditSerializer serializer, CancellationToken cancellationToken = default)
     {
         {{#HasParameters}}
         cancellationToken.ThrowIfCancellationRequested();
         {{#Parameters}}
-        var {{Name}} = await reader.Read{{ReadType}}Async{{Generic}}(cancellationToken);
+        var {{Name}} = await reader.Read{{ReadType}}Async{{Generic}}({{#IsSerialized}}serializer, {{/IsSerialized}}cancellationToken);
         {{/Parameters}}
 
         {{/HasParameters}}
@@ -62,7 +65,7 @@ internal sealed class {{../ClassName}}{{Name}}Handler({{../ClassName}} owner) : 
         {{#HasResponse}}
 
         cancellationToken.ThrowIfCancellationRequested();
-        await writer.Write{{ResponseWriteType}}Async(response, cancellationToken);
+        await writer.Write{{ResponseWriteType}}Async(response{{#NeedsNullCheck}}.RequireNonNull(){{/NeedsNullCheck}}, {{#SerializedResponse}}serializer, {{/SerializedResponse}}cancellationToken);
         {{/HasResponse}}
     }
 }

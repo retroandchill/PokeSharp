@@ -1,7 +1,7 @@
 ﻿using UnrealSharp;
 using UnrealSharp.Attributes;
-using UnrealSharp.Attributes.MetaTags;
 using UnrealSharp.CommonUI;
+using UnrealSharp.Core.Attributes;
 using UnrealSharp.PokeSharp;
 using UnrealSharp.UMG;
 
@@ -20,7 +20,7 @@ public partial class UPauseMenuWidget : UCommonActivatableWidget
         set => CommandWidget.Commands = value;
     }
 
-    protected override UWidget? BP_GetDesiredFocusTarget_Implementation()
+    public override UWidget? BP_GetDesiredFocusTarget()
     {
         return CommandWidget.IsActive ? CommandWidget : null;
     }

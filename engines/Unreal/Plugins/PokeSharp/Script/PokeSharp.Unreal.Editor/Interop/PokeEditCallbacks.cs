@@ -2,9 +2,8 @@
 using JetBrains.Annotations;
 using PokeSharp.Core;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
-using PokeSharp.Unreal.Core.Serialization;
 using PokeSharp.Unreal.Core.Strings;
-using PokeSharp.Unreal.Core.Utils;
+using PokeSharp.Unreal.Editor.PokeEdit.Requests;
 using UnrealSharp.Core;
 using UnrealSharp.Core.Marshallers;
 
@@ -18,6 +17,8 @@ public unsafe struct PokeEditCallbacks
         FName,
         FName,
         IntPtr,
+        IntPtr,
+        int,
         IntPtr,
         UnmanagedArray*,
         NativeBool> SendRequest { get; init; }
@@ -35,17 +36,23 @@ internal static unsafe class PokeEditRequestMethods
         FName controllerName,
         FName methodName,
         IntPtr request,
+        IntPtr requestOffsets,
+        int requestOffsetsSize,
         IntPtr response,
         UnmanagedArray* error
     )
     {
         try
         {
+            var requestOffsetSpan = new Span<IntPtr>((IntPtr*)requestOffsets, requestOffsetsSize);
+            var reader = new UnrealRequestParameterReader(request, requestOffsetSpan);
+            var writer = new UnrealResponseWriter(response);
+            
             GameGlobal.PokeEditRequestProcessor.ProcessRequest(
                 controllerName.ToPokeSharpName(),
                 methodName.ToPokeSharpName(),
-                requestStream,
-                responseStream
+                ref reader,
+                ref writer
             );
             return NativeBool.True;
         }

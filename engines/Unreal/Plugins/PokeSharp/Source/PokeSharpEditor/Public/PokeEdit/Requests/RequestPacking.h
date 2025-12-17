@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "RequestPayload.h"
 #include "PokeEdit/Serialization/JsonConverter.h"
+#include "Serialization/MemoryReader.h"
 
 namespace PokeEdit
 {
@@ -108,5 +109,24 @@ namespace PokeEdit
                 return TRequestPayload<TPackedType<Args>...>{ MoveTemp(Packed).value()... };
             },
             MoveTemp(PackedValues));
+    }
+    
+    POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> ReadJsonFromBuffer(const TArray<uint8>& Buffer);
+    
+    template <TPackable T>
+    constexpr std::expected<T, FString> UnpackResponse(TPackedType<T>& Response)
+    {
+        if constexpr (TDirectlyPackable<T>)
+        {
+            return MoveTemp(Response);
+        }
+        else
+        {
+            return ReadJsonFromBuffer(Response)
+                .and_then([](const TSharedRef<FJsonValue> &Payload)
+                {
+                    return DeserializeFromJson<T>(Payload);
+                });
+        }
     }
 }

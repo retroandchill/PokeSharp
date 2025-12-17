@@ -2,11 +2,7 @@
 
 public interface IPokeEditSerializer
 {
-    T? Deserialize<T>(Stream stream);
+    T? Deserialize<T>(ReadOnlySpan<byte> buffer);
 
-    ValueTask<T?> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default);
-
-    void Serialize<T>(Stream stream, T? value);
-
-    ValueTask SerializeAsync<T>(Stream stream, T? value, CancellationToken cancellationToken = default);
+    byte[] Serialize<T>(T? value);
 }

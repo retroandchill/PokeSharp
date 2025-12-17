@@ -1,4 +1,6 @@
+using System.Text.Json;
 using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
@@ -17,7 +19,5 @@ public interface IResponseWriter
     void WriteBytes(ReadOnlySpan<byte> value);
     
     void WriteEnum<T>(T value) where T : unmanaged, Enum;
-    void WriteSerialized<T>(T value);
-
-    void WriteEmpty();
+    void WriteSerialized<T>(T value, IPokeEditSerializer serializer);
 }

@@ -4,6 +4,7 @@ using PokeSharp.Trainers;
 using PokeSharp.Unreal.Core.Strings;
 using UnrealSharp.Attributes;
 using UnrealSharp.Core;
+using UnrealSharp.Core.Attributes;
 using UnrealSharp.Engine;
 
 namespace PokeSharp.Unreal.Blueprints;

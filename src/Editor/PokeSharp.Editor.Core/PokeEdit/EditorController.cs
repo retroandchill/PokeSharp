@@ -1,11 +1,12 @@
 ﻿using System.Text.Json.Nodes;
 using Injectio.Attributes;
 using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace PokeSharp.Editor.Core.PokeEdit;
 
-[RegisterSingleton]
+[RegisterSingleton(ServiceType = typeof(IPokeEditController))]
 [PokeEditController]
 public sealed partial class EditorController(EditorService editorService)
 {
@@ -23,17 +24,17 @@ public sealed partial class EditorController(EditorService editorService)
 
     [PokeEditRequest]
     public JsonNode GetEntryAtIndex(
-        EntityRequest request
+        Name editorId, int index
     )
     {
-        return editorService.GetEntryAtIndex(request.EditorId, request.Index);
+        return editorService.GetEntryAtIndex(editorId, index);
     }
 
     [PokeEditRequest]
     public EntityUpdateResponse UpdateEntityAtIndex(
-        EntityUpdateRequest edit
+        Name editorId, int index, ObjectDiffNode change
     )
     {
-        return new EntityUpdateResponse(editorService.UpdateEntity(edit.EditorId, edit.Index, edit.Change));
+        return new EntityUpdateResponse(editorService.UpdateEntity(editorId, index, change));
     }
 }

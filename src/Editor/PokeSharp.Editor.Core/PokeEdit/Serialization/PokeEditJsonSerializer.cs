@@ -1,21 +1,18 @@
 ﻿using System.Text.Json;
 using Injectio.Attributes;
-using Zomp.SyncMethodGenerator;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 [RegisterSingleton]
-public sealed partial class PokeEditJsonSerializer(JsonSerializerOptions options) : IPokeEditSerializer
+public sealed class PokeEditJsonSerializer(JsonSerializerOptions options) : IPokeEditSerializer
 {
-    [CreateSyncVersion]
-    public async ValueTask<T?> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
+    public T? Deserialize<T>(ReadOnlySpan<byte> buffer)
     {
-        return await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken);
+        return JsonSerializer.Deserialize<T>(buffer, options);
     }
 
-    [CreateSyncVersion]
-    public async ValueTask SerializeAsync<T>(Stream stream, T? value, CancellationToken cancellationToken = default)
+    public byte[] Serialize<T>(T? value)
     {
-        await JsonSerializer.SerializeAsync(stream, value, options, cancellationToken);
+        return JsonSerializer.SerializeToUtf8Bytes(value, options);
     }
 }

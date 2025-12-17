@@ -1,23 +1,27 @@
-﻿using Injectio.Attributes;
+﻿using System.Text.Json;
+using Injectio.Attributes;
 using PokeSharp.Core;
 using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public sealed class PokeEditRequestProcessor(IEnumerable<IPokeEditController> controllers)
+public sealed class PokeEditRequestProcessor(IEnumerable<IPokeEditController> controllers, IPokeEditSerializer serializer)
 {
     private readonly Dictionary<Name, IPokeEditController> _handlers = controllers.ToDictionary(x => x.Name);
+    
 
-    public void ProcessRequest<TReader>(
+    public void ProcessRequest<TReader, TWriter>(
         Name controllerName,
         Name methodName,
         ref TReader reader, 
-        IResponseWriter writer)
+        ref TWriter writer)
         where TReader : IRequestParameterReader, allows ref struct
+        where TWriter : IResponseWriter, allows ref struct
     {
-        GetHandler(controllerName, methodName).Process(ref reader, writer);
+        GetHandler(controllerName, methodName).Process(ref reader, ref writer, serializer);
     }
     
     public async ValueTask ProcessRequestAsync(
@@ -28,7 +32,7 @@ public sealed class PokeEditRequestProcessor(IEnumerable<IPokeEditController> co
         CancellationToken cancellationToken = default
     )
     {
-        await GetHandler(controllerName, methodName).ProcessAsync(reader, writer, cancellationToken);
+        await GetHandler(controllerName, methodName).ProcessAsync(reader, writer, serializer, cancellationToken);
     }
 
     private IRequestHandler GetHandler(Name controllerName, Name methodName)

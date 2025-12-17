@@ -10,6 +10,8 @@ public record RequestParameterInfo
     
     public required string Generic { get; init; }
     
+    public required bool IsSerialized { get; init; }
+    
     public required string SyncPassExpression { get; init; }
     
     public required string AsyncPassExpression { get; init; }
@@ -32,6 +34,10 @@ public record RequestMethodInfo
     public required bool HasCancellationToken { get; init; }
     
     public required string? ResponseWriteType { get; init; }
+    
+    public required bool SerializedResponse { get; init; }
+    
+    public required bool NeedsNullCheck { get; init; }
 
     public bool HasResponse => ResponseWriteType is not null;
     

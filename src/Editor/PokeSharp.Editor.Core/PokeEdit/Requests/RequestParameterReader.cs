@@ -1,4 +1,6 @@
-﻿using PokeSharp.Core.Strings;
+﻿using System.Text.Json;
+using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
@@ -19,7 +21,7 @@ public interface IRequestParameterReader
     ReadOnlySpan<byte> ReadBytes();
     
     T ReadEnum<T>() where T : unmanaged, Enum;
-    T ReadSerialized<T>();
+    T? ReadSerialized<T>(IPokeEditSerializer serializer);
 
     void Skip();
 }

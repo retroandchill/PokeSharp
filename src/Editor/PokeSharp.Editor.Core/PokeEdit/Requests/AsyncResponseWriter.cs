@@ -1,4 +1,6 @@
+using System.Text.Json;
 using PokeSharp.Core.Strings;
+using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
@@ -17,7 +19,5 @@ public interface IAsyncResponseWriter
     ValueTask WriteBytesAsync(ReadOnlyMemory<byte> value, CancellationToken cancellationToken = default);
     
     ValueTask WriteEnumAsync<T>(T value, CancellationToken cancellationToken = default) where T : unmanaged, Enum;
-    ValueTask WriteSerializedAsync<T>(T value, CancellationToken cancellationToken = default);
-
-    ValueTask WriteEmptyAsync(CancellationToken cancellationToken = default);
+    ValueTask WriteSerializedAsync<T>(T value, IPokeEditSerializer serializer, CancellationToken cancellationToken = default);
 }

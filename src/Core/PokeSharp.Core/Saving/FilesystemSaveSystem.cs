@@ -5,6 +5,7 @@ using Zomp.SyncMethodGenerator;
 namespace PokeSharp.Core.Saving;
 
 [RegisterSingleton]
+[CreateSyncVersion]
 public partial class FilesystemSaveSystem(IFileSystem fileSystem, IOptionsMonitor<SaveDataConfig> config) : ISaveSystem
 {
     public bool Exists(string filePath)
@@ -20,6 +21,7 @@ public partial class FilesystemSaveSystem(IFileSystem fileSystem, IOptionsMonito
         );
     }
 
+    [SkipSyncVersion]
     public ValueTask<ISaveReadHandle> OpenReadAsync(string filePath, CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(OpenRead(filePath));
@@ -38,12 +40,12 @@ public partial class FilesystemSaveSystem(IFileSystem fileSystem, IOptionsMonito
         );
     }
 
+    [SkipSyncVersion]
     public ValueTask<ISaveWriteHandle> OpenWriteAsync(string filePath, CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(OpenWrite(filePath));
     }
 
-    [CreateSyncVersion]
     public ValueTask CopyAsync(
         string sourceFilePath,
         string destinationFilePath,
@@ -57,7 +59,6 @@ public partial class FilesystemSaveSystem(IFileSystem fileSystem, IOptionsMonito
         return ValueTask.CompletedTask;
     }
 
-    [CreateSyncVersion]
     public ValueTask DeleteAsync(string filePath, CancellationToken cancellationToken = default)
     {
         fileSystem.File.Delete(fileSystem.Path.Join(config.CurrentValue.SaveFilePath, filePath));

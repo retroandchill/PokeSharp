@@ -20,8 +20,8 @@ public interface IRequestParameterReader
     ReadOnlySpan<char> ReadString();
     ReadOnlySpan<byte> ReadBytes();
     
-    T ReadUnmanaged<T>() where T : unmanaged;
     T ReadEnum<T>() where T : unmanaged, Enum;
+    T ReadSerialized<T>();
 
     void Skip();
 }

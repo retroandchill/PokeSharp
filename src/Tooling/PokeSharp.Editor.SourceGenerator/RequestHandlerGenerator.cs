@@ -5,6 +5,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PokeSharp.Editor.Core;
 using PokeSharp.Editor.SourceGenerator.Model;
 using PokeSharp.Editor.SourceGenerator.Properties;
+using PokeSharp.Editor.SourceGenerator.Utilities;
+using Retro.SourceGeneratorUtilities.Utilities.Attributes;
+using Retro.SourceGeneratorUtilities.Utilities.Types;
 
 namespace PokeSharp.Editor.SourceGenerator;
 
@@ -15,12 +18,12 @@ public class RequestHandlerGenerator : IIncrementalGenerator
     {
         var dataTypes = context
             .SyntaxProvider.ForAttributeWithMetadataName(
-                typeof(PokeEditRequestAttribute).FullName!,
-                (n, _) => n is MethodDeclarationSyntax,
+                typeof(PokeEditControllerAttribute).FullName!,
+                (n, _) => n is ClassDeclarationSyntax,
                 (ctx, _) =>
                 {
-                    var type = (MethodDeclarationSyntax)ctx.TargetNode;
-                    return ctx.SemanticModel.GetDeclaredSymbol(type) as IMethodSymbol;
+                    var type = (ClassDeclarationSyntax)ctx.TargetNode;
+                    return ctx.SemanticModel.GetDeclaredSymbol(type) as INamedTypeSymbol;
                 }
             )
             .Where(t => t is not null);
@@ -28,42 +31,26 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(dataTypes, Execute!);
     }
 
-    private static void Execute(SourceProductionContext context, IMethodSymbol method)
+    private static void Execute(SourceProductionContext context, INamedTypeSymbol type)
     {
-        var info = method.GetPokeEditRequestInfo();
-        var type = method.ContainingType;
-        if (method.Parameters.Length > 2)
-        {
-            // TODO: Report error
-            return;
-        }
-        var methodName = method.Name.EndsWith("Async") ? method.Name[..^5] : method.Name;
-
-        var requestType = method.Parameters.Length switch
-        {
-            > 0 when method.Parameters[0].Type.Name != "CancellationToken" => method.Parameters[0].Type,
-            _ => null,
-        };
-        var responseType = method.ReturnsVoid ? null : method.ReturnType;
-        var hasCancellationToken =
-            method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken";
+        var controllerInfo = type.GetPokeEditControllerInfo();
 
         var templateParameters = new
         {
             Namespace = type.ContainingNamespace.ToDisplayString(),
-            ClassName = $"{type.Name}{methodName}Handler",
-            ServiceClass = type.ToDisplayString(),
-            MethodName = methodName,
-            RequestName = info.Name ?? methodName,
-            RequestType = requestType?.ToDisplayString() ?? "object?",
-            RequestTypeNotNull = requestType
-                is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
-            ResponseType = responseType?.ToDisplayString() ?? "object?",
-            ResponseNotNull = responseType
-                is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated },
-            HasRequestBody = requestType is not null,
-            HasResponseBody = method is { ReturnsVoid: false, ReturnType: INamedTypeSymbol { IsGenericType: true } },
-            HasCancellationToken = hasCancellationToken,
+            ClassName = type.Name,
+            ControllerName = controllerInfo.Name switch
+            {
+                not null => controllerInfo.Name,
+                null when type.Name.EndsWith("Controller") => type.Name[..^10],
+                null => type.Name
+            },
+            Methods = type.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => !m.IsStatic && m.DeclaredAccessibility == Accessibility.Public &&
+                            m.HasAttribute<PokeEditRequestAttribute>())
+                .Select(GetRequestMethod)
+                .ToImmutableArray()
         };
 
         var handlebars = Handlebars.Create();
@@ -73,5 +60,156 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             $"{templateParameters.ClassName}.g.cs",
             handlebars.Compile(SourceTemplates.RequestHandlerTemplate)(templateParameters)
         );
+    }
+
+    private static RequestMethodInfo GetRequestMethod(IMethodSymbol method)
+    {
+        var methodInfo = method.GetPokeEditRequestInfo();
+
+        var name = methodInfo.Name switch
+        {
+            not null => methodInfo.Name,
+            null when method.Name.EndsWith("Async") => method.Name[..^5],
+            null => method.Name
+        };
+
+        var isAsync = method.ReturnType.Name is "Task" or "ValueTask";
+
+        ITypeSymbol? returnType;
+        if (isAsync)
+        {
+            if (method.ReturnType is INamedTypeSymbol { IsGenericType: true } namedType)
+            {
+                returnType = namedType.TypeArguments[0];
+            }
+            else
+            {
+                returnType = null;
+            }
+        }
+        else
+        {
+            returnType = !method.ReturnsVoid ? method.ReturnType : null;
+        }
+
+        string? syncName;
+        if (isAsync)
+        {
+            syncName = method.Name.EndsWith("Async") ? method.Name[..^5] : method.Name;
+        }
+        else
+        {
+            syncName = method.Name;
+        }
+
+        string? responseWriteType;
+        if (returnType is not null)
+        {
+            (responseWriteType, _) = GetReadOrWriteType(returnType);
+        }
+        else
+        {
+            responseWriteType = null;
+        }
+
+        var validParameters = method.Parameters.Where(p => p.Type.Name != "CancellationToken").ToArray();
+        
+        return new RequestMethodInfo
+        {
+            Name = name,
+            SyncName = syncName,
+            AsyncName = method.Name,
+            IsAsync = isAsync,
+            HasCancellationToken =
+                method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken",
+            ResponseWriteType = returnType is not null ? responseWriteType : null,
+            Parameters = [..validParameters.Select((x, i) => GetRequestParameter(x, i == validParameters.Length - 1))]
+        };
+    }
+
+    private static RequestParameterInfo GetRequestParameter(IParameterSymbol parameter, bool isLast)
+    {
+        var (readType, generic) = GetReadOrWriteType(parameter.Type);
+        return new RequestParameterInfo
+        {
+            Name = parameter.Name,
+            ReadType = readType,
+            Generic = generic,
+            SyncPassExpression = readType switch
+            {
+                "String" => $"{parameter.Name}.ToString()",
+                "Bytes" => GetBytePassExpression(parameter),
+                _ => parameter.Name
+            },
+            AsyncPassExpression = readType switch
+            {
+                "String" => $"{parameter.Name}.ToString()",
+                "Bytes" => GetBytePassExpression(parameter, true),
+                _ => parameter.Name
+            },
+            IsLast = isLast
+        };
+    }
+
+    private static string GetBytePassExpression(IParameterSymbol parameter, bool isAsync = false)
+    {
+        if (parameter.Type.IsSameType(typeof(ReadOnlySpan<byte>)))
+        {
+            return isAsync ? $"{parameter.Name}.Span" : parameter.Name;
+        }
+
+        return parameter.Type.IsSameType<ReadOnlyMemory<byte>>() ? parameter.Name : $"{parameter.Name}.ToArray()";
+    }
+
+private static (string TypeName, string Generic) GetReadOrWriteType(ITypeSymbol typeSymbol)
+    {
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        switch (typeSymbol.SpecialType)
+        {
+            case SpecialType.System_Boolean:
+                return ("Boolean", "");
+            case SpecialType.System_Byte:
+                return ("Byte", "");
+            case SpecialType.System_Int32:
+                return ("Int32", "");
+            case SpecialType.System_Int64:
+                return ("Int64", "");
+            case SpecialType.System_Single:
+                return ("Single", "");
+            case SpecialType.System_Double:
+                return ("Double", "");
+            case SpecialType.System_String:
+                return ("String", "");
+            default:
+            {
+                if (typeSymbol.TypeKind == TypeKind.Enum)
+                {
+                    return ("Enum", $"<{typeSymbol.ToDisplayString()}>");
+                }
+                
+                if (typeSymbol.IsSameType<Guid>())
+                {
+                    return ("Guid", "");
+                }
+                
+                if (typeSymbol.IsSameType(typeof(ReadOnlySpan<char>)) || typeSymbol.IsSameType<ReadOnlyMemory<char>>())
+                {
+                    return ("String", "");
+                }
+                
+                var typeName = typeSymbol.ToDisplayString();
+                if (typeName == GeneratorConstants.Name)
+                {
+                    return ("Name", "");
+                }
+
+                if (typeSymbol.IsSameType<byte[]>() || typeSymbol.IsSameType<IReadOnlyList<byte>>() || typeSymbol.IsSameType<IReadOnlyCollection<byte>>() || typeSymbol.IsSameType(typeof(ReadOnlySpan<byte>)) || typeSymbol.IsSameType<ReadOnlyMemory<byte>>())
+                {
+                    return ("Bytes", "");
+                }
+
+                return ("Serialized", $"<{typeName}>");
+            }
+        }
     }
 }

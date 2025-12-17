@@ -5,11 +5,11 @@ using RhoMicro.CodeAnalysis;
 // ReSharper disable once CheckNamespace
 namespace PokeSharp.Editor.Core;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Class)]
 #if POKESHARP_EDITOR_GENERATOR
 [IncludeFile]
 #endif
-internal class PokeEditRequestAttribute(string? name = null) : Attribute
+internal class PokeEditControllerAttribute(string? name = null) : Attribute
 {
     public string? Name { get; } = name;
 }

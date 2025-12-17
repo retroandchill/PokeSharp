@@ -1,54 +1,69 @@
 #nullable enable
+using System.Collections.Immutable;
+using System.Threading;
 using PokeSharp.Core.Strings;
 using PokeSharp.Editor.Core.PokeEdit.Requests;
 using PokeSharp.Editor.Core.PokeEdit.Serialization;
 
 namespace {{Namespace}};
 
-public sealed class {{ClassName}}({{ServiceClass}} service, IPokeEditSerializer serializer) : IRequestHandler
+partial class {{ClassName}} : IPokeEditController
 {
-    private static readonly Name RequestName = "{{RequestName}}";
-    public Name Name => RequestName;
-    
-    public void Process(Stream requestStream, Stream responseStream)
+    private static readonly Name ControllerName = "{{ControllerName}}";
+    public Name Name => ControllerName;
+
+    private ImmutableDictionary<Name, IRequestHandler> Handlers => LazyInitializer.EnsureInitialized(ref field, BuildHandlers);
+
+    private ImmutableDictionary<Name, IRequestHandler> BuildHandlers()
     {
-        {{#HasRequestBody}}
-        var request = serializer.Deserialize<{{RequestType}}>(requestStream);
-        {{#RequestTypeNotNull}}
-        if (request is null) throw new InvalidOperationException("Request body was null");
-        {{/RequestTypeNotNull}}
-        {{/HasRequestBody}}
-        {{#HasResponseBody}}var response = {{/HasResponseBody}}service.{{MethodName}}({{#HasRequestBody}}request{{/HasRequestBody}});
-        {{#HasResponseBody}}
-        {{#ResponseNotNull}}
-        if (response is null) throw new InvalidOperationException("Response was null");    
-        {{/ResponseNotNull}}
-        serializer.Serialize(responseStream, response);
-        {{/HasResponseBody}}
-        {{^HasResponseBody}}
-        using var streamWriter = new StreamWriter(responseStream);
-        streamWriter.WriteAsync("{}");
-        {{/HasResponseBody}}
+        var builder = ImmutableDictionary.CreateBuilder<Name, IRequestHandler>();
+        {{#Methods}}
+        builder.Add("{{Name}}", new {{../ClassName}}{{Name}}Handler(this));
+        {{/Methods}}
+        return builder.ToImmutable();
     }
 
-    public async ValueTask ProcessAsync(Stream requestStream, Stream responseStream, CancellationToken cancellationToken = default)
+    public IRequestHandler? GetRequestHandler(Name methodName)
     {
-        {{#HasRequestBody}}
-        var request = await serializer.DeserializeAsync<{{RequestType}}>(requestStream, cancellationToken);
-        {{#RequestTypeNotNull}}
-        if (request is null) throw new InvalidOperationException("Request body was null");
-        {{/RequestTypeNotNull}}
-        {{/HasRequestBody}}
-        {{#HasResponseBody}}var response = {{/HasResponseBody}}await service.{{MethodName}}Async({{#HasRequestBody}}request{{/HasRequestBody}}{{#HasCancellationToken}}{{#HasRequestBody}}, {{/HasRequestBody}}cancellationToken{{/HasCancellationToken}});
-        {{#HasResponseBody}}
-        {{#ResponseNotNull}}
-        if (response is null) throw new InvalidOperationException("Response was null");    
-        {{/ResponseNotNull}}
-        await serializer.SerializeAsync(responseStream, response, cancellationToken);
-        {{/HasResponseBody}}
-        {{^HasResponseBody}}
-        await using var streamWriter = new StreamWriter(responseStream);
-        await streamWriter.WriteAsync("{}", cancellationToken);
-        {{/HasResponseBody}}
+        return Handlers.GetValueOrDefault(methodName);
     }
 }
+{{#Methods}}
+    
+internal sealed class {{../ClassName}}{{Name}}Handler({{../ClassName}} owner) : IRequestHandler
+{
+    public void Process<TReader>(ref TReader reader, IResponseWriter writer) where TReader : IRequestParameterReader, allows ref struct
+    {
+        {{#SupportsSync}}
+        {{#Parameters}}
+        var {{Name}} = reader.Read{{ReadType}}{{Generic}}();
+        {{/Parameters}}
+        {{#HasResponse}}var response = {{/HasResponse}}owner.{{SyncName}}({{#Parameters}}{{SyncPassExpression}}{{^IsLast}}, {{/IsLast}}{{/Parameters}});
+        {{#HasResponse}}
+        writer.Write{{ResponseWriteType}}(response);
+        {{/HasResponse}}
+        {{/SupportsSync}}
+        {{^SupportsSync}}
+        throw new InvalidOperationException("Request {{Name}} on controller {{../ControllerName}} cannot be invoked synchronously");
+        {{/SupportsSync}}
+    }
+
+    public async ValueTask ProcessAsync(IAsyncRequestParameterReader reader, IAsyncResponseWriter writer, CancellationToken cancellationToken = default)
+    {
+        {{#HasParameters}}
+        cancellationToken.ThrowIfCancellationRequested();
+        {{#Parameters}}
+        var {{Name}} = await reader.Read{{ReadType}}Async{{Generic}}(cancellationToken);
+        {{/Parameters}}
+
+        {{/HasParameters}}
+        cancellationToken.ThrowIfCancellationRequested();
+        {{#HasResponse}}var response = {{/HasResponse}}{{#IsAsync}}await {{/IsAsync}}owner.{{AsyncName}}({{#Parameters}}{{AsyncPassExpression}}{{^IsLast}}, {{/IsLast}}{{/Parameters}}{{#HasCancellationToken}}, cancellationToken{{/HasCancellationToken}});
+        {{#HasResponse}}
+
+        cancellationToken.ThrowIfCancellationRequested();
+        await writer.Write{{ResponseWriteType}}Async(response, cancellationToken);
+        {{/HasResponse}}
+    }
+}
+{{/Methods}}

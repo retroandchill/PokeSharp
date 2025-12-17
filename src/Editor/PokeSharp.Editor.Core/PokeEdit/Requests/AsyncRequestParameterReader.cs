@@ -19,8 +19,8 @@ public interface IAsyncRequestParameterReader
     ValueTask<ReadOnlyMemory<char>> ReadStringAsync(CancellationToken cancellationToken = default);
     ValueTask<ReadOnlyMemory<byte>> ReadBytesAsync(CancellationToken cancellationToken = default);
     
-    ValueTask<T> ReadUnmanagedAsync<T>(CancellationToken cancellationToken = default) where T : unmanaged;
     ValueTask<T> ReadEnumAsync<T>(CancellationToken cancellationToken = default) where T : unmanaged, Enum;
+    ValueTask<T> ReadSerializedAsync<T>(CancellationToken cancellationToken = default);
     
     ValueTask SkipAsync(CancellationToken cancellationToken = default);
 }

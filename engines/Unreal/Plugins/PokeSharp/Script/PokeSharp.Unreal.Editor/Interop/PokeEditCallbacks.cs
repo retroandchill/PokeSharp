@@ -16,8 +16,9 @@ public unsafe struct PokeEditCallbacks
 {
     public required delegate* unmanaged<
         FName,
-        SharedPtr*,
-        SharedPtr*,
+        FName,
+        IntPtr,
+        IntPtr,
         UnmanagedArray*,
         NativeBool> SendRequest { get; init; }
 
@@ -31,18 +32,18 @@ internal static unsafe class PokeEditRequestMethods
 {
     [UnmanagedCallersOnly]
     public static NativeBool SendRequest(
-        FName requestName,
-        SharedPtr* request,
-        SharedPtr* response,
+        FName controllerName,
+        FName methodName,
+        IntPtr request,
+        IntPtr response,
         UnmanagedArray* error
     )
     {
         try
         {
-            using var requestStream = new ArchiveStream(ref *request);
-            using var responseStream = new ArchiveStream(ref *response);
             GameGlobal.PokeEditRequestProcessor.ProcessRequest(
-                requestName.ToPokeSharpName(),
+                controllerName.ToPokeSharpName(),
+                methodName.ToPokeSharpName(),
                 requestStream,
                 responseStream
             );

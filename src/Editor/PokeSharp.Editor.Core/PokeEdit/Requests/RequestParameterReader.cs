@@ -4,8 +4,6 @@ namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 public interface IRequestParameterReader
 {
-    int? ParameterCount { get; }
-    
     int ParameterIndex { get; }
 
     bool ReadBoolean();

@@ -4,7 +4,6 @@ namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 public interface IAsyncRequestParameterReader
 {
-    int? ParameterCount { get; }
     int ParameterIndex { get; }
 
     ValueTask<bool> ReadBooleanAsync(CancellationToken cancellationToken = default);

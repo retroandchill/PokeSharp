@@ -8,26 +8,29 @@ namespace PokeSharp.Editor.Core.PokeEdit.Requests;
 
 [RegisterSingleton]
 [AutoServiceShortcut]
-public sealed class PokeEditRequestProcessor(IEnumerable<IPokeEditController> controllers, IPokeEditSerializer serializer)
+public sealed class PokeEditRequestProcessor(
+    IEnumerable<IPokeEditController> controllers,
+    IPokeEditSerializer serializer
+)
 {
     private readonly Dictionary<Name, IPokeEditController> _handlers = controllers.ToDictionary(x => x.Name);
-    
 
     public void ProcessRequest<TReader, TWriter>(
         Name controllerName,
         Name methodName,
-        ref TReader reader, 
-        ref TWriter writer)
+        ref TReader reader,
+        ref TWriter writer
+    )
         where TReader : IRequestParameterReader, allows ref struct
         where TWriter : IResponseWriter, allows ref struct
     {
         GetHandler(controllerName, methodName).Process(ref reader, ref writer, serializer);
     }
-    
+
     public async ValueTask ProcessRequestAsync(
         Name controllerName,
         Name methodName,
-        IAsyncRequestParameterReader reader, 
+        IAsyncRequestParameterReader reader,
         IAsyncResponseWriter writer,
         CancellationToken cancellationToken = default
     )
@@ -42,6 +45,7 @@ public sealed class PokeEditRequestProcessor(IEnumerable<IPokeEditController> co
             throw new InvalidOperationException($"Controller with name '{controllerName}' not found");
         }
 
-        return controller.GetRequestHandler(methodName) ?? throw new InvalidOperationException($"Handler for '{methodName}' on '{controllerName}' not found");
+        return controller.GetRequestHandler(methodName)
+            ?? throw new InvalidOperationException($"Handler for '{methodName}' on '{controllerName}' not found");
     }
 }

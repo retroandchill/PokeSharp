@@ -19,11 +19,10 @@ void FPokeSharpEditorModule::StartupModule()
     RegisterCommands();
     RegisterMenu();
     RegisterTabSpawner();
-    
+
     ModelMapping.Emplace(TEXT("PokemonType"),
-                         FJsonStructHandleFactory::CreateLambda(
-                             [](const FName TabName, const int32 Index)
-                             { return MakeShared<PokeEdit::TJsonStructHandle<FType>>(TabName, Index); }));
+                         FJsonStructHandleFactory::CreateLambda([](const FName TabName, const int32 Index)
+                                                                { return FType::CreateJsonHandle(TabName, Index); }));
 }
 
 void FPokeSharpEditorModule::ShutdownModule()

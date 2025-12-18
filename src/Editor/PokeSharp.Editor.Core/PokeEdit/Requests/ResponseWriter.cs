@@ -14,10 +14,11 @@ public interface IResponseWriter
     void WriteDouble(double value);
     void WriteGuid(Guid value);
     void WriteName(Name value);
-    
+
     void WriteString(ReadOnlySpan<char> value);
     void WriteBytes(ReadOnlySpan<byte> value);
-    
-    void WriteEnum<T>(T value) where T : unmanaged, Enum;
+
+    void WriteEnum<T>(T value)
+        where T : unmanaged, Enum;
     void WriteSerialized<T>(T value, IPokeEditSerializer serializer);
 }

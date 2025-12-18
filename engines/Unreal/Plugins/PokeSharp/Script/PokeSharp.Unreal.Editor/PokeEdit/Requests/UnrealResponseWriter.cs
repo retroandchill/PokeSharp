@@ -43,7 +43,7 @@ public readonly ref struct UnrealResponseWriter(IntPtr buffer) : IResponseWriter
 
     public void WriteGuid(Guid value)
     {
-        var unrealGuid = (FGuid) value;
+        var unrealGuid = (FGuid)value;
         unrealGuid.ToNative(buffer);
     }
 
@@ -58,7 +58,11 @@ public readonly ref struct UnrealResponseWriter(IntPtr buffer) : IResponseWriter
         {
             fixed (char* ptr = value)
             {
-                PokeEditSerializationExporter.CallSerializeString((IntPtr) ptr, value.Length, ref *(UnmanagedArray*) buffer);
+                PokeEditSerializationExporter.CallSerializeString(
+                    (IntPtr)ptr,
+                    value.Length,
+                    ref *(UnmanagedArray*)buffer
+                );
             }
         }
     }
@@ -69,12 +73,17 @@ public readonly ref struct UnrealResponseWriter(IntPtr buffer) : IResponseWriter
         {
             fixed (byte* ptr = value)
             {
-                PokeEditSerializationExporter.CallSerializeByteArray((IntPtr) ptr, value.Length, ref *(UnmanagedArray*) buffer);
+                PokeEditSerializationExporter.CallSerializeByteArray(
+                    (IntPtr)ptr,
+                    value.Length,
+                    ref *(UnmanagedArray*)buffer
+                );
             }
         }
     }
 
-    public void WriteEnum<T>(T value) where T : unmanaged, Enum
+    public void WriteEnum<T>(T value)
+        where T : unmanaged, Enum
     {
         BlittableMarshaller<T>.ToNative(buffer, 0, value);
     }

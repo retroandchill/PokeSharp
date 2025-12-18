@@ -3,9 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PokeEdit/Serialization/JsonMacros.h"
+#include "PokeEdit/Serialization/JsonSchemaFwd.h"
 
 #include "Type.generated.h"
+
+namespace PokeEdit
+{
+    class FJsonStructHandle;
+}
 
 /**
  *
@@ -41,18 +46,8 @@ struct POKESHARPEDITOR_API FType
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     TArray<FName> Flags;
+
+    static TSharedRef<PokeEdit::FJsonStructHandle> CreateJsonHandle(FName Name, int32 Index);
 };
 
-JSON_OBJECT_SCHEMA_BEGIN(FType)
-    JSON_FIELD_OPTIONAL(Id)
-    JSON_FIELD_OPTIONAL(Name)
-    JSON_FIELD_OPTIONAL(IconPosition)
-    JSON_FIELD_OPTIONAL(IsSpecialType)
-    JSON_FIELD_OPTIONAL(IsPseudoType)
-    JSON_FIELD_OPTIONAL(Weaknesses)
-    JSON_FIELD_OPTIONAL(Resistances)
-    JSON_FIELD_OPTIONAL(Immunities)
-    JSON_FIELD_OPTIONAL(Flags)
-JSON_OBJECT_SCHEMA_END
-
-template struct POKESHARPEDITOR_API PokeEdit::TJsonConverter<FType>;
+DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FType);

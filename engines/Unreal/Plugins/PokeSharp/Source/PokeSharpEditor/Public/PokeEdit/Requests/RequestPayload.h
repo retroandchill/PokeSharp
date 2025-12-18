@@ -9,7 +9,7 @@ namespace PokeEdit
 {
     template <typename... T>
     struct TRequestPayload;
-    
+
     template <typename... T>
     struct TRequestPayloadIndices;
 
@@ -23,7 +23,6 @@ namespace PokeEdit
     {
         T0 Field0;
     };
-
 
     template <typename T0, typename T1>
     struct TRequestPayload<T0, T1>
@@ -94,42 +93,37 @@ namespace PokeEdit
         T6 Field6;
         T7 Field7;
     };
-    
+
     template <>
     struct TRequestPayloadIndices<>
     {
         constexpr static std::array<size_t, 0> Value = {};
     };
-    
+
     template <typename T0>
     struct TRequestPayloadIndices<T0>
     {
         using FPayload = TRequestPayload<T0>;
-        
+
         constexpr static std::array Value = {offsetof(FPayload, Field0)};
     };
-    
+
     template <typename T0, typename T1>
     struct TRequestPayloadIndices<T0, T1>
     {
         using FPayload = TRequestPayload<T0, T1>;
-        
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1)
-        };
+
+        constexpr static std::array Value = {offsetof(FPayload, Field0), offsetof(FPayload, Field1)};
     };
-    
+
     template <typename T0, typename T1, typename T2>
     struct TRequestPayloadIndices<T0, T1, T2>
     {
         using FPayload = TRequestPayload<T0, T1, T2>;
 
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1),
-            offsetof(FPayload, Field2)
-        };
+        constexpr static std::array Value = {offsetof(FPayload, Field0),
+                                             offsetof(FPayload, Field1),
+                                             offsetof(FPayload, Field2)};
     };
 
     template <typename T0, typename T1, typename T2, typename T3>
@@ -137,12 +131,10 @@ namespace PokeEdit
     {
         using FPayload = TRequestPayload<T0, T1, T2, T3>;
 
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1),
-            offsetof(FPayload, Field2),
-            offsetof(FPayload, Field3)
-        };
+        constexpr static std::array Value = {offsetof(FPayload, Field0),
+                                             offsetof(FPayload, Field1),
+                                             offsetof(FPayload, Field2),
+                                             offsetof(FPayload, Field3)};
     };
 
     template <typename T0, typename T1, typename T2, typename T3, typename T4>
@@ -150,13 +142,11 @@ namespace PokeEdit
     {
         using FPayload = TRequestPayload<T0, T1, T2, T3, T4>;
 
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1),
-            offsetof(FPayload, Field2),
-            offsetof(FPayload, Field3),
-            offsetof(FPayload, Field4)
-        };
+        constexpr static std::array Value = {offsetof(FPayload, Field0),
+                                             offsetof(FPayload, Field1),
+                                             offsetof(FPayload, Field2),
+                                             offsetof(FPayload, Field3),
+                                             offsetof(FPayload, Field4)};
     };
 
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
@@ -164,14 +154,12 @@ namespace PokeEdit
     {
         using FPayload = TRequestPayload<T0, T1, T2, T3, T4, T5>;
 
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1),
-            offsetof(FPayload, Field2),
-            offsetof(FPayload, Field3),
-            offsetof(FPayload, Field4),
-            offsetof(FPayload, Field5)
-        };
+        constexpr static std::array Value = {offsetof(FPayload, Field0),
+                                             offsetof(FPayload, Field1),
+                                             offsetof(FPayload, Field2),
+                                             offsetof(FPayload, Field3),
+                                             offsetof(FPayload, Field4),
+                                             offsetof(FPayload, Field5)};
     };
 
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
@@ -179,15 +167,13 @@ namespace PokeEdit
     {
         using FPayload = TRequestPayload<T0, T1, T2, T3, T4, T5, T6>;
 
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1),
-            offsetof(FPayload, Field2),
-            offsetof(FPayload, Field3),
-            offsetof(FPayload, Field4),
-            offsetof(FPayload, Field5),
-            offsetof(FPayload, Field6)
-        };
+        constexpr static std::array Value = {offsetof(FPayload, Field0),
+                                             offsetof(FPayload, Field1),
+                                             offsetof(FPayload, Field2),
+                                             offsetof(FPayload, Field3),
+                                             offsetof(FPayload, Field4),
+                                             offsetof(FPayload, Field5),
+                                             offsetof(FPayload, Field6)};
     };
 
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
@@ -195,15 +181,13 @@ namespace PokeEdit
     {
         using FPayload = TRequestPayload<T0, T1, T2, T3, T4, T5, T6, T7>;
 
-        constexpr static std::array Value = {
-            offsetof(FPayload, Field0),
-            offsetof(FPayload, Field1),
-            offsetof(FPayload, Field2),
-            offsetof(FPayload, Field3),
-            offsetof(FPayload, Field4),
-            offsetof(FPayload, Field5),
-            offsetof(FPayload, Field6),
-            offsetof(FPayload, Field7)
-        };
+        constexpr static std::array Value = {offsetof(FPayload, Field0),
+                                             offsetof(FPayload, Field1),
+                                             offsetof(FPayload, Field2),
+                                             offsetof(FPayload, Field3),
+                                             offsetof(FPayload, Field4),
+                                             offsetof(FPayload, Field5),
+                                             offsetof(FPayload, Field6),
+                                             offsetof(FPayload, Field7)};
     };
-}
+} // namespace PokeEdit

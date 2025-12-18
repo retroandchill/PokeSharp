@@ -11,13 +11,7 @@
  */
 struct FPokeEditCallbacks
 {
-    using FSendRequest = bool(__stdcall *)(FName,
-                                           FName,
-                                           const uint8*,
-                                           const size_t*,
-                                           int32,
-                                           uint8*,
-                                           FString &);
+    using FSendRequest = bool(__stdcall *)(FName, FName, const uint8 *, const size_t *, int32, uint8 *, FString &);
 
     FSendRequest SendRequest = nullptr;
 };
@@ -34,10 +28,10 @@ class FPokeEditManager
 
     std::expected<void, FString> SendRequest(FName ControllerName,
                                              FName MethodName,
-                                             const uint8* Payload,
+                                             const uint8 *Payload,
                                              TConstArrayView<size_t> ArgumentOffsets,
-                                             uint8* Response) const;
+                                             uint8 *Response) const;
 
-private:
+  private:
     FPokeEditCallbacks Callbacks;
 };

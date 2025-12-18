@@ -13,7 +13,7 @@ namespace PokeEdit
         {
             return std::unexpected(FString(TEXT("Failed to serialize JSON value")));
         }
-        
+
         return Buffer;
     }
 
@@ -30,4 +30,4 @@ namespace PokeEdit
 
         return std::expected<TSharedRef<FJsonValue>, FString>(JsonValue.ToSharedRef());
     }
-}
+} // namespace PokeEdit

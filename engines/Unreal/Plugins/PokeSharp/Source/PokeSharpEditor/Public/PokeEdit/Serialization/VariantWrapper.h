@@ -76,17 +76,17 @@ class TVariantWrapper
     {
         Value.template Emplace<U>(Forward<A>(Args)...);
     }
-    
+
     template <typename F>
-        requires (std::invocable<F, T&> && ...)
-    constexpr decltype(auto) Visit(F&& Functor)
+        requires(std::invocable<F, T &> && ...)
+    constexpr decltype(auto) Visit(F &&Functor)
     {
         return ::Visit(Forward<F>(Functor), Value);
     }
-    
+
     template <typename F>
-        requires (std::invocable<F, const T&> && ...)
-    constexpr decltype(auto) Visit(F&& Functor) const
+        requires(std::invocable<F, const T &> && ...)
+    constexpr decltype(auto) Visit(F &&Functor) const
     {
         return ::Visit(Forward<F>(Functor), Value);
     }

@@ -43,14 +43,17 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             {
                 not null => controllerInfo.Name,
                 null when type.Name.EndsWith("Controller") => type.Name[..^10],
-                null => type.Name
+                null => type.Name,
             },
             Methods = type.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where(m => !m.IsStatic && m.DeclaredAccessibility == Accessibility.Public &&
-                            m.HasAttribute<PokeEditRequestAttribute>())
+                .Where(m =>
+                    !m.IsStatic
+                    && m.DeclaredAccessibility == Accessibility.Public
+                    && m.HasAttribute<PokeEditRequestAttribute>()
+                )
                 .Select(GetRequestMethod)
-                .ToImmutableArray()
+                .ToImmutableArray(),
         };
 
         var handlebars = Handlebars.Create();
@@ -70,7 +73,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         {
             not null => methodInfo.Name,
             null when method.Name.EndsWith("Async") => method.Name[..^5],
-            null => method.Name
+            null => method.Name,
         };
 
         var isAsync = method.ReturnType.Name is "Task" or "ValueTask";
@@ -113,7 +116,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         }
 
         var validParameters = method.Parameters.Where(p => p.Type.Name != "CancellationToken").ToArray();
-        
+
         return new RequestMethodInfo
         {
             Name = name,
@@ -124,8 +127,11 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                 method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken",
             ResponseWriteType = returnType is not null ? responseWriteType : null,
             SerializedResponse = responseWriteType == "Serialized",
-            NeedsNullCheck = returnType is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated } or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" },
-            Parameters = [..validParameters.Select((x, i) => GetRequestParameter(x, i == validParameters.Length - 1))]
+            NeedsNullCheck =
+                returnType
+                    is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
+                        or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" },
+            Parameters = [.. validParameters.Select((x, i) => GetRequestParameter(x, i == validParameters.Length - 1))],
         };
     }
 
@@ -134,7 +140,8 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         var (readType, generic) = GetReadOrWriteType(parameter.Type);
 
         var needsNullCheck =
-            parameter.Type is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
+            parameter.Type
+            is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
                 or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" };
         return new RequestParameterInfo
         {
@@ -147,16 +154,16 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                 "String" => $"{parameter.Name}.ToString()",
                 "Bytes" => GetBytePassExpression(parameter),
                 "Serialized" when needsNullCheck => $"{parameter.Name}.RequireNonNull()",
-                _ => parameter.Name
+                _ => parameter.Name,
             },
             AsyncPassExpression = readType switch
             {
                 "String" => $"{parameter.Name}.ToString()",
                 "Bytes" => GetBytePassExpression(parameter, true),
                 "Serialized" when needsNullCheck => $"{parameter.Name}.RequireNonNull()",
-                _ => parameter.Name
+                _ => parameter.Name,
             },
-            IsLast = isLast
+            IsLast = isLast,
         };
     }
 
@@ -170,7 +177,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
         return parameter.Type.IsSameType<ReadOnlyMemory<byte>>() ? parameter.Name : $"{parameter.Name}.ToArray()";
     }
 
-private static (string TypeName, string Generic) GetReadOrWriteType(ITypeSymbol typeSymbol)
+    private static (string TypeName, string Generic) GetReadOrWriteType(ITypeSymbol typeSymbol)
     {
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (typeSymbol.SpecialType)
@@ -195,24 +202,30 @@ private static (string TypeName, string Generic) GetReadOrWriteType(ITypeSymbol 
                 {
                     return ("Enum", $"<{typeSymbol.ToDisplayString()}>");
                 }
-                
+
                 if (typeSymbol.IsSameType<Guid>())
                 {
                     return ("Guid", "");
                 }
-                
+
                 if (typeSymbol.IsSameType(typeof(ReadOnlySpan<char>)) || typeSymbol.IsSameType<ReadOnlyMemory<char>>())
                 {
                     return ("String", "");
                 }
-                
+
                 var typeName = typeSymbol.ToDisplayString();
                 if (typeName == GeneratorConstants.Name)
                 {
                     return ("Name", "");
                 }
 
-                if (typeSymbol.IsSameType<byte[]>() || typeSymbol.IsSameType<IReadOnlyList<byte>>() || typeSymbol.IsSameType<IReadOnlyCollection<byte>>() || typeSymbol.IsSameType(typeof(ReadOnlySpan<byte>)) || typeSymbol.IsSameType<ReadOnlyMemory<byte>>())
+                if (
+                    typeSymbol.IsSameType<byte[]>()
+                    || typeSymbol.IsSameType<IReadOnlyList<byte>>()
+                    || typeSymbol.IsSameType<IReadOnlyCollection<byte>>()
+                    || typeSymbol.IsSameType(typeof(ReadOnlySpan<byte>))
+                    || typeSymbol.IsSameType<ReadOnlyMemory<byte>>()
+                )
                 {
                     return ("Bytes", "");
                 }

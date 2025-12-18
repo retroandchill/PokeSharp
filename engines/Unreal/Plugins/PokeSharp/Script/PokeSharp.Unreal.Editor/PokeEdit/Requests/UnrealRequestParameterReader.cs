@@ -11,19 +11,20 @@ namespace PokeSharp.Unreal.Editor.PokeEdit.Requests;
 public ref struct UnrealRequestParameterReader(IntPtr buffer, ReadOnlySpan<IntPtr> offsets) : IRequestParameterReader
 {
     public int ParameterIndex { get; private set; }
-    
-    private readonly ReadOnlySpan<IntPtr> _offsets  = offsets;
+
+    private readonly ReadOnlySpan<IntPtr> _offsets = offsets;
 
     private IntPtr CurrentPosition
     {
         get
         {
-            if (ParameterIndex == _offsets.Length) throw new InvalidOperationException("No more parameters to read");
+            if (ParameterIndex == _offsets.Length)
+                throw new InvalidOperationException("No more parameters to read");
 
             return buffer + _offsets[ParameterIndex];
         }
     }
-    
+
     public bool ReadBoolean()
     {
         var value = BoolMarshaller.FromNative(CurrentPosition, 0);
@@ -100,7 +101,8 @@ public ref struct UnrealRequestParameterReader(IntPtr buffer, ReadOnlySpan<IntPt
         }
     }
 
-    public T ReadEnum<T>() where T : unmanaged, Enum
+    public T ReadEnum<T>()
+        where T : unmanaged, Enum
     {
         var value = BlittableMarshaller<T>.FromNative(CurrentPosition, 0);
         ParameterIndex++;

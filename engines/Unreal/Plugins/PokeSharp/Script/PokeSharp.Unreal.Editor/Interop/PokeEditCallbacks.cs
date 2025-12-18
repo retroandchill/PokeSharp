@@ -47,7 +47,7 @@ internal static unsafe class PokeEditRequestMethods
             var requestOffsetSpan = new Span<IntPtr>((IntPtr*)requestOffsets, requestOffsetsSize);
             var reader = new UnrealRequestParameterReader(request, requestOffsetSpan);
             var writer = new UnrealResponseWriter(response);
-            
+
             GameGlobal.PokeEditRequestProcessor.ProcessRequest(
                 controllerName.ToPokeSharpName(),
                 methodName.ToPokeSharpName(),

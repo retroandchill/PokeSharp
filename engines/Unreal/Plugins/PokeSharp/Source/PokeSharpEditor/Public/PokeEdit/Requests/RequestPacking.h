@@ -3,56 +3,77 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RequestPayload.h"
 #include "PokeEdit/Serialization/JsonConverter.h"
+#include "RequestPayload.h"
 #include "Serialization/MemoryReader.h"
 
 namespace PokeEdit
 {
     template <typename>
-    struct TIsDirectlyPackable : std::false_type { };
-    
+    struct TIsDirectlyPackable : std::false_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<bool> : std::true_type { };
-    
+    struct TIsDirectlyPackable<bool> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<uint8> : std::true_type { };
-    
+    struct TIsDirectlyPackable<uint8> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<int32> : std::true_type { };
-    
+    struct TIsDirectlyPackable<int32> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<int64> : std::true_type { };
-    
+    struct TIsDirectlyPackable<int64> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<FName> : std::true_type { };
-    
+    struct TIsDirectlyPackable<FName> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<FGuid> : std::true_type { };
-    
+    struct TIsDirectlyPackable<FGuid> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<FString> : std::true_type { };
-    
+    struct TIsDirectlyPackable<FString> : std::true_type
+    {
+    };
+
     template <>
-    struct TIsDirectlyPackable<TArray<uint8>> : std::true_type { };
-    
+    struct TIsDirectlyPackable<TArray<uint8>> : std::true_type
+    {
+    };
+
     template <typename T>
         requires std::is_enum_v<T>
-    struct TIsDirectlyPackable<T> : std::true_type { };
-    
+    struct TIsDirectlyPackable<T> : std::true_type
+    {
+    };
+
     template <typename T>
     concept TDirectlyPackable = TIsDirectlyPackable<std::remove_cvref_t<T>>::value;
-    
+
     template <typename T>
     concept TPackable = TDirectlyPackable<T> || TJsonSerializable<T>;
-    
+
     template <TPackable T>
     using TPackedType = std::conditional_t<TDirectlyPackable<T>, std::remove_cvref_t<T>, TArray<uint8>>;
-    
-    POKESHARPEDITOR_API std::expected<TArray<uint8>, FString> WriteJsonToBuffer(const TSharedRef<FJsonValue>& JsonValue);
-    
+
+    POKESHARPEDITOR_API std::expected<TArray<uint8>, FString> WriteJsonToBuffer(
+        const TSharedRef<FJsonValue> &JsonValue);
+
     template <TPackable T>
-    constexpr std::expected<TPackedType<T>, FString> PackValue(T&& Value)
+    constexpr std::expected<TPackedType<T>, FString> PackValue(T &&Value)
     {
         if constexpr (TDirectlyPackable<T>)
         {
@@ -60,7 +81,8 @@ namespace PokeEdit
         }
         else
         {
-            static_assert(TJsonSerializable<T>, "Value is not directly packable and does not implement the JsonSerializable interface");
+            static_assert(TJsonSerializable<T>,
+                          "Value is not directly packable and does not implement the JsonSerializable interface");
             auto AsJson = SerializeToJson(Forward<T>(Value));
             return WriteJsonToBuffer(AsJson);
         }
@@ -69,31 +91,36 @@ namespace PokeEdit
     namespace Private
     {
         template <typename>
-        struct TIsStdExpected : std::false_type { };
+        struct TIsStdExpected : std::false_type
+        {
+        };
 
         template <typename V, typename E>
-        struct TIsStdExpected<std::expected<V, E>> : std::true_type { };
+        struct TIsStdExpected<std::expected<V, E>> : std::true_type
+        {
+        };
 
         template <typename T>
         inline constexpr bool TIsStdExpected_V = TIsStdExpected<std::remove_cvref_t<T>>::value;
 
         template <typename Tuple, SIZE_T... I>
-        bool TryGetFirstError(const Tuple& PackedValues, FString& OutError, std::index_sequence<I...>)
+        bool TryGetFirstError(const Tuple &PackedValues, FString &OutError, std::index_sequence<I...>)
         {
             bool bFound = false;
 
             // Left-to-right short-circuit (first error wins).
             (void)((!bFound && !std::get<I>(PackedValues).has_value()
                         ? (OutError = std::get<I>(PackedValues).error(), bFound = true, true)
-                        : false) || ...);
+                        : false) ||
+                   ...);
 
             return bFound;
         }
-    }
-    
+    } // namespace Private
+
     template <TPackable... Args>
-        requires (sizeof...(Args) <= 8)
-    constexpr std::expected<TRequestPayload<TPackedType<Args>...>, FString> PackPayload(Args&&... InArgs)
+        requires(sizeof...(Args) <= 8)
+    constexpr std::expected<TRequestPayload<TPackedType<Args>...>, FString> PackPayload(Args &&...InArgs)
     {
         auto PackedValues = std::make_tuple(PackValue(Forward<Args>(InArgs))...);
 
@@ -103,18 +130,18 @@ namespace PokeEdit
         }
 
         return std::apply(
-            [](auto&&... Packed) -> std::expected<TRequestPayload<TPackedType<Args>...>, FString>
+            [](auto &&...Packed) -> std::expected<TRequestPayload<TPackedType<Args>...>, FString>
             {
                 // Safe: we only get here if all .has_value() are true.
-                return TRequestPayload<TPackedType<Args>...>{ MoveTemp(Packed).value()... };
+                return TRequestPayload<TPackedType<Args>...>{MoveTemp(Packed).value()...};
             },
             MoveTemp(PackedValues));
     }
-    
-    POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> ReadJsonFromBuffer(const TArray<uint8>& Buffer);
-    
+
+    POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> ReadJsonFromBuffer(const TArray<uint8> &Buffer);
+
     template <TPackable T>
-    constexpr std::expected<T, FString> UnpackResponse(TPackedType<T>& Response)
+    constexpr std::expected<T, FString> UnpackResponse(TPackedType<T> &Response)
     {
         if constexpr (TDirectlyPackable<T>)
         {
@@ -122,11 +149,8 @@ namespace PokeEdit
         }
         else
         {
-            return ReadJsonFromBuffer(Response)
-                .and_then([](const TSharedRef<FJsonValue> &Payload)
-                {
-                    return DeserializeFromJson<T>(Payload);
-                });
+            return ReadJsonFromBuffer(Response).and_then([](const TSharedRef<FJsonValue> &Payload)
+                                                         { return DeserializeFromJson<T>(Payload); });
         }
     }
-}
+} // namespace PokeEdit

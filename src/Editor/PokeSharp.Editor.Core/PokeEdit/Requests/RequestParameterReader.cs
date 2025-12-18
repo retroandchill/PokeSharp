@@ -16,11 +16,12 @@ public interface IRequestParameterReader
     double ReadDouble();
     Guid ReadGuid();
     Name ReadName();
-    
+
     ReadOnlySpan<char> ReadString();
     ReadOnlySpan<byte> ReadBytes();
-    
-    T ReadEnum<T>() where T : unmanaged, Enum;
+
+    T ReadEnum<T>()
+        where T : unmanaged, Enum;
     T? ReadSerialized<T>(IPokeEditSerializer serializer);
 
     void Skip();

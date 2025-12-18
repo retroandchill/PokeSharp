@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PokeEdit/Serialization/JsonMacros.h"
+#include "Dom/JsonValue.h"
+#include "PokeEdit/Serialization/JsonSchemaFwd.h"
 #include "PokeEdit/Serialization/VariantWrapper.h"
 
 namespace PokeEdit
@@ -21,16 +22,13 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FValueSetNode)
-        JSON_FIELD_REQUIRED(NewValue)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FValueSetNode);
 
     struct FValueResetNode
     {
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FValueResetNode)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FValueResetNode);
 
     struct FObjectDiffNode
     {
@@ -41,9 +39,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FObjectDiffNode)
-        JSON_FIELD_REQUIRED(Properties)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FObjectDiffNode);
 
     struct FListDiffNode
     {
@@ -54,9 +50,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FListDiffNode)
-        JSON_FIELD_REQUIRED(Edits)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FListDiffNode);
 
     struct FDictionaryDiffNode
     {
@@ -67,9 +61,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FDictionaryDiffNode)
-        JSON_FIELD_REQUIRED(Edits)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FDictionaryDiffNode);
 
     struct FDiffNode
         : TVariantWrapper<FValueSetNode, FValueResetNode, FObjectDiffNode, FListDiffNode, FDictionaryDiffNode>
@@ -77,26 +69,13 @@ namespace PokeEdit
         using TVariantWrapper::TVariantWrapper;
     };
 
+    DECLARE_JSON_UNION(POKESHARPEDITOR_API, FDiffNode);
+
     template <>
     struct TIsVariant<FDiffNode> : std::true_type
     {
     };
 
-    JSON_VARIANT_BEGIN(FDiffNode)
-        JSON_VARIANT_TYPE(FValueSetNode, TEXT("ValueSet"))
-        JSON_VARIANT_TYPE(FValueResetNode, TEXT("ValueReset"))
-        JSON_VARIANT_TYPE(FObjectDiffNode, TEXT("Object"))
-        JSON_VARIANT_TYPE(FListDiffNode, TEXT("List"))
-        JSON_VARIANT_TYPE(FDictionaryDiffNode, TEXT("Dictionary"))
-    JSON_VARIANT_END
-
-    template POKESHARPEDITOR_API struct TJsonConverter<FDiffNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FValueSetNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FValueResetNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FObjectDiffNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FListDiffNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FDictionaryDiffNode>;
-    
     struct FListSetNode
     {
         int32 Index;
@@ -107,10 +86,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FListSetNode)
-        JSON_FIELD_REQUIRED(Index)
-        JSON_FIELD_REQUIRED(Change)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FListSetNode);
 
     struct FListAddNode
     {
@@ -121,9 +97,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FListAddNode)
-        JSON_FIELD_REQUIRED(NewValue)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FListAddNode);
 
     struct FListInsertNode
     {
@@ -135,10 +109,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FListInsertNode)
-        JSON_FIELD_REQUIRED(Index)
-        JSON_FIELD_REQUIRED(NewValue)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FListInsertNode);
 
     struct FListRemoveNode
     {
@@ -149,9 +120,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FListRemoveNode)
-        JSON_FIELD_REQUIRED(Index)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FListRemoveNode);
 
     struct FListSwapNode
     {
@@ -163,36 +132,20 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FListSwapNode)
-        JSON_FIELD_REQUIRED(IndexA)
-        JSON_FIELD_REQUIRED(IndexB)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FListSwapNode);
 
     struct FListEditNode : TVariantWrapper<FListSetNode, FListAddNode, FListInsertNode, FListRemoveNode, FListSwapNode>
     {
         using TVariantWrapper::TVariantWrapper;
     };
 
+    DECLARE_JSON_UNION(POKESHARPEDITOR_API, FListEditNode);
+
     template <>
     struct TIsVariant<FListEditNode> : std::true_type
     {
     };
 
-    JSON_VARIANT_BEGIN(FListEditNode)
-        JSON_VARIANT_TYPE(FListSetNode, TEXT("Set"))
-        JSON_VARIANT_TYPE(FListAddNode, TEXT("Add"))
-        JSON_VARIANT_TYPE(FListInsertNode, TEXT("Insert"))
-        JSON_VARIANT_TYPE(FListRemoveNode, TEXT("Remove"))
-        JSON_VARIANT_TYPE(FListSwapNode, TEXT("Swap"))
-    JSON_VARIANT_END
-
-    template POKESHARPEDITOR_API struct TJsonConverter<FListEditNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FListSetNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FListAddNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FListInsertNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FListRemoveNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FListSwapNode>;
-    
     struct FDictionarySetNode
     {
         TSharedRef<FJsonValue> Key;
@@ -203,10 +156,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FDictionarySetNode)
-        JSON_FIELD_REQUIRED(Key)
-        JSON_FIELD_REQUIRED(Change)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FDictionarySetNode);
 
     struct FDictionaryAddNode
     {
@@ -219,10 +169,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FDictionaryAddNode)
-        JSON_FIELD_REQUIRED(Key)
-        JSON_FIELD_REQUIRED(Value)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FDictionaryAddNode);
 
     struct FDictionaryRemoveNode
     {
@@ -233,9 +180,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FDictionaryRemoveNode)
-        JSON_FIELD_REQUIRED(Key)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FDictionaryRemoveNode);
 
     struct FDictionaryChangeKeyNode
     {
@@ -248,10 +193,7 @@ namespace PokeEdit
         }
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FDictionaryChangeKeyNode)
-        JSON_FIELD_REQUIRED(OldKey)
-        JSON_FIELD_REQUIRED(NewKey)
-    JSON_OBJECT_SCHEMA_END
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FDictionaryChangeKeyNode);
 
     struct FDictionaryEditNode
         : TVariantWrapper<FDictionarySetNode, FDictionaryAddNode, FDictionaryRemoveNode, FDictionaryChangeKeyNode>
@@ -259,21 +201,10 @@ namespace PokeEdit
         using TVariantWrapper::TVariantWrapper;
     };
 
+    DECLARE_JSON_UNION(POKESHARPEDITOR_API, FDictionaryEditNode);
+
     template <>
     struct TIsVariant<FDictionaryEditNode> : std::true_type
     {
     };
-
-    JSON_VARIANT_BEGIN(FDictionaryEditNode)
-        JSON_VARIANT_TYPE(FDictionarySetNode, TEXT("Set"))
-        JSON_VARIANT_TYPE(FDictionaryAddNode, TEXT("Add"))
-        JSON_VARIANT_TYPE(FDictionaryRemoveNode, TEXT("Remove"))
-        JSON_VARIANT_TYPE(FDictionaryChangeKeyNode, TEXT("ChangeKey"))
-    JSON_VARIANT_END
-
-    template POKESHARPEDITOR_API struct TJsonConverter<FDictionaryEditNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FDictionarySetNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FDictionaryAddNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FDictionaryRemoveNode>;
-    template POKESHARPEDITOR_API struct TJsonConverter<FDictionaryChangeKeyNode>;
 } // namespace PokeEdit

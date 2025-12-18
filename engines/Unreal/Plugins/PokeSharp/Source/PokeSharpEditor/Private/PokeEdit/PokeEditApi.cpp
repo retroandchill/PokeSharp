@@ -2,12 +2,14 @@
 
 #include "PokeEdit/PokeEditApi.h"
 #include "PokeEdit/PokeEditClient.h"
-#include "PokeEdit/Schema/Requests.h"
+
+// ReSharper disable once CppUnusedIncludeDirective
+#include "PokeEdit/Serialization/JsonConverterTemplates.h"
 
 namespace PokeEdit
 {
     static const FName ModuleName = "Editor";
-    
+
     std::expected<TArray<FEditorTabOption>, FString> GetEditorTabs()
     {
         static FName RequestName = "GetEditorTabs";
@@ -26,7 +28,9 @@ namespace PokeEdit
         return SendRequest<TSharedRef<FJsonValue>>(ModuleName, RequestName, EditorId, Index);
     }
 
-    std::expected<FEntityUpdateResponse, FString> UpdateEntityAtIndex(const FName EditorId, const int32 Index, FObjectDiffNode DiffNode)
+    std::expected<FEntityUpdateResponse, FString> UpdateEntityAtIndex(const FName EditorId,
+                                                                      const int32 Index,
+                                                                      FObjectDiffNode DiffNode)
     {
         static FName RequestName = "UpdateEntityAtIndex";
         return SendRequest<FEntityUpdateResponse>(ModuleName, RequestName, EditorId, Index, MoveTemp(DiffNode));

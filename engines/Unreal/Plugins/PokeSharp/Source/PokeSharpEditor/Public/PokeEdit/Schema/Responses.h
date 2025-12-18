@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DiffNode.h"
-#include "PokeEdit/Serialization/JsonMacros.h"
-#include "PokeEdit/Serialization/JsonSchema.h"
+#include "PokeEdit/Serialization/JsonSchemaFwd.h"
 
 namespace PokeEdit
 {
@@ -18,20 +17,12 @@ namespace PokeEdit
         FText Name;
     };
 
-    JSON_OBJECT_SCHEMA_BEGIN(FEditorTabOption)
-        JSON_FIELD_REQUIRED(Id)
-        JSON_FIELD_REQUIRED(Name)
-    JSON_OBJECT_SCHEMA_END
-    
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FEditorTabOption);
+
     struct FEntityUpdateResponse
     {
         TOptional<FObjectDiffNode> Diff;
     };
-    
-    JSON_OBJECT_SCHEMA_BEGIN(FEntityUpdateResponse)
-        JSON_FIELD_REQUIRED(Diff)
-    JSON_OBJECT_SCHEMA_END
 
-    template struct POKESHARPEDITOR_API TJsonConverter<FEditorTabOption>;
-    template struct POKESHARPEDITOR_API TJsonConverter<FEntityUpdateResponse>;
+    DECLARE_JSON_OBJECT(POKESHARPEDITOR_API, FEntityUpdateResponse);
 } // namespace PokeEdit

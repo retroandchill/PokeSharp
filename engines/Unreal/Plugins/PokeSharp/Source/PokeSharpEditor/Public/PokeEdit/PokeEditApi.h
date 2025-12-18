@@ -18,5 +18,7 @@ namespace PokeEdit
 
     POKESHARPEDITOR_API std::expected<TSharedRef<FJsonValue>, FString> GetEntryAtIndex(FName EditorId, int32 Index);
 
-    POKESHARPEDITOR_API std::expected<FEntityUpdateResponse, FString> UpdateEntityAtIndex(FName EditorId, int32 Index, FObjectDiffNode DiffNode);
+    POKESHARPEDITOR_API std::expected<FEntityUpdateResponse, FString> UpdateEntityAtIndex(FName EditorId,
+                                                                                          int32 Index,
+                                                                                          FObjectDiffNode DiffNode);
 } // namespace PokeEdit

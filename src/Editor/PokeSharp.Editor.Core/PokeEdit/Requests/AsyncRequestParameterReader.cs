@@ -16,12 +16,13 @@ public interface IAsyncRequestParameterReader
     ValueTask<double> ReadDoubleAsync(CancellationToken cancellationToken = default);
     ValueTask<Guid> ReadGuidAsync(CancellationToken cancellationToken = default);
     ValueTask<Name> ReadNameAsync(CancellationToken cancellationToken = default);
-    
+
     ValueTask<ReadOnlyMemory<char>> ReadStringAsync(CancellationToken cancellationToken = default);
     ValueTask<ReadOnlyMemory<byte>> ReadBytesAsync(CancellationToken cancellationToken = default);
-    
-    ValueTask<T> ReadEnumAsync<T>(CancellationToken cancellationToken = default) where T : unmanaged, Enum;
+
+    ValueTask<T> ReadEnumAsync<T>(CancellationToken cancellationToken = default)
+        where T : unmanaged, Enum;
     ValueTask<T> ReadSerializedAsync<T>(IPokeEditSerializer serializer, CancellationToken cancellationToken = default);
-    
+
     ValueTask SkipAsync(CancellationToken cancellationToken = default);
 }

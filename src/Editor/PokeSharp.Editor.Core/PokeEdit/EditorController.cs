@@ -23,17 +23,13 @@ public sealed partial class EditorController(EditorService editorService)
     }
 
     [PokeEditRequest]
-    public JsonNode GetEntryAtIndex(
-        Name editorId, int index
-    )
+    public JsonNode GetEntryAtIndex(Name editorId, int index)
     {
         return editorService.GetEntryAtIndex(editorId, index);
     }
 
     [PokeEditRequest]
-    public EntityUpdateResponse UpdateEntityAtIndex(
-        Name editorId, int index, ObjectDiffNode change
-    )
+    public EntityUpdateResponse UpdateEntityAtIndex(Name editorId, int index, ObjectDiffNode change)
     {
         return new EntityUpdateResponse(editorService.UpdateEntity(editorId, index, change));
     }

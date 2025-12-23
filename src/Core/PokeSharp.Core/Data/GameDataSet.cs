@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.Core.Collections.Immutable;
 using Retro.ReadOnlyParams.Annotations;
 using Zomp.SyncMethodGenerator;
 
@@ -10,11 +11,11 @@ namespace PokeSharp.Core.Data;
 /// </summary>
 /// <typeparam name="TEntity">The type of the entities stored in this data set.</typeparam>
 /// <typeparam name="TKey">The type of the key used to identify entities.</typeparam>
-public abstract partial class GameDataSet<TEntity, TKey>
+public abstract class GameDataSet<TEntity, TKey>
     where TEntity : IGameDataEntity<TKey, TEntity>
     where TKey : notnull
 {
-    private OrderedDictionary<TKey, TEntity> _data = new();
+    private ImmutableOrderedDictionary<TKey, TEntity> _data = new();
 
     /// <summary>
     /// Gets the internal collection of game data entities organized as an ordered dictionary.
@@ -25,7 +26,7 @@ public abstract partial class GameDataSet<TEntity, TKey>
     /// that represents the dataset of entities. It is used within the class and subclasses
     /// to perform operations like adding or retrieving entities by their unique keys.
     /// </remarks>
-    protected OrderedDictionary<TKey, TEntity> Data => _data;
+    public ImmutableOrderedDictionary<TKey, TEntity> Data => _data;
 
     /// <summary>
     /// Provides a collection of all unique keys associated with the game data entities in the dataset.
@@ -96,21 +97,31 @@ public abstract partial class GameDataSet<TEntity, TKey>
         return _data.IndexOf(key);
     }
 
+    protected void ReplaceData(ImmutableOrderedDictionary<TKey, TEntity> newData)
+    {
+        Interlocked.Exchange(ref _data, newData);
+    }
+    
+    protected void ReplaceData(IEnumerable<TEntity> entities)
+    {
+        ReplaceData(entities.ToImmutableOrderedDictionary(x => x.Id));
+    }
+
     /// <summary>
     /// Replaces the current data set with a new set of entities provided asynchronously.
     /// </summary>
     /// <param name="entities">The asynchronous enumerable of entities to replace the current data set with.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
     /// <returns>A ValueTask representing the asynchronous operation.</returns>
-    [CreateSyncVersion]
-    protected async ValueTask ReplaceDataAsync(IAsyncEnumerable<TEntity> entities)
+    protected async ValueTask ReplaceDataAsync(IAsyncEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        var newData = new OrderedDictionary<TKey, TEntity>();
-        await foreach (var entity in entities)
+        var newData = ImmutableOrderedDictionary.CreateBuilder<TKey, TEntity>();
+        await foreach (var entity in entities.WithCancellation(cancellationToken))
         {
             newData.Add(entity.Id, entity);
         }
 
-        Interlocked.Exchange(ref _data, newData);
+        ReplaceData(newData.ToImmutable());
     }
 }
 
@@ -178,13 +189,34 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     /// Imports a collection of entities into the data set asynchronously.
     /// </summary>
     /// <param name="entities">The collection of entities to import into the data set.</param>
+    /// <param name="shouldSave">Whether the changes should be saved to the storage.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     [CreateSyncVersion]
-    public async ValueTask ImportAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    public async ValueTask ImportAsync(IEnumerable<TEntity> entities, bool shouldSave = true, CancellationToken cancellationToken = default)
     {
         ReplaceData(entities);
-        await SaveAsync(cancellationToken);
+        if (shouldSave)
+        {
+            await SaveAsync(cancellationToken);
+        }
+    }
+    
+    /// <summary>
+    /// Imports a collection of entities into the data set asynchronously.
+    /// </summary>
+    /// <param name="entities">The collection of entities to import into the data set.</param>
+    /// <param name="shouldSave">Whether the changes should be saved to the storage.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    [CreateSyncVersion]
+    public async ValueTask ImportAsync(ImmutableOrderedDictionary<TKey, TEntity> entities, bool shouldSave = true, CancellationToken cancellationToken = default)
+    {
+        ReplaceData(entities);
+        if (shouldSave)
+        {
+            await SaveAsync(cancellationToken);
+        }
     }
 
     /// <summary>
@@ -195,7 +227,7 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     [CreateSyncVersion]
     public ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        return ReplaceDataAsync(dataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken));
+        return ReplaceDataAsync(dataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken), cancellationToken);
     }
 
     /// <summary>

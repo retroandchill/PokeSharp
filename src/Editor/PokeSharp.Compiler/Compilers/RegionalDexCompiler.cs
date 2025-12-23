@@ -99,7 +99,7 @@ public partial class RegionalDexCompiler : IPbsCompiler
 
         await RegionalDex.ImportAsync(
             dexLists.Select(x => new RegionalDex(x.Key, [.. x.Value.Select(y => y.Species)])),
-            cancellationToken
+            cancellationToken: cancellationToken
         );
     }
 

@@ -164,15 +164,17 @@ public interface ILoadedGameDataEntity<TEntity> : ILoadedGameDataEntity, IGameDa
     /// Imports a collection of entities into the game data system.
     /// </summary>
     /// <param name="entities">The collection of entities to be imported.</param>
-    static abstract void Import(IEnumerable<TEntity> entities);
+    /// <param name="shouldSave">Optional. Indicates whether the changes should be saved to the persistent storage.</param>
+    static abstract void Import(IEnumerable<TEntity> entities, bool shouldSave = true);
 
     /// <summary>
     /// Asynchronously imports a collection of entities into the system.
     /// </summary>
     /// <param name="entities">The collection of entities to be imported.</param>
+    /// <param name="shouldSave">Optional. Indicates whether the changes should be saved to the persistent storage.</param>
     /// <param name="cancellationToken">Optional. A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    static abstract ValueTask ImportAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
+    static abstract ValueTask ImportAsync(IEnumerable<TEntity> entities, bool shouldSave = true,  CancellationToken cancellationToken = default);
 }
 
 /// <summary>

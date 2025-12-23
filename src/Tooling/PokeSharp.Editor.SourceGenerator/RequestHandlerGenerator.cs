@@ -45,8 +45,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                 null when type.Name.EndsWith("Controller") => type.Name[..^10],
                 null => type.Name,
             },
-            Methods = type.GetMembers()
-                .OfType<IMethodSymbol>()
+            Methods = GetAllMethods(type)
                 .Where(m =>
                     !m.IsStatic
                     && m.DeclaredAccessibility == Accessibility.Public
@@ -63,6 +62,38 @@ public class RequestHandlerGenerator : IIncrementalGenerator
             $"{templateParameters.ClassName}.g.cs",
             handlebars.Compile(SourceTemplates.RequestHandlerTemplate)(templateParameters)
         );
+    }
+
+    private static IEnumerable<IMethodSymbol> GetAllMethods(INamedTypeSymbol? type)
+    {
+        var seenMethods = new HashSet<string>();
+        
+        while (type is not null && type.SpecialType != SpecialType.System_Object)
+        {
+            foreach (var method in type.GetMembers().OfType<IMethodSymbol>())
+            {
+                // Create a unique signature for the method to identify overrides
+                // This includes name and parameter types
+                var signature = method.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                
+                // If it's an override, we want to find the original signature it matches
+                // but since we go from derived -> base, we'll see the 'newest' one first.
+                // We use OverriddenMethod to find what it replaces.
+                if (method is { IsOverride: true, OverriddenMethod: not null })
+                {
+                    // Track the base method so we don't yield it when we reach that base class
+                    var baseSignature = method.OverriddenMethod.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    seenMethods.Add(baseSignature);
+                }
+
+                if (seenMethods.Add(signature))
+                {
+                    yield return method;
+                }
+            }
+            
+            type = type.BaseType;
+        }
     }
 
     private static RequestMethodInfo GetRequestMethod(IMethodSymbol method)
@@ -117,21 +148,22 @@ public class RequestHandlerGenerator : IIncrementalGenerator
 
         var validParameters = method.Parameters.Where(p => p.Type.Name != "CancellationToken").ToArray();
 
+        var hasCancellationToken =
+            method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken";
         return new RequestMethodInfo
         {
             Name = name,
             SyncName = syncName,
             AsyncName = method.Name,
             IsAsync = isAsync,
-            HasCancellationToken =
-                method.Parameters.Length > 0 && method.Parameters[^1].Type.Name == "CancellationToken",
+            HasCancellationToken = hasCancellationToken,
             ResponseWriteType = returnType is not null ? responseWriteType : null,
             SerializedResponse = responseWriteType == "Serialized",
             NeedsNullCheck =
                 returnType
                     is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
                         or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" },
-            Parameters = [.. validParameters.Select((x, i) => GetRequestParameter(x, i == validParameters.Length - 1))],
+            Parameters = [.. validParameters.Select((x, i) => GetRequestParameter(x, !hasCancellationToken && i == validParameters.Length - 1))],
         };
     }
 

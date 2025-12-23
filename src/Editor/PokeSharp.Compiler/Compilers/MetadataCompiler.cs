@@ -70,8 +70,8 @@ public partial class MetadataCompiler : IPbsCompiler
             );
         }
 
-        await Metadata.ImportAsync([metadata], cancellationToken);
-        await PlayerMetadata.ImportAsync(playerMetadata.Values, cancellationToken);
+        await Metadata.ImportAsync([metadata], cancellationToken: cancellationToken);
+        await PlayerMetadata.ImportAsync(playerMetadata.Values, cancellationToken: cancellationToken);
     }
 
     private static Metadata ParseSection(PbsSection section)

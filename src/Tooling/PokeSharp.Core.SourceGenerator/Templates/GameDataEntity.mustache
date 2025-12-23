@@ -35,9 +35,9 @@ partial {{ClassType}} {{ClassName}} : I{{EntityType}}GameDataEntity<{{Key}}, {{C
     public static int IndexOf({{Key}} key) => Data.IndexOf(key);
 
     {{#IsLoaded}}
-    public static void Import(IEnumerable<{{ClassName}}> entities) => Data.Import(entities);    
+    public static void Import(IEnumerable<{{ClassName}}> entities, bool shouldSave = true) => Data.Import(entities, shouldSave);    
         
-    public static ValueTask ImportAsync(IEnumerable<{{ClassName}}> entities, CancellationToken cancellationToken = default) => Data.ImportAsync(entities, cancellationToken);
+    public static ValueTask ImportAsync(IEnumerable<{{ClassName}}> entities, bool shouldSave = true, CancellationToken cancellationToken = default) => Data.ImportAsync(entities, shouldSave, cancellationToken);
     
     public static void Load() => Data.Load();
     

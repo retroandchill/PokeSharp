@@ -148,7 +148,7 @@ public partial class EncounterCompiler : IPbsCompiler
             FinalizeEncounter(currentEncounter, encounters);
         }
 
-        await Encounter.ImportAsync(encounters, cancellationToken);
+        await Encounter.ImportAsync(encounters, cancellationToken: cancellationToken);
     }
 
     private static void FinalizeEncounter(EncounterInfo currentEncounter, List<Encounter> encounters)

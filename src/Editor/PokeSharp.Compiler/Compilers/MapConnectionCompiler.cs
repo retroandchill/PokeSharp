@@ -120,7 +120,7 @@ public partial class MapConnectionCompiler : IPbsCompiler
             }
         }
 
-        await MapConnection.ImportAsync(mapConnections, cancellationToken);
+        await MapConnection.ImportAsync(mapConnections, cancellationToken: cancellationToken);
     }
 
     private static MapConnection ParseLine(string line, int index)

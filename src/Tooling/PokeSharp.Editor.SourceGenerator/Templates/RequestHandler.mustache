@@ -61,7 +61,7 @@ internal sealed class {{../ClassName}}{{Name}}Handler({{../ClassName}} owner) : 
 
         {{/HasParameters}}
         cancellationToken.ThrowIfCancellationRequested();
-        {{#HasResponse}}var response = {{/HasResponse}}{{#IsAsync}}await {{/IsAsync}}owner.{{AsyncName}}({{#Parameters}}{{AsyncPassExpression}}{{^IsLast}}, {{/IsLast}}{{/Parameters}}{{#HasCancellationToken}}, cancellationToken{{/HasCancellationToken}});
+        {{#HasResponse}}var response = {{/HasResponse}}{{#IsAsync}}await {{/IsAsync}}owner.{{AsyncName}}({{#Parameters}}{{AsyncPassExpression}}{{^IsLast}}, {{/IsLast}}{{/Parameters}}{{#HasCancellationToken}}cancellationToken{{/HasCancellationToken}});
         {{#HasResponse}}
 
         cancellationToken.ThrowIfCancellationRequested();

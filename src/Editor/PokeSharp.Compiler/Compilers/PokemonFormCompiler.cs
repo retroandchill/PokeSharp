@@ -52,7 +52,7 @@ public sealed partial class PokemonFormCompiler(
             })
             .ToArrayAsync(cancellationToken: cancellationToken);
 
-        await Species.ImportAsync(ValidateAllCompiledForms(entities), cancellationToken);
+        await Species.ImportAsync(ValidateAllCompiledForms(entities), cancellationToken: cancellationToken);
     }
 
     [CreateSyncVersion]

@@ -70,7 +70,7 @@ public abstract partial class PbsCompiler<TEntity, TModel>(
             .ToArrayAsync(cancellationToken: cancellationToken);
 
         ValidateAllCompiledEntities(entities);
-        await TEntity.ImportAsync(entities, cancellationToken);
+        await TEntity.ImportAsync(entities, cancellationToken: cancellationToken);
     }
 
     [CreateSyncVersion]

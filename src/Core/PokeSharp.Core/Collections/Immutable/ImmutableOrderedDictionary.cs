@@ -349,6 +349,12 @@ public class ImmutableOrderedDictionary<TKey, TValue>
         return InsertRange(index, items);
     }
 
+    public ImmutableOrderedDictionary<TKey, TValue> Swap(int index1, int index2)
+    {
+        var newList = Keys.Swap(index1, index2);
+        return newList == Keys ? this : new ImmutableOrderedDictionary<TKey, TValue>(_dictionary, newList);
+    }
+
     public ImmutableOrderedDictionary<TKey, TValue> Remove(TKey key)
     {
         var newDictionary = _dictionary.Remove(key);

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace PokeSharp.Core.Strings;
 
-internal readonly record struct NameHashEntry(uint Id, int Hash, string Value);
+internal readonly record struct NameHashEntry(uint Id, int Hash);
 
 internal readonly record struct NameIndices(uint ComparisonIndex, uint DisplayStringIndex)
 {
@@ -18,10 +18,10 @@ internal class NameTable
     private const int BucketMask = BucketCount - 1;
 
     private readonly ConcurrentBag<NameHashEntry>[] _comparisonBuckets = new ConcurrentBag<NameHashEntry>[BucketCount];
-    private readonly ConcurrentDictionary<uint, string> _comparisonIdToString = new();
+    private readonly ConcurrentDictionary<uint, string> _comparisonStrings = new();
 
     private readonly ConcurrentBag<NameHashEntry>[] _displayBuckets = new ConcurrentBag<NameHashEntry>[BucketCount];
-    private readonly ConcurrentDictionary<uint, string> _displayIdToString = new();
+    private readonly ConcurrentDictionary<uint, string> _displayStrings = new();
 
     private uint _nextComparisonId = 1;
     private uint _nextDisplayId = 1;
@@ -106,11 +106,11 @@ internal class NameTable
             if (entry.Hash != hashIgnore)
                 continue;
 
-            if (SpanEqualsString(value, entry.Value, caseSensitive: false))
-            {
-                comparisonId = entry.Id;
-                break;
-            }
+            if (!SpanEqualsString(value, _comparisonStrings[entry.Id], caseSensitive: false))
+                continue;
+
+            comparisonId = entry.Id;
+            break;
         }
 
         // ---- Display lookup (case-sensitive) ----
@@ -119,11 +119,10 @@ internal class NameTable
             if (entry.Hash != hashCase)
                 continue;
 
-            if (SpanEqualsString(value, entry.Value, caseSensitive: true))
-            {
-                displayId = entry.Id;
-                break;
-            }
+            if (!SpanEqualsString(value, _displayStrings[entry.Id], caseSensitive: true))
+                continue;
+            displayId = entry.Id;
+            break;
         }
 
         // If both found, we're done.
@@ -145,20 +144,22 @@ internal class NameTable
         // (1) Ensure comparison entry exists
         if (comparisonId == 0)
         {
-            comparisonId = Interlocked.Increment(ref _nextComparisonId);
-            var cmpEntry = new NameHashEntry(comparisonId, hashIgnore, str);
+            comparisonId = _nextComparisonId;
+            Interlocked.Increment(ref _nextComparisonId);
+            var cmpEntry = new NameHashEntry(comparisonId, hashIgnore);
             cmpBucket.Add(cmpEntry);
-            _comparisonIdToString.TryAdd(comparisonId, str);
+            _comparisonStrings.TryAdd(comparisonId, str);
         }
 
         // (2) Ensure display entry exists
         if (displayId != 0)
             return new NameIndices(comparisonId, displayId);
 
-        displayId = Interlocked.Increment(ref _nextDisplayId);
-        var dispEntry = new NameHashEntry(displayId, hashCase, str);
+        displayId = _nextDisplayId;
+        Interlocked.Increment(ref _nextDisplayId);
+        var dispEntry = new NameHashEntry(displayId, hashCase);
         dispBucket.Add(dispEntry);
-        _displayIdToString.TryAdd(displayId, str);
+        _displayStrings.TryAdd(displayId, str);
 
         return new NameIndices(comparisonId, displayId);
     }
@@ -170,34 +171,14 @@ internal class NameTable
             return false;
         }
 
-        return _comparisonIdToString.ContainsKey(comparisonId) && _displayIdToString.ContainsKey(displayId);
+        return _comparisonStrings.ContainsKey(comparisonId) && _displayStrings.ContainsKey(displayId);
     }
 
     /// <summary>
     /// Get display string for a display id (case-preserving).
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public string GetDisplayString(uint displayId) => _displayIdToString.GetValueOrDefault(displayId, "None");
-
-    /// <summary>
-    /// Get comparison string (canonical) for a comparison id.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public string GetComparisonString(uint comparisonId) =>
-        _comparisonIdToString.GetValueOrDefault(comparisonId, "None");
-
-    /// <summary>
-    /// Compare display id against a span, case-sensitive.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool EqualsDisplay(uint displayId, ReadOnlySpan<char> span)
-    {
-        if (displayId == 0)
-            return IsNoneSpan(span);
-
-        return _displayIdToString.TryGetValue(displayId, out var value)
-            && SpanEqualsString(span, value, caseSensitive: true);
-    }
+    public string GetDisplayString(uint displayId) => _displayStrings.GetValueOrDefault(displayId, "None");
 
     /// <summary>
     /// Compare comparison id against a span, case-insensitive.
@@ -208,7 +189,7 @@ internal class NameTable
         if (comparisonId == 0)
             return IsNoneSpan(span);
 
-        return _comparisonIdToString.TryGetValue(comparisonId, out var value)
+        return _comparisonStrings.TryGetValue(comparisonId, out var value)
             && SpanEqualsString(span, value, caseSensitive: false);
     }
 

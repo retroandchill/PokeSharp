@@ -67,7 +67,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
     private static IEnumerable<IMethodSymbol> GetAllMethods(INamedTypeSymbol? type)
     {
         var seenMethods = new HashSet<string>();
-        
+
         while (type is not null && type.SpecialType != SpecialType.System_Object)
         {
             foreach (var method in type.GetMembers().OfType<IMethodSymbol>())
@@ -75,14 +75,16 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                 // Create a unique signature for the method to identify overrides
                 // This includes name and parameter types
                 var signature = method.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                
+
                 // If it's an override, we want to find the original signature it matches
                 // but since we go from derived -> base, we'll see the 'newest' one first.
                 // We use OverriddenMethod to find what it replaces.
                 if (method is { IsOverride: true, OverriddenMethod: not null })
                 {
                     // Track the base method so we don't yield it when we reach that base class
-                    var baseSignature = method.OverriddenMethod.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var baseSignature = method.OverriddenMethod.ToDisplayString(
+                        SymbolDisplayFormat.FullyQualifiedFormat
+                    );
                     seenMethods.Add(baseSignature);
                 }
 
@@ -91,7 +93,7 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                     yield return method;
                 }
             }
-            
+
             type = type.BaseType;
         }
     }
@@ -163,7 +165,12 @@ public class RequestHandlerGenerator : IIncrementalGenerator
                 returnType
                     is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
                         or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" },
-            Parameters = [.. validParameters.Select((x, i) => GetRequestParameter(x, !hasCancellationToken && i == validParameters.Length - 1))],
+            Parameters =
+            [
+                .. validParameters.Select(
+                    (x, i) => GetRequestParameter(x, !hasCancellationToken && i == validParameters.Length - 1)
+                ),
+            ],
         };
     }
 
@@ -173,8 +180,8 @@ public class RequestHandlerGenerator : IIncrementalGenerator
 
         var needsNullCheck =
             parameter.Type
-            is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
-                or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" };
+                is { IsReferenceType: true, NullableAnnotation: NullableAnnotation.NotAnnotated }
+                    or INamedTypeSymbol { IsGenericType: true, MetadataName: "Nullable`1" };
         return new RequestParameterInfo
         {
             Name = parameter.Name,

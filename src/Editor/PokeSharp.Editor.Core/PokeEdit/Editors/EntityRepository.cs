@@ -10,54 +10,61 @@ namespace PokeSharp.Editor.Core.PokeEdit.Editors;
 public interface IEntityRepository
 {
     IEditableType Type { get; }
-    
+
     bool HasPendingChanges { get; }
-    
+
     void SyncFromSource();
 
     ObjectDiffNode? ApplyEditAt(int index, ObjectDiffNode diff);
-    
+
     void Swap(int index1, int index2);
-    
+
     void RemoveAt(int index);
 
     void SaveChanges();
-    
+
     ValueTask SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-public interface IEntityRepository<TEntity> : IEntityRepository where TEntity : ILoadedGameDataEntity<TEntity>
+public interface IEntityRepository<TEntity> : IEntityRepository
+    where TEntity : ILoadedGameDataEntity<TEntity>
 {
     new IEditableType<TEntity> Type { get; }
-    
+
     TEntity GetEntryAt(int index);
 }
 
-public interface IEntityRepository<TKey, TEntity> : IEntityRepository<TEntity> where TKey : notnull where TEntity : ILoadedGameDataEntity<TKey, TEntity>
+public interface IEntityRepository<TKey, TEntity> : IEntityRepository<TEntity>
+    where TKey : notnull
+    where TEntity : ILoadedGameDataEntity<TKey, TEntity>
 {
     new IEditableType<TEntity> Type { get; }
-    
-    public ImmutableOrderedDictionary<TKey, TEntity> Entries { get;}
-    
+
+    public ImmutableOrderedDictionary<TKey, TEntity> Entries { get; }
+
     TEntity GetEntry(TKey key);
 
     ObjectDiffNode? ApplyEdit(TKey key, ObjectDiffNode diff);
-    
+
     void Remove(TKey key);
 }
 
-public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOptions options, LoadedGameDataSet<TEntity, TKey> dataSet, PokeEditTypeRepository repository) : IEntityRepository<TKey, TEntity>
+public abstract partial class EntityRepository<TKey, TEntity>(
+    JsonSerializerOptions options,
+    LoadedGameDataSet<TEntity, TKey> dataSet,
+    PokeEditTypeRepository repository
+) : IEntityRepository<TKey, TEntity>
     where TKey : notnull
-    where TEntity : ILoadedGameDataEntity<TKey, TEntity> 
+    where TEntity : ILoadedGameDataEntity<TKey, TEntity>
 {
     [Flags]
     private enum SaveState : byte
     {
         None = 0,
         Pending = 1,
-        Saving = 2
+        Saving = 2,
     }
-    
+
     public IEditableType<TEntity> Type { get; } = repository.GetRequiredType<TEntity>();
 
     IEditableType IEntityRepository.Type => Type;
@@ -67,8 +74,9 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
         get;
         private set
         {
-            if (ReferenceEquals(field, value)) return;
-            
+            if (ReferenceEquals(field, value))
+                return;
+
             Interlocked.Exchange(ref field, value);
             dataSet.Import(field, false);
             SaveStateStatus |= SaveState.Pending;
@@ -80,7 +88,7 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
         get;
         set => Interlocked.Exchange(ref field, value);
     } = SaveState.None;
-    
+
     public bool HasPendingChanges => SaveStateStatus.HasFlag(SaveState.Pending);
 
     public void SyncFromSource()
@@ -90,7 +98,9 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
 
     public TEntity GetEntry(TKey key)
     {
-        return Entries.TryGetValue(key, out var entry) ? entry : throw new InvalidOperationException($"Cannot find entry with key {key}.");
+        return Entries.TryGetValue(key, out var entry)
+            ? entry
+            : throw new InvalidOperationException($"Cannot find entry with key {key}.");
     }
 
     public TEntity GetEntryAt(int index)
@@ -99,7 +109,7 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
             ? Entries.GetAt(index).Value
             : throw new InvalidOperationException($"Cannot find index {index} in collection.");
     }
-    
+
     public ObjectDiffNode? ApplyEdit(TKey key, ObjectDiffNode diff)
     {
         if (!Entries.TryGetValue(key, out var current))
@@ -109,9 +119,9 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
 
         var newValue = Type.ApplyEdit(current, diff, options);
         var diffResult = Type.Diff(current, newValue, options);
-        if (diffResult is null) return null;
-        
-        
+        if (diffResult is null)
+            return null;
+
         Entries = Entries.SetItem(key, newValue);
         return diffResult;
     }
@@ -126,8 +136,9 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
         var current = Entries.GetAt(index).Value;
         var newValue = Type.ApplyEdit(current, diff, options);
         var diffResult = Type.Diff(current, newValue, options);
-        if (diffResult is null) return null;
-        
+        if (diffResult is null)
+            return null;
+
         Entries = Entries.SetAt(index, newValue);
         return diffResult;
     }
@@ -138,14 +149,15 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
         {
             throw new InvalidOperationException($"Cannot find index {index1} in collection.");
         }
-        
+
         if (index2 < 0 || index2 >= Entries.Count)
         {
             throw new InvalidOperationException($"Cannot find index {index2} in collection.");
         }
 
-        if (index1 == index2) return;
-        
+        if (index1 == index2)
+            return;
+
         Entries = Entries.Swap(index1, index2);
     }
 
@@ -156,7 +168,7 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
         {
             throw new InvalidOperationException($"Cannot find key {key} in collection.");
         }
-        
+
         Entries = newEntries;
         dataSet.Import(Entries, false);
     }
@@ -167,7 +179,7 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
         {
             throw new InvalidOperationException($"Cannot find index {index} in collection.");
         }
-        
+
         Entries = Entries.RemoveAt(index);
         dataSet.Import(Entries, false);
     }
@@ -175,9 +187,11 @@ public abstract partial class EntityRepository<TKey, TEntity>(JsonSerializerOpti
     [CreateSyncVersion]
     public async ValueTask SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        if (SaveStateStatus.HasFlag(SaveState.Saving)) throw new InvalidOperationException("Cannot save changes while already saving.");
+        if (SaveStateStatus.HasFlag(SaveState.Saving))
+            throw new InvalidOperationException("Cannot save changes while already saving.");
 
-        if (!SaveStateStatus.HasFlag(SaveState.Pending)) return;
+        if (!SaveStateStatus.HasFlag(SaveState.Pending))
+            return;
 
         SaveStateStatus |= SaveState.Saving;
         await dataSet.SaveAsync(cancellationToken);

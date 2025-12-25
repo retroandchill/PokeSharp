@@ -174,7 +174,11 @@ public interface ILoadedGameDataEntity<TEntity> : ILoadedGameDataEntity, IGameDa
     /// <param name="shouldSave">Optional. Indicates whether the changes should be saved to the persistent storage.</param>
     /// <param name="cancellationToken">Optional. A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    static abstract ValueTask ImportAsync(IEnumerable<TEntity> entities, bool shouldSave = true,  CancellationToken cancellationToken = default);
+    static abstract ValueTask ImportAsync(
+        IEnumerable<TEntity> entities,
+        bool shouldSave = true,
+        CancellationToken cancellationToken = default
+    );
 }
 
 /// <summary>

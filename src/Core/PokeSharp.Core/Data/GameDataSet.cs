@@ -101,7 +101,7 @@ public abstract class GameDataSet<TEntity, TKey>
     {
         Interlocked.Exchange(ref _data, newData);
     }
-    
+
     protected void ReplaceData(IEnumerable<TEntity> entities)
     {
         ReplaceData(entities.ToImmutableOrderedDictionary(x => x.Id));
@@ -113,7 +113,10 @@ public abstract class GameDataSet<TEntity, TKey>
     /// <param name="entities">The asynchronous enumerable of entities to replace the current data set with.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
     /// <returns>A ValueTask representing the asynchronous operation.</returns>
-    protected async ValueTask ReplaceDataAsync(IAsyncEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    protected async ValueTask ReplaceDataAsync(
+        IAsyncEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default
+    )
     {
         var newData = ImmutableOrderedDictionary.CreateBuilder<TKey, TEntity>();
         await foreach (var entity in entities.WithCancellation(cancellationToken))
@@ -193,7 +196,11 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     [CreateSyncVersion]
-    public async ValueTask ImportAsync(IEnumerable<TEntity> entities, bool shouldSave = true, CancellationToken cancellationToken = default)
+    public async ValueTask ImportAsync(
+        IEnumerable<TEntity> entities,
+        bool shouldSave = true,
+        CancellationToken cancellationToken = default
+    )
     {
         ReplaceData(entities);
         if (shouldSave)
@@ -201,7 +208,7 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
             await SaveAsync(cancellationToken);
         }
     }
-    
+
     /// <summary>
     /// Imports a collection of entities into the data set asynchronously.
     /// </summary>
@@ -210,7 +217,11 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     /// <param name="cancellationToken">A cancellation token to cancel the operation if required.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     [CreateSyncVersion]
-    public async ValueTask ImportAsync(ImmutableOrderedDictionary<TKey, TEntity> entities, bool shouldSave = true, CancellationToken cancellationToken = default)
+    public async ValueTask ImportAsync(
+        ImmutableOrderedDictionary<TKey, TEntity> entities,
+        bool shouldSave = true,
+        CancellationToken cancellationToken = default
+    )
     {
         ReplaceData(entities);
         if (shouldSave)
@@ -227,7 +238,10 @@ public sealed partial class LoadedGameDataSet<TEntity, TKey>([ReadOnly] IDataLoa
     [CreateSyncVersion]
     public ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        return ReplaceDataAsync(dataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken), cancellationToken);
+        return ReplaceDataAsync(
+            dataLoader.LoadEntitiesAsync<TEntity>(TEntity.DataPath, cancellationToken),
+            cancellationToken
+        );
     }
 
     /// <summary>

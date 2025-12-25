@@ -10,33 +10,43 @@ public class CommonUtilities : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         CppStandard = CppStandardVersion.Cpp23;
 
-        PublicIncludePaths.AddRange([
-            // ... add public include paths required here ...
-        ]);
+        PublicIncludePaths.AddRange(
+            [
+                // ... add public include paths required here ...
+            ]
+        );
 
-        PrivateIncludePaths.AddRange([
-            // ... add other private include paths required here ...
-        ]);
+        PrivateIncludePaths.AddRange(
+            [
+                // ... add other private include paths required here ...
+            ]
+        );
 
-        PublicDependencyModuleNames.AddRange([
-            "Core",
-            "UnrealSharpAsync",
-            "UnrealSharpCore",
-            "CoreUObject",
-            // ... add other public dependencies that you statically link with here ...
-        ]);
+        PublicDependencyModuleNames.AddRange(
+            [
+                "Core",
+                "UnrealSharpAsync",
+                "UnrealSharpCore",
+                "CoreUObject",
+                // ... add other public dependencies that you statically link with here ...
+            ]
+        );
 
-        PrivateDependencyModuleNames.AddRange([
-            "CoreUObject",
-            "Engine",
-            "Slate",
-            "SlateCore",
-            "UnrealSharpBinds",
-            // ... add private dependencies that you statically link with here ...
-        ]);
+        PrivateDependencyModuleNames.AddRange(
+            [
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore",
+                "UnrealSharpBinds",
+                // ... add private dependencies that you statically link with here ...
+            ]
+        );
 
-        DynamicallyLoadedModuleNames.AddRange([
-            // ... add any modules that your module loads dynamically here ...
-        ]);
+        DynamicallyLoadedModuleNames.AddRange(
+            [
+                // ... add any modules that your module loads dynamically here ...
+            ]
+        );
     }
 }

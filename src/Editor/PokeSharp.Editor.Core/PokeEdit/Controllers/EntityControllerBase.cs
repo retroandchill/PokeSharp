@@ -4,7 +4,9 @@ using PokeSharp.Editor.Core.PokeEdit.Schema;
 
 namespace PokeSharp.Editor.Core.PokeEdit.Controllers;
 
-public abstract class EntityControllerBase<TKey, TEntity>(IEntityRepository<TKey, TEntity> repository) where TKey : notnull where TEntity : ILoadedGameDataEntity<TKey, TEntity>
+public abstract class EntityControllerBase<TKey, TEntity>(IEntityRepository<TKey, TEntity> repository)
+    where TKey : notnull
+    where TEntity : ILoadedGameDataEntity<TKey, TEntity>
 {
     protected IEntityRepository<TKey, TEntity> Repository { get; } = repository;
 
@@ -13,13 +15,13 @@ public abstract class EntityControllerBase<TKey, TEntity>(IEntityRepository<TKey
     {
         return Repository.GetEntry(key);
     }
-    
+
     [PokeEditRequest]
     public TEntity GetEntryAt(int index)
     {
         return Repository.GetEntryAt(index);
     }
-    
+
     [PokeEditRequest]
     public EntityUpdateResponse? ApplyEdit(TKey key, ObjectDiffNode diff)
     {
@@ -31,7 +33,7 @@ public abstract class EntityControllerBase<TKey, TEntity>(IEntityRepository<TKey
     {
         return new EntityUpdateResponse(Repository.ApplyEditAt(index, diff));
     }
-    
+
     [PokeEditRequest]
     public void Swap(int index1, int index2)
     {
@@ -43,7 +45,7 @@ public abstract class EntityControllerBase<TKey, TEntity>(IEntityRepository<TKey
     {
         Repository.Remove(key);
     }
-    
+
     [PokeEditRequest]
     public void RemoveAt(int index)
     {
@@ -54,7 +56,7 @@ public abstract class EntityControllerBase<TKey, TEntity>(IEntityRepository<TKey
     {
         Repository.SaveChanges();
     }
-    
+
     [PokeEditRequest]
     public async ValueTask SaveChangesAsync(CancellationToken cancellationToken = default)
     {

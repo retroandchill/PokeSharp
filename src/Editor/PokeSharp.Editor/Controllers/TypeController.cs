@@ -10,7 +10,9 @@ namespace PokeSharp.Editor.Controllers;
 
 [RegisterSingleton(ServiceType = typeof(IPokeEditController), Duplicate = DuplicateStrategy.Append)]
 [PokeEditController]
-public partial class TypeController(IEntityRepository<Name, PokemonType> repository) : EntityControllerBase<Name, PokemonType>(repository), ISelectableController
+public partial class TypeController(IEntityRepository<Name, PokemonType> repository)
+    : EntityControllerBase<Name, PokemonType>(repository),
+        ISelectableController
 {
     [PokeEditRequest]
     public IEnumerable<Text> GetLabels()
